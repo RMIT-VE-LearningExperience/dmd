@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pan Brake Safety Scenario</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body { 
+      font-family: Arial, sans-serif; 
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+    }
+    
+    .container { 
+      max-width: 800px; 
+      width: 90%;
+      margin: 2rem auto; 
+      padding: 2rem;
+    }
+    
+    .screen { 
+      display: none; 
+      opacity: 0; 
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateY(20px);
+    }
+    
+    .screen.active { 
+      display: block; 
+      opacity: 1; 
+      transform: translateY(0);
+      animation: slideInUp 0.6s ease-out;
+    }
+    
+    .card { 
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px; 
+      padding: 2.5rem; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.1);
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .illustration {
+      width: 100%;
+      height: 200px;
+      background: #f0f0f0;
+      border-radius: 15px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .illustration::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 0%, transparent 50%);
+    }
+    
+    .illustration svg {
+      width: 120px;
+      height: 120px;
+      fill: rgba(0,0,0,0.9);
+      z-index: 1;
+    }
+    
+    .illustration-intro {
+      background: #f0f0f0;
+    }
+    
+    .illustration-scene1 {
+      background: #f0f0f0;
+    }
+    
+    .illustration-scene2 {
+      background: #f0f0f0;
+    }
+    
+    .illustration-scene3 {
+      background: #f0f0f0;
+    }
+    
+    .illustration-result {
+      background: #f0f0f0;
+    }
+    
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #00205b;
+      text-align: center;
+    }
+    
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #00205b;
+      text-align: center;
+    }
+    
+    p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #000;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .choices { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 1rem; 
+    }
+    
+    .choices button { 
+      padding: 1rem 1.5rem; 
+      border: none; 
+      border-radius: 12px; 
+      font-size: 1rem; 
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      background: #00205b;
+      color: #fff;
+    }
+    
+    .choices button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      background: #003366;
+    }
+    
+    .choices button:active {
+      transform: translateY(0);
+    }
+    
+    .btn { 
+      background: #00205b;
+      color: #fff; 
+      padding: 1rem 2rem; 
+      border: none; 
+      border-radius: 12px; 
+      font-size: 1.1rem; 
+      font-weight: 600;
+      cursor: pointer; 
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+      background: #003366;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 3px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(45deg, #d50032, #a0002d);
+      border-radius: 3px;
+      transition: width 0.6s ease;
+    }
+    
+    .result-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+    .result-safe {
+      color: #48bb78;
+    }
+    
+    .result-risk {
+      color: #f56565;
+    }
+    
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .card {
+        padding: 1.5rem;
+      }
+      
+      h2 {
+        font-size: 2rem;
+      }
+      
+      .illustration {
+        height: 150px;
+      }
+      
+      .illustration svg {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main" aria-live="polite">
+    <div id="screen-0" class="screen active" aria-labelledby="intro-title">
+      <div class="card">
+        <div class="illustration illustration-intro">
+         
+          <div style="color: #000; font-size: 1.2rem; font-weight: 500; text-align: center;">
+            [Safety Equipment Illustration]
+          </div>
+        </div>
+        <h2 id="intro-title">Operating a Pan Brake Safely</h2>
+        <p>You're about to operate a Pan Brake. Make safe choices to complete the task and ensure workplace safety.</p>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 0%"></div>
+        </div>
+        <button id="startBtn" class="btn pulse" aria-label="Start quiz">Start Quiz</button>
+      </div>
+    </div>
+
+    <div id="screen-1" class="screen" aria-labelledby="scene1-title">
+      <div class="card">
+        <div class="illustration illustration-scene1">
+          <div style="color: #000; font-size: 1.2rem; font-weight: 500; text-align: center;">
+            [Gloves on Clamping Area Illustration]
+          </div>
+        </div>
+        <h3 id="scene1-title">Scene 1: You notice gloves left on the clamping area</h3>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 25%"></div>
+        </div>
+        <div class="choices">
+          <button data-safe="true" data-next="2">Remove them safely before operating</button>
+          <button data-safe="false" data-next="2">Leave them and continue working</button>
+          <button data-safe="false" data-next="2">Tell someone else to handle it</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-2" class="screen" aria-labelledby="scene2-title">
+      <div class="card">
+        <div class="illustration illustration-scene2">
+          <div style="color: #000; font-size: 1.2rem; font-weight: 500; text-align: center;">
+            [Thick Material Bending Illustration]
+          </div>
+        </div>
+        <h3 id="scene2-title">Scene 2: The material is too thick to bend easily</h3>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 50%"></div>
+        </div>
+        <div class="choices">
+          <button data-safe="true" data-next="3">Ask your supervisor for guidance</button>
+          <button data-safe="false" data-next="3">Force the machine to work harder</button>
+          <button data-safe="true" data-next="3">Use a different appropriate tool</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-3" class="screen" aria-labelledby="scene3-title">
+      <div class="card">
+        <div class="illustration illustration-scene3">
+          <div style="color: #000; font-size: 1.2rem; font-weight: 500; text-align: center;">
+            [Workplace Pressure Illustration]
+          </div>
+        </div>
+        <h3 id="scene3-title">Scene 3: Someone rushes you to finish quickly</h3>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 75%"></div>
+        </div>
+        <div class="choices">
+          <button data-safe="false" data-next="4">Rush the job to meet demands</button>
+          <button data-safe="true" data-next="4">Stay focused and work safely</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-4" class="screen" aria-labelledby="result-title">
+      <div class="card">
+        <div class="illustration illustration-result">
+          <div style="color: #000; font-size: 1.2rem; font-weight: 500; text-align: center;">
+            [Results Summary Illustration]
+          </div>
+        </div>
+        <h2 id="result-title">Results</h2>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 100%"></div>
+        </div>
+        <p id="result-message"></p>
+        <button id="retryBtn" class="btn">Try Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      let atRisk = false;
+      let current = 0;
+      const screens = document.querySelectorAll('.screen');
+      
+      function showScreen(id) {
+        screens.forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + id).classList.add('active');
+      }
+
+      document.getElementById('startBtn').addEventListener('click', () => {
+        current = 1;
+        atRisk = false;
+        showScreen(current);
+      });
+
+      document.querySelectorAll('.choices button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const safe = btn.getAttribute('data-safe') === 'true';
+          const next = parseInt(btn.getAttribute('data-next'));
+          if (!safe) atRisk = true;
+          current = next;
+          
+          if (current < 4) {
+            showScreen(current);
+          } else {
+            const resultMessage = document.getElementById('result-message');
+            const resultIcon = document.getElementById('result-icon');
+            const resultSvg = document.getElementById('result-svg');
+            
+            if (atRisk) {
+              resultMessage.innerText = 'At-Risk Operator: You made some unsafe choices. Safety should always be the top priority. Review the scenarios and try again to improve your safety awareness.';
+            } else {
+              resultMessage.innerText = 'Safe Operator: Excellent work! You made safe choices throughout all scenarios. Your commitment to safety helps create a secure workplace for everyone.';
+            }
+            
+            showScreen(4);
+          }
+        });
+      });
+
+      document.getElementById('retryBtn').addEventListener('click', () => {
+        showScreen(0);
+      });
+    })();
+  </script>
+</body>
+</html>
