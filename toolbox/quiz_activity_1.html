@@ -18,7 +18,7 @@
       background: #ffffff;
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       color: #333;
     }
@@ -28,6 +28,42 @@
       width: 90%;
       margin: 2rem auto; 
       padding: 2rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .quiz-tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-width: 120px;
+    }
+
+    .tab {
+      background: #00205b;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      text-align: left;
+    }
+
+    .tab:hover {
+      background: #003366;
+    }
+
+    .tab.active {
+      background: #d50032;
+      box-shadow: 0 4px 8px rgba(213, 0, 50, 0.6);
+    }
+
+    .quiz-panel {
+      flex: 1;
+      display: none;
     }
     
     .screen { 
@@ -163,7 +199,7 @@
       color: #fff; 
       padding: 1rem 2rem; 
       border: none; 
-      border-radius: 12px; 
+      border-radius: 50px; 
       font-size: 1.1rem; 
       font-weight: 600;
       cursor: pointer; 
@@ -175,8 +211,21 @@
       background: #003366;
       transform: translateY(-2px);
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      border-radius: 50px;
+    }
+
+    #retryBtn {
+      background: #fff;
+      color: #00205b;
+      border: 2px solid #00205b;
+    }
+
+    #retryBtn:hover {
+      background: #00205b;
+      color: #fff;
     }
     
+    /* Removed #retryQuiz2Btn rule to inherit from .btn */
     .progress-bar {
       width: 100%;
       height: 6px;
@@ -207,6 +256,18 @@
       color: #f56565;
     }
     
+    .checkmark {
+      display: none;
+      margin-left: 0.5rem;
+      color: #48bb78;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .tab.completed .checkmark {
+      display: inline;
+    }
+    
     @keyframes slideInUp {
       from {
         opacity: 0;
@@ -230,6 +291,27 @@
     @media (max-width: 768px) {
       .container {
         padding: 1rem;
+        flex-direction: column;
+      }
+
+      .quiz-tabs {
+        flex-direction: row;
+        min-width: auto;
+        justify-content: center;
+        margin-bottom: 1rem;
+        gap: 0.5rem;
+      }
+
+      .tab {
+        flex: 1;
+        text-align: center;
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+      }
+
+      .quiz-panel {
+        width: 100%;
       }
       
       .card {
@@ -253,92 +335,190 @@
 </head>
 <body>
   <div class="container" role="main" aria-live="polite">
-    <div id="screen-0" class="screen active" aria-labelledby="intro-title">
-      <div class="card">
-        <div class="illustration illustration-intro">
+    <nav class="quiz-tabs" role="navigation" aria-label="Quiz navigation">
+      <button data-target="quiz-1" class="tab active">Quiz 1 <span class="checkmark">✓</span></button>
+      <button data-target="quiz-2" class="tab">Quiz 2 <span class="checkmark">✓</span></button>
+      <button data-target="quiz-3" class="tab">Quiz 3 <span class="checkmark">✓</span></button>
+    </nav>
+
+    <div class="quiz-panel" id="quiz-1">
+      <div id="screen-0" class="screen active" aria-labelledby="intro-title">
+        <div class="card">
+          
+          <h2 id="intro-title">Operating a Pan Brake Safely</h2>
+          <p>You're about to operate a Pan Brake. Make safe choices to complete the task and ensure workplace safety.</p>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+          </div>
+          <button id="startBtn" class="btn pulse" aria-label="Start quiz">Start Quiz</button>
+        </div>
+      </div>
+
+      <div id="screen-1" class="screen" aria-labelledby="scene1-title">
+        <div class="card">
+          <h3 id="scene1-title">Scene 1: You notice gloves left on the clamping area</h3>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 25%"></div>
+          </div>
+          <div class="choices">
+            <button data-safe="true" data-next="2">Remove them safely before operating</button>
+            <button data-safe="false" data-next="2">Leave them and continue working</button>
+            <button data-safe="false" data-next="2">Tell someone else to handle it</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-2" class="screen" aria-labelledby="scene2-title">
+        <div class="card">
          
-          <div style="color: #000; font-size: 1.2rem; font-weight: 500; text-align: center;">
-            [Safety Equipment Illustration]
+          <h3 id="scene2-title">Scene 2: The material is too thick to bend easily</h3>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 50%"></div>
           </div>
-        </div>
-        <h2 id="intro-title">Operating a Pan Brake Safely</h2>
-        <p>You're about to operate a Pan Brake. Make safe choices to complete the task and ensure workplace safety.</p>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: 0%"></div>
-        </div>
-        <button id="startBtn" class="btn pulse" aria-label="Start quiz">Start Quiz</button>
-      </div>
-    </div>
-
-    <div id="screen-1" class="screen" aria-labelledby="scene1-title">
-      <div class="card">
-        <div class="illustration illustration-scene1">
-          <div style="color: #000; font-size: 1.2rem; font-weight: 500; text-align: center;">
-            [Gloves on Clamping Area Illustration]
+          <div class="choices">
+            <button data-safe="true" data-next="3">Ask your supervisor for guidance</button>
+            <button data-safe="false" data-next="3">Force the machine to work harder</button>
+            <button data-safe="true" data-next="3">Use a different appropriate tool</button>
           </div>
-        </div>
-        <h3 id="scene1-title">Scene 1: You notice gloves left on the clamping area</h3>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: 25%"></div>
-        </div>
-        <div class="choices">
-          <button data-safe="true" data-next="2">Remove them safely before operating</button>
-          <button data-safe="false" data-next="2">Leave them and continue working</button>
-          <button data-safe="false" data-next="2">Tell someone else to handle it</button>
         </div>
       </div>
-    </div>
 
-    <div id="screen-2" class="screen" aria-labelledby="scene2-title">
-      <div class="card">
-        <div class="illustration illustration-scene2">
-          <div style="color: #000; font-size: 1.2rem; font-weight: 500; text-align: center;">
-            [Thick Material Bending Illustration]
+      <div id="screen-3" class="screen" aria-labelledby="scene3-title">
+        <div class="card">
+         
+          <h3 id="scene3-title">Scene 3: Someone rushes you to finish quickly</h3>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 75%"></div>
+          </div>
+          <div class="choices">
+            <button data-safe="false" data-next="4">Rush the job to meet demands</button>
+            <button data-safe="true" data-next="4">Stay focused and work safely</button>
           </div>
         </div>
-        <h3 id="scene2-title">Scene 2: The material is too thick to bend easily</h3>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: 50%"></div>
-        </div>
-        <div class="choices">
-          <button data-safe="true" data-next="3">Ask your supervisor for guidance</button>
-          <button data-safe="false" data-next="3">Force the machine to work harder</button>
-          <button data-safe="true" data-next="3">Use a different appropriate tool</button>
+      </div>
+
+      <div id="screen-4" class="screen" aria-labelledby="result-title">
+        <div class="card">
+         
+          <h2 id="result-title">Results</h2>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+          <p id="result-message"></p>
+          <button id="retryBtn" class="btn">Try Again</button>
         </div>
       </div>
     </div>
 
-    <div id="screen-3" class="screen" aria-labelledby="scene3-title">
-      <div class="card">
-        <div class="illustration illustration-scene3">
-          <div style="color: #000; font-size: 1.2rem; font-weight: 500; text-align: center;">
-            [Workplace Pressure Illustration]
+    <div class="quiz-panel" id="quiz-2" aria-label="Quiz 2">
+      <div id="quiz2-screen-0" class="screen active">
+        <div class="card">
+          
+          <h2>Pan Brake Safety Quiz</h2>
+          <p>Test your knowledge of pan brake safety and procedures. Answer each question to see your results.</p>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+          </div>
+          <button id="startQuiz2Btn" class="btn pulse" aria-label="Start Quiz 2">Start Quiz</button>
+        </div>
+      </div>
+
+      <div id="quiz2-screen-1" class="screen">
+        <div class="card">
+          <h3>1. What is the primary function of a pan brake?</h3>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 20%"></div>
+          </div>
+          <div class="choices">
+            <button data-correct="false">A. Cutting sheet metal</button>
+            <button data-correct="false">B. Welding sheet metal</button>
+            <button data-correct="true">C. Folding and bending sheet metal</button>
+            <button data-correct="false">D. Measuring sheet metal</button>
           </div>
         </div>
-        <h3 id="scene3-title">Scene 3: Someone rushes you to finish quickly</h3>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: 75%"></div>
+      </div>
+
+      <div id="quiz2-screen-2" class="screen">
+        <div class="card">
+         
+          <h3>2. What should be checked before using the pan brake?</h3>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 40%"></div>
+          </div>
+          <div class="choices">
+            <button data-correct="false">A. That it is plugged into power</button>
+            <button data-correct="true">B. That the clamping fingers are tight and properly positioned</button>
+            <button data-correct="false">C. That it has oil on the surface</button>
+            <button data-correct="false">D. That it is on a wheeled stand</button>
+          </div>
         </div>
-        <div class="choices">
-          <button data-safe="false" data-next="4">Rush the job to meet demands</button>
-          <button data-safe="true" data-next="4">Stay focused and work safely</button>
+      </div>
+
+      <div id="quiz2-screen-3" class="screen">
+        <div class="card">
+         
+          <h3>3. When using a pan brake, the clamping bar should be:</h3>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 60%"></div>
+          </div>
+          <div class="choices">
+            <button data-correct="false">A. Loosely fastened to allow movement</button>
+            <button data-correct="true">B. Firmly secured to hold the metal in place</button>
+            <button data-correct="false">C. Covered in grease for easy release</button>
+            <button data-correct="false">D. Left open for quicker operation</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="quiz2-screen-4" class="screen">
+        <div class="card">
+         
+          <h3>4. What PPE should be worn when operating a pan brake?</h3>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 80%"></div>
+          </div>
+          <div class="choices">
+            <button data-correct="false">A. Welding mask and gloves</button>
+            <button data-correct="true">B. Safety glasses and steel-toe boots</button>
+            <button data-correct="false">C. Hearing protection</button>
+            <button data-correct="false">D. Respirator</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="quiz2-screen-5" class="screen">
+        <div class="card">
+         
+          <h3>5. Which material is NOT suitable for use in a pan brake?</h3>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+          <div class="choices">
+            <button data-correct="false">A. Mild steel sheet</button>
+            <button data-correct="false">B. Aluminium sheet</button>
+            <button data-correct="false">C. Thin plastic sheet</button>
+            <button data-correct="true">D. Thick plate steel</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="quiz2-screen-6" class="screen">
+        <div class="card">
+          
+          <h2>Results</h2>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+          <p id="quiz2ResultMessage"></p>
+          <button id="retryQuiz2Btn" class="btn">Try Again</button>
         </div>
       </div>
     </div>
 
-    <div id="screen-4" class="screen" aria-labelledby="result-title">
-      <div class="card">
-        <div class="illustration illustration-result">
-          <div style="color: #000; font-size: 1.2rem; font-weight: 500; text-align: center;">
-            [Results Summary Illustration]
-          </div>
-        </div>
-        <h2 id="result-title">Results</h2>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: 100%"></div>
-        </div>
-        <p id="result-message"></p>
-        <button id="retryBtn" class="btn">Try Again</button>
+    <div class="quiz-panel" id="quiz-3" aria-label="Quiz 3">
+      <div class="card" style="text-align:center; padding: 4rem;">
+        <h2>Quiz 3</h2>
+        <p>Coming Soon...</p>
       </div>
     </div>
   </div>
@@ -347,11 +527,12 @@
     (function(){
       let atRisk = false;
       let current = 0;
-      const screens = document.querySelectorAll('.screen');
+      const screens = document.querySelectorAll('#quiz-1 .screen');
       
       function showScreen(id) {
         screens.forEach(s => s.classList.remove('active'));
         document.getElementById('screen-' + id).classList.add('active');
+        shuffleChoices();
       }
 
       document.getElementById('startBtn').addEventListener('click', () => {
@@ -360,7 +541,7 @@
         showScreen(current);
       });
 
-      document.querySelectorAll('.choices button').forEach(btn => {
+      document.querySelectorAll('#quiz-1 .choices button').forEach(btn => {
         btn.addEventListener('click', () => {
           const safe = btn.getAttribute('data-safe') === 'true';
           const next = parseInt(btn.getAttribute('data-next'));
@@ -371,8 +552,6 @@
             showScreen(current);
           } else {
             const resultMessage = document.getElementById('result-message');
-            const resultIcon = document.getElementById('result-icon');
-            const resultSvg = document.getElementById('result-svg');
             
             if (atRisk) {
               resultMessage.innerText = 'At-Risk Operator: You made some unsafe choices. Safety should always be the top priority. Review the scenarios and try again to improve your safety awareness.';
@@ -381,6 +560,13 @@
             }
             
             showScreen(4);
+            const resultBar = document.querySelector('#screen-4 .progress-fill');
+            if (atRisk) {
+              resultBar.style.background = '#f56565'; // red
+            } else {
+              resultBar.style.background = '#48bb78'; // green
+            }
+            document.querySelector('[data-target="quiz-1"]').classList.add('completed');
           }
         });
       });
@@ -388,6 +574,114 @@
       document.getElementById('retryBtn').addEventListener('click', () => {
         showScreen(0);
       });
+
+      const tabs = document.querySelectorAll('.tab');
+      const panels = document.querySelectorAll('.quiz-panel');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          panels.forEach(p => p.style.display = 'none');
+          document.getElementById(tab.dataset.target).style.display = 'block';
+        });
+      });
+      // Set initial visibility
+      panels.forEach(p => p.style.display = 'none');
+      document.getElementById('quiz-1').style.display = 'block';
+    // Shuffle answer choices in all .choices containers
+    function shuffleChoices() {
+      document.querySelectorAll('.choices').forEach(container => {
+        const buttons = Array.from(container.querySelectorAll('button'));
+        for (let i = buttons.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [buttons[i], buttons[j]] = [buttons[j], buttons[i]];
+        }
+        buttons.forEach(btn => container.appendChild(btn));
+      });
+    }
+    })();
+
+    // Quiz 2 step-by-step logic
+    (function() {
+      let quiz2Current = 0;
+      let quiz2Score = 0;
+      // Select only .screen inside #quiz-2, not quiz-1
+      const quiz2Screens = document.querySelectorAll('#quiz-2 .screen');
+
+      function showQuiz2Screen(id) {
+        quiz2Screens.forEach(s => s.classList.remove('active'));
+        const el = document.getElementById('quiz2-screen-' + id);
+        if (el) el.classList.add('active');
+        shuffleChoices();
+      }
+
+      const startQuiz2Btn = document.getElementById('startQuiz2Btn');
+      if (startQuiz2Btn) {
+        startQuiz2Btn.addEventListener('click', () => {
+          quiz2Current = 1;
+          quiz2Score = 0;
+          showQuiz2Screen(quiz2Current);
+        });
+      }
+
+      // Add event listeners to all quiz 2 choices buttons
+      document.querySelectorAll('#quiz-2 .choices button').forEach((btn, idx, arr) => {
+        btn.addEventListener('click', () => {
+          // Only count answers for question screens (1-5)
+          // Find which screen this button is in:
+          let parentScreen = btn.closest('.screen');
+          if (!parentScreen) return;
+          let screenId = parentScreen.id;
+          let match = screenId && screenId.match(/^quiz2-screen-(\d)$/);
+          if (!match) return;
+          let qnum = parseInt(match[1]);
+          // Only count for screens 1-5
+          if (qnum >= 1 && qnum <= 5) {
+            const correct = btn.getAttribute('data-correct') === 'true';
+            if (correct) quiz2Score++;
+            quiz2Current = qnum + 1;
+            if (quiz2Current <= 5) {
+              showQuiz2Screen(quiz2Current);
+            } else {
+              // Results screen is 6
+              const resultText = `You scored ${quiz2Score} out of 5. ${quiz2Score === 5 ? 'Excellent work!' : quiz2Score >= 3 ? 'Good effort, review the material and try again.' : 'Consider reviewing the safety procedures more thoroughly.'}`;
+              document.getElementById('quiz2ResultMessage').innerText = resultText;
+              // Set result bar color based on score
+              const resultBar = document.querySelector('#quiz2-screen-6 .progress-fill');
+              if (quiz2Score === 5) {
+                resultBar.style.background = '#48bb78'; // green
+              } else {
+                resultBar.style.background = '#f56565'; // red
+              }
+              showQuiz2Screen(6);
+              // Only show tick mark if score is 5
+              if (quiz2Score === 5) {
+                document.querySelector('[data-target="quiz-2"]').classList.add('completed');
+              } else {
+                document.querySelector('[data-target="quiz-2"]').classList.remove('completed');
+              }
+            }
+          }
+        });
+      });
+
+      const retryQuiz2Btn = document.getElementById('retryQuiz2Btn');
+      if (retryQuiz2Btn) {
+        retryQuiz2Btn.addEventListener('click', () => {
+          showQuiz2Screen(0);
+        });
+      }
+    // Shuffle answer choices in all .choices containers
+    function shuffleChoices() {
+      document.querySelectorAll('.choices').forEach(container => {
+        const buttons = Array.from(container.querySelectorAll('button'));
+        for (let i = buttons.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [buttons[i], buttons[j]] = [buttons[j], buttons[i]];
+        }
+        buttons.forEach(btn => container.appendChild(btn));
+      });
+    }
     })();
   </script>
 </body>
