@@ -1,0 +1,836 @@
+@font-face {
+  font-family: 'Segoe UI';
+  src: url('../fonts/segoeuithis.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Segoe UI';
+  src: url('../fonts/segoeuithibd.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Segoe UI';
+  src: url('../fonts/segoeuihisi.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Segoe UI';
+  src: url('../fonts/segoeuihisz.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.darktext {
+  color: #ffffff
+}
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: url('../images/4.jpg') no-repeat center bottom fixed;
+  background-size: cover;
+  color: #333;
+  height: 100vh;
+  overflow: hidden;
+}
+h1 {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #222;
+}
+
+h2 {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #333;
+}
+
+h3 {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+p {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+/* --------------------------------------------
+   Hide all windows and modals by default
+-------------------------------------------- 
+.email-window,
+.programs-window,
+.disk-cleanup-window,
+#bin-window,
+.defrag-window,
+.modal {
+  display: none;
+}*/
+
+/* --------------------------------------------
+   MD Card & Button Styles
+-------------------------------------------- */
+
+.modal,
+.window,
+.modal-content,
+.window-header {
+  border-radius: 5px !important;
+}
+
+.md-card {
+  background: #f3f3f3;
+  border-radius: 0px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+  position: absolute;
+  padding: 10px;
+  border-radius: 5px;
+  /*max-width: 500px;*/
+  min-width: 500px;
+  border: 1px solid #CCC;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.md-button {
+  background: #6f89a6;
+  color: #FFF;
+  border: 1px solid #CCC;
+  border-radius: 0px;
+  padding: 5.5px 16px 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.md-button:hover {
+  background: #0062a7;
+  transform: scale(1.05);
+}
+.md-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #CCC;
+  border-radius: 0px;
+  margin-bottom: 0px;
+  background-color: #2a3d53;
+  color: #FFF;
+}
+.md-input:focus {
+  border-color: #0078D4;
+}
+#twofa-modal .md-button {
+  border-left: 0px;
+}
+#twofa-modal .md-input {
+  border-right: 0px;
+}
+.md-error {
+  background: #FFE6E6;
+  color: #D83B01;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+
+/* --------------------------------------------
+   Desktop, Taskbar & Start Menu
+-------------------------------------------- */
+.desktop {
+  position: relative;
+  height: calc(100vh - 48px);
+}
+.icon {
+  width: 70px;
+  text-align: center;
+  position: absolute;
+  cursor: grab;
+  transition: transform 0.2s;
+}
+.icon span {
+  color: #E1E1E1;
+  font-size: 12px;
+}
+.icon:hover {
+  transform: scale(1.05);
+}
+.icon img {
+  width: 48px;
+  margin: auto;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background: #D83B01;
+  color: #FFF;
+  font-size: 12px;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+
+
+/* ----- Updated Taskbar Layout ----- */
+/* Using a grid to position the Weather (left), Start Button (center) and Time+Wi-Fi (right) */
+.taskbar {
+  display: grid;
+  grid-template-columns: 20px auto 0px;
+  align-items: center;
+  height: 48px;
+  background: #e7e7e7;
+  backdrop-filter: blur(10px);
+  padding: 0 20px;
+  color: #4f4f4f;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+.start-menu-item, .app-list-item {
+  width: 130px;
+  height: 110px;
+  background: #ffffff;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 12px;
+  margin: 5px;
+  display: inline-block;
+  vertical-align: top;
+  padding: 25px 10px 20px;
+  cursor: pointer;
+}
+
+.start-menu-item:hover , .app-list-item:hover {
+  background-color: rgba(0, 120, 212, 0.1);
+  transform: scale(1.03);
+  transition: background-color 0.2s, transform 0.2s;
+}
+.start-menu-left {
+  display: flex;
+  gap: 0px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+.start-menu-left .app-list-item {
+  font-size: 12px;
+}
+/* New icon for start menu and app list items */
+
+
+/* Weather Section on Left */
+.weather-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.weather-section img {
+  width: 24px;
+  height: 24px;
+}
+.weather-info {
+  font-size: 14px;
+  color: #FFF;
+}
+
+/* Center: Start Button */
+.start-button {
+  justify-self: center;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.start-button:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Right: Time and Wi-Fi */
+.time-and-wifi {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.wifi-icon {
+  width: 20px;
+  height: 20px;
+}
+.time-display {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ----- Updated Start Menu ----- */
+/* Start menu appears centered above the taskbar and displays a grid of app thumbnails */
+.start-menu {
+  position: absolute;
+  bottom: 60px;
+  left: 1%;
+  width: auto;
+  max-width: 500px;
+  max-height: calc(100vh - 160px);
+  overflow: hidden;
+  background: rgba(255 255 255 / 62%);
+  backdrop-filter: blur(5px);
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  display: none;
+  flex-direction: column;
+  padding: 20px;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+.start-search-bar {
+  margin-bottom: 15px;
+}
+.start-search-bar input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  text-align: center;
+}
+.app-icon img {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 5px;
+}
+.app-icon span {
+  display: block;
+  font-size: 13px;
+  color: #333;
+}
+
+/* --------------------------------------------
+   Window & Modal Styles
+-------------------------------------------- */
+.window-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f2f5f1;
+  border-radius: 8px 8px 0 0;
+  padding: 12px;  
+  cursor: move;
+  font-weight: bold;
+  color: #333;
+}
+.close-button {
+  font-size: 16px;
+  color: #333333;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.close-button:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+.modal {
+  border-radius: 8px;
+  animation: fadeIn 0.3s ease;
+  border: 0px solid #CCC;
+}
+/* Fullscreen modal style for login flow */
+.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(243, 243, 243, 0.7);
+backdrop-filter: blur(20px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fullscreen .modal-content {
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.generic-app-window {
+  width: 300px; 
+  height: 200px;
+  border-radius: 10px;
+  background: #fff;
+}
+ #email-body{
+  font-size: 14px;
+  padding: 10px 0px;
+ }
+ .email-list-item{
+  font-size: 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #948f8f;
+  padding: 5px 0px 5px 5px;
+
+ }
+ .email-details{
+  font-size: 14px;
+  padding: 10px 0px;
+ }
+.programs-body, .email-body-area, .programs-instructions {
+  padding: 8px;
+}
+.email-time{
+  right: 20px;
+  position: absolute;
+}
+.modal-buttons {
+  margin-top: 16px;
+  display: block;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.programs-list, .email-list, .bin-list {
+  margin-top: 10px;
+}
+
+.progress-bar {
+  height: 12px;
+  border-radius: 6px;
+}
+
+.drive-item {
+  padding: 10px;
+  border: 1px solid #CCC;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.drive-item:hover {
+  background: #E1E1E1;
+  transform: scale(1.05);
+}
+    .strength-weak {
+      color: red;
+      font-weight: bold;
+    }
+
+    .strength-medium {
+      color: blue;
+      font-weight: bold;
+    }
+
+    .strength-strong {
+      color: green;
+      font-weight: bold;
+    }
+
+/* --------------------------------------------
+   Success Modal Styles
+-------------------------------------------- */
+.modal.success-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw !important;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 16000;
+  text-align: center ;
+}
+.modal.success-modal li{
+  list-style: none;
+  color: #008000;
+}
+.modal.success-modal ul{
+  padding-left: 20px;
+    padding-top: 10px;
+    font-size: 1.2em;
+    padding-bottom: 20px;
+    line-height: 1.4em;
+  
+}
+.success-modal-content {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+}
+
+.success-modal-content h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.success-modal-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+.success-modal-content li {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #0078D4;
+}
+
+.success-modal-content .success-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.success-modal-content .success-modal-buttons button {
+  margin-left: 10px;
+}
+.successform{
+  margin-top: 10px;
+   text-align: center;
+    font-size: 14px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.successformfield{
+  margin: 10px 0px;
+
+}
+.successform input {
+    padding: 8px;
+    border-width: 0px 0px 1px 0px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s, color 0.3s;
+    background: transparent;
+}
+.successform input:hover,
+.successform input:focus {
+  background-color: #6f89a6;
+  color: #fff;
+  outline: none;
+}
+.successform .successformfielddate input{
+width: auto !important;
+text-align: center;
+border-width: 0px !important;
+background-color: transparent;
+}
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.icon:focus, .close-button:focus, .md-button:focus, .email-list-item:focus {
+  outline: 2px solid #0078D4;
+  outline-offset: 2px;
+}
+/* Custom Modal Message Styles */
+#custom-message-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30000;
+}
+#custom-message-modal .custom-message-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 0px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  text-align: center;
+}
+#custom-message-modal .custom-message-box p {
+  margin: 0;
+  color: #333;
+}
+#custom-message-modal .custom-message-box button.md-button {
+  margin-top: 16px;
+}
+
+/* Make the right-side app list scrollable */
+.start-menu-right .apps-listing {
+  max-height: calc(100vh - 350px);
+  overflow-y: auto;
+}
+
+/* Slide-up notification */
+.notification-modal {
+  position: fixed;
+  bottom: -200px;
+  right: 0px;
+  transform: translate(-20px, -50px);
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  padding: 25px 15px 10px;
+  display: flex;
+  align-items: center;
+  z-index: 20000;
+  animation: slideUp 0.6s forwards 0.3s;
+  cursor: pointer;
+}
+.notification-modal h2 {
+  line-height: 10px;
+}
+.notification-icon {
+  width: 32px;
+  margin-right: 12px;
+}
+@keyframes slideUp {
+  to { bottom: 20px; }
+}
+
+/* Manager modal tweaks */
+#update-manager-modal .window-header {
+  cursor: move;
+}
+#update-manager-modal .modal-content {
+  padding: 12px;
+}
+
+#apps-update-list {
+  list-style: none;
+  margin: 0; padding: 0 0 12px 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+#apps-update-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+}
+#apps-update-list li span.status {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+/* Green badge for update */
+.status.update {
+  background: #429542;
+  color: #fff;
+  padding: 2px 15px 5px 15px;
+  border-radius: 18px;
+}
+
+/* Plain text for latest */
+.status.latest {
+  background: none;
+  color: #333;
+  padding: 2px 15px 5px 15px;
+  border-radius: 18px;
+}
+
+/* Red text for action required */
+.status.action {
+  background: none;
+  color: red;
+  padding: 2px 15px 5px 15px;
+  border-radius: 18px;
+}
+
+.notification-content{
+  padding-right: 40px;
+}
+
+/* Start Menu Apps Title */
+.start-menu-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #333;
+}
+.ssd, .onedrive
+{
+  cursor: pointer
+  ;
+
+  padding: 10px;
+}
+.ssd:hover, .onedrive:hover {
+  background: #e6e6e6;
+}
+#cleanup-drive-select, #defrag-drive-select{
+  margin-bottom: 10px;
+}
+#defrag-link, #cleanup-link{
+  text-decoration: underline;
+} 
+
+/** **/
+
+.icon {
+  position: absolute;
+  width: 80px;
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  user-select: none;
+}
+
+.icon.selected {
+  background-color: rgba(173, 216, 230, 0.3);
+  border-radius: 5px;
+}
+
+.icon:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
+.icon-image {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 5px;
+  pointer-events: none;
+}
+
+.icon-text {
+  color: white;
+  font-size: 12px;
+  text-align: center;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  max-width: 75px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.window {
+  position: absolute;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  min-width: 300px;
+  min-height: 200px;
+  z-index: 10;
+}
+
+.window-hidden {
+  display: none;
+}
+
+.window-titlebar {
+  background-color: #4a75de;
+  color: white;
+  padding: 8px 10px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  display: flex;
+  align-items: center;
+  cursor: move;
+}
+
+.window-title {
+  flex-grow: 1;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.window-controls {
+  display: flex;
+}
+
+.window-button {
+  width: 16px;
+  height: 16px;
+  margin-left: 5px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.window-close {
+  /*background-color: #ff5f56;*/
+}
+
+/*.window-minimize {
+  background-color: #ffbd2e;
+}
+
+.window-maximize {
+  background-color: #27c93f;
+}*/
+
+.window-content {
+  flex-grow: 1;
+  padding: 10px;
+  overflow: auto;
+  position: relative;
+  background-color: white;
+}
+
+.folder-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  height: 100%;
+}
+
+.file-icon, .folder-icon {
+  cursor: grab;
+}
+
+.dragging {
+  opacity: 0.7;
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+}
+
+#item-count {
+  padding-left: 10px;
+    font-size: 12px;
+}

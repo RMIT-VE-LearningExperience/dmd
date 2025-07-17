@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Virtual Desktop - Windows 11 Inspired</title>
+  <meta name="description" content="A Windows 11 inspired virtual desktop with interactive elements." />
+  <link rel="stylesheet" href="styles/style.css">
+  <script src="script/jspdf.umd.min.js"></script>
+  
+<body role="main">
+  <!-- 1) Desktop Area -->
+  <div class="desktop" id="desktop">
+    <!-- Draggable Email Icon -->
+    <div class="icon" id="email-icon" style="top: 250px; left: 50px;" role="button" aria-label="Email Application" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ') handleEmailIconClick()">
+      <img src="images/7286258.png" alt="Email Icon">
+      <span>Email</span>
+      <span class="notification-badge" id="unread-count" aria-label="5 unread emails">5</span>
+    </div>
+    <!-- Disk Cleanup Icon -->
+    <div class="icon" id="disk-icon" style="top: 250px; left: 50px; display: none;" role="button" aria-label="Disk Cleanup" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ') openDiskCleanup()">
+      <img src="images/18479944.png" alt="Disk Cleanup Icon">
+      <span>Disk Cleanup</span>
+    </div>
+    <!-- Bin Icon -->
+    <div class="icon" id="bin-icon" style="top: 150px; left: 50px;" role="button" aria-label="Recycle Bin" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ') openBinWindow()">
+      <img src="images/6107783.png" alt="Bin Icon">
+      <span>Bin</span>
+    </div>
+    <!-- Computer Icon for Defragmentation -->
+    <div class="icon" id="computer-icon" style="top: 50px; left: 50px;" role="button" aria-label="Computer Defragmentation" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ') openDefragWindow()">
+      <img src="images/2292038.png" alt="Computer Icon">
+      <span>Computer</span>
+    </div>
+  </div>
+
+  <!-- 2) Taskbar -->
+  <div class="taskbar" role="toolbar" aria-label="Taskbar">
+    <!-- Updated Start Button as a Windows Logo -->
+    <div class="start-button" role="button" aria-label="Start menu" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ') toggleStartMenu()">
+      <svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="10" height="10" fill="#1976d2"/>
+        <rect x="16" y="2" width="10" height="10" fill="#1976d2"/>
+        <rect x="2" y="16" width="10" height="10" fill="#1976d2"/>
+        <rect x="16" y="16" width="10" height="10" fill="#1976d2"/>
+      </svg>
+    </div>
+    <div class="time-and-wifi">
+      <img class="wifi-icon" src="images/2099239.png" alt="Wi-Fi Icon">
+      <div class="time-display" id="time-display" aria-live="polite"></div>
+    </div>
+  </div>
+  
+  <!-- 3) Start Menu with Two Columns -->
+  <div class="start-menu" id="start-menu" role="menu">
+    <div class="start-menu-left">
+      <div class="start-menu-item" onclick="openProgramsWindow()" role="menuitem">
+        Programs <span id="programs-update-count" class="update-count"></span>
+      </div>
+      <div class="start-menu-item" onclick="openDiskCleanup()" role="menuitem">Disk Cleanup</div>
+      <div class="start-menu-item" onclick="openBinWindow()" role="menuitem">Bin</div>
+    </div>
+    <div class="start-menu-right">
+      <div class="apps-listing" id="all-apps-list">
+        <div class="app-list-item" style="--icon-url: url('/888846.png');">Chrome Browser</div>
+        <div class="app-list-item" style="--icon-url: url('/732239.png');">QuickTime Player</div>
+        <div class="app-list-item" style="--icon-url: url('/5968377.png');">Generic App</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4) Programs Window -->
+  <div class="programs-window md-card" id="programs-window" role="dialog" aria-modal="true" aria-labelledby="programs-header">
+    <div class="window-header" id="programs-header">
+      <span>Programs</span>
+      <span class="close-button" onclick="closeProgramsWindow()" role="button" tabindex="0" aria-label="Close Programs Window" onkeydown="if(event.key==='Enter'||event.key===' ') this.click()"><img src="images/18359926.png" alt="Close Icon" style="width: 18px; height: 18px;"></span>
+    </div>
+    <div class="programs-body">
+      <div class="programs-instructions">
+        Select the applications you want to update or uninstall, then click the corresponding button.
+      </div>
+      <div class="programs-list" id="apps-list"></div>
+      <div id="apps-progress-container" style="display:none; margin-top:10px;">
+        <div class="programs-progress-bar" id="apps-progress-bar"></div>
+      </div>
+      <div id="all-updated-feedback" style="display:none; color:green; margin-top:8px;">
+        <p><strong>Applied all critical security updates:</strong></p>
+        <ul>
+          <li>Installed Windows 11 Security Update KB5036892</li>
+          <li>Updated Chrome from v.108 to v.122</li>
+          <li>Updated Firefox from v.95 to v.124</li>
+          <li>Updated Java Runtime to the latest version</li>
+          <li>Updated Toll eParcel Manager from v.2.2 to v.2.4</li>
+        </ul>
+        <p>All warehouse operations systems now running current secure versions.</p>
+      </div>
+      <div class="modal-buttons" style="margin-top:10px;">
+        <button class="md-button" onclick="updateSelected()">Update Selected</button>
+        <button class="md-button" onclick="uninstallSelected()">Uninstall Selected</button>
+        <button class="md-button" onclick="closeProgramsWindow()">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 5) Fullscreen Password Reset Modal (Step 1) -->
+  <div class="modal fullscreen" id="password-reset" role="dialog" aria-modal="true" aria-labelledby="passwordResetTitle">
+    <div class="modal-content">
+      <h2 id="passwordResetTitle">Password Reset Required</h2>
+      <p>For security reasons, you must reset your password before accessing the desktop.</p>
+      <div class="modal-buttons">
+        <button class="md-button" onclick="goTo2FA()">Next</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 6) Fullscreen Two-Factor Authentication Modal (Step 2) -->
+<div class="modal fullscreen" id="twofa-modal" role="dialog" aria-modal="true" aria-labelledby="twofaTitle">
+  <div class="modal-content">
+    
+    <!-- [1] Add user icon + username "TopShelf" at the top -->
+    <div class="user-info">
+      <img 
+        src="images/4140051.png" 
+        alt="User Icon" 
+        class="user-icon"
+        style="width: 100px; height: 100px; border-radius: 50%;"
+      />
+      <div class="user-name" style="font-size: .5rem; margin-top: 8px;"><h1>TopShelf</h1></div>
+    </div>
+    <!-- END user-info -->
+
+    <!-- [2] Optionally hide or remove the existing <h2> if you prefer a “cleaner” look; 
+         or keep it if you still want the “Two-Factor Authentication” label. -->
+    <h2 id="twofaTitle" style="margin-top: 16px;">Two-Factor Authentication</h2>
+    
+    <p>A verification code has been sent to your phone/email.</p>
+    <p style="margin-top: 10px;">
+      <small>
+        <a href="#" onclick="openSmsModal()">View the code via text message</a>
+      </small>
+    </p>
+
+    <!-- [3] Place the arrow button next to the field instead of below it. -->
+    <div style="display: flex; align-items: center; margin-top: 15px; gap: 0px;">
+      <input 
+        class="md-input" 
+        type="text" 
+        id="twofa-code" 
+        placeholder="Enter Verification code" 
+        aria-label="Enter Verification Code" 
+        style="flex: 1;"
+      />
+      <!-- Replace "Verify" text with an arrow icon -->
+      <button 
+        class="md-button arrow-button" 
+        onclick="validate2FA()"
+        aria-label="Verify two-factor code"
+        style="display: flex; align-items: center; justify-content: center;"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white">
+          <path d="M11.293 4.707 17.586 11H4v2h13.586l-6.293 6.293 1.414 1.414L21.414 12l-8.707-8.707-1.414 1.414z"/>
+        </svg>
+      </button>
+    </div>
+    <!-- END input + arrow button -->
+
+  </div> <!-- END modal-content -->
+</div> <!-- END twofa-modal -->
+
+<!-- 7) Fullscreen Password Fields Modal (Step 3) -->
+<div class="modal fullscreen" id="password-fields" role="dialog" aria-modal="true" aria-labelledby="passwordFieldsTitle">
+  <div class="modal-content">
+    
+    <!-- [1] Add user icon + username "TopShelf" at the top -->
+    <div class="user-info">
+      <img 
+        src="images/4140051.png" 
+        alt="User Icon" 
+        class="user-icon"
+        style="width: 100px; height: 100px; border-radius: 50%;"
+      />
+      <div class="user-name" style="margin-top: 8px;"><h1>TopShelf</h1></div>
+    </div>
+    <!-- END user-info -->
+
+    <h2 id="passwordFieldsTitle" style="margin-top: 16px;">Create a Strong Password</h2>
+    <div id="password-reqs" class="md-error" style="display:none;">
+      <p><strong>Requirements not met:</strong></p>
+      <ul id="req-list"></ul>
+    </div>
+
+    <div class="password-container">
+      <input
+        class="md-input password-input"
+        type="password"
+        id="new-password"
+        placeholder="New password"
+        aria-label="New Password"
+      />
+      <span
+        class="password-toggle"
+        data-target="new-password"
+        aria-label="Show password"
+        title="Hold to show password"
+      >
+        SHOW
+      </span>
+    </div>
+    <div 
+      id="password-strength-indicator" 
+      aria-live="polite" 
+      style="margin-bottom: 16px;"
+    ></div>
+
+    <!-- [2] Move the 'Submit' arrow button next to the confirm password field. -->
+    <div class="password-container">
+      <input
+        class="md-input password-input"
+        type="password"
+        id="confirm-password"
+        placeholder="Confirm password"
+        aria-label="Confirm Password"
+      />
+      <span
+        class="password-toggle confirmfield"
+        data-target="confirm-password"
+        aria-label="Show password"
+        title="Hold to show password"
+      >
+        SHOW
+      </span>
+      <!-- Replace "Submit" text with an arrow icon -->
+      <button
+        class="md-button arrow-button"
+        onclick="submitNewPassword()"
+        aria-label="Submit new password"
+        style="display: flex; align-items: center; justify-content: center;"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white">
+          <path d="M11.293 4.707 17.586 11H4v2h13.586l-6.293 6.293 1.414 1.414L21.414 12l-8.707-8.707-1.414 1.414z"/>
+        </svg>
+      </button>
+    </div>
+    <!-- END input + arrow button -->
+
+  </div> <!-- END modal-content -->
+</div> <!-- END password-fields modal -->
+  ""
+  <!-- New SMS Modal for Text Message Simulation -->
+  <div class="modal" id="sms-modal" role="dialog" aria-modal="true" aria-labelledby="smsModalTitle">
+    <div class="sms-modal-content">
+      <div class="sms-header">
+        <span id="smsModalTitle"></span>
+        <div class="sms-controls">
+           <button class="md-button phone" onclick="closeSmsModal()" title="Close"><img src="images/18359926.png" alt="Close Icon" style="width: 18px; height: 18px;"></button>
+        </div>
+      </div>
+      <div class="sms-body">
+        <div class="iphone-frame">
+           <div class="iphone-screen">
+             <p>Your verification code is: <strong>987134</strong></p>
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 8) Email Window -->
+  <div class="email-window md-card" id="email-window" role="dialog" aria-modal="true" aria-labelledby="emailHeader" style="display: none;">
+    <div class="window-header" id="email-header">
+      <span id="emailHeader"><img src="images/7286258.png" alt="Email Icon" style="width:26px; margin-right: 10px; vertical-align:middle; margin-right:4px;">Email</span>
+      <span class="close-button" onclick="closeEmailApp()" role="button" tabindex="0" aria-label="Close Email Window" onkeydown="if(event.key==='Enter'||event.key===' ') this.click()"><img src="images/18359926.png" alt="Close Icon" style="width: 18px; height: 18px;"></span>
+    </div>
+    <div id="report-feedback" aria-live="assertive"></div>
+    <div class="email-body-area" id="email-body-area">
+      <div class="email-list" id="email-list"></div>
+      <div class="email-content" id="email-content" style="display: none;">
+        <div class="email-details" id="email-details"></div>
+        <div class="email-controls">
+          <button class="md-button" onclick="replyEmail()">
+            <img src="images/126498.png" alt="Reply Icon" style="width:16px;">
+            Reply
+          </button>
+          <button class="md-button" onclick="reportEmail()">
+            <img src="images/569501.png" alt="Report Icon" style="width:16px;">
+            Report Phishing
+          </button>
+        </div>
+        <div id="email-body"></div>
+        <div style="margin-top: 10px;">
+          <textarea class="md-input" placeholder="Write a reply..." aria-label="Reply Message"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="resizer" id="resizer" role="separator" aria-label="Resize Email Window"></div>
+  </div>
+  
+  <!-- 9) Disk Cleanup Window -->
+     
+  <img src="images/fullscreen.svg" id="fullscreen-toggle" title="Enter fullscreen mode" role="button" tabindex="0" aria-label="Toggle Fullscreen" onkeydown="if(event.key==='Enter'||event.key===' ') this.click()" style="position: fixed; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 3px; cursor: pointer; background: rgba(0, 0, 0, 0.816); z-index: 20000;" alt="Toggle Fullscreen">
+  <div class="disk-cleanup-window md-card" id="disk-cleanup-window" role="dialog" aria-modal="true" aria-labelledby="diskCleanupHeader">
+    <div class="window-header" id="disk-cleanup-header">
+      <span id="diskCleanupHeader">Disk Cleanup</span>
+      <span class="close-button" onclick="closeDiskCleanup()" role="button" tabindex="0" aria-label="Close Disk Cleanup Window" onkeydown="if(event.key==='Enter'||event.key===' ') this.click()"><img src="images/18359926.png" alt="Close Icon" style="width: 18px; height: 18px;"></span>
+    </div>
+    <div style="padding:16px;">
+      <label><input type="checkbox" id="temp-files" checked> Temporary Files</label><br>
+      <label><input type="checkbox" id="recycle-bin" checked> Recycle Bin</label><br>
+      <label><input type="checkbox" id="thumbnails"> Thumbnails</label><br>
+      <label><input type="checkbox" id="old-logs"> Old Log Files</label><br><br>
+      <p id="space-display">Current space available: 120GB</p>
+      <button class="md-button" onclick="performCleanup()">Clean Up</button>
+      <div id="cleanup-feedback" style="color:green; font-size:14px; display:none; margin-top:10px;"></div>
+      <div id="cleanup-progress-container" style="width:100%; background:#eee; height:10px; border-radius:6px; overflow:hidden; display:none; margin-top:8px;">
+        <div class="progress-bar" id="cleanup-progress-bar" style="width:0%; height:100%; background:#0078D4; transition:width 0.1s linear;"></div>
+      </div>
+    </div> 
+  </div>
+  
+  <!-- 10) Bin Window -->
+  <div class="programs-window md-card" id="bin-window" role="dialog" aria-modal="true" aria-labelledby="binHeader">
+    <div class="window-header" id="bin-header">
+      <span id="binHeader">Bin</span>
+      <span class="close-button" onclick="closeBinWindow()" role="button" tabindex="0" aria-label="Close Bin Window" onkeydown="if(event.key==='Enter'||event.key===' ') this.click()"><img src="images/18359926.png" alt="Close Icon" style="width: 18px; height: 18px;"></span>
+    </div>
+    <div class="programs-body" id="bin-body">
+      <div class="programs-instructions">
+        Select a file to restore or click “Empty Bin” to remove all items.
+      </div>
+      <div class="programs-list" id="bin-list"></div>
+      <div id="bin-progress-container" style="width:100%; background:#eee; height:10px; border-radius:6px; overflow:hidden; display:none; margin-top:8px;">
+        <div class="programs-progress-bar" id="bin-progress-bar" style="width:0%; height:100%; background:#0078D4; transition:width 0.1s linear;"></div>
+      </div>
+      <div class="modal-buttons">
+        <button class="md-button" onclick="emptyBin()">Empty Bin</button>
+        <button class="md-button" onclick="closeBinWindow()">Close</button>
+      </div>
+      <div id="bin-feedback" style="display:none; color:green; margin-top:8px;">
+        Bin emptied successfully!
+      </div>
+    </div>
+  </div>
+  
+  <!-- 11) Defragmentation Window -->
+  <div class="defrag-window md-card" id="defrag-window" role="dialog" aria-modal="true" aria-labelledby="defragHeader">
+    <div class="window-header" id="defrag-header">
+      <span id="defragHeader">Computer</span>
+      <span class="close-button" onclick="closeDefragWindow()" role="button" tabindex="0" aria-label="Close Defragmentation Window" onkeydown="if(event.key==='Enter'||event.key===' ') this.click()"><img src="images/18359926.png" alt="Close Icon" style="width: 18px; height: 18px;"></span>
+    </div>
+    <div style="padding:16px;">
+      <p>Select a hard drive to defragment:</p>
+      <div id="drive-list">
+        <div class="drive-item" onclick="selectDrive('C')" id="drive-C" role="button" aria-label="Drive C">
+          <img src="images/3344360.png" alt="Drive C Icon" style="width:40px;"><br>
+          <span>Drive C</span>
+        </div>
+        <div class="drive-item" onclick="selectDrive('D')" id="drive-D" role="button" aria-label="Drive D">
+          <img src="images/3344360.png" alt="Drive D Icon" style="width:40px;"><br>
+          <span>Drive D</span>
+        </div>
+      </div>
+      <div id="defrag-controls" style="display:none; margin-top:16px;">
+        <button class ="md-button" onclick="defragmentDrive()">Defragment Drive <span id="drive-letter"></span></button>
+        <div id="defrag-progress-container" style="width:100%; background:#eee; height:10px; border-radius:6px; overflow:hidden; display:none; margin-top:8px;">
+          <div class="progress-bar" id="defrag-progress-bar" style="width:0%; height:100%; background:#0078D4; transition:width 0.1s linear;"></div>
+        </div>
+        <div id="defrag-feedback" style="display:none; color:green; margin-top:8px;"></div>
+      </div>
+    </div>
+  </div>
+   
+  <script src="script/script.js"></script>
+
+  <!-- Shared phishing checklist modal. Do not duplicate this ID. -->
+  <div class="modal email-detail-modal" id="phishing-checklist-modal" data-email-index="" style="display:none;">
+    <div class="email-detail-header" id="phishing-indicator-header">
+      <span>Select phishing indicators</span>
+      <span class="close-button" onclick="closeModal('phishing-checklist-modal')" role="button" tabindex="0" aria-label="Close Phishing Indicators Modal" onkeydown="if(event.key==='Enter'||event.key===' ') this.click()">
+        <img src="images/18359926.png" alt="Close Icon" style="width: 18px; height: 18px;">
+      </span>
+    </div>
+    <div class="email-detail-body">
+      <form id="phishing-checklist-form">
+        <label><input type="checkbox" value="1"> Inconsistencies in email addresses/links/domain names</label><br>
+        <label><input type="checkbox" value="2"> Requests for credentials/payments/personal details</label><br>
+        <label><input type="checkbox" value="3"> Grammar and spelling errors</label><br>
+        <label><input type="checkbox" value="4"> Suspicious attachments and URLs</label><br><br>
+        <button type="button" onclick="submitPhishingIndicators()" class="md-button">Report to IT Department</button>
+      </form>
+    </div>
+  </div>
+  <!-- Onboarding Overlay for Fullscreen Tip -->
+  <div id="onboarding-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.45); z-index: 30000; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+    <div style="position: absolute; top: 10px; right: 10px; width: 60px; height: 60px; border-radius: 0px; box-shadow: 0 0 0 4px #31b93f; pointer-events: auto;"></div>
+    <div style="max-width: 400px; text-align: center; color: rgb(255, 255, 255) !important; font-size: 1.2em; background: rgba(0,0,0,0.85); padding: 20px; border-radius: 0px;">
+      <p class="darktext"><strong>Tip:</strong> Click the fullscreen icon on the top right corner to enter fullscreen mode. It’s best for an immersive experience.</p>
+      <button id="dismiss-onboarding" class="md-button" style="margin-top: 20px;">Got it</button>
+    </div>
+  </div>
+<script>
+// Onboarding Overlay functionality
+document.addEventListener('DOMContentLoaded', function () {
+  const onboardingOverlay = document.getElementById('onboarding-overlay');
+  const dismissBtn = document.getElementById('dismiss-onboarding');
+  const fullscreenIcon = document.getElementById('fullscreen-toggle');
+  // Only show overlay if not dismissed before (simple localStorage check)
+  if (window.localStorage && localStorage.getItem('onboardingDismissed') === '1') {
+    onboardingOverlay.style.display = 'none';
+    return;
+  }
+  // Positioning the highlight box over the fullscreen icon
+  const highlightBox = onboardingOverlay.querySelector('div');
+  function positionHighlight() {
+    const iconRect = fullscreenIcon.getBoundingClientRect();
+    highlightBox.style.top = iconRect.top + 'px';
+    highlightBox.style.left = iconRect.left + 'px';
+    highlightBox.style.width = iconRect.width + 'px';
+    highlightBox.style.height = iconRect.height + 'px';
+    highlightBox.style.position = 'absolute';
+  }
+  // Wait for layout to be ready
+  setTimeout(positionHighlight, 200);
+  window.addEventListener('resize', positionHighlight);
+  dismissBtn.addEventListener('click', () => {
+    onboardingOverlay.style.display = 'none';
+    if (window.localStorage) localStorage.setItem('onboardingDismissed', '1');
+  });
+  // Allow pointer events for highlight box and tip, but not for background
+  onboardingOverlay.style.pointerEvents = 'none';
+  highlightBox.style.pointerEvents = 'auto';
+  dismissBtn.style.pointerEvents = 'auto';
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var newPasswordInput = document.getElementById("new-password");
+  var strengthIndicator = document.getElementById("password-strength-indicator");
+  
+  function calculatePasswordStrength(password) {
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (/[a-z]/.test(password)) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/\d/.test(password)) score++;
+  if (/[^\w\s]/.test(password)) score++;
+
+  if (score <= 2) return '<span class="strength-weak">Weak</span>';
+  else if (score === 3) return '<span class="strength-medium">Medium</span>';
+  else if (score === 4) return '<span class="strength-strong">Strong</span>';
+  else return '<span class="strength-very-strong">Very Strong</span>';
+}
+  
+  newPasswordInput.addEventListener("input", function() {
+    var strength = calculatePasswordStrength(newPasswordInput.value);
+    strengthIndicator.innerHTML = "Strength: " + strength;
+  });
+});
+</script>
+<script>
+function openEmailDetailModal(content) {
+  document.getElementById("email-detail-body").innerHTML = content;
+  document.getElementById("email-detail-modal").style.display = "block";
+}
+
+function closeEmailDetailModal() {
+  document.getElementById("email-detail-modal").style.display = "none";
+}
+
+// Draggable modal
+// Ensure there's a global flag for the active drag element:
+window.activeDrag = null;
+
+function dragElement(elmnt) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  const header = elmnt.querySelector(".email-detail-header");
+  if (header) {
+    header.addEventListener('mousedown', dragMouseDown);
+  }
+
+  function dragMouseDown(e) {
+    if (window.activeDrag) return; // another element is being dragged
+    window.activeDrag = elmnt;
+    e = e || window.event;
+    e.preventDefault();
+    e.stopPropagation(); // Ensure the event doesn’t bubble
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.addEventListener('mouseup', closeDragElement);
+    document.addEventListener('mousemove', elementDrag);
+  }
+
+  function elementDrag(e) {
+    if (window.activeDrag !== elmnt) return; // Only drag if this is the active element
+    e = e || window.event;
+    e.preventDefault();
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+
+  function closeDragElement() {
+    if (window.activeDrag === elmnt) {
+      window.activeDrag = null;
+    }
+    document.removeEventListener('mouseup', closeDragElement);
+    document.removeEventListener('mousemove', elementDrag);
+  }
+}
+</script>
+<!-- Email Detail Modal -->
+<div class="modal email-detail-modal" id="email-detail-modal" role="dialog" aria-modal="true" aria-labelledby="emailDetailTitle" style="display:none;">
+  <div class="email-detail-header" id="email-detail-header">
+    <span id="emailDetailTitle">Email Detail</span>
+    <span class="close-button" onclick="closeEmailDetailModal()" role="button" tabindex="0" aria-label="Close Email Detail Modal" onkeydown="if(event.key==='Enter'||event.key===' ') this.click()"><img src="images/18359926.png" alt="Close Icon" style="width: 18px; height: 18px;"></span>
+  </div>
+  <div class="email-detail-body" id="email-detail-body">
+    <!-- Email content will be dynamically inserted here -->
+    <div class="email-controls" style="margin-top: 10px;">
+      <button class="md-button" onclick="reportEmail()">
+        <img src="images/569501.png" alt="Report Icon" style="width:16px;">
+        Report Phishing
+      </button>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const sampleEmails = [
+    { subject: "Meeting Tomorrow", body: "<p>Please confirm your availability for tomorrow's meeting at 10 AM.</p>" },
+    { subject: "Project Update", body: "<p>The project is on track. We’ve completed phase 2 successfully.</p>" },
+    { subject: "Password Expiration Notice", body: "<p>Your password will expire in 3 days. Please update it at your earliest convenience.</p>" }
+  ];
+
+  const emailList = document.getElementById("email-list");
+
+  sampleEmails.forEach(email => {
+    // Emails will only be shown in the modal; not appended to the email list.
+    const emailItem = document.createElement("div");
+    emailItem.className = "email-entry";
+    emailItem.textContent = email.subject;
+    emailItem.onclick = function () {
+      openEmailDetailModal(`<h3>${email.subject}</h3>${email.body}`);
+    };
+    // Removed appending to emailList to hide emails from the main view.
+  });
+});
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const fullscreenToggle = document.getElementById('fullscreen-toggle');
+    
+    fullscreenToggle.addEventListener('click', () => {
+      const elem = document.documentElement;
+  
+      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { // Safari
+          elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { // IE/Edge
+          elem.msRequestFullscreen();
+        } else {
+          alert("Your browser does not support fullscreen mode. Please try another browser.");
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+    });
+  });
+  </script>
+</body>
+</html>

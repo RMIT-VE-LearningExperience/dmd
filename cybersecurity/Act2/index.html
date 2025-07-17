@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Virtual Desktop - Windows 11 Inspired</title>
+  <link rel="stylesheet" href="styles/style.css">
+  <script src="scripts/jspdf.umd.min.js"></script>
+  
+<body role="main">
+  <!-- 1) Desktop Area -->
+  <div class="desktop" id="desktop">
+    <img src="images/fullscreen.svg" id="fullscreen-toggle" title="Enter fullscreen mode" role="button" tabindex="0" aria-label="Toggle Fullscreen" onkeydown="if(event.key==='Enter'||event.key===' ') this.click()" style="position: fixed; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 3px; cursor: pointer; background: rgba(0, 0, 0, 0.816); z-index: 20000;" alt="Toggle Fullscreen">
+   
+   
+   
+   
+    <!-- My Computer App Icon -->
+    <div class="icon" id="custom-icon" style="top: 40px; left: 50px;" role="button" aria-label="My Computer" tabindex="0"
+         onclick="openCustomModal()" onkeydown="if(event.key==='Enter'||event.key===' ') openCustomModal()">
+      <img src="images/2292038.png" alt="My Computer">
+      <span>My Computer</span>
+    </div>
+    <div class="icon" id="folder-icon" draggable="false" style="top: 150px; left: 50px;" role="button" aria-label="Open Supplier Negotiations Folder" tabindex="0"
+         onkeydown="if(event.key==='Enter'||event.key===' ') openFolderWindow()">
+      <img src="images/icons8-onedrive-240.png" alt="Supplier Negotiations - Sharepoint">
+      <div class="icon-text">Supplier Negotiations</div>
+  </div>
+
+    <!-- File icon -->
+    <div class="icon" id="file-icon" draggable="false" style="top: 270px; left: 50px;" data-fullname="Supplier_Quotes_Complete.xlsx" role="button" aria-label="Supplier Quotes Excel File" tabindex="0"
+         onkeydown="if(event.key==='Enter'||event.key===' ') openRenameModal(this)">
+      <img src="images/icons8-excel-240.png" alt="Excel file">
+      <div class="icon-text">Supplier_Qu...xlsx</div>
+    </div>
+
+  <!-- Folder window (initially hidden) -->
+  <div class="window window-hidden" id="folder-window" style="top: 130px; left: 150px; width: 400px; height: 300px;">
+      <div class="window-titlebar">
+          <div class="window-title">Supplier Negotiations - Sharepoint</div>
+          <div class="window-controls">
+              <div class="window-button window-minimize"></div>
+              <div class="window-button window-maximize"></div>
+              <div class="window-button window-close" role="button" tabindex="0" aria-label="Close Folder Window"
+                   onclick="this.closest('.window').classList.add('window-hidden')"
+                   onkeydown="if(event.key==='Enter'||event.key===' ') this.click()">
+                <img src="images/18359926.png" alt="Close Icon" style="width:18px;height:18px;">
+              </div>
+          </div>
+      </div>
+      <div class="window-content">
+          <div class="folder-content" id="folder-content">
+              <!-- Folder contents will appear here -->
+          </div>
+      </div>
+      <div class="status-bar">
+          <span id="item-count">0 items</span>
+      </div>
+  </div>
+</div>
+  </div>
+
+
+
+  
+  <!-- 2) Taskbar -->
+  <div class="taskbar" role="toolbar" aria-label="Taskbar">
+    <!-- Updated Start Button as a Windows Logo -->
+    <div class="start-button" role="button" aria-label="Start menu" tabindex="0" 
+    onclick="toggleStartMenu()"
+    onkeydown="if(event.key==='Enter'||event.key===' ') toggleStartMenu()">
+      <svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="10" height="10" fill="#1976d2"/>
+        <rect x="16" y="2" width="10" height="10" fill="#1976d2"/>
+        <rect x="2" y="16" width="10" height="10" fill="#1976d2"/>
+        <rect x="16" y="16" width="10" height="10" fill="#1976d2"/>
+      </svg>
+    </div>
+    <!-- Fullscreen Toggle Icon -->
+    
+    <div class="time-and-wifi">
+      <img class="wifi-icon" src="images/2099239.png" alt="Wi-Fi Icon">
+      <div class="time-display" id="time-display" aria-live="polite"></div>
+    </div>
+  </div>
+  
+  <!-- 3) Start Menu-->
+    <div class="start-menu" id="start-menu" role="menu">
+      <div class="start-menu-left">
+       
+        <div id="apps-update-link" class="start-menu-item" role="menuitem" onclick="openUpdateManager()" tabindex="0"
+             onkeydown="if(event.key==='Enter'||event.key===' ') openUpdateManager()">
+          <div class="start-menu-title">
+            <img src="images/18975679.png"
+                 alt="Apps & Features Icon"
+                 style="width:40px; height:40px; vertical-align:middle; margin:0 auto; display: block;">
+            Apps
+          </div>Updates available
+        </div>
+        <div id="disk-cleanup-link" class="start-menu-item" role="menuitem" onclick="openDiskCleanupModal()" tabindex="0"
+             onkeydown="if(event.key==='Enter'||event.key===' ') openDiskCleanupModal()">
+          <div class="start-menu-title">
+            <img src="images/18479944.png"
+                 alt="Disk Cleanup Icon"
+                 style="width:40px; height:40px; vertical-align:middle; margin:0 auto; display: block;">
+            Disk Cleanup
+          </div>Free up space
+        </div>
+        <div id="disk-defrag-link" class="start-menu-item" role="menuitem" onclick="showDefragModal()" tabindex="0"
+             onkeydown="if(event.key==='Enter'||event.key===' ') showDefragModal()">
+          <div class="start-menu-title">
+            <img src="images/defragment.png"
+                 alt="Disk Defragmenter Icon"
+                 style="width:40px; height:40px; vertical-align:middle; margin:0 auto; display: block;">
+            Disk Defragmenter
+          </div>
+        </div>
+        
+      </div>
+    <div class="start-menu-right">
+      <div class="apps-listing" id="all-apps-list">
+        <div class="app-list-item" style="--icon-url: url('images/888846.png');">Chrome Browser</div>
+        <div class="app-list-item" style="--icon-url: url('images/732239.png');">QuickTime Player</div>
+        <div class="app-list-item" style="--icon-url: url('images/5968377.png');">Generic App</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide-up notification on load -->
+<div id="update-notification-modal" class="modal notification-modal">
+  <div class="notification-content">
+    <img src="images/open-end-wrench.png" alt="Spanner Icon" class="notification-icon">
+    <div style="float: right;">
+      <h2>Updates available</h2>
+      <p>Some apps need updating.</p>
+    </div>
+  </div>
+</div>
+
+<!--  Draggable update manager window (hidden until clicked) -->
+<div id="update-manager-modal" class="desktopmodal md-card" style="display:none;">
+  <div class="window-header" id="updateManagerHeader">
+    <span>Application Updates</span>
+    <span class="close-button" onclick="closeUpdateManager()" role="button" tabindex="0" aria-label="Close Application Updates"
+          onkeydown="if(event.key==='Enter'||event.key===' ') this.click()">
+      <img src="images/18359926.png" alt="Close Icon" style="width:18px;height:18px;">
+    </span>
+  </div>
+  <div class="modal-content">
+    <ul id="apps-update-list"></ul>
+    <div id="apps-update-progress-container" style="display:none; width:100%; background:#eee; height:10px; border-radius:6px; overflow:hidden; margin-bottom:12px;">
+      <div id="apps-update-progress-bar" style="width:0%; height:100%; background:#0078D4;"></div>
+    </div>
+    <div id="apps-update-message" style="display:none; margin-bottom:12px; font-size:14px; color:#429542;"></div>
+    <div class="modal-buttons">
+      <button onclick="applyUpdates()" class="md-button">Update Selected</button>
+      <button onclick="removeObsolete()" class="md-button">Uninstall</button>
+    </div>
+  </div>
+</div>
+
+ 
+
+  <!-- My Computer App Modal -->
+  <div class="modal md-card" id="custom-modal" role="dialog" aria-modal="true" aria-labelledby="customModalHeader" style="display:none;">
+    <div class="window-header" id="customModalHeader">
+      <span>My Computer</span>
+      <span class="close-button" onclick="closeCustomModal()" role="button" tabindex="0" aria-label="Close Custom App Modal"
+            onkeydown="if(event.key==='Enter'||event.key===' ') this.click()">
+        <img src="images/18359926.png" alt="Close Icon" style="width:18px;height:18px;">
+      </span>
+    </div>
+    <div class="modal-content" style="padding:16px; display:flex; gap:16px;">
+      <!-- Left column: System Information (1/3 width) -->
+      <div style="flex:1; border-right: 1px solid #c9c9c9; padding-right: 10px;">
+        <p><strong>System Information:</strong></p>
+        <ul>
+          <li>OS: Windows 11 Pro</li>
+          <li >Last defragmented: <span id="defrag-status" style="color: red;">Never</span></li>
+           </ul><br>
+           <span id="defrag-link" style="color: #0078D4; text-decoration: underline; cursor: pointer; margin-top: 10px;" onclick="showDefragModal()">Run Disk Defragmenter</span>
+          <span id="cleanup-link" style="color: #0078D4; text-decoration: underline; cursor: pointer; margin-top: 4px;" onclick="openDiskCleanupModal()">Run Disk Clean-up</span>
+       
+      </div>
+      <!-- Right column: Drives (2/3 width) -->
+      <div style="flex:2;">
+        <div class="ssd" style="display:flex; align-items:center; margin-bottom:12px;">
+          <img src="images/8680085.png"
+               alt="SSD Icon"
+               style="width:40px; margin-right:8px;">
+          <div>
+            <strong>local Disk (C:)</strong><br>
+            512GB SSD<br>
+            <span>358GB used, 154GB free</span>
+          </div>
+        </div>
+        <div class="onedrive" style="display:flex; align-items:center;">
+          <img src="images/906329.png"
+               alt="Drive Icon"
+               style="width:40px; margin-right:8px;">
+          <div>
+            <strong>One Drive (G:)</strong><br>
+            930GB<br>
+            <span>300GB used, 629GB free</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script/script.js"></script>
+
+  <script>
+    // Global variables
+    let isDragging = false;
+    let dragElement = null;
+    let offsetX = 0, offsetY = 0;
+    let isMovingWindow = false;
+    let windowOffsetX = 0, windowOffsetY = 0;
+    let selectedIcon = null;
+    let fileInFolder = false;
+
+    // DOM elements
+    const desktop = document.getElementById('desktop');
+    const documentsIcon = document.getElementById('folder-icon');
+    const fileIcon = document.getElementById('file-icon');
+    const folderWindow = document.getElementById('folder-window');
+    const folderContent = document.getElementById('folder-content');
+    const itemCount = document.getElementById('item-count');
+
+
+    // Event listeners for folder icon
+    documentsIcon.addEventListener('mousedown', (e) => {
+        if (e.button === 0) { // Left mouse button
+            selectIcon(documentsIcon);
+        }
+    });
+
+    documentsIcon.addEventListener('dblclick', () => {
+        openFolderWindow();
+    });
+
+    // Event listeners for file icon
+    fileIcon.addEventListener('mousedown', (e) => {
+        if (e.button === 0) { // Left mouse button
+            selectIcon(fileIcon);
+            
+            // Start drag
+            if (!fileInFolder) {
+                isDragging = true;
+                dragElement = fileIcon;
+                
+                // Calculate offset
+                const rect = fileIcon.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                
+                // Create drag visual
+                const clone = fileIcon.cloneNode(true);
+                clone.id = 'dragging-element';
+                clone.classList.add('dragging');
+                clone.style.left = e.clientX - offsetX + 'px';
+                clone.style.top = e.clientY - offsetY + 'px';
+                document.body.appendChild(clone);
+            }
+        }
+    });
+    // Open in-experience rename modal
+    fileIcon.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        openRenameModal(fileIcon);
+    });
+
+    // Window controls
+    document.querySelectorAll('.window-close').forEach(button => {
+        button.addEventListener('click', () => {
+            button.closest('.window').classList.add('window-hidden');
+        });
+    });
+
+    // Window dragging
+    document.querySelectorAll('.window-titlebar').forEach(titlebar => {
+        titlebar.addEventListener('mousedown', (e) => {
+            if (e.target === titlebar || e.target.classList.contains('window-title')) {
+                isMovingWindow = true;
+                const window = titlebar.closest('.window');
+                
+                // Calculate offset
+                const rect = window.getBoundingClientRect();
+                windowOffsetX = e.clientX - rect.left;
+                windowOffsetY = e.clientY - rect.top;
+                
+                // Bring to front
+                window.style.zIndex = 20;
+            }
+        });
+    });
+
+    // Desktop click to deselect
+    desktop.addEventListener('mousedown', (e) => {
+        if (e.target === desktop) {
+            deselectAllIcons();
+        }
+    });
+
+    // Global mouse events for dragging
+    document.addEventListener('mousemove', (e) => {
+        // Handle file dragging
+        if (isDragging && dragElement) {
+            const draggingElement = document.getElementById('dragging-element');
+            if (draggingElement) {
+                draggingElement.style.left = e.clientX - offsetX + 'px';
+                draggingElement.style.top = e.clientY - offsetY + 'px';
+            }
+        }
+        
+        // Handle window moving
+        if (isMovingWindow) {
+            const windows = document.querySelectorAll('.window:not(.window-hidden)');
+            windows.forEach(window => {
+                if (window.style.zIndex === '20') {
+                    window.style.left = e.clientX - windowOffsetX + 'px';
+                    window.style.top = e.clientY - windowOffsetY + 'px';
+                }
+            });
+        }
+    });
+
+    document.addEventListener('mouseup', (e) => {
+        // Handle drop for file dragging
+        if (isDragging) {
+            const draggingElement = document.getElementById('dragging-element');
+            if (draggingElement) {
+                const folderRect = folderContent.getBoundingClientRect();
+                const x = e.clientX, y = e.clientY;
+                // If folder window is open and drop inside its content
+                if (
+                    !folderWindow.classList.contains('window-hidden') &&
+                    x >= folderRect.left &&
+                    x <= folderRect.right &&
+                    y >= folderRect.top &&
+                    y <= folderRect.bottom
+                ) {
+                    moveFileToFolder();
+                } else {
+                    // If folder window closed and drop on folder icon
+                    const folderIconRect = documentsIcon.getBoundingClientRect();
+                    if (
+                        x >= folderIconRect.left &&
+                        x <= folderIconRect.right &&
+                        y >= folderIconRect.top &&
+                        y <= folderIconRect.bottom
+                    ) {
+                        openFolderWindow();
+                        moveFileToFolder();
+                    }
+                }
+                // Remove drag visual
+                draggingElement.remove();
+            }
+            isDragging = false;
+            dragElement = null;
+        }
+        
+        // End window moving
+        if (isMovingWindow) {
+            isMovingWindow = false;
+            // Reset z-index after a short delay
+            setTimeout(() => {
+                document.querySelectorAll('.window').forEach(window => {
+                    window.style.zIndex = 10;
+                });
+            }, 100);
+        }
+    });
+
+    // Functions
+    function selectIcon(icon) {
+        deselectAllIcons();
+        icon.classList.add('selected');
+        selectedIcon = icon;
+    }
+
+    function deselectAllIcons() {
+        document.querySelectorAll('.icon').forEach(icon => {
+            icon.classList.remove('selected');
+        });
+        selectedIcon = null;
+    }
+
+    function openFolderWindow() {
+        folderWindow.classList.remove('window-hidden');
+        updateItemCount();
+    }
+
+    function moveFileToFolder() {
+        if (fileInFolder) return;
+
+        // Preserve full filename and compute display name
+        const fullName = fileIcon.dataset.fullname;
+        const dotIndex = fullName.lastIndexOf('.');
+        const extension = dotIndex !== -1 ? fullName.slice(dotIndex) : '';
+        const namePart = dotIndex !== -1 ? fullName.slice(0, dotIndex) : fullName;
+        const displayBase = namePart.length > 11 ? namePart.slice(0, 11) + '...' : namePart;
+
+        // Create file icon in folder
+        const fileIconInFolder = document.createElement('div');
+        fileIconInFolder.className = 'icon';
+        fileIconInFolder.style.position = 'relative';
+        fileIconInFolder.style.margin = '10px';
+        fileIconInFolder.dataset.fullname = fullName;
+        fileIconInFolder.innerHTML = `
+            <svg class="icon-image" viewBox="0 0 24 24" fill="#9fc5e8">
+                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/>
+            </svg>
+            <div class="icon-text">${displayBase + extension}</div>
+        `;
+
+        folderContent.appendChild(fileIconInFolder);
+        fileIconInFolder.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            openRenameModal(fileIconInFolder);
+        });
+
+        // Hide original file icon on desktop
+        fileIcon.style.visibility = 'hidden';
+        fileInFolder = true;
+
+        // Update item count
+        updateItemCount();
+        checkAllTasksComplete();
+
+        // Allow dragging back to desktop
+        fileIconInFolder.addEventListener('mousedown', (e) => {
+            if (e.button === 0) {
+                isDragging = true;
+                dragElement = fileIconInFolder;
+
+                // Calculate offset
+                const rect = fileIconInFolder.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+
+                // Create drag visual
+                const clone = fileIconInFolder.cloneNode(true);
+                clone.id = 'dragging-element';
+                clone.classList.add('dragging');
+                clone.style.left = e.clientX - offsetX + 'px';
+                clone.style.top = e.clientY - offsetY + 'px';
+                document.body.appendChild(clone);
+
+                // Check on mouse up if dropped on desktop
+                document.addEventListener('mouseup', function onceHandler(e) {
+                    const folderRect = folderContent.getBoundingClientRect();
+                    if (
+                        e.clientX < folderRect.left ||
+                        e.clientX > folderRect.right ||
+                        e.clientY < folderRect.top ||
+                        e.clientY > folderRect.bottom
+                    ) {
+                        // Move back to desktop
+                        fileIcon.style.visibility = 'visible';
+                        fileIconInFolder.remove();
+                        fileInFolder = false;
+                        updateItemCount();
+                    }
+                    document.removeEventListener('mouseup', onceHandler);
+                });
+            }
+        });
+    }
+
+    function updateItemCount() {
+        const count = folderContent.children.length;
+        itemCount.textContent = count === 1 ? '1 item' : `${count} items`;
+    }
+
+    // Rename modal for file icon
+    function openRenameModal(iconEl) {
+        const fullName = iconEl.dataset.fullname;
+        const dotIndex = fullName.lastIndexOf('.');
+        const ext = dotIndex !== -1 ? fullName.slice(dotIndex) : '';
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal md-card';
+        modal.style.position = 'fixed';
+        modal.style.top = '50%';
+        modal.style.left = '50%';
+        modal.style.transform = 'translate(-50%, -50%)';
+        modal.style.zIndex = '20000';
+        modal.style.minWidth = '300px';
+        modal.innerHTML = `
+          <div class="window-header">
+            <span>Rename File</span>
+            <span class="close-button" role="button" tabindex="0">×</span>
+          </div>
+          <div class="modal-content" style="padding:16px;">
+            <input type="text" id="rename-input" value="${fullName}" style="width:100%; padding:8px; margin-bottom:12px;">
+            <button id="rename-ok" class="md-button">OK</button>
+            <button id="rename-cancel" class="md-button">Cancel</button>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        // Close handlers
+        modal.querySelector('.close-button').onclick = () => modal.remove();
+        modal.querySelector('#rename-cancel').onclick = () => modal.remove();
+        // OK handler
+        modal.querySelector('#rename-ok').onclick = () => {
+            const newName = modal.querySelector('#rename-input').value.trim();
+            if (newName) {
+                iconEl.dataset.fullname = newName;
+                const dot = newName.lastIndexOf('.');
+                const extension = dot !== -1 ? newName.slice(dot) : '';
+                const namePart = dot !== -1 ? newName.slice(0, dot) : newName;
+                const displayBase = namePart.length > 11 ? namePart.slice(0, 11) + '...' : namePart;
+                iconEl.querySelector('.icon-text').textContent = displayBase + extension;
+                checkAllTasksComplete();
+            }
+            modal.remove();
+        };
+    }
+
+    // Enable dragging icons across desktop
+    makeDraggableIcon(documentsIcon, openFolderWindow);
+    makeDraggableIcon(fileIcon, null);
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const fullscreenToggle = document.getElementById('fullscreen-toggle');
+    if (fullscreenToggle) {
+      fullscreenToggle.addEventListener('click', () => {
+        const elem = document.documentElement;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) { // Safari
+            elem.webkitRequestFullscreen();
+          } else if (elem.msRequestFullscreen) { // IE/Edge
+            elem.msRequestFullscreen();
+          } else {
+            alert("Your browser does not support fullscreen mode. Please try another browser.");
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+          }
+        }
+      });
+    }
+  });
+</script>
+  
+</body>
+</html>
