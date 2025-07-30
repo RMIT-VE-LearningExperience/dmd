@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pan Brake PPE - Learn & Match</title>
+  <link rel="stylesheet" href="https://use.typekit.net/vtr4dld.css">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #ecf0f1;
+      --accent-color: #3498db;
+      --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --heading-font: "Museo", sans-serif;
+      --shadow-elevation-1: 0 2px 4px rgba(0,0,0,0.1);
+      --shadow-elevation-2: 0 6px 20px rgba(0,0,0,0.1);
+      --border-radius: 12px;
+      --card-bg: #fff;
+      --heading-font-weight: 700;
+      --body-font-weight: 400;
+    }
+    body {
+      background-color: var(--secondary-color);
+      font-family: var(--font-family);
+      margin: 0;
+      padding: 40px 20px;
+      color: var(--primary-color);
+      font-weight: var(--body-font-weight);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2.25rem;
+      font-weight: var(--heading-font-weight);
+      letter-spacing: -0.02em;
+      font-family: var(--heading-font);
+    }
+    h2 {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: var(--heading-font-weight);
+      margin-bottom: 24px;
+      font-family: var(--heading-font);
+    }
+    .instructions {
+      font-size: 1rem;
+      line-height: 1.5;
+      max-width: 640px;
+      margin: 0 auto 30px;
+      font-weight: var(--body-font-weight);
+      font-family: var(--font-family);
+    }
+    .ppe-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .ppe-item {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      /* box-shadow removed */
+      padding: 12px;
+      text-align: center;
+      cursor: grab;
+      border: 1px solid #e0e0e0;
+      transition: box-shadow 0.3s ease, transform 0.2s ease-in-out;
+      flex: 0 0 140px;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .ppe-item:active {
+      cursor: grabbing;
+    }
+    .ppe-item:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+    }
+    .ppe-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 12px;
+    }
+    .ppe-item p {
+      margin: 0;
+      font-weight: var(--body-font-weight);
+      color: var(--primary-color);
+      font-family: var(--font-family);
+    }
+    .drop-zone {
+      background-color: var(--card-bg);
+      border: 2px dashed #ccc;
+      border-radius: var(--border-radius);
+      box-shadow: inset 0 0 0 1px #ddd;
+      width: 180px;
+      height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      font-size: 1rem;
+      font-weight: var(--heading-font-weight);
+      color: var(--primary-color);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .zone-title {
+      font-family: var(--heading-font);
+      font-weight: var(--heading-font-weight);
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+    .drop-zone .ppe-item {
+      border: none;
+    }
+    .drop-zone.dragover {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pan Brake PPE – Learn & Match</h1>
+  <p class="instructions">
+    Drag each piece of PPE into the correct body zone below. Hover on each image to learn why it's important.
+  </p>
+
+  <div class="ppe-container" id="ppe-items">
+    <div class="ppe-item" draggable="true" ondragstart="drag(event)" id="glasses" title="Protects eyes from flying debris and sharp edges.">
+      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/safety_glasses.png" alt="Safety Glasses">
+      <p>Glasses</p>
+    </div>
+    <div class="ppe-item" draggable="true" ondragstart="drag(event)" id="longpants" title="Protects legs from scrapes and debris.">
+      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/longpants.png" alt="Long Pants">
+      <p>Long Pants</p>
+    </div>
+    <div class="ppe-item" draggable="true" ondragstart="drag(event)" id="boots" title="Steel-toe boots protect feet from dropped material.">
+      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/boots.png" alt="Safety Boots">
+      <p>Boots</p>
+    </div>
+    <div class="ppe-item" draggable="true" ondragstart="drag(event)" id="dustcoat" title="Dust coat protects your torso and clothing from debris and contaminants.">
+      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/dustcoat.png" alt="Dust Coat">
+      <p>Dust Coat</p>
+    </div>
+  </div>
+
+  <h2>Match PPE to the correct body zone</h2>
+  <div class="ppe-container">
+    <div class="drop-zone" data-zone="glasses" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <div class="zone-title">Eyes</div>
+    </div>
+    <div class="drop-zone" data-zone="longpants" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <div class="zone-title">Legs</div>
+    </div>
+    <div class="drop-zone" data-zone="dustcoat" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <div class="zone-title">Torso</div>
+    </div>
+    <div class="drop-zone" data-zone="boots" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <div class="zone-title">Feet</div>
+    </div>
+  </div>
+
+  <div id="notification" style="display:none; text-align:center; margin-top:20px;
+    font-size:1.2rem; font-weight:var(--heading-font-weight); color:#28a745;">
+  </div>
+  <div style="text-align:center; margin-top:10px;">
+    <button id="resetButton" style="display:none; padding:8px 16px; font-size:1rem;
+      cursor:pointer;">Try Again</button>
+  </div>
+
+  <script>
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+    function drag(ev) {
+      const id = ev.currentTarget.id;
+      ev.dataTransfer.setData('text/plain', id);
+    }
+    function drop(ev) {
+      ev.preventDefault();
+      const id = ev.dataTransfer.getData('text/plain');
+      const dragged = document.getElementById(id);
+      const zone = ev.currentTarget; 
+      zone.classList.remove('dragover');
+      zone.appendChild(dragged);
+      checkCompletion();
+    }
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+      zone.addEventListener('dragenter', () => zone.classList.add('dragover'));
+      zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    });
+
+    function checkCompletion() {
+      const zones = document.querySelectorAll('.drop-zone');
+      let correct = true;
+      let allPlaced = true;
+      zones.forEach(zone => {
+        const item = zone.querySelector('.ppe-item');
+        if (!item) {
+          allPlaced = false;
+          correct = false;
+        } else if (item.id !== zone.dataset.zone) {
+          correct = false;
+        }
+      });
+      const note = document.getElementById('notification');
+      const resetBtn = document.getElementById('resetButton');
+      if (allPlaced) {
+        if (correct) {
+          note.textContent = 'Well done! You matched all PPE correctly.';
+          note.style.color = '#28a745';
+        } else {
+          note.textContent = '❌ Some items are incorrect. Please try again.';
+          note.style.color = '#dc3545';
+        }
+        note.style.display = 'block';
+        resetBtn.style.display = 'inline-block';
+      }
+    }
+    document.getElementById('resetButton').addEventListener('click', () => {
+      const container = document.getElementById('ppe-items');
+      document.querySelectorAll('.drop-zone .ppe-item').forEach(item => {
+        container.appendChild(item);
+      });
+      document.getElementById('notification').style.display = 'none';
+      document.getElementById('resetButton').style.display = 'none';
+    });
+  </script>
+</body>
+</html>
