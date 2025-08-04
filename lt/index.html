@@ -2,35 +2,34 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Embedded Video Submission Portal</title>
+<title>Redirecting to Video Submission Portal</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1MDBG3TN2X"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1MDBG3TN2X');
+</script>
+<meta http-equiv="refresh" content="0;url=https://video-submission-portal-v3-61367289255.us-west1.run.app/" />
 <style>
-  body,html{margin:0;padding:0;height:100%;background:#111;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;}
-  .container{position:relative;width:100%;height:100vh;display:flex;flex-direction:column;}
-  .header{padding:10px;display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.6);}
-  .title{font-size:1.2rem;font-weight:600;flex:1;}
-  .iframe-wrapper{flex:1;position:relative;overflow:hidden;}
-  iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000;}
-  .fallback{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;background:#1a1a1a;color:#ddd;font-size:1rem;}
-  a.button{display:inline-block;padding:8px 16px;border-radius:6px;background:#2563eb;color:#fff;text-decoration:none;font-weight:500;}
+  body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:#0f111a;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;}
+  .box{max-width:480px;text-align:center;line-height:1.4;}
+  a{color:#4f9afb;text-decoration:none;font-weight:600;}
 </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="title">Video Submission Portal</div>
-      <div><a href="https://video-submission-portal-v3-61367289255.us-west1.run.app/" target="_blank" class="button" rel="noopener">Open in new tab</a></div>
-    </div>
-    <div class="iframe-wrapper">
-      <iframe 
-  src="https://video-submission-portal-v3-61367289255.us-west1.run.app/" 
-  loading="lazy" 
-  title="Video Submission Portal"
-  allow="camera; microphone; autoplay; encrypted-media"
-  allowfullscreen
-  style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000;">
-</iframe>
-    </div>
+  <div class="box">
+    <h1>Redirecting...</h1>
+    <p>If you are not redirected automatically, <a href="https://video-submission-portal-v3-61367289255.us-west1.run.app/" target="_blank" rel="noopener">click here</a>.</p>
   </div>
+  <script>
+    // Fallback in case meta refresh is delayed
+    setTimeout(function(){
+      window.location.replace("https://video-submission-portal-v3-61367289255.us-west1.run.app/");
+    }, 200);
+  </script>
 </body>
 </html>
