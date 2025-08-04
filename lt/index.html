@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Embedded Video Submission Portal</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  body,html{margin:0;padding:0;height:100%;background:#111;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;}
+  .container{position:relative;width:100%;height:100vh;display:flex;flex-direction:column;}
+  .header{padding:10px;display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.6);}
+  .title{font-size:1.2rem;font-weight:600;flex:1;}
+  .iframe-wrapper{flex:1;position:relative;overflow:hidden;}
+  iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000;}
+  .fallback{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;background:#1a1a1a;color:#ddd;font-size:1rem;}
+  a.button{display:inline-block;padding:8px 16px;border-radius:6px;background:#2563eb;color:#fff;text-decoration:none;font-weight:500;}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">Video Submission Portal</div>
+      <div><a href="https://video-submission-portal-v3-61367289255.us-west1.run.app/" target="_blank" class="button" rel="noopener">Open in new tab</a></div>
+    </div>
+    <div class="iframe-wrapper">
+      <iframe src="https://video-submission-portal-v3-61367289255.us-west1.run.app/" loading="lazy" title="Video Submission Portal">
+        <div class="fallback">
+          <p>Unable to load the portal. You can open it directly:</p>
+          <a href="https://video-submission-portal-v3-61367289255.us-west1.run.app/" target="_blank" class="button" rel="noopener">Open Portal</a>
+        </div>
+      </iframe>
+    </div>
+  </div>
+</body>
+</html>
