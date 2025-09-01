@@ -1,192 +1,35 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <title>Video Recorder Maintenance</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #0b1220;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --accent: #60a5fa;
-      --accent-2: #a78bfa;
-    }
-    * { box-sizing: border-box; }
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-      color: var(--text);
-      background: radial-gradient(1200px 800px at 20% 10%, #1e293b, transparent 60%),
-                  radial-gradient(900px 600px at 80% 30%, #0b3b68, transparent 60%),
-                  linear-gradient(180deg, #0a0f1d, var(--bg));
-    }
-    .wrap {
-      min-height: 100%;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-    }
-    .card {
-      width: 100%;
-      max-width: 680px;
-      background: color-mix(in oklab, var(--card) 92%, white 8%);
-      border: 1px solid color-mix(in oklab, #ffffff 8%, var(--card));
-      border-radius: 20px;
-      padding: 32px 28px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35), 0 2px 10px rgba(0,0,0,.25);
-    }
-    .top {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      margin-bottom: 8px;
-    }
-    .badge {
-      inline-size: 44px;
-      block-size: 44px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      position: relative;
-      isolation: isolate;
-      overflow: hidden;
-    }
-    .badge::after {
-      content: "";
-      position: absolute;
-      inset: -20%;
-      background: radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,.35), transparent 60%);
-      opacity: .6;
-    }
-    .title {
-      font-size: clamp(20px, 2.6vw, 28px);
-      line-height: 1.2;
-      margin: 0;
-    }
-    .status {
-      display: inline-flex;
-      gap: 10px;
-      align-items: center;
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 14px;
-    }
-    .dot {
-      inline-size: 8px;
-      block-size: 8px;
-      border-radius: 999px;
-      background: var(--accent);
-      position: relative;
-    }
-    .dot::after {
-      content: "";
-      position: absolute;
-      inset: -6px;
-      border-radius: 999px;
-      border: 2px solid color-mix(in oklab, var(--accent) 70%, white 30%);
-      opacity: .6;
-      animation: ping 1.4s infinite ease-out;
-    }
-    @keyframes ping {
-      0% { transform: scale(0.5); opacity: .6; }
-      70% { transform: scale(1.6); opacity: 0; }
-      100% { transform: scale(1.6); opacity: 0; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .dot::after { animation: none; display: none; }
-    }
-    .msg {
-      font-size: clamp(16px, 2vw, 18px);
-      line-height: 1.6;
-      margin: 0 0 18px 0;
-      color: color-mix(in oklab, var(--text) 90%, white 10%);
-    }
-    .hint {
-      font-size: 14px;
-      color: var(--muted);
-      margin: 0 0 20px 0;
-    }
-    .row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    button, a.button {
-      appearance: none;
-      border: 0;
-      cursor: pointer;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-weight: 600;
-      font-size: 14px;
-      line-height: 1;
-      letter-spacing: .2px;
-      text-decoration: none;
-      transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
-      box-shadow: 0 6px 16px rgba(0,0,0,.25);
-    }
-    .primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: white;
-    }
-    .primary:active { transform: translateY(1px); }
-    .ghost {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid color-mix(in oklab, var(--text) 20%, transparent);
-    }
-    footer {
-      margin-top: 20px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
-  </style>
+<meta charset="utf-8" />
+<title>Redirecting to Video Submission Portal</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1MDBG3TN2X"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1MDBG3TN2X');
+</script>
+<meta http-equiv="refresh" content="0;url=https://video-submission-portal-v4-61367289255.us-west1.run.app/" />
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:#0f111a;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;}
+  .box{max-width:480px;text-align:center;line-height:1.4;}
+  a{color:#4f9afb;text-decoration:none;font-weight:600;}
+</style>
 </head>
 <body>
-  <main class="wrap" role="main">
-    <section class="card" aria-labelledby="title">
-      <header class="top">
-        <div class="badge" aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M3 7.5a2.5 2.5 0 0 1 2.5-2.5h7A2.5 2.5 0 0 1 15 7.5V9h1.65a1.5 1.5 0 0 1 1.05.43l2.7 2.57a1.5 1.5 0 0 1 0 2.16l-2.7 2.57a1.5 1.5 0 0 1-1.05.43H15v1.5a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 3 18.5v-11Z" fill="white" opacity=".9"/>
-          </svg>
-        </div>
-        <h1 class="title" id="title">Video Recorder is temporarily under maintenance</h1>
-      </header>
-
-      <div class="status" aria-live="polite">
-        <span class="dot" aria-hidden="true"></span>
-        <span class="mono">Status: maintenance</span>
-      </div>
-
-      <p class="msg">
-        Thanks for your patience. The service will be back in a couple of hours.
-      </p>
-      <p class="hint">
-        You can try again now. If the page still shows this message, give it a little time then try again.
-      </p>
-
-      <div class="row">
-        <button class="primary" onclick="location.reload()">Try again</button>
-      </div>
-
-   
-    </section>
-  </main>
-
+  <div class="box">
+    <h1>Redirecting...</h1>
+    <p>If you are not redirected automatically, <a href="https://video-submission-portal-v4-61367289255.us-west1.run.app/" target="_blank" rel="noopener">click here</a>.</p>
+  </div>
   <script>
-    // Lightweight request ID for quick reference
-    (function () {
-      const rid = Math.random().toString(36).slice(2, 10) + "-" + Date.now().toString(36);
-      const el = document.getElementById("rid");
-      if (el) el.textContent = rid;
-    }());
+    // Fallback in case meta refresh is delayed
+    setTimeout(function(){
+      window.location.replace("https://video-submission-portal-v4-61367289255.us-west1.run.app/");
+    }, 200);
   </script>
 </body>
 </html>
