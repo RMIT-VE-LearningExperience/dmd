@@ -70,6 +70,32 @@
             transition: all 0.3s ease;
         }
 
+         .hotspot:nth-child(odd) {
+            animation: hotspotBounce 4s infinite;
+        }
+
+        .hotspot:nth-child(even) {
+            animation: hotspotBounce 4s infinite 1.5s;
+        }
+
+        .hotspot:hover {
+            filter: drop-shadow(0 5px 10px rgba(23, 14, 81, 0.5));
+            transform: scale(1.01);
+            animation-play-state: paused;
+        }
+
+        @keyframes hotspotBounce {
+            0%, 85%, 100% {
+                transform: scale(1);
+            }
+            90% {
+                transform: scale(1.02);
+            }
+            95% {
+                transform: scale(1);
+            }
+        }
+
         .hotspot:hover {
             filter: drop-shadow(0 5px 10px rgba(23, 14, 81, 0.5));
             transform: scale(1.01);
