@@ -556,6 +556,52 @@
     let mouse = new THREE.Vector2();
     let raycaster = new THREE.Raycaster();
 
+    // VR picking
+    const vrRaycaster = new THREE.Raycaster();
+    const _tempMat4 = new THREE.Matrix4();
+    const _tempVec3 = new THREE.Vector3();
+    function onSelectStart(event) {
+      const controller = event.target;
+
+      // Build a ray from controller forward
+      vrRaycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+      _tempMat4.extractRotation(controller.matrixWorld);
+      vrRaycaster.ray.direction.set(0, 0, -1).applyMatrix4(_tempMat4);
+
+      // Only grab bricks not yet placed
+      const candidates = cubes.filter(b => !b.userData.isPlaced);
+      const hits = vrRaycaster.intersectObjects(candidates, false);
+      if (hits.length > 0) {
+        const brick = hits[0].object;
+        controller.userData.grabbedBrick = brick;
+        brick.userData.isGrabbed = true;
+
+        // parent to controller so it follows precisely
+        controller.attach(brick);
+
+        // show laser, length will be set each frame
+        if (controller.userData.laserLine) controller.userData.laserLine.visible = true;
+      }
+    }
+
+    function onSelectEnd(event) {
+      const controller = event.target;
+      const brick = controller.userData.grabbedBrick;
+      if (!brick) return;
+
+      // detach back to world
+      scene.attach(brick);
+      brick.userData.isGrabbed = false;
+
+      // hide laser
+      if (controller.userData.laserLine) controller.userData.laserLine.visible = false;
+
+      // snap to slot
+      snapToBrickPosition(brick);
+
+      controller.userData.grabbedBrick = null;
+    }
+
     function setupPointerControls() {
       window.addEventListener('pointerdown', onPointerDown);
       window.addEventListener('pointermove', onPointerMove);
@@ -745,15 +791,75 @@
     }
 
     function setupControllers() {
-      // VR controller interactions not yet implemented (drag/drop works on desktop/mobile only)
+      // clear old refs if any
+      controllers.forEach(c => { try { c.removeFromParent(); } catch(e){} });
+      controllers = [];
+
+      for (let i = 0; i < 2; i++) {
+        const controller = renderer.xr.getController(i);
+        controller.userData.grabbedBrick = null;
+
+        // Laser line, only visible while grabbing
+        const rayGeom = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(0, 0, -1)
+        ]);
+        const rayMat = new THREE.LineBasicMaterial({ color: 0x88ccff, transparent: true, opacity: 0.9 });
+        const laser = new THREE.Line(rayGeom, rayMat);
+        laser.visible = false;
+        laser.name = 'laserLine';
+        controller.add(laser);
+        controller.userData.laserLine = laser;
+
+        // Trigger press and release
+        controller.addEventListener('selectstart', onSelectStart);
+        controller.addEventListener('selectend', onSelectEnd);
+
+        // tiny pointer tip for visibility
+        const tip = new THREE.Mesh(
+          new THREE.SphereGeometry(0.008, 8, 8),
+          new THREE.MeshBasicMaterial({ color: 0x88ccff })
+        );
+        tip.position.z = -0.02;
+        controller.add(tip);
+
+        scene.add(controller);
+        controllers.push(controller);
+      }
     }
 
     function render() {
+      // Desktop or legacy path
       if (selectedCube && selectedController) {
         selectedCube.position.y = Math.max(ROW1_Y, selectedCube.position.y);
         highlightNearbyPositions(selectedCube.position.x, selectedCube.position.z);
         setBrickGlow(selectedCube, hoverValidIndex !== null);
       }
+
+      // VR controllers: update hover and laser when grabbing
+      for (const controller of controllers) {
+        const brick = controller.userData.grabbedBrick;
+        const laser = controller.userData.laserLine;
+
+        if (brick) {
+          // brick is parented to controller, get world position for preview
+          brick.getWorldPosition(_tempVec3);
+
+          highlightNearbyPositions(_tempVec3.x, _tempVec3.z);
+          setBrickGlow(brick, hoverValidIndex !== null);
+
+          // set laser length from controller origin to brick
+          const controllerPos = new THREE.Vector3().setFromMatrixPosition(controller.matrixWorld);
+          const dist = controllerPos.distanceTo(_tempVec3);
+          if (laser) {
+            laser.visible = true;
+            laser.scale.z = Math.max(0.05, dist);
+          }
+        } else {
+          if (laser) laser.visible = false;
+        }
+      }
+
       renderer.render(scene, camera);
     }
 
