@@ -159,11 +159,11 @@
 <body>
   <div id="uiOverlay">
     <h2>Brick Stacker</h2>
-    <div id="targetDisplay"></div>
+    
     <div id="scoreDisplay"></div>
     <div id="moveDisplay"></div>
     <div id="timeDisplay"></div>
-    <div id="legend"></div>
+    
   </div>
 
   <div id="helpOverlay">
@@ -176,7 +176,7 @@
 
   <button id="vrButton">Enter VR</button>
   <button id="resetButton">New Game</button>
-  <button id="resetScoreButton">Reset Score</button>
+  
   <button id="helpButton">Help</button>
   <div id="status"></div>
 
@@ -302,8 +302,6 @@
       else setupPointerControls();
 
       // UI
-      setupLegend();
-      updateTargetDisplay();
       updateScoreDisplay();
       renderStatusUI();
       updateProgress();
@@ -312,29 +310,7 @@
       renderer.setAnimationLoop(render);
     }
 
-    function setupLegend() {
-      const el = document.getElementById('legend');
-      el.innerHTML = '';
-      const palette = [
-        ['#C0653E', 'terracotta'],
-        ['#9CAF88', 'sage'],
-        ['#556B6F', 'slate'],
-        ['#D4C4A8', 'sand'],
-        ['#A46A52', 'clay'],
-        ['#C49A36', 'ochre']
-      ];
-      palette.forEach(([hex, name]) => {
-        const row = document.createElement('div');
-        row.className = 'legend-item';
-        row.innerHTML = `<span class="swatch" style="background:${hex}"></span>${name}`;
-        el.appendChild(row);
-      });
-    }
-
-    function updateTargetDisplay() {
-      const parts = TARGET_ARRANGEMENT.map(p => `${p.number} ${p.emoji}`);
-      document.getElementById('targetDisplay').textContent = `Target order: ${parts.join(', ')}`;
-    }
+    
 
     function updateScoreDisplay() {
       document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
@@ -402,7 +378,6 @@
       startTime = Date.now();
 
       spawnNextBrick();
-      updateTargetDisplay();
       updateScoreDisplay();
       updateProgress();
     }
@@ -451,7 +426,6 @@
       spawnNextBrick();
 
       // UI
-      updateTargetDisplay();
       updateScoreDisplay();
       renderStatusUI();
       updateProgress();
@@ -518,8 +492,28 @@
       brick.receiveShadow = true;
       brick.userData.number = currentBrickNumber;
       brick.userData.isPlaced = false;
+      brick.userData.slotIndex = null;
       scene.add(brick);
       cubes.push(brick);
+    }
+    // Helper to release a brick from its slot when picked up
+    function releaseFromSlot(brick) {
+      if (!brick || !brick.userData) return;
+      if (brick.userData.isPlaced && brick.userData.slotIndex != null) {
+        const idx = brick.userData.slotIndex;
+        const marker = gridMarkers[idx];
+        if (marker) {
+          marker.userData.occupied = false;
+          marker.material.color.setHex(MARKER_NORMAL.color);
+          marker.material.opacity = MARKER_NORMAL.opacity;
+        }
+        brick.userData.isPlaced = false;
+        brick.userData.slotIndex = null;
+        if (bricksPlaced > 0) {
+          bricksPlaced--;
+          updateProgress();
+        }
+      }
     }
 
     function createNumberTexture(number, baseHex) {
@@ -575,6 +569,8 @@
         const brick = hits[0].object;
         controller.userData.grabbedBrick = brick;
         brick.userData.isGrabbed = true;
+        // If this brick was previously placed, free its slot and decrement progress
+        releaseFromSlot(brick);
 
         // parent to controller so it follows precisely
         controller.attach(brick);
@@ -626,6 +622,8 @@
       if (intersects.length > 0) {
         selectedCube = intersects[0].object;
         selectedCube.userData.isGrabbed = true;
+        // If this brick was previously placed, free the slot and decrement progress
+        releaseFromSlot(selectedCube);
         if (navigator.vibrate) navigator.vibrate(20);
       }
     }
@@ -694,11 +692,6 @@
       document.getElementById('resetButton').addEventListener('click', () => {
         resetGame();
       });
-      document.getElementById('resetScoreButton').addEventListener('click', () => {
-        score = 0;
-        gamesPlayed = 0;
-        updateScoreDisplay();
-      });
       document.getElementById('helpButton').addEventListener('click', () => {
         showToast('Place bricks onto the glowing slots. The order is shown on the left panel.');
       });
@@ -765,6 +758,7 @@
         brick.position.y = bestPosition.y; // ensure correct row height
         brick.position.z = bestPosition.z;
         brick.userData.isPlaced = true;
+        brick.userData.slotIndex = bestPosition.index;
 
         // Mark this slot as occupied (per row)
         const marker = gridMarkers[bestPosition.index];

@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>WebXR Brick Building Game - Physics Based</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background: #2C2C2C;
+      color: #EDE7E0;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      touch-action: none;
+    }
+    #uiOverlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 1000;
+      background: rgba(180, 179, 179, 0.65);
+      border: 1px solid rgba(237, 231, 224, 0.15);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 12px 14px;
+      border-radius: 12px;
+      max-width: 320px;
+      line-height: 1.3;
+    }
+    #uiOverlay h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: #EDE7E0;
+    }
+    #scoreDisplay, #moveDisplay, #timeDisplay {
+      font-size: 14px;
+      color: #EDE7E0;
+      margin: 4px 0;
+      opacity: 0.95;
+    }
+    #helpOverlay {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      z-index: 1000;
+      background: rgba(27, 26, 23, 0.65);
+      border: 1px solid rgba(237, 231, 224, 0.15);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 10px 12px;
+      border-radius: 12px;
+      max-width: 360px;
+      font-size: 13px;
+      color: #EDE7E0;
+    }
+    #vrButton, #resetButton, #helpButton {
+      position: absolute;
+      right: 20px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #1B1A17;
+      background: #C49A36;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+      transition: transform .08s ease, opacity .15s ease;
+    }
+    #vrButton:hover, #resetButton:hover, #helpButton:hover {
+      transform: translateY(-1px);
+      opacity: 0.95;
+    }
+    #vrButton:disabled {
+      background: #666;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+    #vrButton { bottom: 20px; }
+    #resetButton { bottom: 66px; }
+    #helpButton { bottom: 112px; }
+    #status {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 1000;
+      background: rgba(27, 26, 23, 0.65);
+      border: 1px solid rgba(237, 231, 224, 0.15);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #EDE7E0;
+      min-width: 160px;
+      text-align: right;
+    }
+    #status .progress {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 180px;
+    }
+    #status .progress__label {
+      font-size: 12px;
+      letter-spacing: 0.2px;
+      color: #EDE7E0;
+      opacity: 0.95;
+      text-align: right;
+    }
+    #status .progress__track {
+      position: relative;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(237,231,224,0.18);
+      overflow: hidden;
+    }
+    #status .progress__bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #9CAF88, #C49A36);
+      border-radius: 999px;
+      transition: width 180ms ease;
+    }
+    .toast {
+      position: absolute;
+      left: 50%;
+      top: 72px;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: rgba(27, 26, 23, 0.75);
+      border: 1px solid rgba(237, 231, 224, 0.2);
+      padding: 12px 16px;
+      border-radius: 12px;
+      max-width: 280px;
+      font-size: 14px;
+      color: #EDE7E0;
+    }
+    .toast.success {
+      background: rgba(156, 175, 136, 0.8);
+      color: #1B1A17;
+    }
+    .toast.error {
+      background: rgba(192, 101, 62, 0.8);
+      color: #EDE7E0;
+    }
+    #gameState {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1001;
+      background: rgba(27, 26, 23, 0.9);
+      border: 2px solid #C49A36;
+      padding: 24px;
+      border-radius: 16px;
+      text-align: center;
+      display: none;
+    }
+    #gameState h3 {
+      margin: 0 0 16px;
+      font-size: 24px;
+      color: #C49A36;
+    }
+    #gameState button {
+      background: #C49A36;
+      color: #1B1A17;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="uiOverlay">
+    <h2>Brick Stacker</h2>
+    <div id="scoreDisplay"></div>
+    <div id="moveDisplay"></div>
+    <div id="timeDisplay"></div>
+  </div>
+
+  <div id="helpOverlay">
+    <strong>Goal:</strong> Stack all 6 bricks to build a stable wall<br>
+    <strong>Rule:</strong> Top row bricks need support underneath<br>
+    <strong>VR:</strong> point and squeeze trigger to grab bricks<br>
+    <strong>Desktop:</strong> click and drag bricks<br>
+    <strong>Mobile:</strong> tap and drag bricks<br>
+    <strong>Tip:</strong> slots glow green when placement is valid
+  </div>
+
+  <button id="vrButton">WebXR Not Available</button>
+  <button id="resetButton">New Game</button>
+  <button id="helpButton">Help</button>
+
+  <div id="status"></div>
+  
+  <div id="gameState">
+    <h3 id="gameStateTitle">Wall Complete!</h3>
+    <p id="gameStateMessage"></p>
+    <button onclick="resetGame()">Build Another Wall</button>
+  </div>
+
+  <script>
+    // Game constants
+    const BRICK_W = 0.8, BRICK_H = 0.35, BRICK_D = 0.4;
+    const ROW1_Y = BRICK_H / 2;
+    const GAP_Y = 0.05;
+    const ROW2_Y = ROW1_Y + BRICK_H + GAP_Y;
+
+    // Marker visuals
+    const MARKER_NORMAL = { color: 0x6E665A, opacity: 0.28 };
+    const MARKER_HOVER = { color: 0xEDE7E0, opacity: 0.6 };
+    const MARKER_OCCUPIED = { color: 0x7A8F6A, opacity: 0.75 };
+    const MARKER_VALID = { color: 0x9CAF88, opacity: 0.8 };
+    const MARKER_INVALID = { color: 0xC0653E, opacity: 0.6 };
+
+    // Wall layout
+    const WALL_Z = -1.5;
+    const ROW2_OFFSET_X = BRICK_W / 2;
+    const BRICK_POSITIONS = [
+      // Bottom row (positions 0, 1, 2)
+      { x: -0.8, y: ROW1_Y, z: WALL_Z, row: 'bottom' },
+      { x: 0.0, y: ROW1_Y, z: WALL_Z, row: 'bottom' },
+      { x: 0.8, y: ROW1_Y, z: WALL_Z, row: 'bottom' },
+      // Top row (positions 3, 4, 5)
+      { x: -0.8 + ROW2_OFFSET_X, y: ROW2_Y, z: WALL_Z, row: 'top' },
+      { x: 0.0 + ROW2_OFFSET_X, y: ROW2_Y, z: WALL_Z, row: 'top' },
+      { x: 0.8 + ROW2_OFFSET_X, y: ROW2_Y, z: WALL_Z, row: 'top' }
+    ];
+
+    // Support mapping: which bottom positions support each top position
+    const SUPPORT_MAP = {
+      3: [0, 1], // Top position 3 is supported by bottom positions 0 and 1
+      4: [1, 2], // Top position 4 is supported by bottom positions 1 and 2
+      5: [2]     // Top position 5 is supported by bottom position 2
+    };
+
+    // Global variables
+    let scene, camera, renderer, cubes = [], controllers = [];
+    let selectedCube = null, selectedController = null;
+    let gridMarkers = [], hoverValidIndex = null;
+    let isMobile = false, isXRSupported = false, xrSession = null;
+
+    // Game state
+    let score = 0, gamesPlayed = 0, startTime = 0, moves = 0;
+    let bricksPlaced = 0, currentBrickNumber = 1;
+    let gameComplete = false;
+
+    // Brick color palette
+    const BRICK_COLORS = [
+      { name: 'terracotta', color: 0xC0653E, hexColor: '#C0653E' },
+      { name: 'sage', color: 0x9CAF88, hexColor: '#9CAF88' },
+      { name: 'slate', color: 0x556B6F, hexColor: '#556B6F' },
+      { name: 'sand', color: 0xD4C4A8, hexColor: '#D4C4A8' },
+      { name: 'clay', color: 0xA46A52, hexColor: '#A46A52' },
+      { name: 'ochre', color: 0xC49A36, hexColor: '#C49A36' }
+    ];
+
+    // Audio context for sound effects
+    let audioContext = null;
+
+    function initAudio() {
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) {
+        console.warn('Audio not available');
+      }
+    }
+
+    function playSound(frequency, duration = 0.1, type = 'sine') {
+      if (!audioContext) return;
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+      oscillator.type = type;
+      
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+      
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + duration);
+    }
+
+    async function checkWebXRSupport() {
+      const button = document.getElementById('vrButton');
+      
+      if (!navigator.xr) {
+        button.textContent = 'WebXR Not Supported';
+        button.disabled = true;
+        return false;
+      }
+
+      try {
+        isXRSupported = await navigator.xr.isSessionSupported('immersive-vr');
+        
+        if (isXRSupported) {
+          button.textContent = 'Enter VR';
+          button.disabled = false;
+        } else {
+          button.textContent = 'VR Not Available';
+          button.disabled = true;
+        }
+        
+        return isXRSupported;
+      } catch (error) {
+        // Handle specific permission policy errors
+        if (error.name === 'SecurityError' || error.message.includes('permissions policy')) {
+          console.warn('WebXR blocked by permissions policy. This is normal on some hosting platforms.');
+          button.textContent = 'VR Blocked by Policy';
+          button.disabled = true;
+        } else if (error.name === 'NotSupportedError') {
+          button.textContent = 'VR Not Supported';
+          button.disabled = true;
+        } else {
+          console.warn('WebXR support check failed:', error);
+          button.textContent = 'VR Unavailable';
+          button.disabled = true;
+        }
+        
+        isXRSupported = false;
+        return false;
+      }
+    }
+
+    function renderStatusUI() {
+      const s = document.getElementById('status');
+      s.innerHTML = `
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" aria-label="Wall progress">
+          <div class="progress__label">0 / 6 bricks placed</div>
+          <div class="progress__track"><div class="progress__bar" style="width:0%"></div></div>
+        </div>
+      `;
+    }
+
+    function updateProgress() {
+      const now = Math.min(6, Math.max(0, bricksPlaced));
+      const pct = (now / 6) * 100;
+      const statusEl = document.getElementById('status');
+      const bar = statusEl.querySelector('.progress__bar');
+      const label = statusEl.querySelector('.progress__label');
+      if (bar) bar.style.width = pct + '%';
+      if (label) label.textContent = `${now} / 6 bricks placed`;
+      const pr = statusEl.querySelector('.progress');
+      if (pr) pr.setAttribute('aria-valuenow', String(now));
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
+      document.getElementById('moveDisplay').textContent = `Moves: ${moves}`;
+      const t = startTime > 0 ? Math.floor((Date.now() - startTime) / 1000) : 0;
+      document.getElementById('timeDisplay').textContent = `Time: ${t}s`;
+    }
+
+    function showGameState(title, message, success = false) {
+      const gameState = document.getElementById('gameState');
+      const titleEl = document.getElementById('gameStateTitle');
+      const messageEl = document.getElementById('gameStateMessage');
+      
+      titleEl.textContent = title;
+      messageEl.textContent = message;
+      gameState.style.display = 'block';
+      
+      if (success) {
+        playSound(523.25, 0.2); // C5 note
+        setTimeout(() => playSound(659.25, 0.2), 100); // E5
+        setTimeout(() => playSound(783.99, 0.3), 200); // G5
+      } else {
+        playSound(220, 0.3, 'sawtooth'); // A3 error sound
+      }
+    }
+
+    function hideGameState() {
+      document.getElementById('gameState').style.display = 'none';
+    }
+
+    function checkSupport(topPositionIndex) {
+      // Only check support for top row positions (3, 4, 5)
+      if (topPositionIndex < 3) return true;
+      
+      const supportPositions = SUPPORT_MAP[topPositionIndex];
+      if (!supportPositions) return true;
+
+      // Check if at least one supporting position has a brick
+      return supportPositions.some(supportIndex => {
+        const marker = gridMarkers[supportIndex];
+        return marker && marker.userData.occupied;
+      });
+    }
+
+    function isValidPlacement(positionIndex) {
+      const marker = gridMarkers[positionIndex];
+      if (!marker || marker.userData.occupied) return false;
+      
+      // Check support requirement for top row
+      return checkSupport(positionIndex);
+    }
+
+    async function init() {
+      isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      
+      // Check WebXR support
+      await checkWebXRSupport();
+      
+      // Initialize audio
+      initAudio();
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x404040); // Dark gray instead of blue
+
+      camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 1, 1.8);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.xr.enabled = true;
+      document.body.appendChild(renderer.domElement);
+
+      // Improved lighting
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+      scene.add(hemiLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(3, 4, 2);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 2048;
+      dirLight.shadow.mapSize.height = 2048;
+      dirLight.shadow.camera.near = 0.5;
+      dirLight.shadow.camera.far = 50;
+      dirLight.shadow.camera.left = -10;
+      dirLight.shadow.camera.right = 10;
+      dirLight.shadow.camera.top = 10;
+      dirLight.shadow.camera.bottom = -10;
+      dirLight.shadow.bias = -0.0001;
+      scene.add(dirLight);
+
+      // Environment
+      setupEnvironment();
+      createGridMarkers();
+      setupControllers();
+      setupEventListeners();
+
+      // Initialize game
+      resetGame();
+
+      window.addEventListener('resize', onWindowResize);
+      renderer.setAnimationLoop(render);
+    }
+
+    function setupEnvironment() {
+      // Floor with better materials
+      const floorGeo = new THREE.PlaneGeometry(20, 20);
+      const floorMat = new THREE.MeshLambertMaterial({ 
+        color: 0x2a2a2a, 
+        transparent: true,
+        opacity: 0.8 
+      });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -0.5;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      // Background wall
+      const wallGeo = new THREE.PlaneGeometry(6, 4);
+      const wallMat = new THREE.MeshLambertMaterial({ 
+        color: 0x555555, 
+        transparent: true,
+        opacity: 0.3 
+      });
+      const wall = new THREE.Mesh(wallGeo, wallMat);
+      wall.position.set(0, 1, -2.5);
+      wall.receiveShadow = true;
+      scene.add(wall);
+
+      // Boundary indicators
+      const ringGeo = new THREE.RingGeometry(1.4, 1.42, 64);
+      const ringMat = new THREE.MeshBasicMaterial({ 
+        color: 0x556B6F, 
+        transparent: true, 
+        opacity: 0.3 
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = -0.49;
+      scene.add(ring);
+    }
+
+    function createGridMarkers() {
+      gridMarkers.forEach(marker => {
+        scene.remove(marker);
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material) marker.material.dispose();
+      });
+      gridMarkers = [];
+
+      BRICK_POSITIONS.forEach((pos, index) => {
+        const markerGeometry = new THREE.PlaneGeometry(BRICK_W * 1.1, BRICK_D * 1.1);
+        const markerMaterial = new THREE.MeshBasicMaterial({
+          color: MARKER_NORMAL.color,
+          transparent: true,
+          opacity: MARKER_NORMAL.opacity,
+          side: THREE.DoubleSide
+        });
+        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+        marker.rotation.x = -Math.PI / 2;
+        marker.position.set(pos.x, pos.y - (BRICK_H / 2) - 0.02, pos.z);
+        marker.userData = { 
+          index, 
+          occupied: false,
+          row: pos.row
+        };
+        scene.add(marker);
+        gridMarkers.push(marker);
+      });
+    }
+
+    function resetGame() {
+      // Reset state
+      gameComplete = false;
+      hoverValidIndex = null;
+      selectedCube = null;
+      bricksPlaced = 0;
+      currentBrickNumber = 1;
+      moves = 0;
+      startTime = Date.now();
+
+      // Clear existing bricks
+      cubes.forEach(cube => {
+        scene.remove(cube);
+        if (cube.geometry) cube.geometry.dispose();
+        if (cube.material) {
+          if (Array.isArray(cube.material)) {
+            cube.material.forEach(mat => {
+              if (mat.map) mat.map.dispose();
+              mat.dispose();
+            });
+          } else {
+            if (cube.material.map) cube.material.map.dispose();
+            cube.material.dispose();
+          }
+        }
+      });
+      cubes = [];
+
+      // Recreate grid markers
+      createGridMarkers();
+
+      // Spawn first brick
+      spawnNextBrick();
+
+      // Update UI
+      updateScoreDisplay();
+      renderStatusUI();
+      updateProgress();
+      hideGameState();
+
+      showToast('Build a stable brick wall! Top bricks need support below.', 3000);
+    }
+
+    function spawnNextBrick() {
+      if (currentBrickNumber > 6 || gameComplete) return;
+
+      const colorData = BRICK_COLORS[currentBrickNumber - 1];
+      
+      // Create materials with number texture
+      const materials = [];
+      for (let i = 0; i < 6; i++) {
+        const texture = createNumberTexture(currentBrickNumber, colorData.hexColor);
+        materials.push(new THREE.MeshLambertMaterial({ map: texture }));
+      }
+
+      const brick = new THREE.Mesh(
+        new THREE.BoxGeometry(BRICK_W, BRICK_H, BRICK_D), 
+        materials
+      );
+      
+      addBrickGlow(brick);
+
+      // Spawn position with some randomness
+      const jitterX = (Math.random() - 0.5) * 0.2;
+      const jitterZ = (Math.random() - 0.5) * 0.2;
+      const spawnX = -2.5 + jitterX;
+      const spawnZ = WALL_Z - 1.2 + jitterZ;
+      
+      brick.position.set(spawnX, ROW1_Y, spawnZ);
+      brick.castShadow = true;
+      brick.receiveShadow = true;
+      
+      brick.userData = {
+        number: currentBrickNumber,
+        isPlaced: false,
+        slotIndex: null,
+        isGrabbed: false
+      };
+
+      scene.add(brick);
+      cubes.push(brick);
+
+      playSound(440, 0.1); // A4 note for spawn
+    }
+
+    function addBrickGlow(brick) {
+      const glowGeom = brick.geometry.clone();
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: 0x7A8F6A,
+        transparent: true,
+        opacity: 0.0,
+        depthWrite: false
+      });
+      const glow = new THREE.Mesh(glowGeom, glowMat);
+      glow.scale.set(1.08, 1.08, 1.08);
+      glow.renderOrder = 999;
+      brick.add(glow);
+      brick.userData.glow = glow;
+    }
+
+    function setBrickGlow(brick, active) {
+      if (!brick?.userData?.glow) return;
+      const glow = brick.userData.glow;
+      const target = active ? 0.6 : 0.0;
+      glow.material.opacity = THREE.MathUtils.lerp(glow.material.opacity, target, 0.1);
+      glow.visible = glow.material.opacity > 0.02;
+    }
+
+    function createNumberTexture(number, baseHex) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+
+      // Base color
+      ctx.fillStyle = baseHex;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Subtle texture lines
+      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+      ctx.lineWidth = 1;
+      for (let y = 8; y < canvas.height; y += 16) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Number
+      ctx.fillStyle = 'rgba(0,0,0,0.8)';
+      ctx.font = 'bold 120px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(number), canvas.width / 2, canvas.height / 2);
+
+      // White outline for better visibility
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 3;
+      ctx.strokeText(String(number), canvas.width / 2, canvas.height / 2);
+
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    function setupEventListeners() {
+      // VR Button
+      document.getElementById('vrButton').addEventListener('click', async () => {
+        if (!isXRSupported) {
+          if (!navigator.xr) {
+            showToast('WebXR is not supported in this browser. Try Chrome, Edge, or Firefox on a VR-capable device.', 4000, 'error');
+          } else {
+            showToast('VR is not available. This may be due to browser policies or lack of VR hardware.', 4000, 'error');
+          }
+          return;
+        }
+        
+        try {
+          if (!xrSession) {
+            xrSession = await navigator.xr.requestSession('immersive-vr', {
+              requiredFeatures: ['local-floor'],
+              optionalFeatures: ['hand-tracking']
+            });
+            await renderer.xr.setSession(xrSession);
+            
+            xrSession.addEventListener('end', () => {
+              xrSession = null;
+              document.getElementById('vrButton').textContent = 'Enter VR';
+            });
+            
+            document.getElementById('vrButton').textContent = 'Exit VR';
+            showToast('Welcome to VR! Use trigger to grab bricks.', 3000);
+          } else {
+            await xrSession.end();
+          }
+        } catch (error) {
+          console.error('VR session failed:', error);
+          
+          if (error.name === 'SecurityError') {
+            showToast('VR access denied. Please enable VR permissions or try a different browser.', 4000, 'error');
+          } else if (error.name === 'NotSupportedError') {
+            showToast('VR hardware not detected. Please connect a VR headset and try again.', 4000, 'error');
+          } else {
+            showToast('VR session failed. Please check your VR setup and try again.', 3000, 'error');
+          }
+        }
+      });
+
+      // Game controls
+      document.getElementById('resetButton').addEventListener('click', resetGame);
+      document.getElementById('helpButton').addEventListener('click', () => {
+        showToast('Stack bricks to build a wall! Top row bricks need support underneath.', 4000);
+      });
+
+      // Input controls
+      if (isMobile) {
+        setupTouchControls();
+      } else {
+        setupDesktopControls();
+      }
+    }
+
+    function setupDesktopControls() {
+      const mouse = new THREE.Vector2();
+      const raycaster = new THREE.Raycaster();
+
+      function updateMousePosition(event) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      }
+
+      renderer.domElement.addEventListener('mousedown', (event) => {
+        if (gameComplete) return;
+        
+        updateMousePosition(event);
+        raycaster.setFromCamera(mouse, camera);
+
+        const availableBricks = cubes.filter(b => !b.userData.isPlaced);
+        const intersects = raycaster.intersectObjects(availableBricks);
+        
+        if (intersects.length > 0) {
+          selectedCube = intersects[0].object;
+          selectedCube.userData.isGrabbed = true;
+          releaseFromSlot(selectedCube);
+          playSound(523.25, 0.05); // C5 grab sound
+        }
+      });
+
+      renderer.domElement.addEventListener('mousemove', (event) => {
+        if (!selectedCube || gameComplete) return;
+
+        updateMousePosition(event);
+        updateCubePosition(mouse, raycaster);
+      });
+
+      renderer.domElement.addEventListener('mouseup', () => {
+        if (selectedCube && !gameComplete) {
+          selectedCube.userData.isGrabbed = false;
+          moves++;
+          updateScoreDisplay();
+
+          const snapped = snapToBrickPosition(selectedCube);
+          if (snapped) {
+            playSound(659.25, 0.1); // E5 snap sound
+          }
+
+          selectedCube = null;
+          checkWinCondition();
+        }
+      });
+    }
+
+    function setupTouchControls() {
+      const touches = new Map();
+      const raycaster = new THREE.Raycaster();
+
+      function getTouchPosition(touch) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        return new THREE.Vector2(
+          ((touch.clientX - rect.left) / rect.width) * 2 - 1,
+          -((touch.clientY - rect.top) / rect.height) * 2 + 1
+        );
+      }
+
+      renderer.domElement.addEventListener('touchstart', (event) => {
+        event.preventDefault();
+        if (gameComplete) return;
+
+        const touch = event.changedTouches[0];
+        const mouse = getTouchPosition(touch);
+        
+        raycaster.setFromCamera(mouse, camera);
+        const availableBricks = cubes.filter(b => !b.userData.isPlaced);
+        const intersects = raycaster.intersectObjects(availableBricks);
+        
+        if (intersects.length > 0) {
+          selectedCube = intersects[0].object;
+          selectedCube.userData.isGrabbed = true;
+          releaseFromSlot(selectedCube);
+          touches.set(touch.identifier, mouse);
+          
+          // Haptic feedback
+          if (navigator.vibrate) navigator.vibrate(50);
+          playSound(523.25, 0.05);
+        }
+      });
+
+      renderer.domElement.addEventListener('touchmove', (event) => {
+        event.preventDefault();
+        if (!selectedCube || gameComplete) return;
+
+        const touch = event.changedTouches[0];
+        const mouse = getTouchPosition(touch);
+        touches.set(touch.identifier, mouse);
+        
+        updateCubePosition(mouse, raycaster);
+      });
+
+      renderer.domElement.addEventListener('touchend', (event) => {
+        event.preventDefault();
+        if (selectedCube && !gameComplete) {
+          selectedCube.userData.isGrabbed = false;
+          moves++;
+          updateScoreDisplay();
+
+          const snapped = snapToBrickPosition(selectedCube);
+          if (snapped && navigator.vibrate) {
+            navigator.vibrate(100);
+            playSound(659.25, 0.1);
+          }
+
+          selectedCube = null;
+          checkWinCondition();
+        }
+
+        const touch = event.changedTouches[0];
+        touches.delete(touch.identifier);
+      });
+    }
+
+    function updateCubePosition(mouse, raycaster) {
+      if (!selectedCube) return;
+
+      raycaster.setFromCamera(mouse, camera);
+      
+      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+      const intersection = new THREE.Vector3();
+      raycaster.ray.intersectPlane(plane, intersection);
+
+      if (intersection) {
+        selectedCube.position.x = intersection.x;
+        selectedCube.position.z = intersection.z;
+        selectedCube.position.y = Math.max(ROW1_Y, intersection.y);
+        
+        // Floor constraint
+        const FLOOR_TOP = -0.5;
+        const minCenterY = FLOOR_TOP + (BRICK_H / 2);
+        if (selectedCube.position.y < minCenterY) {
+          selectedCube.position.y = minCenterY;
+        }
+        
+        highlightNearbyPositions(intersection.x, intersection.z);
+        setBrickGlow(selectedCube, hoverValidIndex !== null && isValidPlacement(hoverValidIndex));
+      }
+    }
+
+    function setupControllers() {
+      // Clear existing controllers
+      controllers.forEach(controller => {
+        try {
+          scene.remove(controller);
+        } catch (e) {}
+      });
+      controllers = [];
+
+      // Create enhanced controller models
+      function createControllerModel() {
+        const group = new THREE.Group();
+        
+        // Main body
+        const body = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.015, 0.02, 0.12, 12),
+          new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.1, roughness: 0.8 })
+        );
+        body.position.y = -0.04;
+        group.add(body);
+
+        // Trigger
+        const trigger = new THREE.Mesh(
+          new THREE.BoxGeometry(0.025, 0.015, 0.035),
+          new THREE.MeshStandardMaterial({ 
+            color: 0x666666, 
+            emissive: 0x000000, 
+            metalness: 0.2, 
+            roughness: 0.7 
+          })
+        );
+        trigger.position.set(0, 0.025, -0.015);
+        group.add(trigger);
+
+        // Ring for better visibility
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(0.02, 0.025, 16),
+          new THREE.MeshBasicMaterial({ color: 0x4A90E2, transparent: true, opacity: 0.6 })
+        );
+        ring.position.y = 0.01;
+        ring.rotation.x = -Math.PI / 2;
+        group.add(ring);
+
+        return { group, trigger, ring };
+      }
+
+      // Setup both controllers
+      for (let i = 0; i < 2; i++) {
+        const controller = renderer.xr.getController(i);
+        controller.userData = { grabbedBrick: null };
+
+        // Laser pointer
+        const rayGeometry = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(0, 0, -1)
+        ]);
+        const rayMaterial = new THREE.LineBasicMaterial({ 
+          color: 0x4A90E2, 
+          transparent: true, 
+          opacity: 0.8 
+        });
+        const laser = new THREE.Line(rayGeometry, rayMaterial);
+        laser.visible = false;
+        controller.add(laser);
+        controller.userData.laser = laser;
+
+        // Controller model
+        const { group: model, trigger, ring } = createControllerModel();
+        controller.add(model);
+        controller.userData.triggerMesh = trigger;
+        controller.userData.ringMesh = ring;
+
+        // Event listeners
+        controller.addEventListener('selectstart', onVRSelectStart);
+        controller.addEventListener('selectend', onVRSelectEnd);
+
+        scene.add(controller);
+        controllers.push(controller);
+      }
+    }
+
+    function onVRSelectStart(event) {
+      if (gameComplete) return;
+      
+      const controller = event.target;
+      const raycaster = new THREE.Raycaster();
+
+      // Create ray from controller
+      const tempMatrix = new THREE.Matrix4();
+      raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+      tempMatrix.extractRotation(controller.matrixWorld);
+      raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+
+      // Find grabbable bricks
+      const availableBricks = cubes.filter(b => !b.userData.isPlaced);
+      const intersects = raycaster.intersectObjects(availableBricks);
+
+      if (intersects.length > 0) {
+        const brick = intersects[0].object;
+        controller.userData.grabbedBrick = brick;
+        brick.userData.isGrabbed = true;
+        releaseFromSlot(brick);
+
+        // Attach brick to controller
+        controller.attach(brick);
+        brick.position.set(0, 0, -0.4);
+
+        // Visual feedback
+        if (controller.userData.laser) controller.userData.laser.visible = true;
+        if (controller.userData.triggerMesh) {
+          controller.userData.triggerMesh.material.emissive.setHex(0x4A90E2);
+        }
+        if (controller.userData.ringMesh) {
+          controller.userData.ringMesh.material.opacity = 1.0;
+        }
+
+        // Haptic feedback
+        if (controller.gamepad?.hapticActuators?.length > 0) {
+          controller.gamepad.hapticActuators[0].pulse(0.5, 100);
+        }
+
+        playSound(523.25, 0.05);
+      }
+    }
+
+    function onVRSelectEnd(event) {
+      if (gameComplete) return;
+      
+      const controller = event.target;
+      const brick = controller.userData.grabbedBrick;
+      
+      if (!brick) return;
+
+      // Detach from controller
+      scene.attach(brick);
+      brick.userData.isGrabbed = false;
+
+      // Reset visual feedback
+      if (controller.userData.laser) controller.userData.laser.visible = false;
+      if (controller.userData.triggerMesh) {
+        controller.userData.triggerMesh.material.emissive.setHex(0x000000);
+      }
+      if (controller.userData.ringMesh) {
+        controller.userData.ringMesh.material.opacity = 0.6;
+      }
+
+      moves++;
+      updateScoreDisplay();
+
+      const snapped = snapToBrickPosition(brick);
+      if (snapped) {
+        // Haptic feedback for successful placement
+        if (controller.gamepad?.hapticActuators?.length > 0) {
+          controller.gamepad.hapticActuators[0].pulse(0.8, 150);
+        }
+        playSound(659.25, 0.1);
+      }
+
+      controller.userData.grabbedBrick = null;
+      checkWinCondition();
+    }
+
+    function releaseFromSlot(brick) {
+      if (!brick?.userData) return;
+      
+      if (brick.userData.isPlaced && brick.userData.slotIndex !== null) {
+        const marker = gridMarkers[brick.userData.slotIndex];
+        if (marker) {
+          marker.userData.occupied = false;
+          updateMarkerAppearance(marker);
+        }
+        
+        brick.userData.isPlaced = false;
+        brick.userData.slotIndex = null;
+        
+        if (bricksPlaced > 0) {
+          bricksPlaced--;
+          updateProgress();
+        }
+      }
+    }
+
+    function highlightNearbyPositions(x, z) {
+      const threshold = 0.6;
+      let bestMarker = null;
+      let bestDistance = Infinity;
+
+      gridMarkers.forEach(marker => {
+        const dx = x - marker.position.x;
+        const dz = z - marker.position.z;
+        const distance = Math.hypot(dx, dz);
+
+        if (marker.userData.occupied) {
+          // Keep current state for occupied markers
+          return;
+        }
+
+        if (distance < threshold) {
+          const canPlace = isValidPlacement(marker.userData.index);
+          
+          if (canPlace) {
+            marker.material.color.setHex(MARKER_VALID.color);
+            marker.material.opacity = MARKER_VALID.opacity;
+          } else {
+            marker.material.color.setHex(MARKER_INVALID.color);
+            marker.material.opacity = MARKER_INVALID.opacity;
+          }
+          
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestMarker = marker;
+          }
+        } else {
+          marker.material.color.setHex(MARKER_NORMAL.color);
+          marker.material.opacity = MARKER_NORMAL.opacity;
+        }
+      });
+
+      if (bestMarker) {
+        const canPlace = isValidPlacement(bestMarker.userData.index);
+        if (canPlace) {
+          bestMarker.material.opacity = Math.min(0.95, MARKER_VALID.opacity + 0.2);
+          hoverValidIndex = bestMarker.userData.index;
+        } else {
+          bestMarker.material.opacity = Math.min(0.8, MARKER_INVALID.opacity + 0.1);
+          hoverValidIndex = null;
+        }
+      } else {
+        hoverValidIndex = null;
+      }
+    }
+
+    function updateMarkerAppearance(marker) {
+      if (marker.userData.occupied) {
+        marker.material.color.setHex(MARKER_OCCUPIED.color);
+        marker.material.opacity = MARKER_OCCUPIED.opacity;
+      } else {
+        marker.material.color.setHex(MARKER_NORMAL.color);
+        marker.material.opacity = MARKER_NORMAL.opacity;
+      }
+    }
+
+    function snapToBrickPosition(brick) {
+      let bestPosition = null;
+      let minDistance = Infinity;
+      const SNAP_RADIUS = 0.65;
+
+      BRICK_POSITIONS.forEach((pos, index) => {
+        const marker = gridMarkers[index];
+        if (marker?.userData.occupied) return;
+        
+        // Check if this position is valid (has support if needed)
+        if (!isValidPlacement(index)) return;
+
+        const distance = Math.hypot(brick.position.x - pos.x, brick.position.z - pos.z);
+        if (distance < SNAP_RADIUS && distance < minDistance) {
+          minDistance = distance;
+          bestPosition = { ...pos, index };
+        }
+      });
+
+      if (bestPosition) {
+        // Snap to position
+        brick.position.set(bestPosition.x, bestPosition.y, bestPosition.z);
+        brick.userData.isPlaced = true;
+        brick.userData.slotIndex = bestPosition.index;
+
+        // Update marker
+        const marker = gridMarkers[bestPosition.index];
+        if (marker) {
+          marker.userData.occupied = true;
+          updateMarkerAppearance(marker);
+        }
+
+        setBrickGlow(brick, false);
+        hoverValidIndex = null;
+
+        bricksPlaced++;
+        currentBrickNumber++;
+        updateProgress();
+
+        // Spawn next brick if not complete
+        if (bricksPlaced < 6) {
+          setTimeout(() => spawnNextBrick(), 600);
+        } else {
+          setTimeout(() => checkWinCondition(), 300);
+        }
+
+        return true;
+      } else {
+        // Invalid placement - show feedback
+        if (brick.position.y > ROW1_Y + 0.1) { // Likely trying to place on top row
+          showToast('Top row bricks need support underneath!', 2000, 'error');
+          playSound(200, 0.2, 'sawtooth');
+        }
+      }
+
+      return false;
+    }
+
+    function checkWinCondition() {
+      if (bricksPlaced < 6) return;
+
+      // All 6 bricks are placed, game complete!
+      gameComplete = true;
+      
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const timeBonus = Math.max(0, 180 - elapsed);
+      const movesPenalty = Math.max(0, (moves - 6) * 3);
+      const gameScore = Math.max(100, 500 + timeBonus - movesPenalty);
+      
+      score += gameScore;
+      gamesPlayed++;
+      
+      showGameState(
+        '🏗️ Wall Complete!',
+        `Excellent construction work! You earned ${gameScore} points.\nTime: ${elapsed}s | Moves: ${moves}`,
+        true
+      );
+      
+      // Celebration effect
+      setTimeout(() => {
+        cubes.forEach((brick, i) => {
+          setTimeout(() => {
+            setBrickGlow(brick, true);
+            setTimeout(() => setBrickGlow(brick, false), 400);
+          }, i * 150);
+        });
+      }, 500);
+
+      updateScoreDisplay();
+    }
+
+    function showToast(message, duration = 2500, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(-20px)';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    function render() {
+      // Update grabbed brick positions for VR
+      controllers.forEach(controller => {
+        const brick = controller.userData.grabbedBrick;
+        const laser = controller.userData.laser;
+
+        if (brick && laser) {
+          // Get world position of brick for hover detection
+          const worldPos = new THREE.Vector3();
+          brick.getWorldPosition(worldPos);
+          
+          highlightNearbyPositions(worldPos.x, worldPos.z);
+          setBrickGlow(brick, hoverValidIndex !== null && isValidPlacement(hoverValidIndex));
+          
+          // Update laser length
+          const controllerPos = new THREE.Vector3();
+          controllerPos.setFromMatrixPosition(controller.matrixWorld);
+          const distance = controllerPos.distanceTo(worldPos);
+          laser.scale.z = Math.max(0.1, distance);
+        }
+      });
+
+      // Update brick glows
+      cubes.forEach(brick => {
+        if (brick.userData.glow && brick.userData.isGrabbed) {
+          setBrickGlow(brick, hoverValidIndex !== null && isValidPlacement(hoverValidIndex));
+        }
+      });
+
+      renderer.render(scene, camera);
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // Start the game
+    init().catch(console.error);
+  </script>
+</body>
+</html>
