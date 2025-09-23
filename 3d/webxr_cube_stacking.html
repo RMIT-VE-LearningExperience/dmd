@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WebXR Brick Wall Building Game</title>
+    <title>WebXR Brick Building Game</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         body {
@@ -153,7 +153,7 @@
     <div id="info">
         <h3>🧱 Brick Wall Building Game</h3>
         <div id="targetOrder" style="font-size: 14px; margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-            <strong>Target Brick Wall (Always):</strong>
+            <strong>Target: 2x3 Brick Wall (Any Order!):</strong>
             <div id="brickDisplay" class="brick-pattern">
                 <div class="brick-cell">1🔴</div>
                 <div class="brick-cell">2🟢</div>
@@ -162,17 +162,18 @@
                 <div class="brick-cell">5🟠</div>
                 <div class="brick-cell">6🟣</div>
             </div>
+            <small style="color: #aaa;">↑ Example - arrange bricks in any order you like!</small>
         </div>
         <div id="scoreBoard" style="font-size: 14px; margin: 10px 0;">
             <strong>Score:</strong> <span id="currentScore">0</span> | 
             <strong>Games:</strong> <span id="gamesCount">0</span> |
             <strong>Moves:</strong> <span id="movesCount">0</span>
         </div>
-        <p><strong>Goal:</strong> Build the brick wall: 1-2-3 (bottom row), 4-5-6 (top row)</p>
+        <p><strong>Goal:</strong> Build a 2x3 brick wall using any arrangement you like!</p>
         <p><strong>VR:</strong> Point and squeeze trigger<br>
         <strong>Desktop:</strong> Click and drag<br>
         <strong>Mobile:</strong> Tap and drag</p>
-        <p><strong>Physics:</strong> Cubes auto-stack when dragged over each other!</p>
+        <p><strong>Physics:</strong> Bricks auto-stack when dragged over each other!</p>
     </div>
     
     <button id="vrButton">Enter VR</button>
@@ -201,16 +202,16 @@
         let startTime = 0;
         let moves = 0;
         
-        // Brick wall positions (2 rows, 3 columns) - moved further forward for VR
+        // Brick wall positions (2 rows, 3 columns) - adjusted for brick height
         const BRICK_POSITIONS = [
-            // Bottom row (moved forward)
-            { x: -1, y: 0, z: -1.5, row: 0, col: 0 },
-            { x: 0, y: 0, z: -1.5, row: 0, col: 1 },
-            { x: 1, y: 0, z: -1.5, row: 0, col: 2 },
-            // Top row
-            { x: -1, y: 0.5, z: -1.5, row: 1, col: 0 },
-            { x: 0, y: 0.5, z: -1.5, row: 1, col: 1 },
-            { x: 1, y: 0.5, z: -1.5, row: 1, col: 2 }
+            // Bottom row (adjusted for brick height)
+            { x: -1, y: 0.175, z: -1.5, row: 0, col: 0 },
+            { x: 0, y: 0.175, z: -1.5, row: 0, col: 1 },
+            { x: 1, y: 0.175, z: -1.5, row: 0, col: 2 },
+            // Top row (brick height * 1.5 = 0.525)
+            { x: -1, y: 0.525, z: -1.5, row: 1, col: 0 },
+            { x: 0, y: 0.525, z: -1.5, row: 1, col: 1 },
+            { x: 1, y: 0.525, z: -1.5, row: 1, col: 2 }
         ];
         
         // Raycaster for mouse/controller interaction
@@ -269,6 +270,9 @@
             // Create grid markers for brick positions
             createGridMarkers();
             
+            // Create movement boundary markers for VR
+            createMovementBoundaries();
+            
             // Create VR instruction panels
             createVRInstructions();
             
@@ -299,12 +303,23 @@
         }
         
         function createVRInstructions() {
-            // Create floating instruction panel for VR
-            const instructionsGroup = new THREE.Group();
-            instructionsGroup.name = 'vrInstructions';
+            // Instructions will be attached to left controller dynamically
+            // This function now just creates the template
+        }
+        
+        function attachInstructionsToController(controller, isLeftHand = true) {
+            // Remove any existing instructions on this controller
+            const existingInstructions = controller.getObjectByName('controllerInstructions');
+            if (existingInstructions) {
+                controller.remove(existingInstructions);
+            }
             
-            // Background panel
-            const panelGeometry = new THREE.PlaneGeometry(3, 1.5);
+            // Create floating instruction panel attached to left controller
+            const instructionsGroup = new THREE.Group();
+            instructionsGroup.name = 'controllerInstructions';
+            
+            // Background panel (smaller for hand attachment)
+            const panelGeometry = new THREE.PlaneGeometry(0.3, 0.2);
             const panelMaterial = new THREE.MeshBasicMaterial({ 
                 color: 0x000000, 
                 transparent: true, 
@@ -312,44 +327,50 @@
             });
             const panel = new THREE.Mesh(panelGeometry, panelMaterial);
             
-            // Position instructions to the right side in VR
-            instructionsGroup.position.set(2.5, 1.5, -1);
+            // Position relative to controller (above and slightly forward)
+            instructionsGroup.position.set(0, 0.15, -0.1);
+            instructionsGroup.rotation.x = -Math.PI / 6; // Tilt toward user
             instructionsGroup.add(panel);
             
             // Create text texture for instructions
             const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 256;
+            canvas.width = 256;
+            canvas.height = 160;
             const context = canvas.getContext('2d');
             
             // Background
             context.fillStyle = '#000000';
-            context.fillRect(0, 0, 512, 256);
+            context.fillRect(0, 0, 256, 160);
             
             // Border
-            context.strokeStyle = '#ffffff';
-            context.lineWidth = 4;
-            context.strokeRect(0, 0, 512, 256);
+            context.strokeStyle = '#00ff88';
+            context.lineWidth = 3;
+            context.strokeRect(0, 0, 256, 160);
             
             // Text
             context.fillStyle = '#ffffff';
-            context.font = '24px Arial';
+            context.font = '14px Arial';
             context.textAlign = 'center';
-            context.fillText('🧱 Brick Wall Building', 256, 40);
-            context.font = '18px Arial';
-            context.fillText('Bottom row: 1-2-3 (left to right)', 256, 80);
-            context.fillText('Top row: 4-5-6 (left to right)', 256, 110);
-            context.fillText('Point and squeeze trigger to grab', 256, 150);
-            context.fillText('Cubes auto-stack when overlapping', 256, 180);
-            context.fillText('Score: Faster + Fewer moves!', 256, 220);
+            context.fillText('🧱 Brick Building', 128, 20);
+            context.font = '11px Arial';
+            context.fillText('Build 2x3 brick wall', 128, 40);
+            context.fillText('Any order works!', 128, 55);
+            context.fillText('Joystick: Move around', 128, 75);
+            context.fillText('Trigger: Grab bricks', 128, 90);
+            context.fillText('Auto-stack enabled', 128, 105);
+            context.font = '9px Arial';
+            context.fillText('Score: Speed + Efficiency', 128, 125);
+            context.fillText('Move me to see better!', 128, 140);
             
             const textTexture = new THREE.CanvasTexture(canvas);
             const textMaterial = new THREE.MeshBasicMaterial({ map: textTexture });
             const textMesh = new THREE.Mesh(panelGeometry, textMaterial);
-            textMesh.position.z = 0.01; // Slightly in front of background
+            textMesh.position.z = 0.001; // Slightly in front of background
             
             instructionsGroup.add(textMesh);
-            scene.add(instructionsGroup);
+            controller.add(instructionsGroup);
+            
+            return instructionsGroup;
         }
         
         function createVRStatusPanel(message, color = '#ffffff', duration = 3000) {
@@ -440,6 +461,22 @@
             });
         }
         
+        function createMovementBoundaries() {
+            // Create subtle boundary markers to show movement area in VR
+            const boundaryGeometry = new THREE.RingGeometry(4.5, 5, 16);
+            const boundaryMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x444444,
+                transparent: true,
+                opacity: 0.15,
+                side: THREE.DoubleSide
+            });
+            const boundaryMarker = new THREE.Mesh(boundaryGeometry, boundaryMaterial);
+            boundaryMarker.rotation.x = -Math.PI / 2;
+            boundaryMarker.position.y = -0.48;
+            boundaryMarker.name = 'movementBoundary';
+            scene.add(boundaryMarker);
+        }
+        
         function createNumberTexture(number, color) {
             const canvas = document.createElement('canvas');
             canvas.width = 128;
@@ -466,18 +503,23 @@
         }
         
         function updateTargetDisplay() {
-            // Always show numerical order 1-6
+            // Show that any order works for the brick wall
             const brickDisplay = document.getElementById('brickDisplay');
             brickDisplay.innerHTML = '';
-            TARGET_ARRANGEMENT.forEach(cube => {
+            
+            // Show example arrangement (but emphasize any order works)
+            TARGET_ARRANGEMENT.forEach((brick, index) => {
                 const cell = document.createElement('div');
                 cell.className = 'brick-cell';
-                cell.textContent = `${cube.number}${cube.emoji}`;
-                cell.style.background = cube.color + '30'; // Semi-transparent
+                cell.textContent = `${index + 1}${brick.emoji}`;
+                cell.style.background = brick.color + '30'; // Semi-transparent
+                if (index === 0) {
+                    cell.title = 'Example: Any order works!';
+                }
                 brickDisplay.appendChild(cell);
             });
             
-            console.log('Target arrangement is always 1-6 in numerical order');
+            console.log('Brick wall accepts any arrangement - no specific order required!');
         }
         
         function updateScoreDisplay() {
@@ -495,7 +537,8 @@
         }
         
         function createCubes() {
-            const cubeGeometry = new THREE.BoxGeometry(0.45, 0.45, 0.45);
+            // Create brick geometry instead of cubes (typical brick proportions)
+            const brickGeometry = new THREE.BoxGeometry(0.8, 0.35, 0.4); // Length x Height x Width
             const cubeColors = [
                 { name: 'red', color: 0xff4757, hexColor: '#ff4757' },
                 { name: 'green', color: 0x2ed573, hexColor: '#2ed573' },
@@ -505,7 +548,7 @@
                 { name: 'purple', color: 0x9c88ff, hexColor: '#9c88ff' }
             ];
             
-            cubes = []; // Clear existing cubes
+            cubes = []; // Clear existing cubes (keeping variable name for consistency)
             
             cubeColors.forEach((colorData, index) => {
                 // Create materials for each face with numbers
@@ -515,14 +558,14 @@
                     materials.push(new THREE.MeshLambertMaterial({ map: texture }));
                 }
                 
-                const cube = new THREE.Mesh(cubeGeometry, materials);
+                const brick = new THREE.Mesh(brickGeometry, materials);
                 
-                // Position cubes around the player in VR-friendly positions
+                // Position bricks around the player in VR-friendly positions
                 let validPosition = false;
                 let attempts = 0;
                 
                 while (!validPosition && attempts < 20) {
-                    // Position cubes in a semicircle around the player (in front and sides)
+                    // Position bricks in a semicircle around the player (in front and sides)
                     const angle = (index / cubeColors.length) * Math.PI + Math.PI/4; // 45° to 135° arc
                     const radius = 1.5 + Math.random() * 0.5; // 1.5-2 meters from player
                     
@@ -536,7 +579,7 @@
                     });
                     
                     if (!tooClose) {
-                        cube.position.set(x, 0, z);
+                        brick.position.set(x, 0.175, z); // Adjust Y for brick height
                         validPosition = true;
                     }
                     attempts++;
@@ -544,40 +587,39 @@
                 
                 // Fallback positioning if no valid position found
                 if (!validPosition) {
-                    cube.position.set(
+                    brick.position.set(
                         (index - 2.5) * 0.8, // Spread horizontally
-                        0,
+                        0.175, // Brick height / 2
                         1 // In front of player
                     );
                 }
                 
-                cube.castShadow = true;
-                cube.receiveShadow = true;
+                brick.castShadow = true;
+                brick.receiveShadow = true;
                 
-                cube.userData = {
+                brick.userData = {
                     number: index + 1,
                     colorName: colorData.name,
-                    originalPosition: cube.position.clone(),
-                    isGrabbed: false,
-                    targetIndex: index // Always in numerical order
+                    originalPosition: brick.position.clone(),
+                    isGrabbed: false
                 };
                 
-                scene.add(cube);
-                cubes.push(cube);
+                scene.add(brick);
+                cubes.push(brick); // Keep using 'cubes' array name for consistency
             });
             
             gameWon = false;
             moves = 0;
             startTime = Date.now();
             
-            // Update display to show fixed numerical order
+            // Update display to show that any order works
             updateTargetDisplay();
             updateScoreDisplay();
         }
         
         function getStackHeightAtPosition(x, z, excludeCube) {
-            let maxHeight = 0;
-            const tolerance = 0.4; // How close cubes need to be to stack
+            let maxHeight = 0.175; // Start with one brick height
+            const tolerance = 0.4; // How close bricks need to be to stack
             
             cubes.forEach(cube => {
                 if (cube === excludeCube) return;
@@ -588,7 +630,7 @@
                 );
                 
                 if (distance < tolerance) {
-                    maxHeight = Math.max(maxHeight, cube.position.y + 0.5);
+                    maxHeight = Math.max(maxHeight, cube.position.y + 0.35); // Brick height
                 }
             });
             
@@ -623,30 +665,30 @@
             });
         }
         
-        function snapToBrickPosition(cube) {
+        function snapToBrickPosition(brick) {
             let bestPosition = null;
             let minDistance = Infinity;
             
             // Find the closest brick position
             BRICK_POSITIONS.forEach((pos, index) => {
                 const distance = Math.sqrt(
-                    (cube.position.x - pos.x) ** 2 + 
-                    (cube.position.z - pos.z) ** 2
+                    (brick.position.x - pos.x) ** 2 + 
+                    (brick.position.z - pos.z) ** 2
                 );
                 
-                if (distance < minDistance && distance < 0.7) { // Within snapping range
+                if (distance < minDistance && distance < 0.8) { // Larger snapping range for bricks
                     minDistance = distance;
                     bestPosition = { ...pos, index };
                 }
             });
             
             if (bestPosition) {
-                cube.position.x = bestPosition.x;
-                cube.position.z = bestPosition.z;
+                brick.position.x = bestPosition.x;
+                brick.position.z = bestPosition.z;
                 
                 // Use auto-stacking to determine the correct height
-                const stackHeight = getStackHeightAtPosition(bestPosition.x, bestPosition.z, cube);
-                cube.position.y = Math.max(stackHeight, bestPosition.y);
+                const stackHeight = getStackHeightAtPosition(bestPosition.x, bestPosition.z, brick);
+                brick.position.y = Math.max(stackHeight, bestPosition.y);
                 
                 return true;
             }
@@ -654,19 +696,31 @@
         }
         
         function setupControllers() {
-            // Setup VR controllers with simple visuals
+            // Setup VR controllers with simple visuals and locomotion
             controllers = []; // Clear any existing controllers
             
             for (let i = 0; i < 2; i++) {
                 try {
                     const controller = renderer.xr.getController(i);
+                    const controllerGrip = renderer.xr.getControllerGrip(i);
                     
                     // Add event listeners
                     controller.addEventListener('selectstart', onSelectStart);
                     controller.addEventListener('selectend', onSelectEnd);
+                    controller.addEventListener('connected', (event) => {
+                        console.log(`Controller ${i} connected:`, event.data);
+                        
+                        // Attach instructions to left controller (typically index 0)
+                        if (i === 0 || (event.data.handedness && event.data.handedness === 'left')) {
+                            setTimeout(() => {
+                                attachInstructionsToController(controller, true);
+                            }, 500);
+                        }
+                    });
                     
                     // Add to scene
                     scene.add(controller);
+                    scene.add(controllerGrip);
                     
                     // Create simple visual ray
                     const rayGeometry = new THREE.BufferGeometry();
@@ -689,7 +743,10 @@
                     
                     controllers.push({
                         controller: controller,
-                        index: i
+                        grip: controllerGrip,
+                        index: i,
+                        gamepad: null,
+                        inputSource: null
                     });
                     
                 } catch (error) {
@@ -697,7 +754,100 @@
                 }
             }
             
-            console.log(`Initialized ${controllers.length} VR controllers`);
+            // Fallback: attach instructions to first controller after a delay
+            setTimeout(() => {
+                if (controllers.length > 0) {
+                    attachInstructionsToController(controllers[0].controller, true);
+                }
+            }, 2000);
+            
+            console.log(`Initialized ${controllers.length} VR controllers with hand-attached instructions`);
+        }
+        
+        function updateVRLocomotion() {
+            if (!renderer.xr.getSession()) return;
+            
+            const session = renderer.xr.getSession();
+            const referenceSpace = renderer.xr.getReferenceSpace();
+            
+            if (session && session.inputSources) {
+                session.inputSources.forEach((inputSource, index) => {
+                    if (inputSource.gamepad && controllers[index]) {
+                        controllers[index].gamepad = inputSource.gamepad;
+                        controllers[index].inputSource = inputSource;
+                        
+                        const gamepad = inputSource.gamepad;
+                        
+                        // Check for thumbstick input (usually axes 2,3 for right controller, 0,1 for left)
+                        if (gamepad.axes.length >= 4) {
+                            let moveX = 0;
+                            let moveZ = 0;
+                            
+                            // Use left controller for movement (typically controller index 0)
+                            if (index === 0) {
+                                moveX = gamepad.axes[2]; // Left thumbstick X
+                                moveZ = gamepad.axes[3]; // Left thumbstick Y
+                            }
+                            // Or right controller as backup
+                            else if (index === 1 && Math.abs(gamepad.axes[2]) > 0.1 || Math.abs(gamepad.axes[3]) > 0.1) {
+                                moveX = gamepad.axes[2]; // Right thumbstick X  
+                                moveZ = gamepad.axes[3]; // Right thumbstick Y
+                            }
+                            
+                            // Apply deadzone
+                            const deadzone = 0.15;
+                            if (Math.abs(moveX) < deadzone) moveX = 0;
+                            if (Math.abs(moveZ) < deadzone) moveZ = 0;
+                            
+                            // Apply movement if thumbstick is being used
+                            if (Math.abs(moveX) > 0 || Math.abs(moveZ) > 0) {
+                                const speed = 0.02; // Movement speed
+                                
+                                // Get camera direction for forward movement
+                                const cameraDirection = new THREE.Vector3();
+                                camera.getWorldDirection(cameraDirection);
+                                
+                                // Create right vector
+                                const rightVector = new THREE.Vector3();
+                                rightVector.crossVectors(cameraDirection, camera.up).normalize();
+                                
+                                // Create forward vector (without Y component for ground movement)
+                                const forwardVector = new THREE.Vector3(cameraDirection.x, 0, cameraDirection.z).normalize();
+                                
+                                // Calculate movement vector
+                                const movement = new THREE.Vector3();
+                                movement.addScaledVector(rightVector, moveX * speed);
+                                movement.addScaledVector(forwardVector, -moveZ * speed); // Negative because forward is usually negative Z
+                                
+                                // Apply movement to camera/player position
+                                const currentPosition = new THREE.Vector3();
+                                camera.getWorldPosition(currentPosition);
+                                currentPosition.add(movement);
+                                
+                                // Simple bounds checking (keep player in reasonable area)
+                                const prevX = currentPosition.x;
+                                const prevZ = currentPosition.z;
+                                
+                                currentPosition.x = Math.max(-5, Math.min(5, currentPosition.x));
+                                currentPosition.z = Math.max(-3, Math.min(4, currentPosition.z));
+                                currentPosition.y = Math.max(0.5, currentPosition.y); // Don't go below ground
+                                
+                                // Provide haptic feedback if hitting boundary
+                                if ((prevX !== currentPosition.x || prevZ !== currentPosition.z) && 
+                                    inputSource.hapticActuators && inputSource.hapticActuators[0]) {
+                                    inputSource.hapticActuators[0].pulse(0.3, 100); // Light pulse at boundary
+                                }
+                                
+                                // Apply the movement by offsetting the reference space
+                                if (referenceSpace) {
+                                    const offsetPosition = new THREE.Vector3().subVectors(currentPosition, camera.position);
+                                    camera.position.copy(currentPosition);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
         }
         
         function setupVRButton() {
@@ -711,7 +861,8 @@
                                 renderer.xr.getSession().end();
                             } else {
                                 navigator.xr.requestSession('immersive-vr', {
-                                    requiredFeatures: ['local-floor']
+                                    requiredFeatures: ['local-floor'],
+                                    optionalFeatures: ['hand-tracking', 'bounded-floor']
                                 }).then((session) => {
                                     renderer.xr.setSession(session);
                                 }).catch((error) => {
@@ -738,26 +889,27 @@
                 // Show VR welcome message
                 setTimeout(() => {
                     createVRStatusPanel(
-                        `Welcome to VR Mode!<br>Instructions are on your right<br>Point & squeeze to grab cubes<br>Have fun building!`, 
+                        `Welcome to VR Mode!<br>Instructions attached to left hand<br>Use joystick to move around<br>Point & squeeze to grab bricks<br>Build any arrangement!`, 
                         '#00ff88', 
-                        4000
+                        5000
                     );
                 }, 1000);
             });
             
             renderer.xr.addEventListener('sessionend', () => {
                 vrButton.textContent = 'Enter VR';
-                // Clean up VR-specific elements
-                const vrInstructions = scene.getObjectByName('vrInstructions');
-                if (vrInstructions) {
-                    scene.remove(vrInstructions);
-                }
+                // Clean up controller-attached instructions
+                controllers.forEach(controllerObj => {
+                    const instructions = controllerObj.controller.getObjectByName('controllerInstructions');
+                    if (instructions) {
+                        controllerObj.controller.remove(instructions);
+                    }
+                });
+                // Clean up any floating status panels
                 const vrStatus = scene.getObjectByName('vrStatusPanel');
                 if (vrStatus) {
                     scene.remove(vrStatus);
                 }
-                // Re-create instructions for next VR session
-                createVRInstructions();
             });
         }
         
@@ -795,12 +947,12 @@
             
             // Recreate cubes (this will show the same fixed numerical order)
             createCubes();
-            showStatus('New Brick Wall Challenge! 🧱<br>Build the wall: 1-2-3 (bottom), 4-5-6 (top)!', 3000);
+            showStatus('New Brick Wall Challenge! 🧱<br>Build a 2x3 wall with any arrangement!', 3000);
             
             // Show VR-specific reset message if in VR
             if (renderer.xr.getSession()) {
                 createVRStatusPanel(
-                    `New Challenge Started!<br>Build: 1-2-3 bottom row<br>Then: 4-5-6 top row<br>Let's go!`, 
+                    `New Challenge Started!<br>Build any 2x3 brick wall<br>Any order works!<br>Let's build!`, 
                     '#ffaa00', 
                     3000
                 );
@@ -995,27 +1147,24 @@
         }
         
         function checkWinCondition() {
-            // Check if all cubes are in correct brick positions
-            let correctPlacements = 0;
+            // Check if all 6 brick positions are filled (any order works!)
+            let filledPositions = 0;
             
             BRICK_POSITIONS.forEach((pos, index) => {
-                // Find cube at this position
-                const cubeAtPosition = cubes.find(cube => 
-                    Math.abs(cube.position.x - pos.x) < 0.1 &&
-                    Math.abs(cube.position.z - pos.z) < 0.1 &&
-                    Math.abs(cube.position.y - pos.y) < 0.1
+                // Find any brick at this position
+                const brickAtPosition = cubes.find(brick => 
+                    Math.abs(brick.position.x - pos.x) < 0.3 &&
+                    Math.abs(brick.position.z - pos.z) < 0.3 &&
+                    Math.abs(brick.position.y - pos.y) < 0.2
                 );
                 
-                if (cubeAtPosition) {
-                    // Check if it's the correct cube for this position
-                    const expectedCube = TARGET_ARRANGEMENT[index];
-                    if (cubeAtPosition.userData.number === expectedCube.number) {
-                        correctPlacements++;
-                    }
+                if (brickAtPosition) {
+                    filledPositions++;
                 }
             });
             
-            if (correctPlacements === 6) {
+            // Win if all 6 positions are filled
+            if (filledPositions === 6) {
                 winGame();
             }
         }
@@ -1085,20 +1234,20 @@
         function showInstructions() {
             setTimeout(() => {
                 const device = isMobile ? 'Tap' : 'Click';
-                const regularMessage = `${device} and drag numbered cubes to build the brick wall!<br>
-                           <strong>Bottom row:</strong> 1-2-3 (left to right)<br>
-                           <strong>Top row:</strong> 4-5-6 (left to right)<br>
-                           Cubes auto-stack when dragged over each other<br>
+                const regularMessage = `${device} and drag numbered bricks to build your wall!<br>
+                           <strong>Goal:</strong> Fill all 6 positions (2 rows x 3 columns)<br>
+                           <strong>Freedom:</strong> Use any arrangement you like!<br>
+                           Bricks auto-stack when dragged over each other<br>
                            <strong>Faster + Fewer moves = Higher score!</strong>`;
                 
-                showStatus(regularMessage, 7000);
+                showStatus(regularMessage, 8000);
                 
                 // Show VR-specific instructions if in VR
                 if (renderer.xr.getSession()) {
                     createVRStatusPanel(
-                        `Welcome to VR Brick Building!<br>Point controllers and squeeze to grab<br>Build: 1-2-3 bottom, 4-5-6 top<br>Good luck!`, 
+                        `Welcome to VR Brick Building!<br>Use joystick to move around<br>Build any 2x3 arrangement<br>Creative freedom is yours!<br>Good luck!`, 
                         '#00aaff', 
-                        5000
+                        6000
                     );
                 }
             }, 1000);
@@ -1109,6 +1258,9 @@
         }
         
         function render() {
+            // Update VR locomotion
+            updateVRLocomotion();
+            
             // Update grabbed cube position for VR controllers
             if (selectedCube && selectedController) {
                 const tempMatrix = new THREE.Matrix4();
