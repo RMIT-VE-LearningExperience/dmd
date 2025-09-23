@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WebXR Cube Stacking Game</title>
+    <title>WebXR Brick Wall Building Game</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         body {
@@ -55,13 +55,13 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 20px;
+            font-size: 18px;
             text-align: center;
             background: rgba(0,0,0,0.9);
             padding: 20px;
             border-radius: 10px;
             display: none;
-            max-width: 300px;
+            max-width: 400px;
         }
         
         #resetButton {
@@ -90,6 +90,22 @@
             cursor: pointer;
             font-size: 14px;
             z-index: 1000;
+        }
+        
+        .brick-pattern {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            margin: 8px 0;
+        }
+        
+        .brick-cell {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 4px;
+            text-align: center;
+            border-radius: 3px;
+            font-size: 12px;
         }
         
         @media (max-width: 768px) {
@@ -121,28 +137,42 @@
             }
             
             #status {
-                font-size: 18px;
+                font-size: 16px;
                 padding: 15px;
-                max-width: 250px;
+                max-width: 300px;
+            }
+            
+            .brick-cell {
+                font-size: 10px;
+                padding: 2px;
             }
         }
     </style>
 </head>
 <body>
     <div id="info">
-        <h3>🎮 Cube Stacking Game</h3>
-        <div id="targetOrder" style="font-size: 16px; margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-            <strong>Target Order:</strong> <span id="orderDisplay">🔴 → 🟢 → 🔵</span>
+        <h3>🧱 Brick Wall Building Game</h3>
+        <div id="targetOrder" style="font-size: 14px; margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+            <strong>Target Brick Wall (Always):</strong>
+            <div id="brickDisplay" class="brick-pattern">
+                <div class="brick-cell">1🔴</div>
+                <div class="brick-cell">2🟢</div>
+                <div class="brick-cell">3🔵</div>
+                <div class="brick-cell">4🟡</div>
+                <div class="brick-cell">5🟠</div>
+                <div class="brick-cell">6🟣</div>
+            </div>
         </div>
         <div id="scoreBoard" style="font-size: 14px; margin: 10px 0;">
             <strong>Score:</strong> <span id="currentScore">0</span> | 
             <strong>Games:</strong> <span id="gamesCount">0</span> |
             <strong>Moves:</strong> <span id="movesCount">0</span>
         </div>
+        <p><strong>Goal:</strong> Build the brick wall: 1-2-3 (bottom row), 4-5-6 (top row)</p>
         <p><strong>VR:</strong> Point and squeeze trigger<br>
         <strong>Desktop:</strong> Click and drag<br>
         <strong>Mobile:</strong> Tap and drag</p>
-        <p><strong>Physics:</strong> Moving a cube carries all cubes above it!</p>
+        <p><strong>Physics:</strong> Cubes auto-stack when dragged over each other!</p>
     </div>
     
     <button id="vrButton">Enter VR</button>
@@ -153,18 +183,35 @@
     <script>
         let scene, camera, renderer, cubes = [], controllers = [];
         let selectedCube = null, selectedController = null;
-        let stackedCubes = []; // Track cubes that move together
         let gameWon = false;
-        let TARGET_ORDER = ['red', 'green', 'blue']; // Will be randomized
+        let TARGET_ARRANGEMENT = [
+            { number: 1, color: '#ff4757', emoji: '🔴' },
+            { number: 2, color: '#2ed573', emoji: '🟢' },
+            { number: 3, color: '#3742fa', emoji: '🔵' },
+            { number: 4, color: '#ffa502', emoji: '🟡' },
+            { number: 5, color: '#ff6348', emoji: '🟠' },
+            { number: 6, color: '#9c88ff', emoji: '🟣' }
+        ]; // Always in numerical order 1-6
         let isMobile = false;
         let touchStartPos = null;
-        let originalPositions = {}; // Store original positions for stacked cubes
         
         // Scoring system
         let score = 0;
         let gamesPlayed = 0;
         let startTime = 0;
         let moves = 0;
+        
+        // Brick wall positions (2 rows, 3 columns)
+        const BRICK_POSITIONS = [
+            // Bottom row
+            { x: -1, y: 0, z: 0, row: 0, col: 0 },
+            { x: 0, y: 0, z: 0, row: 0, col: 1 },
+            { x: 1, y: 0, z: 0, row: 0, col: 2 },
+            // Top row
+            { x: -1, y: 0.5, z: 0, row: 1, col: 0 },
+            { x: 0, y: 0.5, z: 0, row: 1, col: 1 },
+            { x: 1, y: 0.5, z: 0, row: 1, col: 2 }
+        ];
         
         // Raycaster for mouse/controller interaction
         const raycaster = new THREE.Raycaster();
@@ -184,7 +231,7 @@
             
             // Camera
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 1.6, 3);
+            camera.position.set(0, 2, 4);
             
             // Renderer with XR support
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -196,14 +243,14 @@
             document.body.appendChild(renderer.domElement);
             
             // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
             
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
             directionalLight.position.set(10, 10, 5);
             directionalLight.castShadow = true;
-            directionalLight.shadow.mapSize.width = 1024;
-            directionalLight.shadow.mapSize.height = 1024;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
             scene.add(directionalLight);
             
             // Floor with better appearance
@@ -219,10 +266,13 @@
             floor.receiveShadow = true;
             scene.add(floor);
             
+            // Create grid markers for brick positions
+            createGridMarkers();
+            
             // Create cubes
             createCubes();
             
-            // Setup VR controllers (without the problematic factory)
+            // Setup VR controllers
             setupControllers();
             
             // Setup VR button
@@ -245,23 +295,60 @@
             showInstructions();
         }
         
-        function generateRandomOrder() {
-            const colors = ['red', 'green', 'blue'];
-            const emojis = { 'red': '🔴', 'green': '🟢', 'blue': '🔵' };
+        function createGridMarkers() {
+            // Create subtle grid markers to show where cubes should go
+            BRICK_POSITIONS.forEach((pos, index) => {
+                const markerGeometry = new THREE.PlaneGeometry(0.4, 0.4);
+                const markerMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0x444444,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+                marker.rotation.x = -Math.PI / 2;
+                marker.position.set(pos.x, pos.y - 0.24, pos.z);
+                scene.add(marker);
+            });
+        }
+        
+        function createNumberTexture(number, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const context = canvas.getContext('2d');
             
-            // Shuffle the array
-            for (let i = colors.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [colors[i], colors[j]] = [colors[j], colors[i]];
-            }
+            // Background
+            context.fillStyle = color;
+            context.fillRect(0, 0, 128, 128);
             
-            TARGET_ORDER = colors;
+            // Border
+            context.strokeStyle = '#000000';
+            context.lineWidth = 4;
+            context.strokeRect(0, 0, 128, 128);
             
-            // Update the display
-            const orderDisplay = TARGET_ORDER.map(color => emojis[color]).join(' → ');
-            document.getElementById('orderDisplay').textContent = orderDisplay;
+            // Number
+            context.fillStyle = '#000000';
+            context.font = 'bold 80px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(number.toString(), 64, 64);
             
-            console.log('New target order:', TARGET_ORDER);
+            return new THREE.CanvasTexture(canvas);
+        }
+        
+        function updateTargetDisplay() {
+            // Always show numerical order 1-6
+            const brickDisplay = document.getElementById('brickDisplay');
+            brickDisplay.innerHTML = '';
+            TARGET_ARRANGEMENT.forEach(cube => {
+                const cell = document.createElement('div');
+                cell.className = 'brick-cell';
+                cell.textContent = `${cube.number}${cube.emoji}`;
+                cell.style.background = cube.color + '30'; // Semi-transparent
+                brickDisplay.appendChild(cell);
+            });
+            
+            console.log('Target arrangement is always 1-6 in numerical order');
         }
         
         function updateScoreDisplay() {
@@ -271,45 +358,66 @@
         }
         
         function calculateScore(timeBonus, movesPenalty) {
-            // Base score: 100 points
-            // Time bonus: up to 50 points (faster = more points)
-            // Move penalty: -5 points per move over 3
-            let gameScore = 100 + timeBonus - movesPenalty;
-            return Math.max(gameScore, 10); // Minimum 10 points
+            // Base score: 150 points (more complex game)
+            // Time bonus: up to 75 points (faster = more points)
+            // Move penalty: -8 points per move over 6
+            let gameScore = 150 + timeBonus - movesPenalty;
+            return Math.max(gameScore, 15); // Minimum 15 points
         }
         
         function createCubes() {
-            const cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-            const colors = [
-                { name: 'red', color: 0xff4757 },
-                { name: 'green', color: 0x2ed573 },
-                { name: 'blue', color: 0x3742fa }
+            const cubeGeometry = new THREE.BoxGeometry(0.45, 0.45, 0.45);
+            const cubeColors = [
+                { name: 'red', color: 0xff4757, hexColor: '#ff4757' },
+                { name: 'green', color: 0x2ed573, hexColor: '#2ed573' },
+                { name: 'blue', color: 0x3742fa, hexColor: '#3742fa' },
+                { name: 'yellow', color: 0xffa502, hexColor: '#ffa502' },
+                { name: 'orange', color: 0xff6348, hexColor: '#ff6348' },
+                { name: 'purple', color: 0x9c88ff, hexColor: '#9c88ff' }
             ];
             
             cubes = []; // Clear existing cubes
             
-            colors.forEach((colorData, index) => {
-                const material = new THREE.MeshLambertMaterial({ 
-                    color: colorData.color,
-                    transparent: true,
-                    opacity: 0.9
-                });
-                const cube = new THREE.Mesh(cubeGeometry, material);
+            cubeColors.forEach((colorData, index) => {
+                // Create materials for each face with numbers
+                const materials = [];
+                for (let i = 0; i < 6; i++) {
+                    const texture = createNumberTexture(index + 1, colorData.hexColor);
+                    materials.push(new THREE.MeshLambertMaterial({ map: texture }));
+                }
                 
-                // Position cubes in a line for easier mobile interaction
-                cube.position.set(
-                    (index - 1) * 1.5,
-                    0,
-                    -1
-                );
+                const cube = new THREE.Mesh(cubeGeometry, materials);
+                
+                // Position cubes randomly around the scene (not in brick positions)
+                let validPosition = false;
+                let attempts = 0;
+                
+                while (!validPosition && attempts < 20) {
+                    const x = (Math.random() - 0.5) * 6;
+                    const z = (Math.random() - 0.5) * 4 + 2; // Behind the brick area
+                    
+                    // Check if position is not in brick area
+                    const tooClose = BRICK_POSITIONS.some(pos => {
+                        const dist = Math.sqrt((x - pos.x) ** 2 + (z - pos.z) ** 2);
+                        return dist < 1.5;
+                    });
+                    
+                    if (!tooClose) {
+                        cube.position.set(x, 0, z);
+                        validPosition = true;
+                    }
+                    attempts++;
+                }
                 
                 cube.castShadow = true;
                 cube.receiveShadow = true;
                 
                 cube.userData = {
+                    number: index + 1,
                     colorName: colorData.name,
                     originalPosition: cube.position.clone(),
-                    isGrabbed: false
+                    isGrabbed: false,
+                    targetIndex: -1 // Will be set based on random arrangement
                 };
                 
                 scene.add(cube);
@@ -317,42 +425,96 @@
             });
             
             gameWon = false;
-            stackedCubes = [];
-            originalPositions = {};
             moves = 0;
             startTime = Date.now();
             
-            // Generate new random order for this game
-            generateRandomOrder();
+            // Update display to show fixed numerical order
+            updateTargetDisplay();
+            
+            // Assign target indices to cubes (always in numerical order)
+            cubes.forEach(cube => {
+                cube.userData.targetIndex = cube.userData.number - 1; // 1->0, 2->1, etc.
+            });
+            
             updateScoreDisplay();
         }
         
-        function getCubesStackedOnTop(baseCube) {
-            const stacked = [];
-            const tolerance = 0.3;
+        function getStackHeightAtPosition(x, z, excludeCube) {
+            let maxHeight = 0;
+            const tolerance = 0.4; // How close cubes need to be to stack
             
-            function findCubesAbove(cube) {
-                cubes.forEach(otherCube => {
-                    if (otherCube === cube || stacked.includes(otherCube)) return;
-                    
-                    // Check if otherCube is directly above this cube
-                    const horizontalDistance = Math.sqrt(
-                        Math.pow(otherCube.position.x - cube.position.x, 2) + 
-                        Math.pow(otherCube.position.z - cube.position.z, 2)
-                    );
-                    
-                    const verticalDistance = Math.abs(otherCube.position.y - (cube.position.y + 0.5));
-                    
-                    if (horizontalDistance < tolerance && verticalDistance < tolerance) {
-                        stacked.push(otherCube);
-                        // Recursively find cubes stacked on top of this one
-                        findCubesAbove(otherCube);
-                    }
-                });
+            cubes.forEach(cube => {
+                if (cube === excludeCube) return;
+                
+                const distance = Math.sqrt(
+                    Math.pow(cube.position.x - x, 2) + 
+                    Math.pow(cube.position.z - z, 2)
+                );
+                
+                if (distance < tolerance) {
+                    maxHeight = Math.max(maxHeight, cube.position.y + 0.5);
+                }
+            });
+            
+            return maxHeight;
+        }
+        
+        function updateStackingFeedback(x, z, excludeCube) {
+            // Reset all cube materials
+            cubes.forEach(cube => {
+                if (cube !== excludeCube && !cube.userData.isGrabbed) {
+                    cube.material.forEach(mat => {
+                        mat.emissive.setHex(0x000000);
+                    });
+                }
+            });
+            
+            // Highlight cubes that would be stacked on
+            const tolerance = 0.4;
+            cubes.forEach(cube => {
+                if (cube === excludeCube) return;
+                
+                const distance = Math.sqrt(
+                    Math.pow(cube.position.x - x, 2) + 
+                    Math.pow(cube.position.z - z, 2)
+                );
+                
+                if (distance < tolerance) {
+                    cube.material.forEach(mat => {
+                        mat.emissive.setHex(0x111111);
+                    });
+                }
+            });
+        }
+        
+        function snapToBrickPosition(cube) {
+            let bestPosition = null;
+            let minDistance = Infinity;
+            
+            // Find the closest brick position
+            BRICK_POSITIONS.forEach((pos, index) => {
+                const distance = Math.sqrt(
+                    (cube.position.x - pos.x) ** 2 + 
+                    (cube.position.z - pos.z) ** 2
+                );
+                
+                if (distance < minDistance && distance < 0.7) { // Within snapping range
+                    minDistance = distance;
+                    bestPosition = { ...pos, index };
+                }
+            });
+            
+            if (bestPosition) {
+                cube.position.x = bestPosition.x;
+                cube.position.z = bestPosition.z;
+                
+                // Use auto-stacking to determine the correct height
+                const stackHeight = getStackHeightAtPosition(bestPosition.x, bestPosition.z, cube);
+                cube.position.y = Math.max(stackHeight, bestPosition.y);
+                
+                return true;
             }
-            
-            findCubesAbove(baseCube);
-            return stacked;
+            return false;
         }
         
         function setupControllers() {
@@ -475,11 +637,10 @@
             cubes.forEach(cube => scene.remove(cube));
             selectedCube = null;
             selectedController = null;
-            stackedCubes = [];
             
-            // Recreate cubes (this will generate a new random order)
+            // Recreate cubes (this will show the same fixed numerical order)
             createCubes();
-            showStatus('New Challenge! 🔄<br>Stack the cubes in the new order!', 2500);
+            showStatus('New Brick Wall Challenge! 🧱<br>Build the wall: 1-2-3 (bottom), 4-5-6 (top)!', 3000);
         }
         
         function onTouchStart(event) {
@@ -498,13 +659,10 @@
             if (intersects.length > 0) {
                 selectedCube = intersects[0].object;
                 selectedCube.userData.isGrabbed = true;
-                selectedCube.material.emissive.setHex(0x444444);
                 
-                // Find all cubes stacked on top and store their relative positions
-                stackedCubes = getCubesStackedOnTop(selectedCube);
-                stackedCubes.forEach(cube => {
-                    cube.userData.isGrabbed = true;
-                    cube.material.emissive.setHex(0x222222);
+                // Highlight selected cube
+                selectedCube.material.forEach(mat => {
+                    mat.emissive.setHex(0x444444);
                 });
                 
                 // Haptic feedback on mobile (if available)
@@ -542,13 +700,10 @@
             if (intersects.length > 0) {
                 selectedCube = intersects[0].object;
                 selectedCube.userData.isGrabbed = true;
-                selectedCube.material.emissive.setHex(0x444444);
                 
-                // Find all cubes stacked on top
-                stackedCubes = getCubesStackedOnTop(selectedCube);
-                stackedCubes.forEach(cube => {
-                    cube.userData.isGrabbed = true;
-                    cube.material.emissive.setHex(0x222222);
+                // Highlight selected cube
+                selectedCube.material.forEach(mat => {
+                    mat.emissive.setHex(0x444444);
                 });
             }
         }
@@ -573,104 +728,47 @@
             raycaster.ray.intersectPlane(plane, intersection);
             
             if (intersection) {
-                // Check if dragging over another cube for auto-stacking
-                const targetHeight = getStackHeightAtPosition(intersection.x, intersection.z, selectedCube);
-                
-                // Update main cube position
-                const oldX = selectedCube.position.x;
-                const oldZ = selectedCube.position.z;
-                
                 selectedCube.position.x = intersection.x;
                 selectedCube.position.z = intersection.z;
+                
+                // Check if dragging over another cube and auto-stack
+                const targetHeight = getStackHeightAtPosition(intersection.x, intersection.z, selectedCube);
                 selectedCube.position.y = Math.max(targetHeight, intersection.y);
                 
-                // Move all stacked cubes with the same delta
-                const deltaX = selectedCube.position.x - oldX;
-                const deltaZ = selectedCube.position.z - oldZ;
-                
-                stackedCubes.forEach(cube => {
-                    cube.position.x += deltaX;
-                    cube.position.z += deltaZ;
-                });
-                
                 // Add visual feedback when hovering over stackable position
-                updateStackingFeedback(intersection.x, intersection.z);
+                updateStackingFeedback(intersection.x, intersection.z, selectedCube);
             }
-        }
-        
-        function getStackHeightAtPosition(x, z, excludeCube) {
-            let maxHeight = 0;
-            const tolerance = 0.4;
-            const excludeList = [excludeCube, ...stackedCubes];
-            
-            cubes.forEach(cube => {
-                if (excludeList.includes(cube)) return;
-                
-                const distance = Math.sqrt(
-                    Math.pow(cube.position.x - x, 2) + 
-                    Math.pow(cube.position.z - z, 2)
-                );
-                
-                if (distance < tolerance) {
-                    maxHeight = Math.max(maxHeight, cube.position.y + 0.5);
-                }
-            });
-            
-            return maxHeight;
-        }
-        
-        function updateStackingFeedback(x, z) {
-            const excludeList = [selectedCube, ...stackedCubes];
-            
-            // Reset all cube materials
-            cubes.forEach(cube => {
-                if (!excludeList.includes(cube)) {
-                    cube.material.emissive.setHex(0x000000);
-                    cube.material.opacity = 0.9;
-                }
-            });
-            
-            // Highlight cubes that would be stacked on
-            const tolerance = 0.4;
-            cubes.forEach(cube => {
-                if (excludeList.includes(cube)) return;
-                
-                const distance = Math.sqrt(
-                    Math.pow(cube.position.x - x, 2) + 
-                    Math.pow(cube.position.z - z, 2)
-                );
-                
-                if (distance < tolerance) {
-                    cube.material.emissive.setHex(0x111111);
-                    cube.material.opacity = 1.0;
-                }
-            });
         }
         
         function onPointerUp() {
             if (selectedCube) {
                 selectedCube.userData.isGrabbed = false;
-                selectedCube.material.emissive.setHex(0x000000);
+                
+                // Clear highlighting
+                selectedCube.material.forEach(mat => {
+                    mat.emissive.setHex(0x000000);
+                });
+                
+                // Clear visual feedback from all cubes
+                cubes.forEach(cube => {
+                    cube.material.forEach(mat => {
+                        mat.emissive.setHex(0x000000);
+                    });
+                });
                 
                 // Count this as a move
                 moves++;
                 updateScoreDisplay();
                 
-                // Clear visual feedback from all cubes
-                stackedCubes.forEach(cube => {
-                    cube.userData.isGrabbed = false;
-                    cube.material.emissive.setHex(0x000000);
-                    cube.material.opacity = 0.9;
-                });
+                // Try to snap to brick position
+                const snapped = snapToBrickPosition(selectedCube);
+                if (snapped) {
+                    if (navigator.vibrate) {
+                        navigator.vibrate(100); // Stronger feedback for successful placement
+                    }
+                }
                 
-                cubes.forEach(cube => {
-                    cube.material.emissive.setHex(0x000000);
-                    cube.material.opacity = 0.9;
-                });
-                
-                snapToGrid(selectedCube);
                 selectedCube = null;
-                stackedCubes = [];
                 checkWinCondition();
                 
                 // Haptic feedback on mobile
@@ -695,13 +793,10 @@
                 selectedCube = intersects[0].object;
                 selectedController = controller;
                 selectedCube.userData.isGrabbed = true;
-                selectedCube.material.emissive.setHex(0x444444);
                 
-                // Find all cubes stacked on top
-                stackedCubes = getCubesStackedOnTop(selectedCube);
-                stackedCubes.forEach(cube => {
-                    cube.userData.isGrabbed = true;
-                    cube.material.emissive.setHex(0x222222);
+                // Highlight selected cube
+                selectedCube.material.forEach(mat => {
+                    mat.emissive.setHex(0x444444);
                 });
             }
         }
@@ -709,76 +804,55 @@
         function onSelectEnd() {
             if (selectedCube) {
                 selectedCube.userData.isGrabbed = false;
-                selectedCube.material.emissive.setHex(0x000000);
+                
+                // Clear highlighting
+                selectedCube.material.forEach(mat => {
+                    mat.emissive.setHex(0x000000);
+                });
+                
+                // Clear visual feedback from all cubes
+                cubes.forEach(cube => {
+                    cube.material.forEach(mat => {
+                        mat.emissive.setHex(0x000000);
+                    });
+                });
                 
                 // Count this as a move
                 moves++;
                 updateScoreDisplay();
                 
-                // Clear visual feedback from all cubes
-                stackedCubes.forEach(cube => {
-                    cube.userData.isGrabbed = false;
-                    cube.material.emissive.setHex(0x000000);
-                    cube.material.opacity = 0.9;
-                });
+                // Try to snap to brick position
+                snapToBrickPosition(selectedCube);
                 
-                cubes.forEach(cube => {
-                    cube.material.emissive.setHex(0x000000);
-                    cube.material.opacity = 0.9;
-                });
-                
-                snapToGrid(selectedCube);
                 selectedCube = null;
                 selectedController = null;
-                stackedCubes = [];
                 checkWinCondition();
             }
         }
         
-        function snapToGrid(cube) {
-            // Snap to nearest grid position for final placement
-            const oldX = cube.position.x;
-            const oldZ = cube.position.z;
-            
-            cube.position.x = Math.round(cube.position.x * 2) / 2;
-            cube.position.z = Math.round(cube.position.z * 2) / 2;
-            
-            // Calculate the delta for moving stacked cubes
-            const deltaX = cube.position.x - oldX;
-            const deltaZ = cube.position.z - oldZ;
-            
-            // Move stacked cubes with the main cube
-            stackedCubes.forEach(stackedCube => {
-                stackedCube.position.x += deltaX;
-                stackedCube.position.z += deltaZ;
-            });
-            
-            // Ensure proper stacking height (refine the position)
-            const targetHeight = getStackHeightAtPosition(cube.position.x, cube.position.z, cube);
-            cube.position.y = Math.max(targetHeight, 0);
-        }
-        
         function checkWinCondition() {
-            // Find all cubes at the same x,z position (stacked)
-            const stacks = {};
+            // Check if all cubes are in correct brick positions
+            let correctPlacements = 0;
             
-            cubes.forEach(cube => {
-                const key = `${Math.round(cube.position.x * 2)},${Math.round(cube.position.z * 2)}`;
-                if (!stacks[key]) stacks[key] = [];
-                stacks[key].push(cube);
-            });
-            
-            // Check if any stack has all 3 cubes in correct order
-            for (let stack of Object.values(stacks)) {
-                if (stack.length === 3) {
-                    stack.sort((a, b) => a.position.y - b.position.y);
-                    const stackOrder = stack.map(cube => cube.userData.colorName);
-                    
-                    if (JSON.stringify(stackOrder) === JSON.stringify(TARGET_ORDER)) {
-                        winGame();
-                        return;
+            BRICK_POSITIONS.forEach((pos, index) => {
+                // Find cube at this position
+                const cubeAtPosition = cubes.find(cube => 
+                    Math.abs(cube.position.x - pos.x) < 0.1 &&
+                    Math.abs(cube.position.z - pos.z) < 0.1 &&
+                    Math.abs(cube.position.y - pos.y) < 0.1
+                );
+                
+                if (cubeAtPosition) {
+                    // Check if it's the correct cube for this position
+                    const expectedCube = TARGET_ARRANGEMENT[index];
+                    if (cubeAtPosition.userData.number === expectedCube.number) {
+                        correctPlacements++;
                     }
                 }
+            });
+            
+            if (correctPlacements === 6) {
+                winGame();
             }
         }
         
@@ -788,15 +862,15 @@
             
             // Calculate score
             const timeTaken = (Date.now() - startTime) / 1000; // seconds
-            const timeBonus = Math.max(0, Math.floor(50 - timeTaken)); // Up to 50 bonus points for speed
-            const movesPenalty = Math.max(0, (moves - 3) * 5); // -5 points per move over 3
+            const timeBonus = Math.max(0, Math.floor(75 - timeTaken * 2)); // Up to 75 bonus points for speed
+            const movesPenalty = Math.max(0, (moves - 6) * 8); // -8 points per move over 6
             const gameScore = calculateScore(timeBonus, movesPenalty);
             
             score += gameScore;
             updateScoreDisplay();
             
             // Show detailed win message
-            const message = `🎉 Perfect Stack! You Won! 🎉<br>
+            const message = `🧱 Perfect Brick Wall! You Won! 🧱<br>
                            <strong>Game Score: ${gameScore} points</strong><br>
                            Time: ${timeTaken.toFixed(1)}s (${timeBonus > 0 ? '+' + timeBonus : '0'} bonus)<br>
                            Moves: ${moves} (${movesPenalty > 0 ? '-' + movesPenalty : '0'} penalty)<br>
@@ -804,14 +878,16 @@
             
             showStatus(message, 5000);
             
-            // Celebration effect
+            // Celebration effect - make all cubes glow
             cubes.forEach(cube => {
-                cube.material.emissive.setHex(0x222222);
+                cube.material.forEach(mat => {
+                    mat.emissive.setHex(0x222222);
+                });
             });
             
             // Victory haptic feedback
             if (navigator.vibrate) {
-                navigator.vibrate([100, 50, 100, 50, 100]);
+                navigator.vibrate([100, 50, 100, 50, 200]);
             }
             
             // Auto-restart after a delay
@@ -835,12 +911,11 @@
         function showInstructions() {
             setTimeout(() => {
                 const device = isMobile ? 'Tap' : 'Click';
-                const emojis = { 'red': '🔴', 'green': '🟢', 'blue': '🔵' };
-                const orderDisplay = TARGET_ORDER.map(color => emojis[color]).join(' → ');
-                showStatus(`${device} and drag cubes to stack them!<br>
-                           <strong>Target Order:</strong> ${orderDisplay}<br>
-                           Moving a cube carries all cubes above it!<br>
-                           <strong>Faster + Fewer moves = Higher score!</strong>`, 6000);
+                showStatus(`${device} and drag numbered cubes to build the brick wall!<br>
+                           <strong>Bottom row:</strong> 1-2-3 (left to right)<br>
+                           <strong>Top row:</strong> 4-5-6 (left to right)<br>
+                           Cubes auto-stack when dragged over each other<br>
+                           <strong>Faster + Fewer moves = Higher score!</strong>`, 7000);
             }, 1000);
         }
         
@@ -860,9 +935,6 @@
                 const targetPos = selectedController.position.clone();
                 targetPos.add(forward);
                 
-                const oldX = selectedCube.position.x;
-                const oldZ = selectedCube.position.z;
-                
                 selectedCube.position.x = targetPos.x;
                 selectedCube.position.z = targetPos.z;
                 
@@ -870,26 +942,25 @@
                 const targetHeight = getStackHeightAtPosition(targetPos.x, targetPos.z, selectedCube);
                 selectedCube.position.y = Math.max(targetHeight, targetPos.y);
                 
-                // Move stacked cubes with VR controller
-                const deltaX = selectedCube.position.x - oldX;
-                const deltaZ = selectedCube.position.z - oldZ;
-                
-                stackedCubes.forEach(cube => {
-                    cube.position.x += deltaX;
-                    cube.position.z += deltaZ;
-                });
-                
                 // Visual feedback for VR stacking
-                updateStackingFeedback(targetPos.x, targetPos.z);
+                updateStackingFeedback(targetPos.x, targetPos.z, selectedCube);
             }
             
             // Add gentle floating animation to unplaced cubes
             if (!gameWon) {
                 const time = Date.now() * 0.001;
                 cubes.forEach((cube, index) => {
-                    if (!cube.userData.isGrabbed && cube.position.y < 0.1) {
-                        cube.rotation.x = Math.sin(time + index) * 0.05;
-                        cube.rotation.y = Math.cos(time + index * 0.7) * 0.05;
+                    if (!cube.userData.isGrabbed) {
+                        // Check if cube is not in a brick position
+                        const inBrickPosition = BRICK_POSITIONS.some(pos => 
+                            Math.abs(cube.position.x - pos.x) < 0.1 &&
+                            Math.abs(cube.position.z - pos.z) < 0.1
+                        );
+                        
+                        if (!inBrickPosition) {
+                            cube.rotation.x = Math.sin(time + index) * 0.02;
+                            cube.rotation.y = Math.cos(time + index * 0.7) * 0.02;
+                        }
                     }
                 });
             }
