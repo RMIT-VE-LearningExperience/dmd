@@ -578,9 +578,14 @@
 
         // parent to controller so it follows precisely
         controller.attach(brick);
+        // Place the brick in front of the controller, not inside it
+        brick.position.set(0, 0, -0.4);
 
         // show laser, length will be set each frame
         if (controller.userData.laserLine) controller.userData.laserLine.visible = true;
+
+        // Highlight trigger mesh on grab
+        if (controller.userData.triggerMesh) controller.userData.triggerMesh.material.emissive.setHex(0x88ccff);
       }
     }
 
@@ -598,6 +603,9 @@
 
       // snap to slot
       snapToBrickPosition(brick);
+
+      // Reset trigger highlight
+      if (controller.userData.triggerMesh) controller.userData.triggerMesh.material.emissive.setHex(0x000000);
 
       controller.userData.grabbedBrick = null;
     }
@@ -645,6 +653,12 @@
         selectedCube.position.x = intersection.x;
         selectedCube.position.z = intersection.z;
         selectedCube.position.y = Math.max(ROW1_Y, intersection.y);
+        // Floor clamp for both desktop and VR
+        const FLOOR_TOP = -0.5;
+        const minCenterY = FLOOR_TOP + (BRICK_H / 2);
+        if (selectedCube.position.y < minCenterY) {
+          selectedCube.position.y = minCenterY;
+        }
         highlightNearbyPositions(intersection.x, intersection.z);
         setBrickGlow(selectedCube, hoverValidIndex !== null);
       }
@@ -795,6 +809,28 @@
       controllers.forEach(c => { try { c.removeFromParent(); } catch(e){} });
       controllers = [];
 
+      function createSimpleControllerModel(controller) {
+        // Simple controller model with a trigger mesh for feedback
+        const group = new THREE.Group();
+        // Handle
+        const handle = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.012, 0.018, 0.11, 16),
+          new THREE.MeshStandardMaterial({ color: 0x222326, metalness: 0.3, roughness: 0.7 })
+        );
+        handle.position.y = -0.035;
+        group.add(handle);
+        // Trigger
+        const trigger = new THREE.Mesh(
+          new THREE.BoxGeometry(0.022, 0.014, 0.032),
+          new THREE.MeshStandardMaterial({ color: 0x555a60, emissive: 0x000000, metalness: 0.3, roughness: 0.6 })
+        );
+        trigger.position.set(0, 0.022, -0.012);
+        group.add(trigger);
+        // Assign for feedback
+        controller.userData.triggerMesh = trigger;
+        return group;
+      }
+
       for (let i = 0; i < 2; i++) {
         const controller = renderer.xr.getController(i);
         controller.userData.grabbedBrick = null;
@@ -823,6 +859,11 @@
         tip.position.z = -0.02;
         controller.add(tip);
 
+        // Add simple controller model with trigger feedback
+        const model = createSimpleControllerModel(controller);
+        model.position.y = -0.01;
+        controller.add(model);
+
         scene.add(controller);
         controllers.push(controller);
       }
@@ -848,12 +889,24 @@
           highlightNearbyPositions(_tempVec3.x, _tempVec3.z);
           setBrickGlow(brick, hoverValidIndex !== null);
 
+          // smooth follow
+          const targetWorldPos = new THREE.Vector3().setFromMatrixPosition(controller.matrixWorld);
+          targetWorldPos.z -= 0.4;
+          brick.position.lerp(controller.worldToLocal(targetWorldPos.clone()), 0.25);
+
           // set laser length from controller origin to brick
           const controllerPos = new THREE.Vector3().setFromMatrixPosition(controller.matrixWorld);
           const dist = controllerPos.distanceTo(_tempVec3);
           if (laser) {
             laser.visible = true;
             laser.scale.z = Math.max(0.05, dist);
+          }
+
+          // Floor clamp for VR
+          const FLOOR_TOP = -0.5;
+          const minCenterY = FLOOR_TOP + (BRICK_H / 2);
+          if (brick.position.y < minCenterY) {
+            brick.position.y = minCenterY;
           }
         } else {
           if (laser) laser.visible = false;
