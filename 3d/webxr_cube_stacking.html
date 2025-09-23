@@ -113,6 +113,33 @@
       min-width: 160px;
       text-align: right;
     }
+    #status .progress {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 180px;
+    }
+    #status .progress__label {
+      font-size: 12px;
+      letter-spacing: 0.2px;
+      color: #EDE7E0;
+      opacity: 0.95;
+      text-align: right;
+    }
+    #status .progress__track {
+      position: relative;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(237,231,224,0.18);
+      overflow: hidden;
+    }
+    #status .progress__bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #9CAF88, #C49A36);
+      border-radius: 999px;
+      transition: width 180ms ease;
+    }
     .toast {
       position: absolute;
       left: 50%;
@@ -195,10 +222,33 @@
       { number: 6, color: '#C49A36', emoji: '🪔' }
     ];
 
+    function renderStatusUI() {
+      const s = document.getElementById('status');
+      s.innerHTML = `
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" aria-label="Wall progress">
+          <div class="progress__label">0 / 6 bricks</div>
+          <div class="progress__track"><div class="progress__bar" style="width:0%"></div></div>
+        </div>
+      `;
+    }
+
+    function updateProgress() {
+      const now = Math.min(6, Math.max(0, bricksPlaced));
+      const pct = (now / 6) * 100;
+      const statusEl = document.getElementById('status');
+      const bar = statusEl.querySelector('.progress__bar');
+      const label = statusEl.querySelector('.progress__label');
+      if (bar) bar.style.width = pct + '%';
+      if (label) label.textContent = `${now} / 6 bricks`;
+      const pr = statusEl.querySelector('.progress');
+      if (pr) pr.setAttribute('aria-valuenow', String(now));
+    }
+
     function init() {
       isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
       scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x87CEEB); // sky blue
 
       camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
       camera.position.set(0, 1, 1.8); // pull back a bit so both rows are comfy on desktop
@@ -255,6 +305,8 @@
       setupLegend();
       updateTargetDisplay();
       updateScoreDisplay();
+      renderStatusUI();
+      updateProgress();
 
       window.addEventListener('resize', onWindowResize);
       renderer.setAnimationLoop(render);
@@ -352,6 +404,59 @@
       spawnNextBrick();
       updateTargetDisplay();
       updateScoreDisplay();
+      updateProgress();
+    }
+
+    function clearBricksAndMarkers() {
+      // remove bricks
+      if (cubes && cubes.length) {
+        cubes.forEach(b => {
+          if (!b) return;
+          scene.remove(b);
+          if (b.geometry) b.geometry.dispose();
+          if (b.material) {
+            if (Array.isArray(b.material)) b.material.forEach(m => m && m.map && m.map.dispose());
+            else if (b.material.map) b.material.map.dispose();
+          }
+        });
+      }
+      cubes = [];
+
+      // remove markers
+      if (gridMarkers && gridMarkers.length) {
+        gridMarkers.forEach(m => {
+          if (!m) return;
+          scene.remove(m);
+          if (m.geometry) m.geometry.dispose();
+          if (m.material) m.material.dispose();
+        });
+      }
+      gridMarkers = [];
+    }
+
+    function resetGame() {
+      // reset state
+      hoverValidIndex = null;
+      selectedCube = null;
+      bricksPlaced = 0;
+      currentBrickNumber = 1;
+      moves = 0;
+      startTime = Date.now();
+
+      // clear old pieces
+      clearBricksAndMarkers();
+
+      // rebuild markers and spawn first brick
+      createGridMarkers();
+      spawnNextBrick();
+
+      // UI
+      updateTargetDisplay();
+      updateScoreDisplay();
+      renderStatusUI();
+      updateProgress();
+
+      showToast('New game');
     }
 
     function addBrickGlow(brick) {
@@ -527,8 +632,7 @@
       });
 
       document.getElementById('resetButton').addEventListener('click', () => {
-        scene.clear();
-        init();
+        resetGame();
       });
       document.getElementById('resetScoreButton').addEventListener('click', () => {
         score = 0;
@@ -615,6 +719,7 @@
 
         bricksPlaced++;
         currentBrickNumber++;
+        updateProgress();
 
         if (bricksPlaced < 6) {
           setTimeout(() => { spawnNextBrick(); }, 800);
@@ -636,10 +741,11 @@
       gamesPlayed++;
       showToast(`Nice, wall complete, +${gameScore} points`);
       updateScoreDisplay();
+      updateProgress();
     }
 
     function setupControllers() {
-      // Placeholder for XR controllers if you add them later
+      // VR controller interactions not yet implemented (drag/drop works on desktop/mobile only)
     }
 
     function render() {
