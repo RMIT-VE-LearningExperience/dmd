@@ -93,19 +93,30 @@
         }
         
         .brick-pattern {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             gap: 2px;
             margin: 8px 0;
+        }
+        
+        .brick-row {
+            display: flex;
+            gap: 1px;
+        }
+        
+        .brick-row.offset {
+            transform: translateX(15px); /* Offset second row */
         }
         
         .brick-cell {
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.3);
-            padding: 4px;
+            padding: 4px 8px;
             text-align: center;
             border-radius: 3px;
             font-size: 12px;
+            min-width: 30px;
         }
         
         @media (max-width: 768px) {
@@ -153,27 +164,32 @@
     <div id="info">
         <h3>🧱 Brick Wall Building Game</h3>
         <div id="targetOrder" style="font-size: 14px; margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
-            <strong>Target: 2x3 Brick Wall (Any Order!):</strong>
+            <strong>Target: Staggered Brick Wall:</strong>
             <div id="brickDisplay" class="brick-pattern">
-                <div class="brick-cell">1🔴</div>
-                <div class="brick-cell">2🟢</div>
-                <div class="brick-cell">3🔵</div>
-                <div class="brick-cell">4🟡</div>
-                <div class="brick-cell">5🟠</div>
-                <div class="brick-cell">6🟣</div>
+                <div class="brick-row">
+                    <div class="brick-cell">🧱</div>
+                    <div class="brick-cell">🧱</div>
+                    <div class="brick-cell">🧱</div>
+                </div>
+                <div class="brick-row offset">
+                    <div class="brick-cell">🧱</div>
+                    <div class="brick-cell">🧱</div>
+                    <div class="brick-cell">🧱</div>
+                </div>
             </div>
-            <small style="color: #aaa;">↑ Example - arrange bricks in any order you like!</small>
+            <small style="color: #aaa;">↑ Classic staggered pattern - one brick at a time!</small>
         </div>
         <div id="scoreBoard" style="font-size: 14px; margin: 10px 0;">
             <strong>Score:</strong> <span id="currentScore">0</span> | 
             <strong>Games:</strong> <span id="gamesCount">0</span> |
-            <strong>Moves:</strong> <span id="movesCount">0</span>
+            <strong>Moves:</strong> <span id="movesCount">0</span><br>
+            <strong>Progress:</strong> <span id="bricksProgress">0/6 bricks placed</span>
         </div>
-        <p><strong>Goal:</strong> Build a 2x3 brick wall using any arrangement you like!</p>
+        <p><strong>Goal:</strong> Build a staggered brick wall - one brick at a time!</p>
         <p><strong>VR:</strong> Point and squeeze trigger<br>
         <strong>Desktop:</strong> Click and drag<br>
         <strong>Mobile:</strong> Tap and drag</p>
-        <p><strong>Physics:</strong> Bricks auto-stack when dragged over each other!</p>
+        <p><strong>System:</strong> Place each brick to spawn the next one!</p>
     </div>
     
     <button id="vrButton">Enter VR</button>
@@ -201,17 +217,19 @@
         let gamesPlayed = 0;
         let startTime = 0;
         let moves = 0;
+        let bricksPlaced = 0;
+        let currentBrickNumber = 1;
         
-        // Brick wall positions (2 rows, 3 columns) - adjusted for brick height
+        // Realistic brick wall positions (running bond pattern)
         const BRICK_POSITIONS = [
-            // Bottom row (adjusted for brick height)
-            { x: -1, y: 0.175, z: -1.5, row: 0, col: 0 },
+            // Bottom row (3 bricks, no gaps)
+            { x: -0.8, y: 0.175, z: -1.5, row: 0, col: 0 },
             { x: 0, y: 0.175, z: -1.5, row: 0, col: 1 },
-            { x: 1, y: 0.175, z: -1.5, row: 0, col: 2 },
-            // Top row (brick height * 1.5 = 0.525)
-            { x: -1, y: 0.525, z: -1.5, row: 1, col: 0 },
-            { x: 0, y: 0.525, z: -1.5, row: 1, col: 1 },
-            { x: 1, y: 0.525, z: -1.5, row: 1, col: 2 }
+            { x: 0.8, y: 0.175, z: -1.5, row: 0, col: 2 },
+            // Top row (offset by half brick = 0.4, creating staggered pattern)
+            { x: -0.4, y: 0.525, z: -1.5, row: 1, col: 0 },
+            { x: 0.4, y: 0.525, z: -1.5, row: 1, col: 1 },
+            { x: 1.2, y: 0.525, z: -1.5, row: 1, col: 2 }
         ];
         
         // Raycaster for mouse/controller interaction
@@ -351,16 +369,16 @@
             context.fillStyle = '#ffffff';
             context.font = '14px Arial';
             context.textAlign = 'center';
-            context.fillText('🧱 Brick Building', 128, 20);
+            context.fillText('🧱 Staggered Bricks', 128, 20);
             context.font = '11px Arial';
-            context.fillText('Build 2x3 brick wall', 128, 40);
-            context.fillText('Any order works!', 128, 55);
+            context.fillText('Build realistic wall', 128, 40);
+            context.fillText('One brick at a time!', 128, 55);
             context.fillText('Joystick: Move around', 128, 75);
-            context.fillText('Trigger: Grab bricks', 128, 90);
-            context.fillText('Auto-stack enabled', 128, 105);
+            context.fillText('Trigger: Grab brick', 128, 90);
+            context.fillText('Place to spawn next', 128, 105);
             context.font = '9px Arial';
             context.fillText('Score: Speed + Efficiency', 128, 125);
-            context.fillText('Move me to see better!', 128, 140);
+            context.fillText('Progress on this hand!', 128, 140);
             
             const textTexture = new THREE.CanvasTexture(canvas);
             const textMaterial = new THREE.MeshBasicMaterial({ map: textTexture });
@@ -503,29 +521,15 @@
         }
         
         function updateTargetDisplay() {
-            // Show that any order works for the brick wall
-            const brickDisplay = document.getElementById('brickDisplay');
-            brickDisplay.innerHTML = '';
-            
-            // Show example arrangement (but emphasize any order works)
-            TARGET_ARRANGEMENT.forEach((brick, index) => {
-                const cell = document.createElement('div');
-                cell.className = 'brick-cell';
-                cell.textContent = `${index + 1}${brick.emoji}`;
-                cell.style.background = brick.color + '30'; // Semi-transparent
-                if (index === 0) {
-                    cell.title = 'Example: Any order works!';
-                }
-                brickDisplay.appendChild(cell);
-            });
-            
-            console.log('Brick wall accepts any arrangement - no specific order required!');
+            // The staggered pattern is now shown directly in the HTML
+            console.log('Staggered brick wall pattern - one brick spawns at a time!');
         }
         
         function updateScoreDisplay() {
             document.getElementById('currentScore').textContent = score;
             document.getElementById('gamesCount').textContent = gamesPlayed;
             document.getElementById('movesCount').textContent = moves;
+            document.getElementById('bricksProgress').textContent = `${bricksPlaced}/6 bricks placed`;
         }
         
         function calculateScore(timeBonus, movesPenalty) {
@@ -537,8 +541,25 @@
         }
         
         function createCubes() {
-            // Create brick geometry instead of cubes (typical brick proportions)
-            const brickGeometry = new THREE.BoxGeometry(0.8, 0.35, 0.4); // Length x Height x Width
+            cubes = []; // Clear existing cubes
+            bricksPlaced = 0;
+            currentBrickNumber = 1;
+            
+            gameWon = false;
+            moves = 0;
+            startTime = Date.now();
+            
+            // Spawn only the first brick
+            spawnNextBrick();
+            
+            // Update display
+            updateTargetDisplay();
+            updateScoreDisplay();
+        }
+        
+        function spawnNextBrick() {
+            if (currentBrickNumber > 6) return; // All bricks spawned
+            
             const cubeColors = [
                 { name: 'red', color: 0xff4757, hexColor: '#ff4757' },
                 { name: 'green', color: 0x2ed573, hexColor: '#2ed573' },
@@ -548,73 +569,50 @@
                 { name: 'purple', color: 0x9c88ff, hexColor: '#9c88ff' }
             ];
             
-            cubes = []; // Clear existing cubes (keeping variable name for consistency)
+            const brickGeometry = new THREE.BoxGeometry(0.8, 0.35, 0.4);
+            const colorData = cubeColors[currentBrickNumber - 1];
             
-            cubeColors.forEach((colorData, index) => {
-                // Create materials for each face with numbers
-                const materials = [];
-                for (let i = 0; i < 6; i++) {
-                    const texture = createNumberTexture(index + 1, colorData.hexColor);
-                    materials.push(new THREE.MeshLambertMaterial({ map: texture }));
-                }
-                
-                const brick = new THREE.Mesh(brickGeometry, materials);
-                
-                // Position bricks around the player in VR-friendly positions
-                let validPosition = false;
-                let attempts = 0;
-                
-                while (!validPosition && attempts < 20) {
-                    // Position bricks in a semicircle around the player (in front and sides)
-                    const angle = (index / cubeColors.length) * Math.PI + Math.PI/4; // 45° to 135° arc
-                    const radius = 1.5 + Math.random() * 0.5; // 1.5-2 meters from player
-                    
-                    const x = Math.cos(angle) * radius;
-                    const z = Math.sin(angle) * radius - 0.5; // Slightly forward
-                    
-                    // Check if position is not in brick area
-                    const tooClose = BRICK_POSITIONS.some(pos => {
-                        const dist = Math.sqrt((x - pos.x) ** 2 + (z - pos.z) ** 2);
-                        return dist < 1.0;
-                    });
-                    
-                    if (!tooClose) {
-                        brick.position.set(x, 0.175, z); // Adjust Y for brick height
-                        validPosition = true;
-                    }
-                    attempts++;
-                }
-                
-                // Fallback positioning if no valid position found
-                if (!validPosition) {
-                    brick.position.set(
-                        (index - 2.5) * 0.8, // Spread horizontally
-                        0.175, // Brick height / 2
-                        1 // In front of player
-                    );
-                }
-                
-                brick.castShadow = true;
-                brick.receiveShadow = true;
-                
-                brick.userData = {
-                    number: index + 1,
-                    colorName: colorData.name,
-                    originalPosition: brick.position.clone(),
-                    isGrabbed: false
-                };
-                
-                scene.add(brick);
-                cubes.push(brick); // Keep using 'cubes' array name for consistency
-            });
+            // Create materials for each face with numbers
+            const materials = [];
+            for (let i = 0; i < 6; i++) {
+                const texture = createNumberTexture(currentBrickNumber, colorData.hexColor);
+                materials.push(new THREE.MeshLambertMaterial({ map: texture }));
+            }
             
-            gameWon = false;
-            moves = 0;
-            startTime = Date.now();
+            const brick = new THREE.Mesh(brickGeometry, materials);
             
-            // Update display to show that any order works
-            updateTargetDisplay();
-            updateScoreDisplay();
+            // Position new brick in front of player (random position in spawn area)
+            const spawnAngle = Math.random() * Math.PI/2 + Math.PI/4; // 45° to 135° arc
+            const spawnRadius = 1.2 + Math.random() * 0.4; // 1.2-1.6 meters from player
+            
+            const spawnX = Math.cos(spawnAngle) * spawnRadius;
+            const spawnZ = Math.sin(spawnAngle) * spawnRadius - 0.3;
+            
+            brick.position.set(spawnX, 0.175, spawnZ);
+            brick.castShadow = true;
+            brick.receiveShadow = true;
+            
+            brick.userData = {
+                number: currentBrickNumber,
+                colorName: colorData.name,
+                originalPosition: brick.position.clone(),
+                isGrabbed: false,
+                isPlaced: false
+            };
+            
+            scene.add(brick);
+            cubes.push(brick);
+            
+            // Show spawn notification in VR
+            if (renderer.xr.getSession()) {
+                createVRStatusPanel(
+                    `Brick ${currentBrickNumber} spawned!<br>Pick it up and place it<br>${6 - bricksPlaced} bricks remaining`, 
+                    '#00aaff', 
+                    2000
+                );
+            }
+            
+            console.log(`Spawned brick ${currentBrickNumber}`);
         }
         
         function getStackHeightAtPosition(x, z, excludeCube) {
@@ -666,30 +664,51 @@
         }
         
         function snapToBrickPosition(brick) {
+            if (brick.userData.isPlaced) return false; // Already placed
+            
             let bestPosition = null;
             let minDistance = Infinity;
             
-            // Find the closest brick position
+            // Find the closest available brick position
             BRICK_POSITIONS.forEach((pos, index) => {
                 const distance = Math.sqrt(
                     (brick.position.x - pos.x) ** 2 + 
                     (brick.position.z - pos.z) ** 2
                 );
                 
-                if (distance < minDistance && distance < 0.8) { // Larger snapping range for bricks
-                    minDistance = distance;
-                    bestPosition = { ...pos, index };
+                if (distance < minDistance && distance < 0.6) { // Snapping range for bricks
+                    // Check if this position is already occupied
+                    const occupied = cubes.some(otherBrick => 
+                        otherBrick !== brick &&
+                        otherBrick.userData.isPlaced &&
+                        Math.abs(otherBrick.position.x - pos.x) < 0.2 &&
+                        Math.abs(otherBrick.position.z - pos.z) < 0.2
+                    );
+                    
+                    if (!occupied) {
+                        minDistance = distance;
+                        bestPosition = { ...pos, index };
+                    }
                 }
             });
             
             if (bestPosition) {
                 brick.position.x = bestPosition.x;
+                brick.position.y = bestPosition.y;
                 brick.position.z = bestPosition.z;
+                brick.userData.isPlaced = true;
                 
-                // Use auto-stacking to determine the correct height
-                const stackHeight = getStackHeightAtPosition(bestPosition.x, bestPosition.z, brick);
-                brick.position.y = Math.max(stackHeight, bestPosition.y);
+                bricksPlaced++;
+                currentBrickNumber++;
                 
+                // Spawn next brick if we haven't placed all 6 yet
+                if (bricksPlaced < 6) {
+                    setTimeout(() => {
+                        spawnNextBrick();
+                    }, 1000); // Small delay for better UX
+                }
+                
+                console.log(`Brick placed! ${bricksPlaced}/6 complete`);
                 return true;
             }
             return false;
@@ -889,7 +908,7 @@
                 // Show VR welcome message
                 setTimeout(() => {
                     createVRStatusPanel(
-                        `Welcome to VR Mode!<br>Instructions attached to left hand<br>Use joystick to move around<br>Point & squeeze to grab bricks<br>Build any arrangement!`, 
+                        `Welcome to VR Mode!<br>Instructions attached to left hand<br>Use joystick to move around<br>Point & squeeze to grab brick<br>Build staggered wall!`, 
                         '#00ff88', 
                         5000
                     );
@@ -945,14 +964,14 @@
             selectedCube = null;
             selectedController = null;
             
-            // Recreate cubes (this will show the same fixed numerical order)
+            // Recreate cubes (this will spawn only the first brick)
             createCubes();
-            showStatus('New Brick Wall Challenge! 🧱<br>Build a 2x3 wall with any arrangement!', 3000);
+            showStatus('New Staggered Brick Wall! 🧱<br>Place each brick to spawn the next one!', 3000);
             
             // Show VR-specific reset message if in VR
             if (renderer.xr.getSession()) {
                 createVRStatusPanel(
-                    `New Challenge Started!<br>Build any 2x3 brick wall<br>Any order works!<br>Let's build!`, 
+                    `New Staggered Wall!<br>Build classic brick pattern<br>One brick at a time<br>Let's build!`, 
                     '#ffaa00', 
                     3000
                 );
@@ -1046,14 +1065,16 @@
             if (intersection) {
                 selectedCube.position.x = intersection.x;
                 selectedCube.position.z = intersection.z;
+                selectedCube.position.y = Math.max(0.175, intersection.y); // Keep at brick height
                 
-                // Check if dragging over another cube and auto-stack
-                const targetHeight = getStackHeightAtPosition(intersection.x, intersection.z, selectedCube);
-                selectedCube.position.y = Math.max(targetHeight, intersection.y);
-                
-                // Add visual feedback when hovering over stackable position
-                updateStackingFeedback(intersection.x, intersection.z, selectedCube);
+                // Add visual feedback for nearby brick positions
+                highlightNearbyPositions(intersection.x, intersection.z);
             }
+        }
+        
+        function highlightNearbyPositions(x, z) {
+            // Could add highlighting for nearby brick positions
+            // For now, keep it simple
         }
         
         function onPointerUp() {
@@ -1063,13 +1084,6 @@
                 // Clear highlighting
                 selectedCube.material.forEach(mat => {
                     mat.emissive.setHex(0x000000);
-                });
-                
-                // Clear visual feedback from all cubes
-                cubes.forEach(cube => {
-                    cube.material.forEach(mat => {
-                        mat.emissive.setHex(0x000000);
-                    });
                 });
                 
                 // Count this as a move
@@ -1126,13 +1140,6 @@
                     mat.emissive.setHex(0x000000);
                 });
                 
-                // Clear visual feedback from all cubes
-                cubes.forEach(cube => {
-                    cube.material.forEach(mat => {
-                        mat.emissive.setHex(0x000000);
-                    });
-                });
-                
                 // Count this as a move
                 moves++;
                 updateScoreDisplay();
@@ -1147,24 +1154,8 @@
         }
         
         function checkWinCondition() {
-            // Check if all 6 brick positions are filled (any order works!)
-            let filledPositions = 0;
-            
-            BRICK_POSITIONS.forEach((pos, index) => {
-                // Find any brick at this position
-                const brickAtPosition = cubes.find(brick => 
-                    Math.abs(brick.position.x - pos.x) < 0.3 &&
-                    Math.abs(brick.position.z - pos.z) < 0.3 &&
-                    Math.abs(brick.position.y - pos.y) < 0.2
-                );
-                
-                if (brickAtPosition) {
-                    filledPositions++;
-                }
-            });
-            
-            // Win if all 6 positions are filled
-            if (filledPositions === 6) {
+            // Win when all 6 bricks are placed in their positions
+            if (bricksPlaced === 6) {
                 winGame();
             }
         }
@@ -1234,10 +1225,10 @@
         function showInstructions() {
             setTimeout(() => {
                 const device = isMobile ? 'Tap' : 'Click';
-                const regularMessage = `${device} and drag numbered bricks to build your wall!<br>
-                           <strong>Goal:</strong> Fill all 6 positions (2 rows x 3 columns)<br>
-                           <strong>Freedom:</strong> Use any arrangement you like!<br>
-                           Bricks auto-stack when dragged over each other<br>
+                const regularMessage = `${device} and drag bricks to build a staggered wall!<br>
+                           <strong>System:</strong> Only one brick appears at a time<br>
+                           <strong>Goal:</strong> Place it to spawn the next brick<br>
+                           <strong>Pattern:</strong> Classic staggered brick layout<br>
                            <strong>Faster + Fewer moves = Higher score!</strong>`;
                 
                 showStatus(regularMessage, 8000);
@@ -1245,7 +1236,7 @@
                 // Show VR-specific instructions if in VR
                 if (renderer.xr.getSession()) {
                     createVRStatusPanel(
-                        `Welcome to VR Brick Building!<br>Use joystick to move around<br>Build any 2x3 arrangement<br>Creative freedom is yours!<br>Good luck!`, 
+                        `Welcome to Staggered Building!<br>Use joystick to move around<br>Place each brick to get the next<br>Build classic brick pattern!<br>Good luck!`, 
                         '#00aaff', 
                         6000
                     );
@@ -1274,30 +1265,16 @@
                 
                 selectedCube.position.x = targetPos.x;
                 selectedCube.position.z = targetPos.z;
-                
-                // Auto-stack in VR too
-                const targetHeight = getStackHeightAtPosition(targetPos.x, targetPos.z, selectedCube);
-                selectedCube.position.y = Math.max(targetHeight, targetPos.y);
-                
-                // Visual feedback for VR stacking
-                updateStackingFeedback(targetPos.x, targetPos.z, selectedCube);
+                selectedCube.position.y = Math.max(0.175, targetPos.y); // Keep at brick height
             }
             
             // Add gentle floating animation to unplaced cubes
             if (!gameWon) {
                 const time = Date.now() * 0.001;
                 cubes.forEach((cube, index) => {
-                    if (!cube.userData.isGrabbed) {
-                        // Check if cube is not in a brick position
-                        const inBrickPosition = BRICK_POSITIONS.some(pos => 
-                            Math.abs(cube.position.x - pos.x) < 0.1 &&
-                            Math.abs(cube.position.z - pos.z) < 0.1
-                        );
-                        
-                        if (!inBrickPosition) {
-                            cube.rotation.x = Math.sin(time + index) * 0.02;
-                            cube.rotation.y = Math.cos(time + index * 0.7) * 0.02;
-                        }
+                    if (!cube.userData.isGrabbed && !cube.userData.isPlaced) {
+                        cube.rotation.x = Math.sin(time + index) * 0.02;
+                        cube.rotation.y = Math.cos(time + index * 0.7) * 0.02;
                     }
                 });
             }
