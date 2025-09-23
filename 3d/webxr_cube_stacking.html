@@ -201,16 +201,16 @@
         let startTime = 0;
         let moves = 0;
         
-        // Brick wall positions (2 rows, 3 columns)
+        // Brick wall positions (2 rows, 3 columns) - moved further forward for VR
         const BRICK_POSITIONS = [
-            // Bottom row
-            { x: -1, y: 0, z: 0, row: 0, col: 0 },
-            { x: 0, y: 0, z: 0, row: 0, col: 1 },
-            { x: 1, y: 0, z: 0, row: 0, col: 2 },
+            // Bottom row (moved forward)
+            { x: -1, y: 0, z: -1.5, row: 0, col: 0 },
+            { x: 0, y: 0, z: -1.5, row: 0, col: 1 },
+            { x: 1, y: 0, z: -1.5, row: 0, col: 2 },
             // Top row
-            { x: -1, y: 0.5, z: 0, row: 1, col: 0 },
-            { x: 0, y: 0.5, z: 0, row: 1, col: 1 },
-            { x: 1, y: 0.5, z: 0, row: 1, col: 2 }
+            { x: -1, y: 0.5, z: -1.5, row: 1, col: 0 },
+            { x: 0, y: 0.5, z: -1.5, row: 1, col: 1 },
+            { x: 1, y: 0.5, z: -1.5, row: 1, col: 2 }
         ];
         
         // Raycaster for mouse/controller interaction
@@ -231,7 +231,7 @@
             
             // Camera
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 2, 4);
+            camera.position.set(0, 1.6, 2.5); // Moved back for better VR view
             
             // Renderer with XR support
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -269,6 +269,9 @@
             // Create grid markers for brick positions
             createGridMarkers();
             
+            // Create VR instruction panels
+            createVRInstructions();
+            
             // Create cubes
             createCubes();
             
@@ -293,6 +296,132 @@
             
             // Instructions
             showInstructions();
+        }
+        
+        function createVRInstructions() {
+            // Create floating instruction panel for VR
+            const instructionsGroup = new THREE.Group();
+            instructionsGroup.name = 'vrInstructions';
+            
+            // Background panel
+            const panelGeometry = new THREE.PlaneGeometry(3, 1.5);
+            const panelMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x000000, 
+                transparent: true, 
+                opacity: 0.8 
+            });
+            const panel = new THREE.Mesh(panelGeometry, panelMaterial);
+            
+            // Position instructions to the right side in VR
+            instructionsGroup.position.set(2.5, 1.5, -1);
+            instructionsGroup.add(panel);
+            
+            // Create text texture for instructions
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            const context = canvas.getContext('2d');
+            
+            // Background
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, 512, 256);
+            
+            // Border
+            context.strokeStyle = '#ffffff';
+            context.lineWidth = 4;
+            context.strokeRect(0, 0, 512, 256);
+            
+            // Text
+            context.fillStyle = '#ffffff';
+            context.font = '24px Arial';
+            context.textAlign = 'center';
+            context.fillText('🧱 Brick Wall Building', 256, 40);
+            context.font = '18px Arial';
+            context.fillText('Bottom row: 1-2-3 (left to right)', 256, 80);
+            context.fillText('Top row: 4-5-6 (left to right)', 256, 110);
+            context.fillText('Point and squeeze trigger to grab', 256, 150);
+            context.fillText('Cubes auto-stack when overlapping', 256, 180);
+            context.fillText('Score: Faster + Fewer moves!', 256, 220);
+            
+            const textTexture = new THREE.CanvasTexture(canvas);
+            const textMaterial = new THREE.MeshBasicMaterial({ map: textTexture });
+            const textMesh = new THREE.Mesh(panelGeometry, textMaterial);
+            textMesh.position.z = 0.01; // Slightly in front of background
+            
+            instructionsGroup.add(textMesh);
+            scene.add(instructionsGroup);
+        }
+        
+        function createVRStatusPanel(message, color = '#ffffff', duration = 3000) {
+            // Remove existing status panel
+            const existingPanel = scene.getObjectByName('vrStatusPanel');
+            if (existingPanel) {
+                scene.remove(existingPanel);
+            }
+            
+            const statusGroup = new THREE.Group();
+            statusGroup.name = 'vrStatusPanel';
+            
+            // Background panel
+            const panelGeometry = new THREE.PlaneGeometry(2.5, 1);
+            const panelMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x000000, 
+                transparent: true, 
+                opacity: 0.9 
+            });
+            const panel = new THREE.Mesh(panelGeometry, panelMaterial);
+            
+            // Position status in front of player
+            statusGroup.position.set(0, 1.8, -1.2);
+            statusGroup.add(panel);
+            
+            // Create text texture
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 200;
+            const context = canvas.getContext('2d');
+            
+            // Background
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, 512, 200);
+            
+            // Border
+            context.strokeStyle = color;
+            context.lineWidth = 6;
+            context.strokeRect(0, 0, 512, 200);
+            
+            // Text
+            context.fillStyle = color;
+            context.font = 'bold 32px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            
+            // Split message into lines
+            const lines = message.split('<br>');
+            const lineHeight = 40;
+            const startY = 100 - (lines.length - 1) * lineHeight / 2;
+            
+            lines.forEach((line, index) => {
+                // Remove HTML tags for canvas rendering
+                const cleanLine = line.replace(/<[^>]*>/g, '');
+                context.fillText(cleanLine, 256, startY + index * lineHeight);
+            });
+            
+            const textTexture = new THREE.CanvasTexture(canvas);
+            const textMaterial = new THREE.MeshBasicMaterial({ map: textTexture });
+            const textMesh = new THREE.Mesh(panelGeometry, textMaterial);
+            textMesh.position.z = 0.01;
+            
+            statusGroup.add(textMesh);
+            scene.add(statusGroup);
+            
+            // Auto-remove after duration
+            setTimeout(() => {
+                const panel = scene.getObjectByName('vrStatusPanel');
+                if (panel) {
+                    scene.remove(panel);
+                }
+            }, duration);
         }
         
         function createGridMarkers() {
@@ -388,18 +517,22 @@
                 
                 const cube = new THREE.Mesh(cubeGeometry, materials);
                 
-                // Position cubes randomly around the scene (not in brick positions)
+                // Position cubes around the player in VR-friendly positions
                 let validPosition = false;
                 let attempts = 0;
                 
                 while (!validPosition && attempts < 20) {
-                    const x = (Math.random() - 0.5) * 6;
-                    const z = (Math.random() - 0.5) * 4 + 2; // Behind the brick area
+                    // Position cubes in a semicircle around the player (in front and sides)
+                    const angle = (index / cubeColors.length) * Math.PI + Math.PI/4; // 45° to 135° arc
+                    const radius = 1.5 + Math.random() * 0.5; // 1.5-2 meters from player
+                    
+                    const x = Math.cos(angle) * radius;
+                    const z = Math.sin(angle) * radius - 0.5; // Slightly forward
                     
                     // Check if position is not in brick area
                     const tooClose = BRICK_POSITIONS.some(pos => {
                         const dist = Math.sqrt((x - pos.x) ** 2 + (z - pos.z) ** 2);
-                        return dist < 1.5;
+                        return dist < 1.0;
                     });
                     
                     if (!tooClose) {
@@ -407,6 +540,15 @@
                         validPosition = true;
                     }
                     attempts++;
+                }
+                
+                // Fallback positioning if no valid position found
+                if (!validPosition) {
+                    cube.position.set(
+                        (index - 2.5) * 0.8, // Spread horizontally
+                        0,
+                        1 // In front of player
+                    );
                 }
                 
                 cube.castShadow = true;
@@ -417,7 +559,7 @@
                     colorName: colorData.name,
                     originalPosition: cube.position.clone(),
                     isGrabbed: false,
-                    targetIndex: -1 // Will be set based on random arrangement
+                    targetIndex: index // Always in numerical order
                 };
                 
                 scene.add(cube);
@@ -430,12 +572,6 @@
             
             // Update display to show fixed numerical order
             updateTargetDisplay();
-            
-            // Assign target indices to cubes (always in numerical order)
-            cubes.forEach(cube => {
-                cube.userData.targetIndex = cube.userData.number - 1; // 1->0, 2->1, etc.
-            });
-            
             updateScoreDisplay();
         }
         
@@ -599,10 +735,29 @@
             
             renderer.xr.addEventListener('sessionstart', () => {
                 vrButton.textContent = 'Exit VR';
+                // Show VR welcome message
+                setTimeout(() => {
+                    createVRStatusPanel(
+                        `Welcome to VR Mode!<br>Instructions are on your right<br>Point & squeeze to grab cubes<br>Have fun building!`, 
+                        '#00ff88', 
+                        4000
+                    );
+                }, 1000);
             });
             
             renderer.xr.addEventListener('sessionend', () => {
                 vrButton.textContent = 'Enter VR';
+                // Clean up VR-specific elements
+                const vrInstructions = scene.getObjectByName('vrInstructions');
+                if (vrInstructions) {
+                    scene.remove(vrInstructions);
+                }
+                const vrStatus = scene.getObjectByName('vrStatusPanel');
+                if (vrStatus) {
+                    scene.remove(vrStatus);
+                }
+                // Re-create instructions for next VR session
+                createVRInstructions();
             });
         }
         
@@ -641,6 +796,15 @@
             // Recreate cubes (this will show the same fixed numerical order)
             createCubes();
             showStatus('New Brick Wall Challenge! 🧱<br>Build the wall: 1-2-3 (bottom), 4-5-6 (top)!', 3000);
+            
+            // Show VR-specific reset message if in VR
+            if (renderer.xr.getSession()) {
+                createVRStatusPanel(
+                    `New Challenge Started!<br>Build: 1-2-3 bottom row<br>Then: 4-5-6 top row<br>Let's go!`, 
+                    '#ffaa00', 
+                    3000
+                );
+            }
         }
         
         function onTouchStart(event) {
@@ -876,7 +1040,17 @@
                            Moves: ${moves} (${movesPenalty > 0 ? '-' + movesPenalty : '0'} penalty)<br>
                            <strong>Total Score: ${score}</strong>`;
             
+            // Show message both in regular UI and VR
             showStatus(message, 5000);
+            
+            // Show VR-specific success message if in VR
+            if (renderer.xr.getSession()) {
+                createVRStatusPanel(
+                    `🎉 VICTORY! 🎉<br>Perfect Brick Wall Built!<br>Score: ${gameScore} points<br>Total: ${score} points`, 
+                    '#00ff00', 
+                    4000
+                );
+            }
             
             // Celebration effect - make all cubes glow
             cubes.forEach(cube => {
@@ -911,11 +1085,22 @@
         function showInstructions() {
             setTimeout(() => {
                 const device = isMobile ? 'Tap' : 'Click';
-                showStatus(`${device} and drag numbered cubes to build the brick wall!<br>
+                const regularMessage = `${device} and drag numbered cubes to build the brick wall!<br>
                            <strong>Bottom row:</strong> 1-2-3 (left to right)<br>
                            <strong>Top row:</strong> 4-5-6 (left to right)<br>
                            Cubes auto-stack when dragged over each other<br>
-                           <strong>Faster + Fewer moves = Higher score!</strong>`, 7000);
+                           <strong>Faster + Fewer moves = Higher score!</strong>`;
+                
+                showStatus(regularMessage, 7000);
+                
+                // Show VR-specific instructions if in VR
+                if (renderer.xr.getSession()) {
+                    createVRStatusPanel(
+                        `Welcome to VR Brick Building!<br>Point controllers and squeeze to grab<br>Build: 1-2-3 bottom, 4-5-6 top<br>Good luck!`, 
+                        '#00aaff', 
+                        5000
+                    );
+                }
             }, 1000);
         }
         
