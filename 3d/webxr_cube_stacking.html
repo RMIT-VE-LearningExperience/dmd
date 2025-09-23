@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WebXR Cube Stacking Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+        }
+        
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 280px;
+            font-size: 14px;
+        }
+        
+        #vrButton {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1000;
+        }
+        
+        #vrButton:hover {
+            background: #45a049;
+        }
+        
+        #vrButton:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        #status {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            text-align: center;
+            background: rgba(0,0,0,0.9);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            max-width: 300px;
+        }
+        
+        #resetButton {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            padding: 12px 24px;
+            background: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1000;
+        }
+        
+        #resetScoreButton {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            padding: 8px 16px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        
+        @media (max-width: 768px) {
+            #info {
+                font-size: 12px;
+                padding: 10px;
+                max-width: 250px;
+            }
+            
+            #vrButton {
+                bottom: 10px;
+                right: 10px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            
+            #resetButton {
+                bottom: 10px;
+                left: 10px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            
+            #resetScoreButton {
+                bottom: 60px;
+                left: 10px;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            #status {
+                font-size: 18px;
+                padding: 15px;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>🎮 Cube Stacking Game</h3>
+        <div id="targetOrder" style="font-size: 16px; margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+            <strong>Target Order:</strong> <span id="orderDisplay">🔴 → 🟢 → 🔵</span>
+        </div>
+        <div id="scoreBoard" style="font-size: 14px; margin: 10px 0;">
+            <strong>Score:</strong> <span id="currentScore">0</span> | 
+            <strong>Games:</strong> <span id="gamesCount">0</span> |
+            <strong>Moves:</strong> <span id="movesCount">0</span>
+        </div>
+        <p><strong>VR:</strong> Point and squeeze trigger<br>
+        <strong>Desktop:</strong> Click and drag<br>
+        <strong>Mobile:</strong> Tap and drag</p>
+        <p><strong>Physics:</strong> Moving a cube carries all cubes above it!</p>
+    </div>
+    
+    <button id="vrButton">Enter VR</button>
+    <button id="resetButton">New Game</button>
+    <button id="resetScoreButton">Reset Score</button>
+    <div id="status"></div>
+
+    <script>
+        let scene, camera, renderer, cubes = [], controllers = [];
+        let selectedCube = null, selectedController = null;
+        let stackedCubes = []; // Track cubes that move together
+        let gameWon = false;
+        let TARGET_ORDER = ['red', 'green', 'blue']; // Will be randomized
+        let isMobile = false;
+        let touchStartPos = null;
+        let originalPositions = {}; // Store original positions for stacked cubes
+        
+        // Scoring system
+        let score = 0;
+        let gamesPlayed = 0;
+        let startTime = 0;
+        let moves = 0;
+        
+        // Raycaster for mouse/controller interaction
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        // Detect mobile devices
+        isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                  ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        
+        init();
+        animate();
+        
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.6, 3);
+            
+            // Renderer with XR support
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.xr.enabled = true;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.appendChild(renderer.domElement);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
+            scene.add(directionalLight);
+            
+            // Floor with better appearance
+            const floorGeometry = new THREE.PlaneGeometry(10, 10);
+            const floorMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x2d4a4a,
+                transparent: true,
+                opacity: 0.8
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.5;
+            floor.receiveShadow = true;
+            scene.add(floor);
+            
+            // Create cubes
+            createCubes();
+            
+            // Setup VR controllers (without the problematic factory)
+            setupControllers();
+            
+            // Setup VR button
+            setupVRButton();
+            
+            // Setup controls based on device
+            if (isMobile) {
+                setupTouchControls();
+            } else {
+                setupMouseControls();
+            }
+            
+            // Reset button
+            setupResetButton();
+            
+            // Window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Instructions
+            showInstructions();
+        }
+        
+        function generateRandomOrder() {
+            const colors = ['red', 'green', 'blue'];
+            const emojis = { 'red': '🔴', 'green': '🟢', 'blue': '🔵' };
+            
+            // Shuffle the array
+            for (let i = colors.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [colors[i], colors[j]] = [colors[j], colors[i]];
+            }
+            
+            TARGET_ORDER = colors;
+            
+            // Update the display
+            const orderDisplay = TARGET_ORDER.map(color => emojis[color]).join(' → ');
+            document.getElementById('orderDisplay').textContent = orderDisplay;
+            
+            console.log('New target order:', TARGET_ORDER);
+        }
+        
+        function updateScoreDisplay() {
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('gamesCount').textContent = gamesPlayed;
+            document.getElementById('movesCount').textContent = moves;
+        }
+        
+        function calculateScore(timeBonus, movesPenalty) {
+            // Base score: 100 points
+            // Time bonus: up to 50 points (faster = more points)
+            // Move penalty: -5 points per move over 3
+            let gameScore = 100 + timeBonus - movesPenalty;
+            return Math.max(gameScore, 10); // Minimum 10 points
+        }
+        
+        function createCubes() {
+            const cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const colors = [
+                { name: 'red', color: 0xff4757 },
+                { name: 'green', color: 0x2ed573 },
+                { name: 'blue', color: 0x3742fa }
+            ];
+            
+            cubes = []; // Clear existing cubes
+            
+            colors.forEach((colorData, index) => {
+                const material = new THREE.MeshLambertMaterial({ 
+                    color: colorData.color,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                const cube = new THREE.Mesh(cubeGeometry, material);
+                
+                // Position cubes in a line for easier mobile interaction
+                cube.position.set(
+                    (index - 1) * 1.5,
+                    0,
+                    -1
+                );
+                
+                cube.castShadow = true;
+                cube.receiveShadow = true;
+                
+                cube.userData = {
+                    colorName: colorData.name,
+                    originalPosition: cube.position.clone(),
+                    isGrabbed: false
+                };
+                
+                scene.add(cube);
+                cubes.push(cube);
+            });
+            
+            gameWon = false;
+            stackedCubes = [];
+            originalPositions = {};
+            moves = 0;
+            startTime = Date.now();
+            
+            // Generate new random order for this game
+            generateRandomOrder();
+            updateScoreDisplay();
+        }
+        
+        function getCubesStackedOnTop(baseCube) {
+            const stacked = [];
+            const tolerance = 0.3;
+            
+            function findCubesAbove(cube) {
+                cubes.forEach(otherCube => {
+                    if (otherCube === cube || stacked.includes(otherCube)) return;
+                    
+                    // Check if otherCube is directly above this cube
+                    const horizontalDistance = Math.sqrt(
+                        Math.pow(otherCube.position.x - cube.position.x, 2) + 
+                        Math.pow(otherCube.position.z - cube.position.z, 2)
+                    );
+                    
+                    const verticalDistance = Math.abs(otherCube.position.y - (cube.position.y + 0.5));
+                    
+                    if (horizontalDistance < tolerance && verticalDistance < tolerance) {
+                        stacked.push(otherCube);
+                        // Recursively find cubes stacked on top of this one
+                        findCubesAbove(otherCube);
+                    }
+                });
+            }
+            
+            findCubesAbove(baseCube);
+            return stacked;
+        }
+        
+        function setupControllers() {
+            // Setup VR controllers with simple visuals
+            controllers = []; // Clear any existing controllers
+            
+            for (let i = 0; i < 2; i++) {
+                try {
+                    const controller = renderer.xr.getController(i);
+                    
+                    // Add event listeners
+                    controller.addEventListener('selectstart', onSelectStart);
+                    controller.addEventListener('selectend', onSelectEnd);
+                    
+                    // Add to scene
+                    scene.add(controller);
+                    
+                    // Create simple visual ray
+                    const rayGeometry = new THREE.BufferGeometry();
+                    const rayPositions = new Float32Array([
+                        0, 0, 0,
+                        0, 0, -1
+                    ]);
+                    rayGeometry.setAttribute('position', new THREE.BufferAttribute(rayPositions, 3));
+                    
+                    const rayMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+                    const rayLine = new THREE.Line(rayGeometry, rayMaterial);
+                    rayLine.scale.z = 3;
+                    controller.add(rayLine);
+                    
+                    // Simple controller handle visual
+                    const handleGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.15);
+                    const handleMaterial = new THREE.MeshBasicMaterial({ color: 0x888888 });
+                    const handleMesh = new THREE.Mesh(handleGeometry, handleMaterial);
+                    controller.add(handleMesh);
+                    
+                    controllers.push({
+                        controller: controller,
+                        index: i
+                    });
+                    
+                } catch (error) {
+                    console.log(`Controller ${i} setup failed:`, error);
+                }
+            }
+            
+            console.log(`Initialized ${controllers.length} VR controllers`);
+        }
+        
+        function setupVRButton() {
+            const vrButton = document.getElementById('vrButton');
+            
+            if ('xr' in navigator) {
+                navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+                    if (supported) {
+                        vrButton.addEventListener('click', () => {
+                            if (renderer.xr.getSession()) {
+                                renderer.xr.getSession().end();
+                            } else {
+                                navigator.xr.requestSession('immersive-vr', {
+                                    requiredFeatures: ['local-floor']
+                                }).then((session) => {
+                                    renderer.xr.setSession(session);
+                                }).catch((error) => {
+                                    console.log('VR session failed:', error);
+                                    showStatus('VR session failed to start', 2000);
+                                });
+                            }
+                        });
+                    } else {
+                        vrButton.textContent = 'VR Not Supported';
+                        vrButton.disabled = true;
+                    }
+                }).catch(() => {
+                    vrButton.textContent = 'VR Not Available';
+                    vrButton.disabled = true;
+                });
+            } else {
+                vrButton.textContent = 'WebXR Not Available';
+                vrButton.disabled = true;
+            }
+            
+            renderer.xr.addEventListener('sessionstart', () => {
+                vrButton.textContent = 'Exit VR';
+            });
+            
+            renderer.xr.addEventListener('sessionend', () => {
+                vrButton.textContent = 'Enter VR';
+            });
+        }
+        
+        function setupMouseControls() {
+            renderer.domElement.addEventListener('mousedown', onPointerDown);
+            renderer.domElement.addEventListener('mousemove', onPointerMove);
+            renderer.domElement.addEventListener('mouseup', onPointerUp);
+        }
+        
+        function setupTouchControls() {
+            renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: false });
+            renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: false });
+            renderer.domElement.addEventListener('touchend', onTouchEnd, { passive: false });
+        }
+        
+        function setupResetButton() {
+            document.getElementById('resetButton').addEventListener('click', resetGame);
+            document.getElementById('resetScoreButton').addEventListener('click', resetScore);
+        }
+        
+        function resetScore() {
+            if (confirm('Reset your total score and start fresh?')) {
+                score = 0;
+                gamesPlayed = 0;
+                updateScoreDisplay();
+                showStatus('Score Reset! 🔄', 1500);
+            }
+        }
+        
+        function resetGame() {
+            // Remove existing cubes
+            cubes.forEach(cube => scene.remove(cube));
+            selectedCube = null;
+            selectedController = null;
+            stackedCubes = [];
+            
+            // Recreate cubes (this will generate a new random order)
+            createCubes();
+            showStatus('New Challenge! 🔄<br>Stack the cubes in the new order!', 2500);
+        }
+        
+        function onTouchStart(event) {
+            event.preventDefault();
+            if (gameWon || renderer.xr.getSession()) return;
+            
+            const touch = event.touches[0];
+            touchStartPos = { x: touch.clientX, y: touch.clientY };
+            
+            mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(cubes);
+            
+            if (intersects.length > 0) {
+                selectedCube = intersects[0].object;
+                selectedCube.userData.isGrabbed = true;
+                selectedCube.material.emissive.setHex(0x444444);
+                
+                // Find all cubes stacked on top and store their relative positions
+                stackedCubes = getCubesStackedOnTop(selectedCube);
+                stackedCubes.forEach(cube => {
+                    cube.userData.isGrabbed = true;
+                    cube.material.emissive.setHex(0x222222);
+                });
+                
+                // Haptic feedback on mobile (if available)
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            }
+        }
+        
+        function onTouchMove(event) {
+            event.preventDefault();
+            if (gameWon || !selectedCube || renderer.xr.getSession()) return;
+            
+            const touch = event.touches[0];
+            mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+            
+            updateCubePosition();
+        }
+        
+        function onTouchEnd(event) {
+            event.preventDefault();
+            onPointerUp();
+        }
+        
+        function onPointerDown(event) {
+            if (gameWon || renderer.xr.getSession()) return;
+            
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(cubes);
+            
+            if (intersects.length > 0) {
+                selectedCube = intersects[0].object;
+                selectedCube.userData.isGrabbed = true;
+                selectedCube.material.emissive.setHex(0x444444);
+                
+                // Find all cubes stacked on top
+                stackedCubes = getCubesStackedOnTop(selectedCube);
+                stackedCubes.forEach(cube => {
+                    cube.userData.isGrabbed = true;
+                    cube.material.emissive.setHex(0x222222);
+                });
+            }
+        }
+        
+        function onPointerMove(event) {
+            if (gameWon || !selectedCube || renderer.xr.getSession()) return;
+            
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            updateCubePosition();
+        }
+        
+        function updateCubePosition() {
+            if (!selectedCube) return;
+            
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Project mouse position to a plane
+            const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+            const intersection = new THREE.Vector3();
+            raycaster.ray.intersectPlane(plane, intersection);
+            
+            if (intersection) {
+                // Check if dragging over another cube for auto-stacking
+                const targetHeight = getStackHeightAtPosition(intersection.x, intersection.z, selectedCube);
+                
+                // Update main cube position
+                const oldX = selectedCube.position.x;
+                const oldZ = selectedCube.position.z;
+                
+                selectedCube.position.x = intersection.x;
+                selectedCube.position.z = intersection.z;
+                selectedCube.position.y = Math.max(targetHeight, intersection.y);
+                
+                // Move all stacked cubes with the same delta
+                const deltaX = selectedCube.position.x - oldX;
+                const deltaZ = selectedCube.position.z - oldZ;
+                
+                stackedCubes.forEach(cube => {
+                    cube.position.x += deltaX;
+                    cube.position.z += deltaZ;
+                });
+                
+                // Add visual feedback when hovering over stackable position
+                updateStackingFeedback(intersection.x, intersection.z);
+            }
+        }
+        
+        function getStackHeightAtPosition(x, z, excludeCube) {
+            let maxHeight = 0;
+            const tolerance = 0.4;
+            const excludeList = [excludeCube, ...stackedCubes];
+            
+            cubes.forEach(cube => {
+                if (excludeList.includes(cube)) return;
+                
+                const distance = Math.sqrt(
+                    Math.pow(cube.position.x - x, 2) + 
+                    Math.pow(cube.position.z - z, 2)
+                );
+                
+                if (distance < tolerance) {
+                    maxHeight = Math.max(maxHeight, cube.position.y + 0.5);
+                }
+            });
+            
+            return maxHeight;
+        }
+        
+        function updateStackingFeedback(x, z) {
+            const excludeList = [selectedCube, ...stackedCubes];
+            
+            // Reset all cube materials
+            cubes.forEach(cube => {
+                if (!excludeList.includes(cube)) {
+                    cube.material.emissive.setHex(0x000000);
+                    cube.material.opacity = 0.9;
+                }
+            });
+            
+            // Highlight cubes that would be stacked on
+            const tolerance = 0.4;
+            cubes.forEach(cube => {
+                if (excludeList.includes(cube)) return;
+                
+                const distance = Math.sqrt(
+                    Math.pow(cube.position.x - x, 2) + 
+                    Math.pow(cube.position.z - z, 2)
+                );
+                
+                if (distance < tolerance) {
+                    cube.material.emissive.setHex(0x111111);
+                    cube.material.opacity = 1.0;
+                }
+            });
+        }
+        
+        function onPointerUp() {
+            if (selectedCube) {
+                selectedCube.userData.isGrabbed = false;
+                selectedCube.material.emissive.setHex(0x000000);
+                
+                // Count this as a move
+                moves++;
+                updateScoreDisplay();
+                
+                // Clear visual feedback from all cubes
+                stackedCubes.forEach(cube => {
+                    cube.userData.isGrabbed = false;
+                    cube.material.emissive.setHex(0x000000);
+                    cube.material.opacity = 0.9;
+                });
+                
+                cubes.forEach(cube => {
+                    cube.material.emissive.setHex(0x000000);
+                    cube.material.opacity = 0.9;
+                });
+                
+                snapToGrid(selectedCube);
+                selectedCube = null;
+                stackedCubes = [];
+                checkWinCondition();
+                
+                // Haptic feedback on mobile
+                if (navigator.vibrate) {
+                    navigator.vibrate(30);
+                }
+            }
+        }
+        
+        function onSelectStart(event) {
+            const controller = event.target;
+            
+            const tempMatrix = new THREE.Matrix4();
+            tempMatrix.identity().extractRotation(controller.matrixWorld);
+            
+            raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+            raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+            
+            const intersects = raycaster.intersectObjects(cubes);
+            
+            if (intersects.length > 0 && !gameWon) {
+                selectedCube = intersects[0].object;
+                selectedController = controller;
+                selectedCube.userData.isGrabbed = true;
+                selectedCube.material.emissive.setHex(0x444444);
+                
+                // Find all cubes stacked on top
+                stackedCubes = getCubesStackedOnTop(selectedCube);
+                stackedCubes.forEach(cube => {
+                    cube.userData.isGrabbed = true;
+                    cube.material.emissive.setHex(0x222222);
+                });
+            }
+        }
+        
+        function onSelectEnd() {
+            if (selectedCube) {
+                selectedCube.userData.isGrabbed = false;
+                selectedCube.material.emissive.setHex(0x000000);
+                
+                // Count this as a move
+                moves++;
+                updateScoreDisplay();
+                
+                // Clear visual feedback from all cubes
+                stackedCubes.forEach(cube => {
+                    cube.userData.isGrabbed = false;
+                    cube.material.emissive.setHex(0x000000);
+                    cube.material.opacity = 0.9;
+                });
+                
+                cubes.forEach(cube => {
+                    cube.material.emissive.setHex(0x000000);
+                    cube.material.opacity = 0.9;
+                });
+                
+                snapToGrid(selectedCube);
+                selectedCube = null;
+                selectedController = null;
+                stackedCubes = [];
+                checkWinCondition();
+            }
+        }
+        
+        function snapToGrid(cube) {
+            // Snap to nearest grid position for final placement
+            const oldX = cube.position.x;
+            const oldZ = cube.position.z;
+            
+            cube.position.x = Math.round(cube.position.x * 2) / 2;
+            cube.position.z = Math.round(cube.position.z * 2) / 2;
+            
+            // Calculate the delta for moving stacked cubes
+            const deltaX = cube.position.x - oldX;
+            const deltaZ = cube.position.z - oldZ;
+            
+            // Move stacked cubes with the main cube
+            stackedCubes.forEach(stackedCube => {
+                stackedCube.position.x += deltaX;
+                stackedCube.position.z += deltaZ;
+            });
+            
+            // Ensure proper stacking height (refine the position)
+            const targetHeight = getStackHeightAtPosition(cube.position.x, cube.position.z, cube);
+            cube.position.y = Math.max(targetHeight, 0);
+        }
+        
+        function checkWinCondition() {
+            // Find all cubes at the same x,z position (stacked)
+            const stacks = {};
+            
+            cubes.forEach(cube => {
+                const key = `${Math.round(cube.position.x * 2)},${Math.round(cube.position.z * 2)}`;
+                if (!stacks[key]) stacks[key] = [];
+                stacks[key].push(cube);
+            });
+            
+            // Check if any stack has all 3 cubes in correct order
+            for (let stack of Object.values(stacks)) {
+                if (stack.length === 3) {
+                    stack.sort((a, b) => a.position.y - b.position.y);
+                    const stackOrder = stack.map(cube => cube.userData.colorName);
+                    
+                    if (JSON.stringify(stackOrder) === JSON.stringify(TARGET_ORDER)) {
+                        winGame();
+                        return;
+                    }
+                }
+            }
+        }
+        
+        function winGame() {
+            gameWon = true;
+            gamesPlayed++;
+            
+            // Calculate score
+            const timeTaken = (Date.now() - startTime) / 1000; // seconds
+            const timeBonus = Math.max(0, Math.floor(50 - timeTaken)); // Up to 50 bonus points for speed
+            const movesPenalty = Math.max(0, (moves - 3) * 5); // -5 points per move over 3
+            const gameScore = calculateScore(timeBonus, movesPenalty);
+            
+            score += gameScore;
+            updateScoreDisplay();
+            
+            // Show detailed win message
+            const message = `🎉 Perfect Stack! You Won! 🎉<br>
+                           <strong>Game Score: ${gameScore} points</strong><br>
+                           Time: ${timeTaken.toFixed(1)}s (${timeBonus > 0 ? '+' + timeBonus : '0'} bonus)<br>
+                           Moves: ${moves} (${movesPenalty > 0 ? '-' + movesPenalty : '0'} penalty)<br>
+                           <strong>Total Score: ${score}</strong>`;
+            
+            showStatus(message, 5000);
+            
+            // Celebration effect
+            cubes.forEach(cube => {
+                cube.material.emissive.setHex(0x222222);
+            });
+            
+            // Victory haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100, 50, 100]);
+            }
+            
+            // Auto-restart after a delay
+            setTimeout(() => {
+                if (gameWon) { // Only restart if user hasn't manually reset
+                    resetGame();
+                }
+            }, 6000);
+        }
+        
+        function showStatus(message, duration = 2000) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, duration);
+        }
+        
+        function showInstructions() {
+            setTimeout(() => {
+                const device = isMobile ? 'Tap' : 'Click';
+                const emojis = { 'red': '🔴', 'green': '🟢', 'blue': '🔵' };
+                const orderDisplay = TARGET_ORDER.map(color => emojis[color]).join(' → ');
+                showStatus(`${device} and drag cubes to stack them!<br>
+                           <strong>Target Order:</strong> ${orderDisplay}<br>
+                           Moving a cube carries all cubes above it!<br>
+                           <strong>Faster + Fewer moves = Higher score!</strong>`, 6000);
+            }, 1000);
+        }
+        
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+        
+        function render() {
+            // Update grabbed cube position for VR controllers
+            if (selectedCube && selectedController) {
+                const tempMatrix = new THREE.Matrix4();
+                tempMatrix.identity().extractRotation(selectedController.matrixWorld);
+                
+                const forward = new THREE.Vector3(0, 0, -0.8);
+                forward.applyMatrix4(tempMatrix);
+                
+                const targetPos = selectedController.position.clone();
+                targetPos.add(forward);
+                
+                const oldX = selectedCube.position.x;
+                const oldZ = selectedCube.position.z;
+                
+                selectedCube.position.x = targetPos.x;
+                selectedCube.position.z = targetPos.z;
+                
+                // Auto-stack in VR too
+                const targetHeight = getStackHeightAtPosition(targetPos.x, targetPos.z, selectedCube);
+                selectedCube.position.y = Math.max(targetHeight, targetPos.y);
+                
+                // Move stacked cubes with VR controller
+                const deltaX = selectedCube.position.x - oldX;
+                const deltaZ = selectedCube.position.z - oldZ;
+                
+                stackedCubes.forEach(cube => {
+                    cube.position.x += deltaX;
+                    cube.position.z += deltaZ;
+                });
+                
+                // Visual feedback for VR stacking
+                updateStackingFeedback(targetPos.x, targetPos.z);
+            }
+            
+            // Add gentle floating animation to unplaced cubes
+            if (!gameWon) {
+                const time = Date.now() * 0.001;
+                cubes.forEach((cube, index) => {
+                    if (!cube.userData.isGrabbed && cube.position.y < 0.1) {
+                        cube.rotation.x = Math.sin(time + index) * 0.05;
+                        cube.rotation.y = Math.cos(time + index * 0.7) * 0.05;
+                    }
+                });
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
+</body>
+</html>
