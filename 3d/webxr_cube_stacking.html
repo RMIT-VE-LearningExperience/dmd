@@ -554,8 +554,10 @@
     const vrRaycaster = new THREE.Raycaster();
     const _tempMat4 = new THREE.Matrix4();
     const _tempVec3 = new THREE.Vector3();
-    // Distance to hold a grabbed brick in front of the controller (in meters)
-    const HOLD_DISTANCE = 2; // farther from the face for comfort
+    // Dynamic hold configuration
+    const HOLD_MIN  = 0.35;  // closest allowed distance
+    const HOLD_MAX  = 2.0;   // farthest allowed distance
+    const HOLD_SENS = 1.2;   // how much forward/back motion changes distance
     function onSelectStart(event) {
       const controller = event.target;
 
@@ -577,6 +579,18 @@
         // Do NOT parent to controller; we will drive world position each frame
         controller.userData.holding = true;
 
+        // Capture grab-time controller pose and forward, and baseline distance to brick
+        const controllerPos = new THREE.Vector3().setFromMatrixPosition(controller.matrixWorld);
+        const controllerRot = new THREE.Matrix4().extractRotation(controller.matrixWorld);
+        const forwardAtGrab = new THREE.Vector3(0, 0, -1).applyMatrix4(controllerRot).normalize();
+        // distance from controller to brick along forward axis at grab
+        const toBrick = brick.position.clone().sub(controllerPos);
+        let baseDist = toBrick.dot(forwardAtGrab);
+        baseDist = THREE.MathUtils.clamp(baseDist, HOLD_MIN, HOLD_MAX);
+        controller.userData.holdBaseDist = baseDist;
+        controller.userData.holdForward  = forwardAtGrab.clone();
+        controller.userData.holdGrabPos  = controllerPos.clone();
+
         // show laser, length will be set each frame
         if (controller.userData.laserLine) controller.userData.laserLine.visible = true;
 
@@ -593,6 +607,9 @@
       // detach back to world (no longer needed; don't parent)
       brick.userData.isGrabbed = false;
       controller.userData.holding = false;
+      controller.userData.holdBaseDist = null;
+      controller.userData.holdForward  = null;
+      controller.userData.holdGrabPos  = null;
 
       // hide laser
       if (controller.userData.laserLine) controller.userData.laserLine.visible = false;
@@ -901,18 +918,28 @@
         const laser = controller.userData.laserLine;
 
         if (brick) {
-          // Controller world position and forward vector
+          // Controller world pose and forward (current frame)
           const controllerPos = new THREE.Vector3().setFromMatrixPosition(controller.matrixWorld);
           const controllerRot = new THREE.Matrix4().extractRotation(controller.matrixWorld);
-          const forward = new THREE.Vector3(0, 0, -1).applyMatrix4(controllerRot).normalize();
+          const forwardNow = new THREE.Vector3(0, 0, -1).applyMatrix4(controllerRot).normalize();
 
-          // Target world position HOLD_DISTANCE in front of controller
-          const targetWorld = controllerPos.clone().add(forward.multiplyScalar(HOLD_DISTANCE));
+          // Baseline distance captured on grab
+          const base = (controller.userData.holdBaseDist != null) ? controller.userData.holdBaseDist : 0.6;
+          const grabPos = controller.userData.holdGrabPos || controllerPos;
+
+          // Movement along forward since grab
+          const moveVec = controllerPos.clone().sub(grabPos);
+          const deltaAlongForward = moveVec.dot(forwardNow);
+          // Desired distance = base + scaled forward/back delta
+          const desiredDist = THREE.MathUtils.clamp(base + deltaAlongForward * HOLD_SENS, HOLD_MIN, HOLD_MAX);
+
+          // Target point at desiredDist in front of controller
+          const targetWorld = controllerPos.clone().add(forwardNow.multiplyScalar(desiredDist));
 
           // Smoothly move brick toward target world position
           brick.position.lerp(targetWorld, 0.35);
 
-          // Keep brick upright (no controller pitch/roll) so you can place it straight
+          // Keep brick upright (no controller pitch/roll), easing back to level
           const uprightQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0));
           brick.quaternion.slerp(uprightQuat, 0.25);
 
