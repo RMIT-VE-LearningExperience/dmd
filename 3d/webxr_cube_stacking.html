@@ -359,7 +359,7 @@
       ctx.fillStyle = '#EDE7E0';
       ctx.font = 'bold 26px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('Place bricks on glowing slots', 256, 95);
+      ctx.fillText('01 - Place bricks on glowing slots', 256, 95);
       ctx.font = '20px Arial';
       ctx.fillText('Grab with trigger, release to snap', 256, 150);
       const tex = new THREE.CanvasTexture(canvas);
@@ -555,7 +555,7 @@
     const _tempMat4 = new THREE.Matrix4();
     const _tempVec3 = new THREE.Vector3();
     // Distance to hold a grabbed brick in front of the controller (in meters)
-    const HOLD_DISTANCE = 1.3; // farther from the face for comfort
+    const HOLD_DISTANCE = 2; // farther from the face for comfort
     function onSelectStart(event) {
       const controller = event.target;
 
@@ -693,7 +693,7 @@
         resetGame();
       });
       document.getElementById('helpButton').addEventListener('click', () => {
-        showToast('Place bricks onto the glowing slots. The order is shown on the left panel.');
+        showToast('01 - Place bricks onto the glowing slots. The order is shown on the left panel.');
       });
     }
 
