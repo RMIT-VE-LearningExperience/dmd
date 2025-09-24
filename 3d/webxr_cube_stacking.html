@@ -804,24 +804,45 @@
       controllers = [];
 
       function createSimpleControllerModel(controller) {
-        // Simple controller model with a trigger mesh for feedback
         const group = new THREE.Group();
-        // Handle
-        const handle = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.012, 0.018, 0.11, 16),
-          new THREE.MeshStandardMaterial({ color: 0x222326, metalness: 0.3, roughness: 0.7 })
+
+        // handle grip (light plastic)
+        const grip = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.018, 0.022, 0.12, 18),
+          new THREE.MeshStandardMaterial({ color: 0xF2F2F2, metalness: 0.05, roughness: 0.9 })
         );
-        handle.position.y = -0.035;
-        group.add(handle);
-        // Trigger
+        grip.rotation.z = Math.PI / 2;
+        grip.position.set(0, -0.03, 0.02);
+        group.add(grip);
+
+        // head/body
+        const head = new THREE.Mesh(
+          new THREE.TorusGeometry(0.04, 0.011, 16, 24),
+          new THREE.MeshStandardMaterial({ color: 0xF7F7F7, metalness: 0.05, roughness: 0.92 })
+        );
+        head.rotation.x = Math.PI / 2;
+        head.position.set(0, 0.02, 0.0);
+        group.add(head);
+
+        // small housing block (subtle grey)
+        const body = new THREE.Mesh(
+          new THREE.BoxGeometry(0.06, 0.03, 0.06),
+          new THREE.MeshStandardMaterial({ color: 0xE7E7E7, metalness: 0.05, roughness: 0.9 })
+        );
+        body.position.set(0, 0.01, -0.01);
+        group.add(body);
+
+        // trigger piece – we can emissively highlight on grab
         const trigger = new THREE.Mesh(
-          new THREE.BoxGeometry(0.022, 0.014, 0.032),
-          new THREE.MeshStandardMaterial({ color: 0x555a60, emissive: 0x000000, metalness: 0.3, roughness: 0.6 })
+          new THREE.BoxGeometry(0.014, 0.02, 0.018),
+          new THREE.MeshStandardMaterial({ color: 0xDCDCDC, emissive: 0x000000, metalness: 0.1, roughness: 0.7 })
         );
-        trigger.position.set(0, 0.022, -0.012);
+        trigger.position.set(0, 0.012, -0.05);
         group.add(trigger);
-        // Assign for feedback
         controller.userData.triggerMesh = trigger;
+
+        group.castShadow = false;
+        group.receiveShadow = false;
         return group;
       }
 
@@ -841,17 +862,20 @@
         controller.add(laser);
         controller.userData.laserLine = laser;
 
+        // Always-visible pointing ray (red), a bit longer for aiming
+        const pointerGeom = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(0, 0, -1.2)
+        ]);
+        const pointerMat = new THREE.LineBasicMaterial({ color: 0xff4040, transparent: true, opacity: 0.95 });
+        const pointer = new THREE.Line(pointerGeom, pointerMat);
+        pointer.name = 'pointerLine';
+        controller.add(pointer);
+        controller.userData.pointerLine = pointer;
+
         // Trigger press and release
         controller.addEventListener('selectstart', onSelectStart);
         controller.addEventListener('selectend', onSelectEnd);
-
-        // tiny pointer tip for visibility
-        const tip = new THREE.Mesh(
-          new THREE.SphereGeometry(0.008, 8, 8),
-          new THREE.MeshBasicMaterial({ color: 0x88ccff })
-        );
-        tip.position.z = -0.02;
-        controller.add(tip);
 
         // Add simple controller model with trigger feedback
         const model = createSimpleControllerModel(controller);
