@@ -842,6 +842,7 @@
        ========================= */
     let mouse = new THREE.Vector2();
     let raycaster = new THREE.Raycaster();
+    let activePointerId = null; // track which finger/mouse is dragging a brick on mobile
 
     function setupTouchOrPointer() {
       window.addEventListener('pointerdown', onPointerDown, { passive: false });
@@ -852,6 +853,10 @@
     function onPointerDown(event) {
       if (isMobile && mobileLookMode) return;
       if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+      // Only allow one active drag at a time
+      if (activePointerId !== null) return;
+      activePointerId = event.pointerId;
 
       event.preventDefault();
       const rect = renderer.domElement.getBoundingClientRect();
@@ -865,23 +870,40 @@
         const obj = hitExit[0].object;
         let cur = obj;
         while (cur && !cur.userData.interactable) cur = cur.parent;
-        if (cur && cur.userData.interactable === 'exit') { exitImmersive(); return; }
+        if (cur && cur.userData.interactable === 'exit') {
+          // clear pointer tracking since we will not start a drag
+          activePointerId = null;
+          exitImmersive();
+          return;
+        }
       }
 
-      // Then bricks
-      const intersects = raycaster.intersectObjects(cubes);
+      // Then bricks: select only non-placed (loose) bricks
+      const intersects = raycaster.intersectObjects(cubes, false);
       if (intersects.length > 0) {
-        selectedCube = intersects[0].object;
-        selectedCube.userData.isGrabbed = true;
-        releaseFromSlot(selectedCube);
-        updateFloorIndicatorForBrick(selectedCube);
-        if (navigator.vibrate) navigator.vibrate(15);
+        const hit = intersects.find(i => !i.object.userData.isPlaced);
+        if (hit) {
+          selectedCube = hit.object;
+          selectedCube.userData.isGrabbed = true;
+          // If by any chance the brick was snapped, free it (defensive)
+          releaseFromSlot(selectedCube);
+          updateFloorIndicatorForBrick(selectedCube);
+          if (navigator.vibrate) navigator.vibrate(15);
+        } else {
+          // Nothing eligible to drag under the finger
+          activePointerId = null;
+        }
+      } else {
+        // No object under the finger
+        activePointerId = null;
       }
     }
 
     function onPointerMove(event) {
-      if (!selectedCube) return;
       if (isMobile && mobileLookMode) return;
+      if (activePointerId === null || event.pointerId !== activePointerId) return;
+      if (!selectedCube) return;
+
       const rect = renderer.domElement.getBoundingClientRect();
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -906,7 +928,10 @@
       }
     }
 
-    function onPointerUp() {
+    function onPointerUp(event) {
+      if (activePointerId === null || event.pointerId !== activePointerId) return;
+      activePointerId = null;
+
       if (selectedCube) {
         selectedCube.userData.isGrabbed = false;
         moves++;
@@ -1156,25 +1181,27 @@
         if (obj && obj.userData.interactable === 'exit') { exitImmersive(); return; }
       }
 
-      // Try to directly hit a brick
-      const hits = intersectBricksFromController(controller);
+      // Try to directly hit a NON-PLACED brick first
+      let hits = intersectBricksFromController(controller).filter(h => !h.object.userData.isPlaced);
       if (hits.length > 0) {
         selectedCube = hits[0].object;
       } else {
-        // Fallback, choose the closest brick near a forward point
+        // Fallback, choose the closest NON-PLACED brick near a forward point
         const ray = getControllerRay(controller);
         const grabPoint = ray.origin.clone().addScaledVector(ray.direction, 1.2);
         let best = null, bestDist = 0.35;
         for (const b of cubes) {
+          if (b.userData.isPlaced) continue;
           const d = b.position.distanceTo(grabPoint);
           if (d < bestDist) { best = b; bestDist = d; }
         }
         if (!best) {
-          // Final fallback, closest to the controller itself
+          // Final fallback, closest NON-PLACED to the controller itself
           const ctrlPos = new THREE.Vector3();
           controller.getWorldPosition(ctrlPos);
           let bd = 0.3;
           for (const b of cubes) {
+            if (b.userData.isPlaced) continue;
             const d = b.position.distanceTo(ctrlPos);
             if (d < bd) { best = b; bd = d; }
           }
@@ -1184,6 +1211,7 @@
 
       if (selectedCube) {
         selectedCube.userData.isGrabbed = true;
+        // Defensive free (should be loose already)
         releaseFromSlot(selectedCube);
         VR_STATE.grabbing = true;
         VR_STATE.controller = controller;
