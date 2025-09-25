@@ -134,7 +134,6 @@
     let BRICK_POSITIONS = [];
     let HALF_POSITIONS = [];
 
-    // Alternate half slots by row, even rows half on right, odd rows half on left
     function rebuildBrickPositions() {
       BRICK_POSITIONS = [];
       HALF_POSITIONS = [];
@@ -174,7 +173,7 @@
     let floorIndicator = null;
 
     // Interactables
-    const INTERACTABLES = []; // exit sign lives here
+    const INTERACTABLES = [];
 
     // Scoring and progress
     let score = 0, gamesPlayed = 0, startTime = 0, moves = 0, bricksPlaced = 0, currentBrickNumber = 1;
@@ -368,7 +367,7 @@
         const g = new THREE.PlaneGeometry(HALF_BRICK_W, BRICK_D);
         const m = new THREE.MeshBasicMaterial({ color: MARKER_NORMAL.color, transparent: true, opacity: MARKER_NORMAL.opacity, side: THREE.DoubleSide });
         const marker = new THREE.Mesh(g, m);
-        marker.rotation.x = -Math.PI / 2; /* fixed dot syntax */
+        marker.rotation.x = -Math.PI / 2;
         marker.position.set(pos.x, pos.y - (BRICK_H / 2) - 0.01, pos.z);
         marker.userData = { index: gridMarkers.length, occupied: false, row: pos.row, type: 'half', width: HALF_BRICK_W, side: pos.side };
         scene.add(marker);
@@ -437,7 +436,7 @@
           const topY = ROW1_Y + (ROWS - 1) * (BRICK_H + GAP_Y) + BRICK_H * 1.8;
           exitSign.position.set(0, topY, WALL_Z);
           exitSign.scale.set(0.8, 0.8, 0.8);
-          exitSign.rotation.y = 0;
+          exitSign.rotation.y = Math.PI / 2; // rotated 90 degrees
           exitSign.userData.interactable = 'exit';
           scene.add(exitSign);
           INTERACTABLES.push(exitSign);
@@ -459,6 +458,7 @@
           const fallback = new THREE.Mesh(p, m);
           const topY = ROW1_Y + (ROWS - 1) * (BRICK_H + GAP_Y) + BRICK_H * 1.8;
           fallback.position.set(0, topY, WALL_Z);
+          fallback.rotation.y = Math.PI / 2; // match rotation
           fallback.userData.interactable = 'exit';
           scene.add(fallback);
           INTERACTABLES.push(fallback);
@@ -656,10 +656,11 @@
       const brick = new THREE.Mesh(new THREE.BoxGeometry(width, BRICK_H, depth), material);
       addBrickGlow(brick);
 
+      // Spawn on user's right side, closer to camera
       const jitterX = (Math.random() - 0.5) * 0.1;
-      theJitterZ = (Math.random() - 0.5) * 0.1; /* minor unique var to avoid shadowing */
-      const baseX  = -2.6 + jitterX;
-      const baseZ  = WALL_Z - 0.8 + theJitterZ;
+      const jitterZ = (Math.random() - 0.5) * 0.1;
+      const baseX  = +1.2 + jitterX;            // right of center
+      const baseZ  = WALL_Z + 0.9 + jitterZ;    // closer to user than the wall, around z = -0.6
 
       const free = findFreeSpawnXZ(baseX, baseZ, width, depth);
 
@@ -775,7 +776,6 @@
       }
     }
 
-    // One toast helper
     function showToast(text, ms = 2000) {
       const t = document.createElement('div');
       t.className = 'toast';
@@ -931,7 +931,6 @@
       if (line && line.material) line.material.color.setHex(color);
     }
 
-    // Build ray using controller world rotation, forward is -Z
     function getControllerRay(controller) {
       _tmpMat4.identity().extractRotation(controller.matrixWorld);
       _ctrlDir.set(0, 0, -1).applyMatrix4(_tmpMat4).normalize();
