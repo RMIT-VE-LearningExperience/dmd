@@ -140,7 +140,7 @@
       const startX = -((COLS - 1) / 2) * (BRICK_W + GAP_X);
       for (let r = 0; r < ROWS; r++) {
         const y = ROW1_Y + r * (BRICK_H + GAP_Y);
-        const offset = (r % 2 === 1) ? (BRICK_W / 2) : 0;
+        const offset = (r % 2 === 1) ? ((BRICK_W + GAP_X) / 2) : 0;
         for (let c = 0; c < COLS; c++) {
           const x = startX + c * (BRICK_W + GAP_X) + offset;
           BRICK_POSITIONS.push({ x, y, z: WALL_Z, row: r });
@@ -451,14 +451,13 @@
           const topY = ROW1_Y + (ROWS - 1) * (BRICK_H + GAP_Y) + BRICK_H * 1.8;
           exitSign.position.set(0, topY, WALL_Z);
           exitSign.scale.set(0.8, 0.8, 0.8);
-          exitSign.rotation.y = Math.PI / 2; // rotated 90 degrees
+          exitSign.rotation.y = Math.PI / 2;
           exitSign.userData.interactable = 'exit';
           scene.add(exitSign);
           INTERACTABLES.push(exitSign);
         },
         undefined,
         () => {
-          // Fallback, simple EXIT panel
           const p = new THREE.PlaneGeometry(0.6, 0.25);
           const c = document.createElement('canvas');
           c.width = 512; c.height = 256;
@@ -473,7 +472,7 @@
           const fallback = new THREE.Mesh(p, m);
           const topY = ROW1_Y + (ROWS - 1) * (BRICK_H + GAP_Y) + BRICK_H * 1.8;
           fallback.position.set(0, topY, WALL_Z);
-          fallback.rotation.y = Math.PI / 2; // match rotation
+          fallback.rotation.y = Math.PI / 2;
           fallback.userData.interactable = 'exit';
           scene.add(fallback);
           INTERACTABLES.push(fallback);
@@ -597,12 +596,13 @@
     const FLOOR_TOP = -0.5;
     function getNoOverlapHoverY(x, z) {
       let minCenterY = FLOOR_TOP + (BRICK_H / 2);
-      const CLEAR = 0.04;
+      const CLEAR = 0.08;
+      const PROX_PAD = 0.12;
       for (const b of cubes) {
         if (!b.userData.isPlaced) continue;
         const params = b.geometry && b.geometry.parameters ? b.geometry.parameters : { width: BRICK_W, depth: BRICK_D };
-        const halfW = (params.width || BRICK_W) / 2;
-        const halfD = (params.depth || BRICK_D) / 2;
+        const halfW = (params.width || BRICK_W) / 2 + PROX_PAD;
+        const halfD = (params.depth || BRICK_D) / 2 + PROX_PAD;
         const overlapsX = Math.abs(x - b.position.x) <= halfW;
         const overlapsZ = Math.abs(z - b.position.z) <= halfD;
         if (overlapsX && overlapsZ) {
@@ -800,7 +800,7 @@
       setTimeout(() => t.remove(), ms);
     }
 
-    // Hover highlight, now only sets hover look and a flag, the pulser handles idle look
+    // Hover highlight, only sets hover look and a flag, the pulser handles idle look
     function highlightNearbyPositions(x, z) {
       const threshold = 0.35;
       let best = { d: Infinity, m: null };
@@ -825,7 +825,7 @@
           m.userData.isHoverLit = true;
           if (d < best.d) best = { d, m };
         } else {
-          m.userData.isHoverLit = false; // idle, pulser will style it
+          m.userData.isHoverLit = false;
         }
       });
 
@@ -936,7 +936,6 @@
     };
 
     function makeControllerRig(controller) {
-      // Simple light controller body
       const handle = new THREE.Mesh(
         new THREE.CylinderGeometry(0.015, 0.02, 0.12, 16),
         new THREE.MeshStandardMaterial({ color: 0xF7F4EA, roughness: 0.6, metalness: 0.0 })
@@ -945,7 +944,6 @@
       handle.position.z = -0.03;
       controller.add(handle);
 
-      // Pointer line
       const points = [new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,-1)];
       const geom = new THREE.BufferGeometry().setFromPoints(points);
       const mat  = new THREE.LineBasicMaterial({ color: VR_STATE.lineColorIdle, transparent: true, opacity: 0.9 });
@@ -1010,7 +1008,6 @@
     function onVRSelectStart(controller, event) {
       if (VR_STATE.grabbing) return;
 
-      // Interactables first
       const iHit = intersectInteractablesFromController(controller);
       if (iHit.length) {
         let obj = iHit[0].object;
@@ -1021,12 +1018,10 @@
         }
       }
 
-      // Then bricks
       const hits = intersectBricksFromController(controller);
       if (hits.length > 0) {
         selectedCube = hits[0].object;
       } else {
-        // Ray based proximity fallback
         const ray = getControllerRay(controller);
         const grabPoint = ray.origin.clone().addScaledVector(ray.direction, 1.2);
         let best = null, bestDist = 0.35;
@@ -1095,7 +1090,6 @@
     function render() {
       if (controls) controls.update();
 
-      // VR dragging follows ground projection
       if (VR_STATE.grabbing && VR_STATE.controller && selectedCube) {
         const hit = projectToGround(VR_STATE.controller);
         if (hit) {
@@ -1108,10 +1102,8 @@
         }
       }
 
-      // Idle marker pulse
       pulseMarkers(performance.now() * 0.001);
 
-      // Update pointer line emphasis
       controllers.forEach(rig => {
         const c = rig.controller, line = c.getObjectByName('pointerLine');
         if (line && c.visible) line.material.opacity = VR_STATE.grabbing && VR_STATE.controller === c ? 1.0 : 0.7;
@@ -1153,7 +1145,6 @@
       });
     }
 
-    // Init
     init();
   </script>
 </body>
