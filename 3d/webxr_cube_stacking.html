@@ -231,6 +231,8 @@
 
     // Floor indicator ring that follows the grabbed brick
     let floorIndicator = null;
+    // Floor mesh, visible in desktop and VR, hidden in AR
+    let floorMesh = null;
 
     // Interactables that can be clicked with ray, includes exit sign
     const INTERACTABLES = [];
@@ -281,7 +283,7 @@
     }
 
     /* =========================
-       VR system detection, used for a small info badge
+       VR system detection
        ========================= */
     function detectVRSystem(session) {
       const ua = navigator.userAgent.toLowerCase();
@@ -309,7 +311,7 @@
       camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
       camera.position.set(0, 1, 1.8);
 
-      // Renderer, alpha must be true so AR can be transparent
+      // Renderer, alpha true gives transparent canvas in AR
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -334,7 +336,7 @@
       controls.maxDistance = 6;
       controls.update();
 
-      // Mobile look toggle, allows swapping between camera control and building
+      // Mobile look toggle
       if (isMobile) {
         controls.enabled = false;
         const lookBtn = document.getElementById('lookToggle');
@@ -353,20 +355,25 @@
         renderer.xr.addEventListener('sessionstart', () => {
           if (controls) controls.enabled = false;
           detectVRSystem(renderer.xr.getSession());
+          // Hide synthetic floor in AR, show in VR
+          if (isAR && floorMesh) floorMesh.visible = false;
+          else if (floorMesh) floorMesh.visible = true;
           showToast(isAR ? 'AR mode active' : 'VR mode active');
         });
         renderer.xr.addEventListener('sessionend', () => {
           if (controls && !isMobile) controls.enabled = true;
           vrSystem = 'unknown';
           isAR = false;
-          scene.background = new THREE.Color(0x87CEEB);  // restore sky
+          // Restore sky and canvas opacity, show floor again
+          scene.background = new THREE.Color(0x87CEEB);
           renderer.setClearAlpha(1.0);
           renderer.domElement.style.background = '';
+          if (floorMesh) floorMesh.visible = true;
           showToast('XR session ended');
         });
       }
 
-      // Lighting, soft hemisphere plus a directional light with shadows
+      // Lighting
       const hemiLight = new THREE.HemisphereLight(0xF7F4EA, 0xA8BBA3, 0.6);
       scene.add(hemiLight);
 
@@ -380,19 +387,19 @@
       dirLight.shadow.bias = -0.0005;
       scene.add(dirLight);
 
-      // Floor, only meaningful in desktop or VR, will still exist in AR but the camera sees passthrough
+      // Floor, visible in desktop or VR, hidden automatically in AR
       const floorGeo = new THREE.PlaneGeometry(20, 20);
       const floorMat = new THREE.MeshStandardMaterial({ color: 0xF7F4EA, roughness: 0.95, metalness: 0.0 });
-      const floor = new THREE.Mesh(floorGeo, floorMat);
-      floor.rotation.x = -Math.PI / 2;
-      floor.position.y = -0.5;
-      floor.receiveShadow = true;
-      stageGroup.add(floor);
+      floorMesh = new THREE.Mesh(floorGeo, floorMat);
+      floorMesh.rotation.x = -Math.PI / 2;
+      floorMesh.position.y = -0.5;
+      floorMesh.receiveShadow = true;
+      stageGroup.add(floorMesh);
 
-      // Parent the stage to the scene so we can move it as one unit in AR
+      // Parent the stage to the scene for AR anchoring
       scene.add(stageGroup);
 
-      // Ground indicator that follows the grabbed brick
+      // Ground indicator ring that follows the grabbed brick
       createFloorIndicator();
 
       // Build the wall markers, show only the active row
@@ -402,7 +409,7 @@
       activeRow = 0;
       setRowVisibility(activeRow);
 
-      // Helper visuals on the floor and instruction plaque
+      // Helper visuals
       createMovementBoundaries();
       createVRInstructions();
 
@@ -516,7 +523,7 @@
     }
 
     /* =========================
-       Floor helper visuals, thin ring and text panel
+       Floor helper visuals
        ========================= */
     function createMovementBoundaries() {
       const geo = new THREE.RingGeometry(1.4, 1.42, 64);
@@ -561,14 +568,14 @@
           const topY = ROW1_Y + (ROWS - 1) * (BRICK_H + GAP_Y) + BRICK_H * 1.8;
           exitSign.position.set(0, topY, WALL_Z);
           exitSign.scale.set(0.8, 0.8, 0.8);
-          exitSign.rotation.y = Math.PI / 2; // rotated by 90 degrees
+          exitSign.rotation.y = Math.PI / 2;
           exitSign.userData.interactable = 'exit';
           stageGroup.add(exitSign);
           INTERACTABLES.push(exitSign);
         },
         undefined,
         () => {
-          // Fallback plane sign when GLB is blocked or not found
+          // Fallback plane sign
           const p = new THREE.PlaneGeometry(0.6, 0.25);
           const c = document.createElement('canvas');
           c.width = 512; c.height = 256;
@@ -658,7 +665,7 @@
       showToast('New game');
     }
 
-    // Outline glow attached to a brick for subtle feedback
+    // Outline glow attached to a brick, subtle feedback
     function addBrickGlow(brick) {
       const glowGeom = brick.geometry.clone();
       const glowMat = new THREE.MeshBasicMaterial({ color: 0x7A8F6A, transparent: true, opacity: 0.0, depthWrite: false });
@@ -668,7 +675,6 @@
       brick.add(glow);
       brick.userData.glow = glow;
     }
-
     function setBrickGlow(brick, active) {
       if (!brick || !brick.userData) return;
       const glow = brick.userData.glow;
@@ -832,7 +838,7 @@
     }
 
     /* =========================
-       Desktop pointer interactions, grab and drop logic
+       Desktop pointer interactions
        ========================= */
     let mouse = new THREE.Vector2();
     let raycaster = new THREE.Raycaster();
@@ -925,7 +931,7 @@
     }
 
     /* =========================
-       Marker highlight and idle pulse, blue tint while idle
+       Marker highlight and idle pulse
        ========================= */
     function highlightNearbyPositions(x, z) {
       const threshold = 0.35;
@@ -1291,7 +1297,7 @@
       const vrBtn = document.getElementById('vrButton');
       const arBtn = document.getElementById('arButton');
 
-      // Start opaque VR, suitable for Quest or Pico
+      // Start VR
       vrBtn.addEventListener('click', async () => {
         if (!navigator.xr) { showToast('WebXR not supported'); return; }
         try {
@@ -1306,7 +1312,7 @@
         } catch (e) { console.warn(e); showToast('Could not start VR session'); }
       });
 
-      // Start passthrough AR, requires immersive ar and hit test
+      // Start AR with passthrough and hit test
       arBtn.addEventListener('click', async () => {
         if (!navigator.xr) { showToast('WebXR not supported'); return; }
         try {
@@ -1329,7 +1335,7 @@
           xrLocalSpace = await session.requestReferenceSpace('local-floor');
           xrHitSource = await session.requestHitTestSource({ space: xrViewerSpace });
 
-          buildARReticle();                 // create reticle if not already built
+          buildARReticle();
           session.addEventListener('select', onARSelectPlaceStage);
 
           renderer.xr.setReferenceSpaceType('local-floor');
@@ -1372,7 +1378,7 @@
       // Move entire stage to the reticle pose
       stageGroup.position.copy(arReticle.position);
 
-      // Face the user, yaw only, keeps wall nicely aligned
+      // Face the user, yaw only
       const camDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
       const yaw = Math.atan2(camDir.x, camDir.z);
       stageGroup.rotation.set(0, yaw, 0);
