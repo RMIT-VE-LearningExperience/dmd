@@ -359,7 +359,14 @@
         const marker = new THREE.Mesh(g, m);
         marker.rotation.x = -Math.PI / 2;
         marker.position.set(pos.x, pos.y - (BRICK_H / 2) - 0.01, pos.z);
-        marker.userData = { index: gridMarkers.length, occupied: false, row: pos.row, type: 'full', width: BRICK_W };
+        marker.userData = {
+          index: gridMarkers.length,
+          occupied: false,
+          row: pos.row,
+          type: 'full',
+          width: BRICK_W,
+          isHoverLit: false
+        };
         scene.add(marker);
         gridMarkers.push(marker);
       });
@@ -369,7 +376,15 @@
         const marker = new THREE.Mesh(g, m);
         marker.rotation.x = -Math.PI / 2;
         marker.position.set(pos.x, pos.y - (BRICK_H / 2) - 0.01, pos.z);
-        marker.userData = { index: gridMarkers.length, occupied: false, row: pos.row, type: 'half', width: HALF_BRICK_W, side: pos.side };
+        marker.userData = {
+          index: gridMarkers.length,
+          occupied: false,
+          row: pos.row,
+          type: 'half',
+          width: HALF_BRICK_W,
+          side: pos.side,
+          isHoverLit: false
+        };
         scene.add(marker);
         gridMarkers.push(marker);
       });
@@ -659,8 +674,8 @@
       // Spawn on user's right side, closer to camera
       const jitterX = (Math.random() - 0.5) * 0.1;
       const jitterZ = (Math.random() - 0.5) * 0.1;
-      const baseX  = +1.2 + jitterX;            // right of center
-      const baseZ  = WALL_Z + 0.9 + jitterZ;    // closer to user than the wall, around z = -0.6
+      const baseX  = +1.2 + jitterX;
+      const baseZ  = WALL_Z + 0.9 + jitterZ;
 
       const free = findFreeSpawnXZ(baseX, baseZ, width, depth);
 
@@ -776,6 +791,7 @@
       }
     }
 
+    // Toast
     function showToast(text, ms = 2000) {
       const t = document.createElement('div');
       t.className = 'toast';
@@ -784,34 +800,61 @@
       setTimeout(() => t.remove(), ms);
     }
 
+    // Hover highlight, now only sets hover look and a flag, the pulser handles idle look
     function highlightNearbyPositions(x, z) {
       const threshold = 0.35;
       let best = { d: Infinity, m: null };
+
       gridMarkers.forEach(m => {
-        if (!m.visible) return;
+        if (!m.visible) { m.userData.isHoverLit = false; return; }
+
         if (m.userData.occupied) {
           m.material.color.setHex(MARKER_OCCUPIED.color);
           m.material.opacity = MARKER_OCCUPIED.opacity;
+          m.userData.isHoverLit = false;
           return;
         }
+
         const dx = x - m.position.x;
         const dz = z - m.position.z;
         const d  = Math.hypot(dx, dz);
+
         if (d < threshold) {
           m.material.color.setHex(MARKER_HOVER.color);
           m.material.opacity = MARKER_HOVER.opacity;
+          m.userData.isHoverLit = true;
           if (d < best.d) best = { d, m };
         } else {
-          m.material.color.setHex(MARKER_NORMAL.color);
-          m.material.opacity = MARKER_NORMAL.opacity;
+          m.userData.isHoverLit = false; // idle, pulser will style it
         }
       });
+
       if (best.m) {
         best.m.material.opacity = Math.min(0.9, MARKER_HOVER.opacity + 0.15);
         hoverValidIndex = best.m.userData.index;
       } else {
         hoverValidIndex = null;
       }
+    }
+
+    // Pulse idle markers with a blue tint
+    const _pulseBlue = new THREE.Color(0x66aaff);
+    const _pulseBase = new THREE.Color(MARKER_NORMAL.color);
+    function pulseMarkers(timeSeconds) {
+      const s = timeSeconds;
+      const wave = 0.5 + 0.5 * Math.sin(s * 2.2);
+      const tint = 0.15 + 0.25 * wave;
+      const opa  = MARKER_NORMAL.opacity + 0.08 * Math.sin(s * 2.2);
+
+      gridMarkers.forEach(m => {
+        if (!m.visible) return;
+        if (m.userData.occupied) return;
+        if (m.userData.isHoverLit) return;
+
+        const c = m.material.color;
+        c.copy(_pulseBase).lerp(_pulseBlue, tint);
+        m.material.opacity = Math.max(0.15, Math.min(0.75, opa));
+      });
     }
 
     function snapToBrickPosition(brick) {
@@ -1064,6 +1107,9 @@
           updateFloorIndicatorForBrick(selectedCube);
         }
       }
+
+      // Idle marker pulse
+      pulseMarkers(performance.now() * 0.001);
 
       // Update pointer line emphasis
       controllers.forEach(rig => {
