@@ -842,6 +842,11 @@
        ========================= */
     let mouse = new THREE.Vector2();
     let raycaster = new THREE.Raycaster();
+
+    // In AR the stage is anchored at stageGroup.position.y; use that as ground Y.
+    function getGroundPlaneY() {
+      return isAR ? stageGroup.position.y : 0;
+    }
     let activePointerId = null; // track which finger/mouse is dragging a brick on mobile
 
     function setupTouchOrPointer() {
@@ -885,6 +890,14 @@
         if (hit) {
           selectedCube = hit.object;
           selectedCube.userData.isGrabbed = true;
+          // Compute drag offset so the brick doesn't jump when starting drag
+          const planeY = getGroundPlaneY();
+          const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -planeY);
+          const intersection = new THREE.Vector3();
+          raycaster.ray.intersectPlane(plane, intersection);
+          const offX = (isFinite(intersection.x) ? (selectedCube.position.x - intersection.x) : 0);
+          const offZ = (isFinite(intersection.z) ? (selectedCube.position.z - intersection.z) : 0);
+          selectedCube.userData.grabOffset = { x: offX, z: offZ };
           // If by any chance the brick was snapped, free it (defensive)
           releaseFromSlot(selectedCube);
           updateFloorIndicatorForBrick(selectedCube);
@@ -912,17 +925,30 @@
 
     function updateCubePosition() {
       if (!selectedCube) return;
+
       raycaster.setFromCamera(mouse, camera);
-      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+      // Use dynamic ground plane: AR uses the stage's anchored Y
+      const planeY = getGroundPlaneY();
+      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -planeY);
+
       const intersection = new THREE.Vector3();
       raycaster.ray.intersectPlane(plane, intersection);
 
       if (intersection) {
-        selectedCube.position.x = intersection.x;
-        selectedCube.position.z = intersection.z;
-        const minCenterY = getNoOverlapHoverY(intersection.x, intersection.z);
-        selectedCube.position.y = Math.max(minCenterY, intersection.y);
-        highlightNearbyPositions(intersection.x, intersection.z);
+        const off = (selectedCube.userData && selectedCube.userData.grabOffset) ? selectedCube.userData.grabOffset : { x: 0, z: 0 };
+        const nextX = intersection.x + off.x;
+        const nextZ = intersection.z + off.z;
+
+        selectedCube.position.x = nextX;
+        selectedCube.position.z = nextZ;
+
+        const minCenterY = getNoOverlapHoverY(nextX, nextZ);
+        // Keep brick at least on the current plane height
+        const desiredY = Math.max(minCenterY, planeY + (BRICK_H * 0.5));
+        selectedCube.position.y = desiredY;
+
+        highlightNearbyPositions(nextX, nextZ);
         setBrickGlow(selectedCube, hoverValidIndex !== null);
         updateFloorIndicatorForBrick(selectedCube);
       }
@@ -939,6 +965,7 @@
         const snapped = snapToBrickPosition(selectedCube);
         if (snapped && navigator.vibrate) navigator.vibrate(60);
         hideFloorIndicator();
+        if (selectedCube.userData) delete selectedCube.userData.grabOffset;
         selectedCube = null;
         checkWinCondition();
       }
@@ -1159,13 +1186,17 @@
     }
 
     // Project controller ray to a ground plane, return suggested Y to avoid overlaps
-    const _groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-    const _hit = new THREE.Vector3();
     function projectToGround(controller) {
+      // Dynamic ground: AR uses stage anchor Y, otherwise 0
+      const planeY = getGroundPlaneY();
+      const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -planeY);
+
       const ray = getControllerRay(controller);
-      if (ray.intersectPlane(_groundPlane, _hit)) {
-        const minCenterY = getNoOverlapHoverY(_hit.x, _hit.z);
-        return { x: _hit.x, z: _hit.z, y: minCenterY };
+      const hit = new THREE.Vector3();
+      if (ray.intersectPlane(groundPlane, hit)) {
+        const minCenterY = getNoOverlapHoverY(hit.x, hit.z);
+        const desiredY = Math.max(minCenterY, planeY + (BRICK_H * 0.5));
+        return { x: hit.x, z: hit.z, y: desiredY };
       }
       return null;
     }
