@@ -1,1263 +1,1400 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>WebXR Brick Building Game - Physics Based</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      background: #2C2C2C;
-      color: #EDE7E0;
-      font-family: Arial, sans-serif;
-      overflow: hidden;
-      touch-action: none;
-    }
-    #uiOverlay {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      z-index: 1000;
-      background: rgba(180, 179, 179, 0.65);
-      border: 1px solid rgba(237, 231, 224, 0.15);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      padding: 12px 14px;
-      border-radius: 12px;
-      max-width: 320px;
-      line-height: 1.3;
-    }
-    #uiOverlay h2 {
-      margin: 0 0 8px;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      color: #EDE7E0;
-    }
-    #scoreDisplay, #moveDisplay, #timeDisplay {
-      font-size: 14px;
-      color: #EDE7E0;
-      margin: 4px 0;
-      opacity: 0.95;
-    }
-    #helpOverlay {
-      position: absolute;
-      bottom: 12px;
-      left: 12px;
-      z-index: 1000;
-      background: rgba(27, 26, 23, 0.65);
-      border: 1px solid rgba(237, 231, 224, 0.15);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      padding: 10px 12px;
-      border-radius: 12px;
-      max-width: 360px;
-      font-size: 13px;
-      color: #EDE7E0;
-    }
-    #vrButton, #resetButton, #helpButton {
-      position: absolute;
-      right: 20px;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      cursor: pointer;
-      color: #1B1A17;
-      background: #C49A36;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-      transition: transform .08s ease, opacity .15s ease;
-    }
-    #vrButton:hover, #resetButton:hover, #helpButton:hover {
-      transform: translateY(-1px);
-      opacity: 0.95;
-    }
-    #vrButton:disabled {
-      background: #666;
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-    #vrButton { bottom: 20px; }
-    #resetButton { bottom: 66px; }
-    #helpButton { bottom: 112px; }
-    #status {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      z-index: 1000;
-      background: rgba(27, 26, 23, 0.65);
-      border: 1px solid rgba(237, 231, 224, 0.15);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      padding: 10px 12px;
-      border-radius: 12px;
-      font-size: 13px;
-      color: #EDE7E0;
-      min-width: 160px;
-      text-align: right;
-    }
-    #status .progress {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      min-width: 180px;
-    }
-    #status .progress__label {
-      font-size: 12px;
-      letter-spacing: 0.2px;
-      color: #EDE7E0;
-      opacity: 0.95;
-      text-align: right;
-    }
-    #status .progress__track {
-      position: relative;
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(237,231,224,0.18);
-      overflow: hidden;
-    }
-    #status .progress__bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #9CAF88, #C49A36);
-      border-radius: 999px;
-      transition: width 180ms ease;
-    }
-    .toast {
-      position: absolute;
-      left: 50%;
-      top: 72px;
-      transform: translateX(-50%);
-      z-index: 1000;
-      background: rgba(27, 26, 23, 0.75);
-      border: 1px solid rgba(237, 231, 224, 0.2);
-      padding: 12px 16px;
-      border-radius: 12px;
-      max-width: 280px;
-      font-size: 14px;
-      color: #EDE7E0;
-    }
-    .toast.success {
-      background: rgba(156, 175, 136, 0.8);
-      color: #1B1A17;
-    }
-    .toast.error {
-      background: rgba(192, 101, 62, 0.8);
-      color: #EDE7E0;
-    }
-    #gameState {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1001;
-      background: rgba(27, 26, 23, 0.9);
-      border: 2px solid #C49A36;
-      padding: 24px;
-      border-radius: 16px;
-      text-align: center;
-      display: none;
-    }
-    #gameState h3 {
-      margin: 0 0 16px;
-      font-size: 24px;
-      color: #C49A36;
-    }
-    #gameState button {
-      background: #C49A36;
-      color: #1B1A17;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin: 8px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WebXR Brick Building Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+        }
+        
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 280px;
+            font-size: 14px;
+        }
+        
+        #vrButton {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1000;
+        }
+        
+        #vrButton:hover {
+            background: #45a049;
+        }
+        
+        #vrButton:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        #status {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            text-align: center;
+            background: rgba(0,0,0,0.9);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            max-width: 400px;
+        }
+        
+        #resetButton {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            padding: 12px 24px;
+            background: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1000;
+        }
+        
+        #resetScoreButton {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            padding: 8px 16px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        
+        .brick-pattern {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            margin: 8px 0;
+        }
+        
+        .brick-row {
+            display: flex;
+            gap: 1px;
+        }
+        
+        .brick-row.offset {
+            transform: translateX(15px); /* Offset second row */
+        }
+        
+        .brick-cell {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 4px 8px;
+            text-align: center;
+            border-radius: 3px;
+            font-size: 12px;
+            min-width: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            #info {
+                font-size: 12px;
+                padding: 10px;
+                max-width: 250px;
+            }
+            
+            #vrButton {
+                bottom: 10px;
+                right: 10px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            
+            #resetButton {
+                bottom: 10px;
+                left: 10px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            
+            #resetScoreButton {
+                bottom: 60px;
+                left: 10px;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            #status {
+                font-size: 16px;
+                padding: 15px;
+                max-width: 300px;
+            }
+            
+            .brick-cell {
+                font-size: 10px;
+                padding: 2px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div id="uiOverlay">
-    <h2>Brick Stacker</h2>
-    <div id="scoreDisplay"></div>
-    <div id="moveDisplay"></div>
-    <div id="timeDisplay"></div>
-  </div>
-
-  <div id="helpOverlay">
-    <strong>Goal:</strong> Stack all 6 bricks to build a stable wall<br>
-    <strong>Rule:</strong> Top row bricks need support underneath<br>
-    <strong>VR:</strong> point and squeeze trigger to grab bricks<br>
-    <strong>Desktop:</strong> click and drag bricks<br>
-    <strong>Mobile:</strong> tap and drag bricks<br>
-    <strong>Tip:</strong> slots glow green when placement is valid
-  </div>
-
-  <button id="vrButton">WebXR Not Available</button>
-  <button id="resetButton">New Game</button>
-  <button id="helpButton">Help</button>
-
-  <div id="status"></div>
-  
-  <div id="gameState">
-    <h3 id="gameStateTitle">Wall Complete!</h3>
-    <p id="gameStateMessage"></p>
-    <button onclick="resetGame()">Build Another Wall</button>
-  </div>
-
-  <script>
-    // Game constants
-    const BRICK_W = 0.8, BRICK_H = 0.35, BRICK_D = 0.4;
-    const ROW1_Y = BRICK_H / 2;
-    const GAP_Y = 0.05;
-    const ROW2_Y = ROW1_Y + BRICK_H + GAP_Y;
-
-    // Marker visuals
-    const MARKER_NORMAL = { color: 0x6E665A, opacity: 0.28 };
-    const MARKER_HOVER = { color: 0xEDE7E0, opacity: 0.6 };
-    const MARKER_OCCUPIED = { color: 0x7A8F6A, opacity: 0.75 };
-    const MARKER_VALID = { color: 0x9CAF88, opacity: 0.8 };
-    const MARKER_INVALID = { color: 0xC0653E, opacity: 0.6 };
-
-    // Wall layout
-    const WALL_Z = -1.5;
-    const ROW2_OFFSET_X = BRICK_W / 2;
-    const BRICK_POSITIONS = [
-      // Bottom row (positions 0, 1, 2)
-      { x: -0.8, y: ROW1_Y, z: WALL_Z, row: 'bottom' },
-      { x: 0.0, y: ROW1_Y, z: WALL_Z, row: 'bottom' },
-      { x: 0.8, y: ROW1_Y, z: WALL_Z, row: 'bottom' },
-      // Top row (positions 3, 4, 5)
-      { x: -0.8 + ROW2_OFFSET_X, y: ROW2_Y, z: WALL_Z, row: 'top' },
-      { x: 0.0 + ROW2_OFFSET_X, y: ROW2_Y, z: WALL_Z, row: 'top' },
-      { x: 0.8 + ROW2_OFFSET_X, y: ROW2_Y, z: WALL_Z, row: 'top' }
-    ];
-
-    // Support mapping: which bottom positions support each top position
-    const SUPPORT_MAP = {
-      3: [0, 1], // Top position 3 is supported by bottom positions 0 and 1
-      4: [1, 2], // Top position 4 is supported by bottom positions 1 and 2
-      5: [2]     // Top position 5 is supported by bottom position 2
-    };
-
-    // Global variables
-    let scene, camera, renderer, cubes = [], controllers = [];
-    let selectedCube = null, selectedController = null;
-    let gridMarkers = [], hoverValidIndex = null;
-    let isMobile = false, isXRSupported = false, xrSession = null;
-
-    // Game state
-    let score = 0, gamesPlayed = 0, startTime = 0, moves = 0;
-    let bricksPlaced = 0, currentBrickNumber = 1;
-    let gameComplete = false;
-
-    // Brick color palette
-    const BRICK_COLORS = [
-      { name: 'terracotta', color: 0xC0653E, hexColor: '#C0653E' },
-      { name: 'sage', color: 0x9CAF88, hexColor: '#9CAF88' },
-      { name: 'slate', color: 0x556B6F, hexColor: '#556B6F' },
-      { name: 'sand', color: 0xD4C4A8, hexColor: '#D4C4A8' },
-      { name: 'clay', color: 0xA46A52, hexColor: '#A46A52' },
-      { name: 'ochre', color: 0xC49A36, hexColor: '#C49A36' }
-    ];
-
-    // Audio context for sound effects
-    let audioContext = null;
-
-    function initAudio() {
-      try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      } catch (e) {
-        console.warn('Audio not available');
-      }
-    }
-
-    function playSound(frequency, duration = 0.1, type = 'sine') {
-      if (!audioContext) return;
-      
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-      oscillator.type = type;
-      
-      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-      
-      oscillator.start();
-      oscillator.stop(audioContext.currentTime + duration);
-    }
-
-    async function checkWebXRSupport() {
-      const button = document.getElementById('vrButton');
-      
-      if (!navigator.xr) {
-        button.textContent = 'WebXR Not Supported';
-        button.disabled = true;
-        return false;
-      }
-
-      try {
-        isXRSupported = await navigator.xr.isSessionSupported('immersive-vr');
-        
-        if (isXRSupported) {
-          button.textContent = 'Enter VR';
-          button.disabled = false;
-        } else {
-          button.textContent = 'VR Not Available';
-          button.disabled = true;
-        }
-        
-        return isXRSupported;
-      } catch (error) {
-        // Handle specific permission policy errors
-        if (error.name === 'SecurityError' || error.message.includes('permissions policy')) {
-          console.warn('WebXR blocked by permissions policy. This is normal on some hosting platforms.');
-          button.textContent = 'VR Blocked by Policy';
-          button.disabled = true;
-        } else if (error.name === 'NotSupportedError') {
-          button.textContent = 'VR Not Supported';
-          button.disabled = true;
-        } else {
-          console.warn('WebXR support check failed:', error);
-          button.textContent = 'VR Unavailable';
-          button.disabled = true;
-        }
-        
-        isXRSupported = false;
-        return false;
-      }
-    }
-
-    function renderStatusUI() {
-      const s = document.getElementById('status');
-      s.innerHTML = `
-        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" aria-label="Wall progress">
-          <div class="progress__label">0 / 6 bricks placed</div>
-          <div class="progress__track"><div class="progress__bar" style="width:0%"></div></div>
+    <div id="info">
+        <h3>🧱 Brick Wall Building Game</h3>
+        <div id="targetOrder" style="font-size: 14px; margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+            <strong>Target: Staggered Brick Wall:</strong>
+            <div id="brickDisplay" class="brick-pattern">
+                <div class="brick-row">
+                    <div class="brick-cell">🧱</div>
+                    <div class="brick-cell">🧱</div>
+                    <div class="brick-cell">🧱</div>
+                </div>
+                <div class="brick-row offset">
+                    <div class="brick-cell">🧱</div>
+                    <div class="brick-cell">🧱</div>
+                    <div class="brick-cell">🧱</div>
+                </div>
+            </div>
+            <small style="color: #aaa;">↑ Classic staggered pattern - one brick at a time!</small>
         </div>
-      `;
-    }
+        <div id="scoreBoard" style="font-size: 14px; margin: 10px 0;">
+            <strong>Score:</strong> <span id="currentScore">0</span> | 
+            <strong>Games:</strong> <span id="gamesCount">0</span> |
+            <strong>Moves:</strong> <span id="movesCount">0</span><br>
+            <strong>Progress:</strong> <span id="bricksProgress">0/6 bricks placed</span>
+        </div>
+        <p><strong>Goal:</strong> Build a staggered brick wall - one brick at a time!</p>
+        <p><strong>VR:</strong> Point and squeeze trigger<br>
+        <strong>Desktop:</strong> Click and drag<br>
+        <strong>Mobile:</strong> Tap and drag</p>
+        <p><strong>System:</strong> Place each brick to spawn the next one!</p>
+    </div>
+    
+    <button id="vrButton">Enter VR</button>
+    <button id="resetButton">New Game</button>
+    <button id="resetScoreButton">Reset Score</button>
+    <div id="status"></div>
 
-    function updateProgress() {
-      const now = Math.min(6, Math.max(0, bricksPlaced));
-      const pct = (now / 6) * 100;
-      const statusEl = document.getElementById('status');
-      const bar = statusEl.querySelector('.progress__bar');
-      const label = statusEl.querySelector('.progress__label');
-      if (bar) bar.style.width = pct + '%';
-      if (label) label.textContent = `${now} / 6 bricks placed`;
-      const pr = statusEl.querySelector('.progress');
-      if (pr) pr.setAttribute('aria-valuenow', String(now));
-    }
-
-    function updateScoreDisplay() {
-      document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
-      document.getElementById('moveDisplay').textContent = `Moves: ${moves}`;
-      const t = startTime > 0 ? Math.floor((Date.now() - startTime) / 1000) : 0;
-      document.getElementById('timeDisplay').textContent = `Time: ${t}s`;
-    }
-
-    function showGameState(title, message, success = false) {
-      const gameState = document.getElementById('gameState');
-      const titleEl = document.getElementById('gameStateTitle');
-      const messageEl = document.getElementById('gameStateMessage');
-      
-      titleEl.textContent = title;
-      messageEl.textContent = message;
-      gameState.style.display = 'block';
-      
-      if (success) {
-        playSound(523.25, 0.2); // C5 note
-        setTimeout(() => playSound(659.25, 0.2), 100); // E5
-        setTimeout(() => playSound(783.99, 0.3), 200); // G5
-      } else {
-        playSound(220, 0.3, 'sawtooth'); // A3 error sound
-      }
-    }
-
-    function hideGameState() {
-      document.getElementById('gameState').style.display = 'none';
-    }
-
-    function checkSupport(topPositionIndex) {
-      // Only check support for top row positions (3, 4, 5)
-      if (topPositionIndex < 3) return true;
-      
-      const supportPositions = SUPPORT_MAP[topPositionIndex];
-      if (!supportPositions) return true;
-
-      // Check if at least one supporting position has a brick
-      return supportPositions.some(supportIndex => {
-        const marker = gridMarkers[supportIndex];
-        return marker && marker.userData.occupied;
-      });
-    }
-
-    function isValidPlacement(positionIndex) {
-      const marker = gridMarkers[positionIndex];
-      if (!marker || marker.userData.occupied) return false;
-      
-      // Check support requirement for top row
-      return checkSupport(positionIndex);
-    }
-
-    async function init() {
-      isMobile = /Mobi|Android/i.test(navigator.userAgent);
-      
-      // Check WebXR support
-      await checkWebXRSupport();
-      
-      // Initialize audio
-      initAudio();
-
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x404040); // Dark gray instead of blue
-
-      camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 1, 1.8);
-
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      renderer.xr.enabled = true;
-      document.body.appendChild(renderer.domElement);
-
-      // Improved lighting
-      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
-      scene.add(hemiLight);
-
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      dirLight.position.set(3, 4, 2);
-      dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 2048;
-      dirLight.shadow.mapSize.height = 2048;
-      dirLight.shadow.camera.near = 0.5;
-      dirLight.shadow.camera.far = 50;
-      dirLight.shadow.camera.left = -10;
-      dirLight.shadow.camera.right = 10;
-      dirLight.shadow.camera.top = 10;
-      dirLight.shadow.camera.bottom = -10;
-      dirLight.shadow.bias = -0.0001;
-      scene.add(dirLight);
-
-      // Environment
-      setupEnvironment();
-      createGridMarkers();
-      setupControllers();
-      setupEventListeners();
-
-      // Initialize game
-      resetGame();
-
-      window.addEventListener('resize', onWindowResize);
-      renderer.setAnimationLoop(render);
-    }
-
-    function setupEnvironment() {
-      // Floor with better materials
-      const floorGeo = new THREE.PlaneGeometry(20, 20);
-      const floorMat = new THREE.MeshLambertMaterial({ 
-        color: 0x2a2a2a, 
-        transparent: true,
-        opacity: 0.8 
-      });
-      const floor = new THREE.Mesh(floorGeo, floorMat);
-      floor.rotation.x = -Math.PI / 2;
-      floor.position.y = -0.5;
-      floor.receiveShadow = true;
-      scene.add(floor);
-
-      // Background wall
-      const wallGeo = new THREE.PlaneGeometry(6, 4);
-      const wallMat = new THREE.MeshLambertMaterial({ 
-        color: 0x555555, 
-        transparent: true,
-        opacity: 0.3 
-      });
-      const wall = new THREE.Mesh(wallGeo, wallMat);
-      wall.position.set(0, 1, -2.5);
-      wall.receiveShadow = true;
-      scene.add(wall);
-
-      // Boundary indicators
-      const ringGeo = new THREE.RingGeometry(1.4, 1.42, 64);
-      const ringMat = new THREE.MeshBasicMaterial({ 
-        color: 0x556B6F, 
-        transparent: true, 
-        opacity: 0.3 
-      });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.rotation.x = -Math.PI / 2;
-      ring.position.y = -0.49;
-      scene.add(ring);
-    }
-
-    function createGridMarkers() {
-      gridMarkers.forEach(marker => {
-        scene.remove(marker);
-        if (marker.geometry) marker.geometry.dispose();
-        if (marker.material) marker.material.dispose();
-      });
-      gridMarkers = [];
-
-      BRICK_POSITIONS.forEach((pos, index) => {
-        const markerGeometry = new THREE.PlaneGeometry(BRICK_W * 1.1, BRICK_D * 1.1);
-        const markerMaterial = new THREE.MeshBasicMaterial({
-          color: MARKER_NORMAL.color,
-          transparent: true,
-          opacity: MARKER_NORMAL.opacity,
-          side: THREE.DoubleSide
-        });
-        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-        marker.rotation.x = -Math.PI / 2;
-        marker.position.set(pos.x, pos.y - (BRICK_H / 2) - 0.02, pos.z);
-        marker.userData = { 
-          index, 
-          occupied: false,
-          row: pos.row
-        };
-        scene.add(marker);
-        gridMarkers.push(marker);
-      });
-    }
-
-    function resetGame() {
-      // Reset state
-      gameComplete = false;
-      hoverValidIndex = null;
-      selectedCube = null;
-      bricksPlaced = 0;
-      currentBrickNumber = 1;
-      moves = 0;
-      startTime = Date.now();
-
-      // Clear existing bricks
-      cubes.forEach(cube => {
-        scene.remove(cube);
-        if (cube.geometry) cube.geometry.dispose();
-        if (cube.material) {
-          if (Array.isArray(cube.material)) {
-            cube.material.forEach(mat => {
-              if (mat.map) mat.map.dispose();
-              mat.dispose();
+    <script>
+        let scene, camera, renderer, cubes = [], controllers = [];
+        let selectedCube = null, selectedController = null;
+        let gameWon = false;
+        let TARGET_ARRANGEMENT = [
+            { number: 1, color: '#ff4757', emoji: '🔴' },
+            { number: 2, color: '#2ed573', emoji: '🟢' },
+            { number: 3, color: '#3742fa', emoji: '🔵' },
+            { number: 4, color: '#ffa502', emoji: '🟡' },
+            { number: 5, color: '#ff6348', emoji: '🟠' },
+            { number: 6, color: '#9c88ff', emoji: '🟣' }
+        ]; // Always in numerical order 1-6
+        let isMobile = false;
+        let touchStartPos = null;
+        
+        // Scoring system
+        let score = 0;
+        let gamesPlayed = 0;
+        let startTime = 0;
+        let moves = 0;
+        let bricksPlaced = 0;
+        let currentBrickNumber = 1;
+        
+        // Realistic brick wall positions (running bond pattern)
+        const BRICK_POSITIONS = [
+            // Bottom row (3 bricks, no gaps)
+            { x: -0.8, y: 0.175, z: -1.5, row: 0, col: 0 },
+            { x: 0, y: 0.175, z: -1.5, row: 0, col: 1 },
+            { x: 0.8, y: 0.175, z: -1.5, row: 0, col: 2 },
+            // Top row (offset by half brick = 0.4, creating staggered pattern)
+            { x: -0.4, y: 0.525, z: -1.5, row: 1, col: 0 },
+            { x: 0.4, y: 0.525, z: -1.5, row: 1, col: 1 },
+            { x: 1.2, y: 0.525, z: -1.5, row: 1, col: 2 }
+        ];
+        
+        // Raycaster for mouse/controller interaction
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        // Detect mobile devices
+        isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                  ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        
+        init();
+        animate();
+        
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.6, 2.5); // Moved back for better VR view
+            
+            // Renderer with XR support
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.xr.enabled = true;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.appendChild(renderer.domElement);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            // Floor with better appearance
+            const floorGeometry = new THREE.PlaneGeometry(10, 10);
+            const floorMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x2d4a4a,
+                transparent: true,
+                opacity: 0.8
             });
-          } else {
-            if (cube.material.map) cube.material.map.dispose();
-            cube.material.dispose();
-          }
-        }
-      });
-      cubes = [];
-
-      // Recreate grid markers
-      createGridMarkers();
-
-      // Spawn first brick
-      spawnNextBrick();
-
-      // Update UI
-      updateScoreDisplay();
-      renderStatusUI();
-      updateProgress();
-      hideGameState();
-
-      showToast('Build a stable brick wall! Top bricks need support below.', 3000);
-    }
-
-    function spawnNextBrick() {
-      if (currentBrickNumber > 6 || gameComplete) return;
-
-      const colorData = BRICK_COLORS[currentBrickNumber - 1];
-      
-      // Create materials with number texture
-      const materials = [];
-      for (let i = 0; i < 6; i++) {
-        const texture = createNumberTexture(currentBrickNumber, colorData.hexColor);
-        materials.push(new THREE.MeshLambertMaterial({ map: texture }));
-      }
-
-      const brick = new THREE.Mesh(
-        new THREE.BoxGeometry(BRICK_W, BRICK_H, BRICK_D), 
-        materials
-      );
-      
-      addBrickGlow(brick);
-
-      // Spawn position with some randomness
-      const jitterX = (Math.random() - 0.5) * 0.2;
-      const jitterZ = (Math.random() - 0.5) * 0.2;
-      const spawnX = -2.5 + jitterX;
-      const spawnZ = WALL_Z - 1.2 + jitterZ;
-      
-      brick.position.set(spawnX, ROW1_Y, spawnZ);
-      brick.castShadow = true;
-      brick.receiveShadow = true;
-      
-      brick.userData = {
-        number: currentBrickNumber,
-        isPlaced: false,
-        slotIndex: null,
-        isGrabbed: false
-      };
-
-      scene.add(brick);
-      cubes.push(brick);
-
-      playSound(440, 0.1); // A4 note for spawn
-    }
-
-    function addBrickGlow(brick) {
-      const glowGeom = brick.geometry.clone();
-      const glowMat = new THREE.MeshBasicMaterial({
-        color: 0x7A8F6A,
-        transparent: true,
-        opacity: 0.0,
-        depthWrite: false
-      });
-      const glow = new THREE.Mesh(glowGeom, glowMat);
-      glow.scale.set(1.08, 1.08, 1.08);
-      glow.renderOrder = 999;
-      brick.add(glow);
-      brick.userData.glow = glow;
-    }
-
-    function setBrickGlow(brick, active) {
-      if (!brick?.userData?.glow) return;
-      const glow = brick.userData.glow;
-      const target = active ? 0.6 : 0.0;
-      glow.material.opacity = THREE.MathUtils.lerp(glow.material.opacity, target, 0.1);
-      glow.visible = glow.material.opacity > 0.02;
-    }
-
-    function createNumberTexture(number, baseHex) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 256;
-      canvas.height = 256;
-      const ctx = canvas.getContext('2d');
-
-      // Base color
-      ctx.fillStyle = baseHex;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Subtle texture lines
-      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-      ctx.lineWidth = 1;
-      for (let y = 8; y < canvas.height; y += 16) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-
-      // Number
-      ctx.fillStyle = 'rgba(0,0,0,0.8)';
-      ctx.font = 'bold 120px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(String(number), canvas.width / 2, canvas.height / 2);
-
-      // White outline for better visibility
-      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-      ctx.lineWidth = 3;
-      ctx.strokeText(String(number), canvas.width / 2, canvas.height / 2);
-
-      return new THREE.CanvasTexture(canvas);
-    }
-
-    function setupEventListeners() {
-      // VR Button
-      document.getElementById('vrButton').addEventListener('click', async () => {
-        if (!isXRSupported) {
-          if (!navigator.xr) {
-            showToast('WebXR is not supported in this browser. Try Chrome, Edge, or Firefox on a VR-capable device.', 4000, 'error');
-          } else {
-            showToast('VR is not available. This may be due to browser policies or lack of VR hardware.', 4000, 'error');
-          }
-          return;
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.5;
+            floor.receiveShadow = true;
+            scene.add(floor);
+            
+            // Create grid markers for brick positions
+            createGridMarkers();
+            
+            // Create movement boundary markers for VR
+            createMovementBoundaries();
+            
+            // Create VR instruction panels
+            createVRInstructions();
+            
+            // Create cubes
+            createCubes();
+            
+            // Setup VR controllers
+            setupControllers();
+            
+            // Setup VR button
+            setupVRButton();
+            
+            // Setup controls based on device
+            if (isMobile) {
+                setupTouchControls();
+            } else {
+                setupMouseControls();
+            }
+            
+            // Reset button
+            setupResetButton();
+            
+            // Window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Instructions
+            showInstructions();
         }
         
-        try {
-          if (!xrSession) {
-            xrSession = await navigator.xr.requestSession('immersive-vr', {
-              requiredFeatures: ['local-floor'],
-              optionalFeatures: ['hand-tracking']
-            });
-            await renderer.xr.setSession(xrSession);
+        function createVRInstructions() {
+            // Instructions will be attached to left controller dynamically
+            // This function now just creates the template
+        }
+        
+        function attachInstructionsToController(controller, isLeftHand = true) {
+            // Remove any existing instructions on this controller
+            const existingInstructions = controller.getObjectByName('controllerInstructions');
+            if (existingInstructions) {
+                controller.remove(existingInstructions);
+            }
             
-            xrSession.addEventListener('end', () => {
-              xrSession = null;
-              document.getElementById('vrButton').textContent = 'Enter VR';
+            // Create floating instruction panel attached to left controller
+            const instructionsGroup = new THREE.Group();
+            instructionsGroup.name = 'controllerInstructions';
+            
+            // Background panel (smaller for hand attachment)
+            const panelGeometry = new THREE.PlaneGeometry(0.3, 0.2);
+            const panelMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x000000, 
+                transparent: true, 
+                opacity: 0.8 
+            });
+            const panel = new THREE.Mesh(panelGeometry, panelMaterial);
+            
+            // Position relative to controller (above and slightly forward)
+            instructionsGroup.position.set(0, 0.15, -0.1);
+            instructionsGroup.rotation.x = -Math.PI / 6; // Tilt toward user
+            instructionsGroup.add(panel);
+            
+            // Create text texture for instructions
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 160;
+            const context = canvas.getContext('2d');
+            
+            // Background
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, 256, 160);
+            
+            // Border
+            context.strokeStyle = '#00ff88';
+            context.lineWidth = 3;
+            context.strokeRect(0, 0, 256, 160);
+            
+            // Text
+            context.fillStyle = '#ffffff';
+            context.font = '14px Arial';
+            context.textAlign = 'center';
+            context.fillText('🧱 Staggered Bricks', 128, 20);
+            context.font = '11px Arial';
+            context.fillText('Build realistic wall', 128, 40);
+            context.fillText('One brick at a time!', 128, 55);
+            context.fillText('Joystick: Move around', 128, 75);
+            context.fillText('Trigger: Grab brick', 128, 90);
+            context.fillText('Place to spawn next', 128, 105);
+            context.font = '9px Arial';
+            context.fillText('Score: Speed + Efficiency', 128, 125);
+            context.fillText('Progress on this hand!', 128, 140);
+            
+            const textTexture = new THREE.CanvasTexture(canvas);
+            const textMaterial = new THREE.MeshBasicMaterial({ map: textTexture });
+            const textMesh = new THREE.Mesh(panelGeometry, textMaterial);
+            textMesh.position.z = 0.001; // Slightly in front of background
+            
+            instructionsGroup.add(textMesh);
+            controller.add(instructionsGroup);
+            
+            return instructionsGroup;
+        }
+        
+        function createVRStatusPanel(message, color = '#ffffff', duration = 3000) {
+            // Remove existing status panel
+            const existingPanel = scene.getObjectByName('vrStatusPanel');
+            if (existingPanel) {
+                scene.remove(existingPanel);
+            }
+            
+            const statusGroup = new THREE.Group();
+            statusGroup.name = 'vrStatusPanel';
+            
+            // Background panel
+            const panelGeometry = new THREE.PlaneGeometry(2.5, 1);
+            const panelMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x000000, 
+                transparent: true, 
+                opacity: 0.9 
+            });
+            const panel = new THREE.Mesh(panelGeometry, panelMaterial);
+            
+            // Position status in front of player
+            statusGroup.position.set(0, 1.8, -1.2);
+            statusGroup.add(panel);
+            
+            // Create text texture
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 200;
+            const context = canvas.getContext('2d');
+            
+            // Background
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, 512, 200);
+            
+            // Border
+            context.strokeStyle = color;
+            context.lineWidth = 6;
+            context.strokeRect(0, 0, 512, 200);
+            
+            // Text
+            context.fillStyle = color;
+            context.font = 'bold 32px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            
+            // Split message into lines
+            const lines = message.split('<br>');
+            const lineHeight = 40;
+            const startY = 100 - (lines.length - 1) * lineHeight / 2;
+            
+            lines.forEach((line, index) => {
+                // Remove HTML tags for canvas rendering
+                const cleanLine = line.replace(/<[^>]*>/g, '');
+                context.fillText(cleanLine, 256, startY + index * lineHeight);
             });
             
-            document.getElementById('vrButton').textContent = 'Exit VR';
-            showToast('Welcome to VR! Use trigger to grab bricks.', 3000);
-          } else {
-            await xrSession.end();
-          }
-        } catch (error) {
-          console.error('VR session failed:', error);
-          
-          if (error.name === 'SecurityError') {
-            showToast('VR access denied. Please enable VR permissions or try a different browser.', 4000, 'error');
-          } else if (error.name === 'NotSupportedError') {
-            showToast('VR hardware not detected. Please connect a VR headset and try again.', 4000, 'error');
-          } else {
-            showToast('VR session failed. Please check your VR setup and try again.', 3000, 'error');
-          }
-        }
-      });
-
-      // Game controls
-      document.getElementById('resetButton').addEventListener('click', resetGame);
-      document.getElementById('helpButton').addEventListener('click', () => {
-        showToast('Stack bricks to build a wall! Top row bricks need support underneath.', 4000);
-      });
-
-      // Input controls
-      if (isMobile) {
-        setupTouchControls();
-      } else {
-        setupDesktopControls();
-      }
-    }
-
-    function setupDesktopControls() {
-      const mouse = new THREE.Vector2();
-      const raycaster = new THREE.Raycaster();
-
-      function updateMousePosition(event) {
-        const rect = renderer.domElement.getBoundingClientRect();
-        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      }
-
-      renderer.domElement.addEventListener('mousedown', (event) => {
-        if (gameComplete) return;
-        
-        updateMousePosition(event);
-        raycaster.setFromCamera(mouse, camera);
-
-        const availableBricks = cubes.filter(b => !b.userData.isPlaced);
-        const intersects = raycaster.intersectObjects(availableBricks);
-        
-        if (intersects.length > 0) {
-          selectedCube = intersects[0].object;
-          selectedCube.userData.isGrabbed = true;
-          releaseFromSlot(selectedCube);
-          playSound(523.25, 0.05); // C5 grab sound
-        }
-      });
-
-      renderer.domElement.addEventListener('mousemove', (event) => {
-        if (!selectedCube || gameComplete) return;
-
-        updateMousePosition(event);
-        updateCubePosition(mouse, raycaster);
-      });
-
-      renderer.domElement.addEventListener('mouseup', () => {
-        if (selectedCube && !gameComplete) {
-          selectedCube.userData.isGrabbed = false;
-          moves++;
-          updateScoreDisplay();
-
-          const snapped = snapToBrickPosition(selectedCube);
-          if (snapped) {
-            playSound(659.25, 0.1); // E5 snap sound
-          }
-
-          selectedCube = null;
-          checkWinCondition();
-        }
-      });
-    }
-
-    function setupTouchControls() {
-      const touches = new Map();
-      const raycaster = new THREE.Raycaster();
-
-      function getTouchPosition(touch) {
-        const rect = renderer.domElement.getBoundingClientRect();
-        return new THREE.Vector2(
-          ((touch.clientX - rect.left) / rect.width) * 2 - 1,
-          -((touch.clientY - rect.top) / rect.height) * 2 + 1
-        );
-      }
-
-      renderer.domElement.addEventListener('touchstart', (event) => {
-        event.preventDefault();
-        if (gameComplete) return;
-
-        const touch = event.changedTouches[0];
-        const mouse = getTouchPosition(touch);
-        
-        raycaster.setFromCamera(mouse, camera);
-        const availableBricks = cubes.filter(b => !b.userData.isPlaced);
-        const intersects = raycaster.intersectObjects(availableBricks);
-        
-        if (intersects.length > 0) {
-          selectedCube = intersects[0].object;
-          selectedCube.userData.isGrabbed = true;
-          releaseFromSlot(selectedCube);
-          touches.set(touch.identifier, mouse);
-          
-          // Haptic feedback
-          if (navigator.vibrate) navigator.vibrate(50);
-          playSound(523.25, 0.05);
-        }
-      });
-
-      renderer.domElement.addEventListener('touchmove', (event) => {
-        event.preventDefault();
-        if (!selectedCube || gameComplete) return;
-
-        const touch = event.changedTouches[0];
-        const mouse = getTouchPosition(touch);
-        touches.set(touch.identifier, mouse);
-        
-        updateCubePosition(mouse, raycaster);
-      });
-
-      renderer.domElement.addEventListener('touchend', (event) => {
-        event.preventDefault();
-        if (selectedCube && !gameComplete) {
-          selectedCube.userData.isGrabbed = false;
-          moves++;
-          updateScoreDisplay();
-
-          const snapped = snapToBrickPosition(selectedCube);
-          if (snapped && navigator.vibrate) {
-            navigator.vibrate(100);
-            playSound(659.25, 0.1);
-          }
-
-          selectedCube = null;
-          checkWinCondition();
-        }
-
-        const touch = event.changedTouches[0];
-        touches.delete(touch.identifier);
-      });
-    }
-
-    function updateCubePosition(mouse, raycaster) {
-      if (!selectedCube) return;
-
-      raycaster.setFromCamera(mouse, camera);
-      
-      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-      const intersection = new THREE.Vector3();
-      raycaster.ray.intersectPlane(plane, intersection);
-
-      if (intersection) {
-        selectedCube.position.x = intersection.x;
-        selectedCube.position.z = intersection.z;
-        selectedCube.position.y = Math.max(ROW1_Y, intersection.y);
-        
-        // Floor constraint
-        const FLOOR_TOP = -0.5;
-        const minCenterY = FLOOR_TOP + (BRICK_H / 2);
-        if (selectedCube.position.y < minCenterY) {
-          selectedCube.position.y = minCenterY;
+            const textTexture = new THREE.CanvasTexture(canvas);
+            const textMaterial = new THREE.MeshBasicMaterial({ map: textTexture });
+            const textMesh = new THREE.Mesh(panelGeometry, textMaterial);
+            textMesh.position.z = 0.01;
+            
+            statusGroup.add(textMesh);
+            scene.add(statusGroup);
+            
+            // Auto-remove after duration
+            setTimeout(() => {
+                const panel = scene.getObjectByName('vrStatusPanel');
+                if (panel) {
+                    scene.remove(panel);
+                }
+            }, duration);
         }
         
-        highlightNearbyPositions(intersection.x, intersection.z);
-        setBrickGlow(selectedCube, hoverValidIndex !== null && isValidPlacement(hoverValidIndex));
-      }
-    }
-
-    function setupControllers() {
-      // Clear existing controllers
-      controllers.forEach(controller => {
-        try {
-          scene.remove(controller);
-        } catch (e) {}
-      });
-      controllers = [];
-
-      // Create enhanced controller models
-      function createControllerModel() {
-        const group = new THREE.Group();
-        
-        // Main body
-        const body = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.015, 0.02, 0.12, 12),
-          new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.1, roughness: 0.8 })
-        );
-        body.position.y = -0.04;
-        group.add(body);
-
-        // Trigger
-        const trigger = new THREE.Mesh(
-          new THREE.BoxGeometry(0.025, 0.015, 0.035),
-          new THREE.MeshStandardMaterial({ 
-            color: 0x666666, 
-            emissive: 0x000000, 
-            metalness: 0.2, 
-            roughness: 0.7 
-          })
-        );
-        trigger.position.set(0, 0.025, -0.015);
-        group.add(trigger);
-
-        // Ring for better visibility
-        const ring = new THREE.Mesh(
-          new THREE.RingGeometry(0.02, 0.025, 16),
-          new THREE.MeshBasicMaterial({ color: 0x4A90E2, transparent: true, opacity: 0.6 })
-        );
-        ring.position.y = 0.01;
-        ring.rotation.x = -Math.PI / 2;
-        group.add(ring);
-
-        return { group, trigger, ring };
-      }
-
-      // Setup both controllers
-      for (let i = 0; i < 2; i++) {
-        const controller = renderer.xr.getController(i);
-        controller.userData = { grabbedBrick: null };
-
-        // Laser pointer
-        const rayGeometry = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(0, 0, 0),
-          new THREE.Vector3(0, 0, -1)
-        ]);
-        const rayMaterial = new THREE.LineBasicMaterial({ 
-          color: 0x4A90E2, 
-          transparent: true, 
-          opacity: 0.8 
-        });
-        const laser = new THREE.Line(rayGeometry, rayMaterial);
-        laser.visible = false;
-        controller.add(laser);
-        controller.userData.laser = laser;
-
-        // Controller model
-        const { group: model, trigger, ring } = createControllerModel();
-        controller.add(model);
-        controller.userData.triggerMesh = trigger;
-        controller.userData.ringMesh = ring;
-
-        // Event listeners
-        controller.addEventListener('selectstart', onVRSelectStart);
-        controller.addEventListener('selectend', onVRSelectEnd);
-
-        scene.add(controller);
-        controllers.push(controller);
-      }
-    }
-
-    function onVRSelectStart(event) {
-      if (gameComplete) return;
-      
-      const controller = event.target;
-      const raycaster = new THREE.Raycaster();
-
-      // Create ray from controller
-      const tempMatrix = new THREE.Matrix4();
-      raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-      tempMatrix.extractRotation(controller.matrixWorld);
-      raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-
-      // Find grabbable bricks
-      const availableBricks = cubes.filter(b => !b.userData.isPlaced);
-      const intersects = raycaster.intersectObjects(availableBricks);
-
-      if (intersects.length > 0) {
-        const brick = intersects[0].object;
-        controller.userData.grabbedBrick = brick;
-        brick.userData.isGrabbed = true;
-        releaseFromSlot(brick);
-
-        // Attach brick to controller
-        controller.attach(brick);
-        brick.position.set(0, 0, -0.4);
-
-        // Visual feedback
-        if (controller.userData.laser) controller.userData.laser.visible = true;
-        if (controller.userData.triggerMesh) {
-          controller.userData.triggerMesh.material.emissive.setHex(0x4A90E2);
-        }
-        if (controller.userData.ringMesh) {
-          controller.userData.ringMesh.material.opacity = 1.0;
-        }
-
-        // Haptic feedback
-        if (controller.gamepad?.hapticActuators?.length > 0) {
-          controller.gamepad.hapticActuators[0].pulse(0.5, 100);
-        }
-
-        playSound(523.25, 0.05);
-      }
-    }
-
-    function onVRSelectEnd(event) {
-      if (gameComplete) return;
-      
-      const controller = event.target;
-      const brick = controller.userData.grabbedBrick;
-      
-      if (!brick) return;
-
-      // Detach from controller
-      scene.attach(brick);
-      brick.userData.isGrabbed = false;
-
-      // Reset visual feedback
-      if (controller.userData.laser) controller.userData.laser.visible = false;
-      if (controller.userData.triggerMesh) {
-        controller.userData.triggerMesh.material.emissive.setHex(0x000000);
-      }
-      if (controller.userData.ringMesh) {
-        controller.userData.ringMesh.material.opacity = 0.6;
-      }
-
-      moves++;
-      updateScoreDisplay();
-
-      const snapped = snapToBrickPosition(brick);
-      if (snapped) {
-        // Haptic feedback for successful placement
-        if (controller.gamepad?.hapticActuators?.length > 0) {
-          controller.gamepad.hapticActuators[0].pulse(0.8, 150);
-        }
-        playSound(659.25, 0.1);
-      }
-
-      controller.userData.grabbedBrick = null;
-      checkWinCondition();
-    }
-
-    function releaseFromSlot(brick) {
-      if (!brick?.userData) return;
-      
-      if (brick.userData.isPlaced && brick.userData.slotIndex !== null) {
-        const marker = gridMarkers[brick.userData.slotIndex];
-        if (marker) {
-          marker.userData.occupied = false;
-          updateMarkerAppearance(marker);
+        function createGridMarkers() {
+            // Create subtle grid markers to show where cubes should go
+            BRICK_POSITIONS.forEach((pos, index) => {
+                const markerGeometry = new THREE.PlaneGeometry(0.4, 0.4);
+                const markerMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0x444444,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+                marker.rotation.x = -Math.PI / 2;
+                marker.position.set(pos.x, pos.y - 0.24, pos.z);
+                scene.add(marker);
+            });
         }
         
-        brick.userData.isPlaced = false;
-        brick.userData.slotIndex = null;
+        function createMovementBoundaries() {
+            // Create subtle boundary markers to show movement area in VR
+            const boundaryGeometry = new THREE.RingGeometry(4.5, 5, 16);
+            const boundaryMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x444444,
+                transparent: true,
+                opacity: 0.15,
+                side: THREE.DoubleSide
+            });
+            const boundaryMarker = new THREE.Mesh(boundaryGeometry, boundaryMaterial);
+            boundaryMarker.rotation.x = -Math.PI / 2;
+            boundaryMarker.position.y = -0.48;
+            boundaryMarker.name = 'movementBoundary';
+            scene.add(boundaryMarker);
+        }
         
-        if (bricksPlaced > 0) {
-          bricksPlaced--;
-          updateProgress();
+        function createNumberTexture(number, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const context = canvas.getContext('2d');
+            
+            // Background
+            context.fillStyle = color;
+            context.fillRect(0, 0, 128, 128);
+            
+            // Border
+            context.strokeStyle = '#000000';
+            context.lineWidth = 4;
+            context.strokeRect(0, 0, 128, 128);
+            
+            // Number
+            context.fillStyle = '#000000';
+            context.font = 'bold 80px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(number.toString(), 64, 64);
+            
+            return new THREE.CanvasTexture(canvas);
         }
-      }
-    }
-
-    function highlightNearbyPositions(x, z) {
-      const threshold = 0.6;
-      let bestMarker = null;
-      let bestDistance = Infinity;
-
-      gridMarkers.forEach(marker => {
-        const dx = x - marker.position.x;
-        const dz = z - marker.position.z;
-        const distance = Math.hypot(dx, dz);
-
-        if (marker.userData.occupied) {
-          // Keep current state for occupied markers
-          return;
-        }
-
-        if (distance < threshold) {
-          const canPlace = isValidPlacement(marker.userData.index);
-          
-          if (canPlace) {
-            marker.material.color.setHex(MARKER_VALID.color);
-            marker.material.opacity = MARKER_VALID.opacity;
-          } else {
-            marker.material.color.setHex(MARKER_INVALID.color);
-            marker.material.opacity = MARKER_INVALID.opacity;
-          }
-          
-          if (distance < bestDistance) {
-            bestDistance = distance;
-            bestMarker = marker;
-          }
-        } else {
-          marker.material.color.setHex(MARKER_NORMAL.color);
-          marker.material.opacity = MARKER_NORMAL.opacity;
-        }
-      });
-
-      if (bestMarker) {
-        const canPlace = isValidPlacement(bestMarker.userData.index);
-        if (canPlace) {
-          bestMarker.material.opacity = Math.min(0.95, MARKER_VALID.opacity + 0.2);
-          hoverValidIndex = bestMarker.userData.index;
-        } else {
-          bestMarker.material.opacity = Math.min(0.8, MARKER_INVALID.opacity + 0.1);
-          hoverValidIndex = null;
-        }
-      } else {
-        hoverValidIndex = null;
-      }
-    }
-
-    function updateMarkerAppearance(marker) {
-      if (marker.userData.occupied) {
-        marker.material.color.setHex(MARKER_OCCUPIED.color);
-        marker.material.opacity = MARKER_OCCUPIED.opacity;
-      } else {
-        marker.material.color.setHex(MARKER_NORMAL.color);
-        marker.material.opacity = MARKER_NORMAL.opacity;
-      }
-    }
-
-    function snapToBrickPosition(brick) {
-      let bestPosition = null;
-      let minDistance = Infinity;
-      const SNAP_RADIUS = 0.65;
-
-      BRICK_POSITIONS.forEach((pos, index) => {
-        const marker = gridMarkers[index];
-        if (marker?.userData.occupied) return;
         
-        // Check if this position is valid (has support if needed)
-        if (!isValidPlacement(index)) return;
-
-        const distance = Math.hypot(brick.position.x - pos.x, brick.position.z - pos.z);
-        if (distance < SNAP_RADIUS && distance < minDistance) {
-          minDistance = distance;
-          bestPosition = { ...pos, index };
+        function updateTargetDisplay() {
+            // The staggered pattern is now shown directly in the HTML
+            console.log('Staggered brick wall pattern - one brick spawns at a time!');
         }
-      });
-
-      if (bestPosition) {
-        // Snap to position
-        brick.position.set(bestPosition.x, bestPosition.y, bestPosition.z);
-        brick.userData.isPlaced = true;
-        brick.userData.slotIndex = bestPosition.index;
-
-        // Update marker
-        const marker = gridMarkers[bestPosition.index];
-        if (marker) {
-          marker.userData.occupied = true;
-          updateMarkerAppearance(marker);
+        
+        function updateScoreDisplay() {
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('gamesCount').textContent = gamesPlayed;
+            document.getElementById('movesCount').textContent = moves;
+            document.getElementById('bricksProgress').textContent = `${bricksPlaced}/6 bricks placed`;
         }
-
-        setBrickGlow(brick, false);
-        hoverValidIndex = null;
-
-        bricksPlaced++;
-        currentBrickNumber++;
-        updateProgress();
-
-        // Spawn next brick if not complete
-        if (bricksPlaced < 6) {
-          setTimeout(() => spawnNextBrick(), 600);
-        } else {
-          setTimeout(() => checkWinCondition(), 300);
+        
+        function calculateScore(timeBonus, movesPenalty) {
+            // Base score: 150 points (more complex game)
+            // Time bonus: up to 75 points (faster = more points)
+            // Move penalty: -8 points per move over 6
+            let gameScore = 150 + timeBonus - movesPenalty;
+            return Math.max(gameScore, 15); // Minimum 15 points
         }
-
-        return true;
-      } else {
-        // Invalid placement - show feedback
-        if (brick.position.y > ROW1_Y + 0.1) { // Likely trying to place on top row
-          showToast('Top row bricks need support underneath!', 2000, 'error');
-          playSound(200, 0.2, 'sawtooth');
+        
+        function createCubes() {
+            cubes = []; // Clear existing cubes
+            bricksPlaced = 0;
+            currentBrickNumber = 1;
+            
+            gameWon = false;
+            moves = 0;
+            startTime = Date.now();
+            
+            // Spawn only the first brick
+            spawnNextBrick();
+            
+            // Update display
+            updateTargetDisplay();
+            updateScoreDisplay();
         }
-      }
-
-      return false;
-    }
-
-    function checkWinCondition() {
-      if (bricksPlaced < 6) return;
-
-      // All 6 bricks are placed, game complete!
-      gameComplete = true;
-      
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const timeBonus = Math.max(0, 180 - elapsed);
-      const movesPenalty = Math.max(0, (moves - 6) * 3);
-      const gameScore = Math.max(100, 500 + timeBonus - movesPenalty);
-      
-      score += gameScore;
-      gamesPlayed++;
-      
-      showGameState(
-        '🏗️ Wall Complete!',
-        `Excellent construction work! You earned ${gameScore} points.\nTime: ${elapsed}s | Moves: ${moves}`,
-        true
-      );
-      
-      // Celebration effect
-      setTimeout(() => {
-        cubes.forEach((brick, i) => {
-          setTimeout(() => {
-            setBrickGlow(brick, true);
-            setTimeout(() => setBrickGlow(brick, false), 400);
-          }, i * 150);
-        });
-      }, 500);
-
-      updateScoreDisplay();
-    }
-
-    function showToast(message, duration = 2500, type = 'info') {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(-50%) translateY(-20px)';
-        setTimeout(() => toast.remove(), 300);
-      }, duration);
-    }
-
-    function render() {
-      // Update grabbed brick positions for VR
-      controllers.forEach(controller => {
-        const brick = controller.userData.grabbedBrick;
-        const laser = controller.userData.laser;
-
-        if (brick && laser) {
-          // Get world position of brick for hover detection
-          const worldPos = new THREE.Vector3();
-          brick.getWorldPosition(worldPos);
-          
-          highlightNearbyPositions(worldPos.x, worldPos.z);
-          setBrickGlow(brick, hoverValidIndex !== null && isValidPlacement(hoverValidIndex));
-          
-          // Update laser length
-          const controllerPos = new THREE.Vector3();
-          controllerPos.setFromMatrixPosition(controller.matrixWorld);
-          const distance = controllerPos.distanceTo(worldPos);
-          laser.scale.z = Math.max(0.1, distance);
+        
+        function spawnNextBrick() {
+            if (currentBrickNumber > 6) return; // All bricks spawned
+            
+            const cubeColors = [
+                { name: 'red', color: 0xff4757, hexColor: '#ff4757' },
+                { name: 'green', color: 0x2ed573, hexColor: '#2ed573' },
+                { name: 'blue', color: 0x3742fa, hexColor: '#3742fa' },
+                { name: 'yellow', color: 0xffa502, hexColor: '#ffa502' },
+                { name: 'orange', color: 0xff6348, hexColor: '#ff6348' },
+                { name: 'purple', color: 0x9c88ff, hexColor: '#9c88ff' }
+            ];
+            
+            const brickGeometry = new THREE.BoxGeometry(0.8, 0.35, 0.4);
+            const colorData = cubeColors[currentBrickNumber - 1];
+            
+            // Create materials for each face with numbers
+            const materials = [];
+            for (let i = 0; i < 6; i++) {
+                const texture = createNumberTexture(currentBrickNumber, colorData.hexColor);
+                materials.push(new THREE.MeshLambertMaterial({ map: texture }));
+            }
+            
+            const brick = new THREE.Mesh(brickGeometry, materials);
+            
+            // Position new brick in front of player (random position in spawn area)
+            const spawnAngle = Math.random() * Math.PI/2 + Math.PI/4; // 45° to 135° arc
+            const spawnRadius = 1.2 + Math.random() * 0.4; // 1.2-1.6 meters from player
+            
+            const spawnX = Math.cos(spawnAngle) * spawnRadius;
+            const spawnZ = Math.sin(spawnAngle) * spawnRadius - 0.3;
+            
+            brick.position.set(spawnX, 0.175, spawnZ);
+            brick.castShadow = true;
+            brick.receiveShadow = true;
+            
+            brick.userData = {
+                number: currentBrickNumber,
+                colorName: colorData.name,
+                originalPosition: brick.position.clone(),
+                isGrabbed: false,
+                isPlaced: false
+            };
+            
+            scene.add(brick);
+            cubes.push(brick);
+            
+            // Show spawn notification in VR
+            if (renderer.xr.getSession()) {
+                createVRStatusPanel(
+                    `Brick ${currentBrickNumber} spawned!<br>Pick it up and place it<br>${6 - bricksPlaced} bricks remaining`, 
+                    '#00aaff', 
+                    2000
+                );
+            }
+            
+            console.log(`Spawned brick ${currentBrickNumber}`);
         }
-      });
-
-      // Update brick glows
-      cubes.forEach(brick => {
-        if (brick.userData.glow && brick.userData.isGrabbed) {
-          setBrickGlow(brick, hoverValidIndex !== null && isValidPlacement(hoverValidIndex));
+        
+        function getStackHeightAtPosition(x, z, excludeCube) {
+            let maxHeight = 0.175; // Start with one brick height
+            const tolerance = 0.4; // How close bricks need to be to stack
+            
+            cubes.forEach(cube => {
+                if (cube === excludeCube) return;
+                
+                const distance = Math.sqrt(
+                    Math.pow(cube.position.x - x, 2) + 
+                    Math.pow(cube.position.z - z, 2)
+                );
+                
+                if (distance < tolerance) {
+                    maxHeight = Math.max(maxHeight, cube.position.y + 0.35); // Brick height
+                }
+            });
+            
+            return maxHeight;
         }
-      });
-
-      renderer.render(scene, camera);
-    }
-
-    function onWindowResize() {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    // Start the game
-    init().catch(console.error);
-  </script>
+        
+        function updateStackingFeedback(x, z, excludeCube) {
+            // Reset all cube materials
+            cubes.forEach(cube => {
+                if (cube !== excludeCube && !cube.userData.isGrabbed) {
+                    cube.material.forEach(mat => {
+                        mat.emissive.setHex(0x000000);
+                    });
+                }
+            });
+            
+            // Highlight cubes that would be stacked on
+            const tolerance = 0.4;
+            cubes.forEach(cube => {
+                if (cube === excludeCube) return;
+                
+                const distance = Math.sqrt(
+                    Math.pow(cube.position.x - x, 2) + 
+                    Math.pow(cube.position.z - z, 2)
+                );
+                
+                if (distance < tolerance) {
+                    cube.material.forEach(mat => {
+                        mat.emissive.setHex(0x111111);
+                    });
+                }
+            });
+        }
+        
+        function snapToBrickPosition(brick) {
+            if (brick.userData.isPlaced) return false; // Already placed
+            
+            let bestPosition = null;
+            let minDistance = Infinity;
+            
+            // Find the closest available brick position
+            BRICK_POSITIONS.forEach((pos, index) => {
+                const distance = Math.sqrt(
+                    (brick.position.x - pos.x) ** 2 + 
+                    (brick.position.z - pos.z) ** 2
+                );
+                
+                if (distance < minDistance && distance < 0.6) { // Snapping range for bricks
+                    // Check if this position is already occupied
+                    const occupied = cubes.some(otherBrick => 
+                        otherBrick !== brick &&
+                        otherBrick.userData.isPlaced &&
+                        Math.abs(otherBrick.position.x - pos.x) < 0.2 &&
+                        Math.abs(otherBrick.position.z - pos.z) < 0.2
+                    );
+                    
+                    if (!occupied) {
+                        minDistance = distance;
+                        bestPosition = { ...pos, index };
+                    }
+                }
+            });
+            
+            if (bestPosition) {
+                brick.position.x = bestPosition.x;
+                brick.position.y = bestPosition.y;
+                brick.position.z = bestPosition.z;
+                brick.userData.isPlaced = true;
+                
+                bricksPlaced++;
+                currentBrickNumber++;
+                
+                // Spawn next brick if we haven't placed all 6 yet
+                if (bricksPlaced < 6) {
+                    setTimeout(() => {
+                        spawnNextBrick();
+                    }, 1000); // Small delay for better UX
+                }
+                
+                console.log(`Brick placed! ${bricksPlaced}/6 complete`);
+                return true;
+            }
+            return false;
+        }
+        
+        function setupControllers() {
+            // Setup VR controllers with simple visuals and locomotion
+            controllers = []; // Clear any existing controllers
+            
+            for (let i = 0; i < 2; i++) {
+                try {
+                    const controller = renderer.xr.getController(i);
+                    const controllerGrip = renderer.xr.getControllerGrip(i);
+                    
+                    // Add event listeners
+                    controller.addEventListener('selectstart', onSelectStart);
+                    controller.addEventListener('selectend', onSelectEnd);
+                    controller.addEventListener('connected', (event) => {
+                        const inputSource = event.data;
+                        console.log(`Controller ${i} connected:`, inputSource);
+                        
+                        // 🎮 CONTROLLER TYPE DETECTION
+                        console.log('Controller Type Detection:');
+                        console.log('- Handedness:', inputSource.handedness); // 'left', 'right', or ''
+                        console.log('- Target Ray Mode:', inputSource.targetRayMode); // 'tracked-pointer', 'gaze', 'screen'
+                        console.log('- Profiles:', inputSource.profiles); // Array of controller profile strings
+                        console.log('- Has Gamepad:', !!inputSource.gamepad); // Boolean
+                        
+                        // Common controller profiles you might see:
+                        if (inputSource.profiles) {
+                            inputSource.profiles.forEach(profile => {
+                                console.log(`Profile detected: ${profile}`);
+                                
+                                // 🎯 CONTROLLER TYPES - Examples of what you might see:
+                                switch(true) {
+                                    case profile.includes('oculus-touch'):
+                                        console.log('→ Meta Quest/Oculus Touch controllers detected');
+                                        break;
+                                    case profile.includes('valve-index'):
+                                        console.log('→ Valve Index controllers detected');
+                                        break;
+                                    case profile.includes('windows-mixed-reality'):
+                                        console.log('→ Windows Mixed Reality controllers detected');
+                                        break;
+                                    case profile.includes('htc-vive'):
+                                        console.log('→ HTC Vive controllers detected');
+                                        break;
+                                    case profile.includes('samsung-odyssey'):
+                                        console.log('→ Samsung Odyssey controllers detected');
+                                        break;
+                                    case profile.includes('generic-trigger'):
+                                        console.log('→ Generic trigger controller detected');
+                                        break;
+                                    case profile.includes('generic-hand-select'):
+                                        console.log('→ Hand tracking detected');
+                                        break;
+                                    default:
+                                        console.log(`→ Unknown controller type: ${profile}`);
+                                }
+                            });
+                        }
+                        
+                        // 🤚 HANDEDNESS-BASED ACTIONS
+                        if (inputSource.handedness === 'left' || i === 0) {
+                            setTimeout(() => {
+                                attachInstructionsToController(controller, true);
+                                console.log('→ Instructions attached to left controller');
+                            }, 500);
+                        }
+                        
+                        // 🎮 GAMEPAD DETECTION
+                        if (inputSource.gamepad) {
+                            console.log('Gamepad detected with:');
+                            console.log('- Buttons:', inputSource.gamepad.buttons.length);
+                            console.log('- Axes (joysticks):', inputSource.gamepad.axes.length);
+                            
+                            // Log button mapping for debugging
+                            inputSource.gamepad.buttons.forEach((button, index) => {
+                                console.log(`  Button ${index}:`, button.pressed ? 'PRESSED' : 'released');
+                            });
+                            
+                            // Log axis values for debugging
+                            inputSource.gamepad.axes.forEach((axis, index) => {
+                                console.log(`  Axis ${index}:`, axis.toFixed(3));
+                            });
+                        }
+                    });
+                    
+                    // Add to scene
+                    scene.add(controller);
+                    scene.add(controllerGrip);
+                    
+                    // Create simple visual ray
+                    const rayGeometry = new THREE.BufferGeometry();
+                    const rayPositions = new Float32Array([
+                        0, 0, 0,
+                        0, 0, -1
+                    ]);
+                    rayGeometry.setAttribute('position', new THREE.BufferAttribute(rayPositions, 3));
+                    
+                    const rayMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+                    const rayLine = new THREE.Line(rayGeometry, rayMaterial);
+                    rayLine.scale.z = 3;
+                    controller.add(rayLine);
+                    
+                    // Simple controller handle visual
+                    const handleGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.15);
+                    const handleMaterial = new THREE.MeshBasicMaterial({ color: 0x888888 });
+                    const handleMesh = new THREE.Mesh(handleGeometry, handleMaterial);
+                    controller.add(handleMesh);
+                    
+                    controllers.push({
+                        controller: controller,
+                        grip: controllerGrip,
+                        index: i,
+                        gamepad: null,
+                        inputSource: null
+                    });
+                    
+                } catch (error) {
+                    console.log(`Controller ${i} setup failed:`, error);
+                }
+            }
+            
+            // Fallback: attach instructions to first controller after a delay
+            setTimeout(() => {
+                if (controllers.length > 0) {
+                    attachInstructionsToController(controllers[0].controller, true);
+                }
+            }, 2000);
+            
+            console.log(`Initialized ${controllers.length} VR controllers with detailed type detection`);
+        }
+        
+        function updateVRLocomotion() {
+            if (!renderer.xr.getSession()) return;
+            
+            const session = renderer.xr.getSession();
+            const referenceSpace = renderer.xr.getReferenceSpace();
+            
+            if (session && session.inputSources) {
+                session.inputSources.forEach((inputSource, index) => {
+                    if (inputSource.gamepad && controllers[index]) {
+                        controllers[index].gamepad = inputSource.gamepad;
+                        controllers[index].inputSource = inputSource;
+                        
+                        const gamepad = inputSource.gamepad;
+                        
+                        // 🕹️ GAMEPAD INPUT MAPPING FOR DIFFERENT CONTROLLERS:
+                        console.log('Gamepad Input Detection:');
+                        console.log(`Controller ${index} (${inputSource.handedness}):`, inputSource.profiles[0]);
+                        
+                        // Check for thumbstick input (mapping varies by controller)
+                        if (gamepad.axes.length >= 4) {
+                            let moveX = 0;
+                            let moveZ = 0;
+                            
+                            // 🎮 CONTROLLER-SPECIFIC MAPPINGS:
+                            
+                            // Meta Quest / Oculus Touch Controllers:
+                            // - Left: axes[2,3] = thumbstick, axes[0,1] = unused
+                            // - Right: axes[2,3] = thumbstick, axes[0,1] = unused
+                            
+                            // Valve Index Controllers:
+                            // - Both: axes[0,1] = thumbstick/touchpad, axes[2,3] = trackpad
+                            
+                            // Windows Mixed Reality:
+                            // - Both: axes[0,1] = thumbstick, axes[2,3] = touchpad
+                            
+                            if (inputSource.profiles[0]?.includes('oculus-touch')) {
+                                // Meta Quest controllers
+                                if (inputSource.handedness === 'left') {
+                                    moveX = gamepad.axes[2]; // Left thumbstick X
+                                    moveZ = gamepad.axes[3]; // Left thumbstick Y
+                                    console.log(`Quest Left stick: X=${moveX.toFixed(2)}, Y=${moveZ.toFixed(2)}`);
+                                } else if (inputSource.handedness === 'right') {
+                                    // Use right controller as backup for movement
+                                    moveX = gamepad.axes[2];
+                                    moveZ = gamepad.axes[3];
+                                    console.log(`Quest Right stick: X=${moveX.toFixed(2)}, Y=${moveZ.toFixed(2)}`);
+                                }
+                            } else if (inputSource.profiles[0]?.includes('valve-index')) {
+                                // Valve Index controllers
+                                moveX = gamepad.axes[0]; // Touchpad/thumbstick X
+                                moveZ = gamepad.axes[1]; // Touchpad/thumbstick Y
+                                console.log(`Index controller: X=${moveX.toFixed(2)}, Y=${moveZ.toFixed(2)}`);
+                            } else {
+                                // Generic/fallback mapping
+                                if (index === 0) { // Prefer left controller for movement
+                                    moveX = gamepad.axes[2] || gamepad.axes[0];
+                                    moveZ = gamepad.axes[3] || gamepad.axes[1];
+                                } else if (Math.abs(gamepad.axes[2] || gamepad.axes[0]) > 0.1 || 
+                                          Math.abs(gamepad.axes[3] || gamepad.axes[1]) > 0.1) {
+                                    moveX = gamepad.axes[2] || gamepad.axes[0];
+                                    moveZ = gamepad.axes[3] || gamepad.axes[1];
+                                }
+                                console.log(`Generic controller: X=${moveX.toFixed(2)}, Y=${moveZ.toFixed(2)}`);
+                            }
+                            
+                            // Apply deadzone
+                            const deadzone = 0.15;
+                            if (Math.abs(moveX) < deadzone) moveX = 0;
+                            if (Math.abs(moveZ) < deadzone) moveZ = 0;
+                            
+                            // Apply movement if thumbstick is being used
+                            if (Math.abs(moveX) > 0 || Math.abs(moveZ) > 0) {
+                                const speed = 0.02; // Movement speed
+                                
+                                // Get camera direction for forward movement
+                                const cameraDirection = new THREE.Vector3();
+                                camera.getWorldDirection(cameraDirection);
+                                
+                                // Create right vector
+                                const rightVector = new THREE.Vector3();
+                                rightVector.crossVectors(cameraDirection, camera.up).normalize();
+                                
+                                // Create forward vector (without Y component for ground movement)
+                                const forwardVector = new THREE.Vector3(cameraDirection.x, 0, cameraDirection.z).normalize();
+                                
+                                // Calculate movement vector
+                                const movement = new THREE.Vector3();
+                                movement.addScaledVector(rightVector, moveX * speed);
+                                movement.addScaledVector(forwardVector, -moveZ * speed); // Negative because forward is usually negative Z
+                                
+                                // Apply movement to camera/player position
+                                const currentPosition = new THREE.Vector3();
+                                camera.getWorldPosition(currentPosition);
+                                currentPosition.add(movement);
+                                
+                                // Simple bounds checking (keep player in reasonable area)
+                                const prevX = currentPosition.x;
+                                const prevZ = currentPosition.z;
+                                
+                                currentPosition.x = Math.max(-5, Math.min(5, currentPosition.x));
+                                currentPosition.z = Math.max(-3, Math.min(4, currentPosition.z));
+                                currentPosition.y = Math.max(0.5, currentPosition.y); // Don't go below ground
+                                
+                                // Provide haptic feedback if hitting boundary
+                                if ((prevX !== currentPosition.x || prevZ !== currentPosition.z) && 
+                                    inputSource.hapticActuators && inputSource.hapticActuators[0]) {
+                                    inputSource.hapticActuators[0].pulse(0.3, 100); // Light pulse at boundary
+                                }
+                                
+                                // Apply the movement by offsetting the reference space
+                                if (referenceSpace) {
+                                    const offsetPosition = new THREE.Vector3().subVectors(currentPosition, camera.position);
+                                    camera.position.copy(currentPosition);
+                                }
+                            }
+                        }
+                        
+                        // 🔘 BUTTON MAPPING EXAMPLES:
+                        // Meta Quest: button[0] = trigger, button[1] = grip, button[4] = A/X, button[5] = B/Y
+                        // Valve Index: button[0] = trigger, button[1] = grip, button[2] = trackpad click
+                        // Generic: button[0] = main select (trigger), button[1] = secondary (grip)
+                        
+                        if (gamepad.buttons.length > 0) {
+                            gamepad.buttons.forEach((button, buttonIndex) => {
+                                if (button.pressed) {
+                                    console.log(`Button ${buttonIndex} pressed on ${inputSource.handedness} controller`);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        }
+        
+        function setupVRButton() {
+            const vrButton = document.getElementById('vrButton');
+            
+            if ('xr' in navigator) {
+                navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+                    if (supported) {
+                        vrButton.addEventListener('click', () => {
+                            if (renderer.xr.getSession()) {
+                                renderer.xr.getSession().end();
+                            } else {
+                                navigator.xr.requestSession('immersive-vr', {
+                                    requiredFeatures: ['local-floor'],
+                                    optionalFeatures: ['hand-tracking', 'bounded-floor']
+                                }).then((session) => {
+                                    renderer.xr.setSession(session);
+                                }).catch((error) => {
+                                    console.log('VR session failed:', error);
+                                    showStatus('VR session failed to start', 2000);
+                                });
+                            }
+                        });
+                    } else {
+                        vrButton.textContent = 'VR Not Supported';
+                        vrButton.disabled = true;
+                    }
+                }).catch(() => {
+                    vrButton.textContent = 'VR Not Available';
+                    vrButton.disabled = true;
+                });
+            } else {
+                vrButton.textContent = 'WebXR Not Available';
+                vrButton.disabled = true;
+            }
+            
+            renderer.xr.addEventListener('sessionstart', () => {
+                vrButton.textContent = 'Exit VR';
+                // Show VR welcome message
+                setTimeout(() => {
+                    createVRStatusPanel(
+                        `Welcome to VR Mode!<br>Instructions attached to left hand<br>Use joystick to move around<br>Point & squeeze to grab brick<br>Build staggered wall!`, 
+                        '#00ff88', 
+                        5000
+                    );
+                }, 1000);
+            });
+            
+            renderer.xr.addEventListener('sessionend', () => {
+                vrButton.textContent = 'Enter VR';
+                // Clean up controller-attached instructions
+                controllers.forEach(controllerObj => {
+                    const instructions = controllerObj.controller.getObjectByName('controllerInstructions');
+                    if (instructions) {
+                        controllerObj.controller.remove(instructions);
+                    }
+                });
+                // Clean up any floating status panels
+                const vrStatus = scene.getObjectByName('vrStatusPanel');
+                if (vrStatus) {
+                    scene.remove(vrStatus);
+                }
+            });
+        }
+        
+        function setupMouseControls() {
+            renderer.domElement.addEventListener('mousedown', onPointerDown);
+            renderer.domElement.addEventListener('mousemove', onPointerMove);
+            renderer.domElement.addEventListener('mouseup', onPointerUp);
+        }
+        
+        function setupTouchControls() {
+            renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: false });
+            renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: false });
+            renderer.domElement.addEventListener('touchend', onTouchEnd, { passive: false });
+        }
+        
+        function setupResetButton() {
+            document.getElementById('resetButton').addEventListener('click', resetGame);
+            document.getElementById('resetScoreButton').addEventListener('click', resetScore);
+        }
+        
+        function resetScore() {
+            if (confirm('Reset your total score and start fresh?')) {
+                score = 0;
+                gamesPlayed = 0;
+                updateScoreDisplay();
+                showStatus('Score Reset! 🔄', 1500);
+            }
+        }
+        
+        function resetGame() {
+            // Remove existing cubes
+            cubes.forEach(cube => scene.remove(cube));
+            selectedCube = null;
+            selectedController = null;
+            
+            // Recreate cubes (this will spawn only the first brick)
+            createCubes();
+            showStatus('New Staggered Brick Wall! 🧱<br>Place each brick to spawn the next one!', 3000);
+            
+            // Show VR-specific reset message if in VR
+            if (renderer.xr.getSession()) {
+                createVRStatusPanel(
+                    `New Staggered Wall!<br>Build classic brick pattern<br>One brick at a time<br>Let's build!`, 
+                    '#ffaa00', 
+                    3000
+                );
+            }
+        }
+        
+        function onTouchStart(event) {
+            event.preventDefault();
+            if (gameWon || renderer.xr.getSession()) return;
+            
+            const touch = event.touches[0];
+            touchStartPos = { x: touch.clientX, y: touch.clientY };
+            
+            mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(cubes);
+            
+            if (intersects.length > 0) {
+                selectedCube = intersects[0].object;
+                selectedCube.userData.isGrabbed = true;
+                
+                // Highlight selected cube
+                selectedCube.material.forEach(mat => {
+                    mat.emissive.setHex(0x444444);
+                });
+                
+                // Haptic feedback on mobile (if available)
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            }
+        }
+        
+        function onTouchMove(event) {
+            event.preventDefault();
+            if (gameWon || !selectedCube || renderer.xr.getSession()) return;
+            
+            const touch = event.touches[0];
+            mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+            
+            updateCubePosition();
+        }
+        
+        function onTouchEnd(event) {
+            event.preventDefault();
+            onPointerUp();
+        }
+        
+        function onPointerDown(event) {
+            if (gameWon || renderer.xr.getSession()) return;
+            
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(cubes);
+            
+            if (intersects.length > 0) {
+                selectedCube = intersects[0].object;
+                selectedCube.userData.isGrabbed = true;
+                
+                // Highlight selected cube
+                selectedCube.material.forEach(mat => {
+                    mat.emissive.setHex(0x444444);
+                });
+            }
+        }
+        
+        function onPointerMove(event) {
+            if (gameWon || !selectedCube || renderer.xr.getSession()) return;
+            
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            updateCubePosition();
+        }
+        
+        function updateCubePosition() {
+            if (!selectedCube) return;
+            
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Project mouse position to a plane
+            const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+            const intersection = new THREE.Vector3();
+            raycaster.ray.intersectPlane(plane, intersection);
+            
+            if (intersection) {
+                selectedCube.position.x = intersection.x;
+                selectedCube.position.z = intersection.z;
+                selectedCube.position.y = Math.max(0.175, intersection.y); // Keep at brick height
+                
+                // Add visual feedback for nearby brick positions
+                highlightNearbyPositions(intersection.x, intersection.z);
+            }
+        }
+        
+        function highlightNearbyPositions(x, z) {
+            // Could add highlighting for nearby brick positions
+            // For now, keep it simple
+        }
+        
+        function onPointerUp() {
+            if (selectedCube) {
+                selectedCube.userData.isGrabbed = false;
+                
+                // Clear highlighting
+                selectedCube.material.forEach(mat => {
+                    mat.emissive.setHex(0x000000);
+                });
+                
+                // Count this as a move
+                moves++;
+                updateScoreDisplay();
+                
+                // Try to snap to brick position
+                const snapped = snapToBrickPosition(selectedCube);
+                if (snapped) {
+                    if (navigator.vibrate) {
+                        navigator.vibrate(100); // Stronger feedback for successful placement
+                    }
+                }
+                
+                selectedCube = null;
+                checkWinCondition();
+                
+                // Haptic feedback on mobile
+                if (navigator.vibrate) {
+                    navigator.vibrate(30);
+                }
+            }
+        }
+        
+        function onSelectStart(event) {
+            const controller = event.target;
+            
+            const tempMatrix = new THREE.Matrix4();
+            tempMatrix.identity().extractRotation(controller.matrixWorld);
+            
+            raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+            raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+            
+            const intersects = raycaster.intersectObjects(cubes);
+            
+            if (intersects.length > 0 && !gameWon) {
+                selectedCube = intersects[0].object;
+                selectedController = controller;
+                selectedCube.userData.isGrabbed = true;
+                
+                // Highlight selected cube
+                selectedCube.material.forEach(mat => {
+                    mat.emissive.setHex(0x444444);
+                });
+            }
+        }
+        
+        function onSelectEnd() {
+            if (selectedCube) {
+                selectedCube.userData.isGrabbed = false;
+                
+                // Clear highlighting
+                selectedCube.material.forEach(mat => {
+                    mat.emissive.setHex(0x000000);
+                });
+                
+                // Count this as a move
+                moves++;
+                updateScoreDisplay();
+                
+                // Try to snap to brick position
+                snapToBrickPosition(selectedCube);
+                
+                selectedCube = null;
+                selectedController = null;
+                checkWinCondition();
+            }
+        }
+        
+        function checkWinCondition() {
+            // Win when all 6 bricks are placed in their positions
+            if (bricksPlaced === 6) {
+                winGame();
+            }
+        }
+        
+        function winGame() {
+            gameWon = true;
+            gamesPlayed++;
+            
+            // Calculate score
+            const timeTaken = (Date.now() - startTime) / 1000; // seconds
+            const timeBonus = Math.max(0, Math.floor(75 - timeTaken * 2)); // Up to 75 bonus points for speed
+            const movesPenalty = Math.max(0, (moves - 6) * 8); // -8 points per move over 6
+            const gameScore = calculateScore(timeBonus, movesPenalty);
+            
+            score += gameScore;
+            updateScoreDisplay();
+            
+            // Show detailed win message
+            const message = `🧱 Perfect Brick Wall! You Won! 🧱<br>
+                           <strong>Game Score: ${gameScore} points</strong><br>
+                           Time: ${timeTaken.toFixed(1)}s (${timeBonus > 0 ? '+' + timeBonus : '0'} bonus)<br>
+                           Moves: ${moves} (${movesPenalty > 0 ? '-' + movesPenalty : '0'} penalty)<br>
+                           <strong>Total Score: ${score}</strong>`;
+            
+            // Show message both in regular UI and VR
+            showStatus(message, 5000);
+            
+            // Show VR-specific success message if in VR
+            if (renderer.xr.getSession()) {
+                createVRStatusPanel(
+                    `🎉 VICTORY! 🎉<br>Perfect Brick Wall Built!<br>Score: ${gameScore} points<br>Total: ${score} points`, 
+                    '#00ff00', 
+                    4000
+                );
+            }
+            
+            // Celebration effect - make all cubes glow
+            cubes.forEach(cube => {
+                cube.material.forEach(mat => {
+                    mat.emissive.setHex(0x222222);
+                });
+            });
+            
+            // Victory haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100, 50, 200]);
+            }
+            
+            // Auto-restart after a delay
+            setTimeout(() => {
+                if (gameWon) { // Only restart if user hasn't manually reset
+                    resetGame();
+                }
+            }, 6000);
+        }
+        
+        function showStatus(message, duration = 2000) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, duration);
+        }
+        
+        function showInstructions() {
+            setTimeout(() => {
+                const device = isMobile ? 'Tap' : 'Click';
+                const regularMessage = `${device} and drag bricks to build a staggered wall!<br>
+                           <strong>System:</strong> Only one brick appears at a time<br>
+                           <strong>Goal:</strong> Place it to spawn the next brick<br>
+                           <strong>Pattern:</strong> Classic staggered brick layout<br>
+                           <strong>Faster + Fewer moves = Higher score!</strong>`;
+                
+                showStatus(regularMessage, 8000);
+                
+                // Show VR-specific instructions if in VR
+                if (renderer.xr.getSession()) {
+                    createVRStatusPanel(
+                        `Welcome to Staggered Building!<br>Use joystick to move around<br>Place each brick to get the next<br>Build classic brick pattern!<br>Good luck!`, 
+                        '#00aaff', 
+                        6000
+                    );
+                }
+            }, 1000);
+        }
+        
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+        
+        function render() {
+            // Update VR locomotion
+            updateVRLocomotion();
+            
+            // Update grabbed cube position for VR controllers
+            if (selectedCube && selectedController) {
+                const tempMatrix = new THREE.Matrix4();
+                tempMatrix.identity().extractRotation(selectedController.matrixWorld);
+                
+                const forward = new THREE.Vector3(0, 0, -0.8);
+                forward.applyMatrix4(tempMatrix);
+                
+                const targetPos = selectedController.position.clone();
+                targetPos.add(forward);
+                
+                selectedCube.position.x = targetPos.x;
+                selectedCube.position.z = targetPos.z;
+                selectedCube.position.y = Math.max(0.175, targetPos.y); // Keep at brick height
+            }
+            
+            // Add gentle floating animation to unplaced cubes
+            if (!gameWon) {
+                const time = Date.now() * 0.001;
+                cubes.forEach((cube, index) => {
+                    if (!cube.userData.isGrabbed && !cube.userData.isPlaced) {
+                        cube.rotation.x = Math.sin(time + index) * 0.02;
+                        cube.rotation.y = Math.cos(time + index * 0.7) * 0.02;
+                    }
+                });
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
 </body>
 </html>
