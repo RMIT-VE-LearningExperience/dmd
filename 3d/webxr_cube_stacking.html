@@ -7,7 +7,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@webxr-input-profiles/motion-controllers@1.0.0/dist/motion-controllers.module.js"></script>
   <style>
     body {
       margin: 0;
@@ -75,7 +74,7 @@
     #status .progress { display: flex; flex-direction: column; gap: 6px; min-width: 180px; }
     #status .progress__label { font-size: 12px; letter-spacing: .2px; color: #1B1A17; opacity: .95; text-align: right; }
     #status .progress__track { position: relative; height: 8px; border-radius: 999px; background: rgba(168,187,163,.25); overflow: hidden; }
-    #status .progress__bar { height: 100%, width: 0%; background: linear-gradient(90deg, #A8BBA3, #B87C4C); border-radius: 999px; transition: width 180ms ease; }
+    #status .progress__bar { height: 100%; width: 0%; background: linear-gradient(90deg, #A8BBA3, #B87C4C); border-radius: 999px; transition: width 180ms ease; }
 
     .toast {
       position: absolute; left: 50%; top: 72px; transform: translateX(-50%); z-index: 1000;
@@ -174,14 +173,17 @@
     // Floor circle indicator
     let floorIndicator = null;
 
+    // Interactables (non-brick)
+    const INTERACTABLES = []; // exit sign lives here
+
     // Scoring and progress
     let score = 0, gamesPlayed = 0, startTime = 0, moves = 0, bricksPlaced = 0, currentBrickNumber = 1;
     let TOTAL_BRICKS = ROWS * COLS;
     let activeRow = 0;
 
-    // VR System Detection
+    // VR system badge
     let vrSystem = 'unknown';
-    let vrInfo = document.getElementById('vrInfo');
+    const vrInfo = document.getElementById('vrInfo');
 
     function renderStatusUI() {
       const s = document.getElementById('status');
@@ -192,7 +194,6 @@
         </div>
       `;
     }
-
     function updateProgress() {
       const now = Math.min(TOTAL_BRICKS, Math.max(0, bricksPlaced));
       const pct = (now / TOTAL_BRICKS) * 100;
@@ -206,51 +207,16 @@
     }
 
     function detectVRSystem(session) {
-      // Detect VR system based on user agent and XR session info
-      const userAgent = navigator.userAgent.toLowerCase();
-      const inputSources = session ? Array.from(session.inputSources) : [];
-      
-      if (userAgent.includes('oculus') || userAgent.includes('quest')) {
-        vrSystem = 'oculus';
-      } else if (userAgent.includes('vive') || inputSources.some(source => source.profiles.includes('htc-vive'))) {
-        vrSystem = 'vive';
-      } else if (userAgent.includes('valve index') || inputSources.some(source => source.profiles.includes('valve-index'))) {
-        vrSystem = 'index';
-      } else if (inputSources.some(source => source.profiles.includes('microsoft-mixed-reality'))) {
-        vrSystem = 'wmr';
-      } else if (inputSources.some(source => source.profiles.includes('pico'))) {
-        vrSystem = 'pico';
-      } else if (inputSources.length > 0) {
-        // Try to detect from the first controller profile
-        const firstProfile = inputSources[0].profiles[0] || '';
-        if (firstProfile.includes('oculus')) vrSystem = 'oculus';
-        else if (firstProfile.includes('vive')) vrSystem = 'vive';
-        else if (firstProfile.includes('index')) vrSystem = 'index';
-        else if (firstProfile.includes('microsoft')) vrSystem = 'wmr';
-        else vrSystem = 'generic';
-      } else {
-        vrSystem = 'generic';
-      }
-      
-      console.log('Detected VR System:', vrSystem);
-      updateVRInfo();
-    }
-
-    function updateVRInfo() {
-      const systemNames = {
-        oculus: 'Meta Quest/Oculus',
-        vive: 'HTC Vive',
-        index: 'Valve Index',
-        wmr: 'Windows MR',
-        pico: 'Pico VR',
-        generic: 'Generic VR',
-        unknown: 'Unknown'
-      };
-      
+      const ua = navigator.userAgent.toLowerCase();
+      const inputs = session ? Array.from(session.inputSources) : [];
+      if (ua.includes('oculus') || ua.includes('quest')) vrSystem = 'oculus';
+      else if (inputs.some(s => s.profiles.includes('pico'))) vrSystem = 'pico';
+      else if (inputs.length) vrSystem = 'generic';
+      else vrSystem = 'unknown';
       if (vrSystem !== 'unknown') {
-        vrInfo.textContent = `VR System: ${systemNames[vrSystem] || vrSystem}`;
+        vrInfo.textContent = `VR System: ${vrSystem}`;
         vrInfo.classList.add('show');
-        setTimeout(() => vrInfo.classList.remove('show'), 3000);
+        setTimeout(() => vrInfo.classList.remove('show'), 2500);
       }
     }
 
@@ -300,11 +266,10 @@
         });
       }
 
-      // Enhanced VR session handling
       if (renderer && renderer.xr) {
-        renderer.xr.addEventListener('sessionstart', (event) => {
+        renderer.xr.addEventListener('sessionstart', (e) => {
           if (controls) controls.enabled = false;
-          detectVRSystem(event.target.getSession());
+          detectVRSystem(renderer.xr.getSession());
           showToast('VR mode active');
         });
         renderer.xr.addEventListener('sessionend', () => {
@@ -349,6 +314,9 @@
       // Helpers
       createMovementBoundaries();
       createVRInstructions();
+
+      // EXIT SIGN (load after scene base)
+      loadExitSign();
 
       // Bricks
       createCubes();
@@ -407,14 +375,10 @@
         gridMarkers.push(marker);
       });
     }
-
     function setRowVisibility(row) {
       gridMarkers.forEach((m) => {
-        if (m.userData.occupied) {
-          m.visible = false;
-        } else {
-          m.visible = (m.userData.row === row);
-        }
+        if (m.userData.occupied) m.visible = false;
+        else m.visible = (m.userData.row === row);
         if (m.visible) {
           m.material.color.setHex(MARKER_NORMAL.color);
           m.material.opacity = MARKER_NORMAL.opacity;
@@ -422,8 +386,7 @@
       });
     }
     function isRowComplete(row) {
-      const rowMarkers = gridMarkers.filter(m => m.userData.row === row);
-      return rowMarkers.every(m => m.userData.occupied);
+      return gridMarkers.filter(m => m.userData.row === row).every(m => m.userData.occupied);
     }
     function recomputeActiveRow() {
       let r = 0;
@@ -440,7 +403,6 @@
       ring.position.y = -0.49;
       scene.add(ring);
     }
-
     function createVRInstructions() {
       const panelGeometry = new THREE.PlaneGeometry(0.6, 0.28);
       const canvas = document.createElement('canvas');
@@ -463,6 +425,59 @@
       scene.add(mesh);
     }
 
+    // EXIT SIGN LOADING AND PLACEMENT
+    let exitSign = null;
+    function loadExitSign() {
+      const loader = new THREE.GLTFLoader();
+      loader.load(
+        'assets/exit_sign.glb',
+        (gltf) => {
+          exitSign = gltf.scene;
+          exitSign.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; } });
+          const topY = ROW1_Y + (ROWS - 1) * (BRICK_H + GAP_Y) + BRICK_H * 1.8;
+          exitSign.position.set(0, topY, WALL_Z);
+          exitSign.scale.set(0.8, 0.8, 0.8);
+          exitSign.rotation.y = 0;
+          exitSign.userData.interactable = 'exit';
+          scene.add(exitSign);
+          INTERACTABLES.push(exitSign);
+        },
+        undefined,
+        () => {
+          // Fallback: simple EXIT panel
+          const p = new THREE.PlaneGeometry(0.6, 0.25);
+          const c = document.createElement('canvas');
+          c.width = 512; c.height = 256;
+          const ctx = c.getContext('2d');
+          ctx.fillStyle = '#1B1A17'; ctx.fillRect(0,0,512,256);
+          ctx.fillStyle = '#E74C3C';
+          ctx.font = 'bold 140px Arial';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('EXIT', 256, 128);
+          const tex = new THREE.CanvasTexture(c);
+          const m = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+          const fallback = new THREE.Mesh(p, m);
+          const topY = ROW1_Y + (ROWS - 1) * (BRICK_H + GAP_Y) + BRICK_H * 1.8;
+          fallback.position.set(0, topY, WALL_Z);
+          fallback.userData.interactable = 'exit';
+          scene.add(fallback);
+          INTERACTABLES.push(fallback);
+        }
+      );
+    }
+    function exitImmersive() {
+      const sess = renderer.xr.getSession && renderer.xr.getSession();
+      if (sess) {
+        sess.end();
+        showToast('Exiting VR');
+        return;
+      }
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+        showToast('Exiting fullscreen');
+      }
+    }
+
     function createCubes() {
       cubes = [];
       bricksPlaced = 0;
@@ -473,7 +488,6 @@
       updateScoreDisplay();
       updateProgress();
     }
-
     function clearBricksAndMarkers() {
       if (cubes && cubes.length) {
         cubes.forEach(b => {
@@ -497,7 +511,6 @@
       }
       gridMarkers = [];
     }
-
     function resetGame() {
       hoverValidIndex = null;
       selectedCube = null;
@@ -530,7 +543,6 @@
       brick.add(glow);
       brick.userData.glow = glow;
     }
-
     function setBrickGlow(brick, active) {
       if (!brick || !brick.userData) return;
       const glow = brick.userData.glow;
@@ -549,7 +561,7 @@
       });
       floorIndicator = new THREE.Mesh(geo, mat);
       floorIndicator.rotation.x = -Math.PI / 2;
-      floorIndicator.position.y = -0.499; // just above the floor at -0.5
+      floorIndicator.position.y = -0.499;
       floorIndicator.visible = false;
       scene.add(floorIndicator);
     }
@@ -566,7 +578,7 @@
     }
     function hideFloorIndicator() { if (floorIndicator) floorIndicator.visible = false; }
 
-    // No overlap hover height
+    // Hover height over existing bricks
     const FLOOR_TOP = -0.5;
     function getNoOverlapHoverY(x, z) {
       let minCenterY = FLOOR_TOP + (BRICK_H / 2);
@@ -588,7 +600,7 @@
       return minCenterY;
     }
 
-    // Spawn overlap helpers
+    // Spawn placement helpers
     function aabbOverlap2D(ax, az, aw, ad, bx, bz, bw, bd) {
       const halfAw = aw * 0.5, halfAd = ad * 0.5;
       const halfBw = bw * 0.5, halfBd = bd * 0.5;
@@ -661,7 +673,6 @@
       scene.add(brick);
       cubes.push(brick);
     }
-
     function releaseFromSlot(brick) {
       if (!brick || !brick.userData) return;
       if (brick.userData.isPlaced && brick.userData.slotIndex != null) {
@@ -703,6 +714,19 @@
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
 
+      // First, check EXIT sign
+      const hitExit = raycaster.intersectObjects(INTERACTABLES, true);
+      if (hitExit.length) {
+        const obj = hitExit[0].object;
+        let cur = obj;
+        while (cur && !cur.userData.interactable) cur = cur.parent;
+        if (cur && cur.userData.interactable === 'exit') {
+          exitImmersive();
+          return;
+        }
+      }
+
+      // Then bricks
       const intersects = raycaster.intersectObjects(cubes);
       if (intersects.length > 0) {
         selectedCube = intersects[0].object;
@@ -721,7 +745,6 @@
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       updateCubePosition();
     }
-
     function updateCubePosition() {
       if (!selectedCube) return;
       raycaster.setFromCamera(mouse, camera);
@@ -732,17 +755,13 @@
       if (intersection) {
         selectedCube.position.x = intersection.x;
         selectedCube.position.z = intersection.z;
-
         const minCenterY = getNoOverlapHoverY(intersection.x, intersection.z);
         selectedCube.position.y = Math.max(minCenterY, intersection.y);
-
         highlightNearbyPositions(intersection.x, intersection.z);
         setBrickGlow(selectedCube, hoverValidIndex !== null);
-
         updateFloorIndicatorForBrick(selectedCube);
       }
     }
-
     function onPointerUp() {
       if (selectedCube) {
         selectedCube.userData.isGrabbed = false;
@@ -864,7 +883,7 @@
       updateProgress();
     }
 
-    // -------- Enhanced VR controller system --------
+    // -------- VR controller helpers --------
     const VR_STATE = {
       grabbing: false,
       controller: null,
@@ -872,188 +891,34 @@
       lineColorGrab: 0xB87C4C
     };
 
-    function createControllerVisual(vrSystem, handedness = 'unknown') {
-      const group = new THREE.Group();
-      
-      // Create different controller visuals based on detected VR system
-      switch (vrSystem) {
-        case 'oculus':
-          return createOculusController(group, handedness);
-        case 'vive':
-          return createViveController(group, handedness);
-        case 'index':
-          return createIndexController(group, handedness);
-        case 'wmr':
-          return createWMRController(group, handedness);
-        default:
-          return createGenericController(group, handedness);
-      }
-    }
-
-    function createOculusController(group, handedness) {
-      // Oculus Touch controller shape
-      const handleGeometry = new THREE.CylinderGeometry(0.012, 0.018, 0.1, 8);
-      const handleMaterial = new THREE.MeshStandardMaterial({ color: 0x2D2D2D, roughness: 0.7, metalness: 0.1 });
-      const handle = new THREE.Mesh(handleGeometry, handleMaterial);
-      handle.rotation.x = Math.PI / 2;
-      handle.position.z = -0.05;
-      group.add(handle);
-
-      // Ring
-      const ringGeometry = new THREE.TorusGeometry(0.03, 0.004, 8, 16);
-      const ringMaterial = new THREE.MeshStandardMaterial({ color: 0x1C1C1C, roughness: 0.6, metalness: 0.2 });
-      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-      ring.rotation.x = -Math.PI / 2;
-      ring.position.y = 0.02;
-      group.add(ring);
-
-      return group;
-    }
-
-    function createViveController(group, handedness) {
-      // HTC Vive controller shape (more cylindrical)
-      const bodyGeometry = new THREE.CylinderGeometry(0.015, 0.015, 0.15, 12);
-      const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x1A1A1A, roughness: 0.8, metalness: 0.0 });
-      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-      body.rotation.x = Math.PI / 2;
-      body.position.z = -0.075;
-      group.add(body);
-
-      // Trackpad area
-      const trackpadGeometry = new THREE.CylinderGeometry(0.018, 0.018, 0.005, 16);
-      const trackpadMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.3, metalness: 0.0 });
-      const trackpad = new THREE.Mesh(trackpadGeometry, trackpadMaterial);
-      trackpad.position.y = 0.01;
-      group.add(trackpad);
-
-      return group;
-    }
-
-    function createIndexController(group, handedness) {
-      // Valve Index controller (knuckles style)
-      const mainGeometry = new THREE.BoxGeometry(0.03, 0.08, 0.12);
-      const mainMaterial = new THREE.MeshStandardMaterial({ color: 0x1C1C1C, roughness: 0.7, metalness: 0.1 });
-      const main = new THREE.Mesh(mainGeometry, mainMaterial);
-      main.position.z = -0.06;
-      group.add(main);
-
-      // Strap indicators
-      const strapGeometry = new THREE.BoxGeometry(0.035, 0.005, 0.08);
-      const strapMaterial = new THREE.MeshStandardMaterial({ color: 0x0A0A0A, roughness: 0.9, metalness: 0.0 });
-      const strap1 = new THREE.Mesh(strapGeometry, strapMaterial);
-      const strap2 = new THREE.Mesh(strapGeometry, strapMaterial);
-      strap1.position.set(0, 0.03, -0.06);
-      strap2.position.set(0, -0.03, -0.06);
-      group.add(strap1, strap2);
-
-      return group;
-    }
-
-    function createWMRController(group, handedness) {
-      // Windows Mixed Reality controller
-      const handleGeometry = new THREE.CylinderGeometry(0.013, 0.016, 0.12, 8);
-      const handleMaterial = new THREE.MeshStandardMaterial({ color: 0x2A2A2A, roughness: 0.6, metalness: 0.2 });
-      const handle = new THREE.Mesh(handleGeometry, handleMaterial);
-      handle.rotation.x = Math.PI / 2;
-      handle.position.z = -0.06;
-      group.add(handle);
-
-      // Top section
-      const topGeometry = new THREE.BoxGeometry(0.025, 0.04, 0.06);
-      const topMaterial = new THREE.MeshStandardMaterial({ color: 0x1E1E1E, roughness: 0.7, metalness: 0.1 });
-      const top = new THREE.Mesh(topGeometry, topMaterial);
-      top.position.y = 0.015;
-      group.add(top);
-
-      return group;
-    }
-
-    function createGenericController(group, handedness) {
-      // Generic VR controller
-      const handleGeometry = new THREE.CylinderGeometry(0.015, 0.02, 0.12, 16);
-      const handleMaterial = new THREE.MeshStandardMaterial({ color: 0xF7F4EA, roughness: 0.6, metalness: 0.0 });
-      const handle = new THREE.Mesh(handleGeometry, handleMaterial);
+    function makeControllerRig(controller, index) {
+      // Simple light controller body
+      const handle = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.015, 0.02, 0.12, 16),
+        new THREE.MeshStandardMaterial({ color: 0xF7F4EA, roughness: 0.6, metalness: 0.0 })
+      );
       handle.rotation.x = Math.PI / 2;
       handle.position.z = -0.03;
-      group.add(handle);
+      controller.add(handle);
 
-      return group;
-    }
-
-    function makeControllerRig(controller, index) {
-      // Get handedness from the controller
-      let handedness = 'unknown';
-      if (renderer.xr.getSession()) {
-        const inputSources = Array.from(renderer.xr.getSession().inputSources);
-        if (inputSources[index]) {
-          handedness = inputSources[index].handedness || 'unknown';
-        }
-      }
-
-      // Create controller visual based on detected VR system
-      const controllerVisual = createControllerVisual(vrSystem, handedness);
-      controller.add(controllerVisual);
-
-      // Add pointer line
-      const points = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)];
-      const lineGeom = new THREE.BufferGeometry().setFromPoints(points);
-      const lineMat = new THREE.LineBasicMaterial({ 
-        color: VR_STATE.lineColorIdle, 
-        transparent: true, 
-        opacity: 0.9,
-        linewidth: 2 
-      });
-      const line = new THREE.Line(lineGeom, lineMat);
+      // Pointer line
+      const points = [new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,-1)];
+      const geom = new THREE.BufferGeometry().setFromPoints(points);
+      const mat  = new THREE.LineBasicMaterial({ color: VR_STATE.lineColorIdle, transparent: true, opacity: 0.9 });
+      const line = new THREE.Line(geom, mat);
       line.name = 'pointerLine';
       line.scale.z = 1.5;
       controller.add(line);
 
-      // Enhanced event handling
-      controller.addEventListener('selectstart', (event) => onVRSelectStart(controller, event));
-      controller.addEventListener('selectend', (event) => onVRSelectEnd(controller, event));
-      controller.addEventListener('squeezestart', (event) => onVRSqueezeStart(controller, event));
-      controller.addEventListener('squeezeend', (event) => onVRSqueezeEnd(controller, event));
-      
-      controller.addEventListener('connected', (event) => {
-        console.log(`Controller ${index} connected:`, event.data);
-        controller.visible = true;
-        
-        // Update controller visual based on actual connected controller
-        if (event.data && event.data.profiles && event.data.profiles.length > 0) {
-          const profile = event.data.profiles[0];
-          let newSystem = vrSystem;
-          
-          if (profile.includes('oculus') || profile.includes('quest')) {
-            newSystem = 'oculus';
-          } else if (profile.includes('vive')) {
-            newSystem = 'vive';
-          } else if (profile.includes('index')) {
-            newSystem = 'index';
-          } else if (profile.includes('microsoft-mixed-reality')) {
-            newSystem = 'wmr';
-          }
-          
-          if (newSystem !== vrSystem) {
-            vrSystem = newSystem;
-            // Remove old visual and add new one
-            controller.remove(controllerVisual);
-            const newVisual = createControllerVisual(vrSystem, event.data.handedness);
-            controller.add(newVisual);
-            updateVRInfo();
-          }
-        }
-      });
-      
-      controller.addEventListener('disconnected', () => {
-        console.log(`Controller ${index} disconnected`);
-        controller.visible = false;
-      });
+      controller.addEventListener('selectstart', (e) => onVRSelectStart(controller, e));
+      controller.addEventListener('selectend',   (e) => onVRSelectEnd(controller, e));
+      controller.addEventListener('connected',   () => { controller.visible = true; });
+      controller.addEventListener('disconnected',() => { controller.visible = false; });
 
       controller.visible = false;
-      return { controller, line, index, visual: controllerVisual };
+      return { controller, line, index };
     }
 
-    // Enhanced VR interaction functions
     const _ctrlRay = new THREE.Ray();
     const _ctrlRaycaster = new THREE.Raycaster();
     const _ctrlDir = new THREE.Vector3();
@@ -1061,12 +926,8 @@
 
     function setLineColor(ctrl, color) {
       const line = ctrl.getObjectByName('pointerLine');
-      if (line && line.material) {
-        line.material.color.setHex(color);
-        line.material.needsUpdate = true;
-      }
+      if (line && line.material) line.material.color.setHex(color);
     }
-
     function getControllerRay(controller) {
       controller.getWorldDirection(_ctrlDir);
       _ctrlDir.normalize();
@@ -1075,11 +936,17 @@
       _ctrlRay.direction.copy(_ctrlDir);
       return _ctrlRay;
     }
-
     function intersectBricksFromController(controller) {
       const ray = getControllerRay(controller);
       _ctrlRaycaster.ray.copy(ray);
+      _ctrlRaycaster.far = 5;
       return _ctrlRaycaster.intersectObjects(cubes, false);
+    }
+    function intersectInteractablesFromController(controller) {
+      const ray = getControllerRay(controller);
+      _ctrlRaycaster.ray.copy(ray);
+      _ctrlRaycaster.far = 5;
+      return _ctrlRaycaster.intersectObjects(INTERACTABLES, true);
     }
 
     const _groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -1096,32 +963,40 @@
     function onVRSelectStart(controller, event) {
       if (VR_STATE.grabbing) return;
 
-      console.log('VR Select Start');
-      
-      // Try direct intersection first
+      // First, interactables (EXIT)
+      const iHit = intersectInteractablesFromController(controller);
+      if (iHit.length) {
+        let obj = iHit[0].object;
+        while (obj && !obj.userData.interactable) obj = obj.parent;
+        if (obj && obj.userData.interactable === 'exit') {
+          exitImmersive();
+          return;
+        }
+      }
+
+      // Then bricks
       const hits = intersectBricksFromController(controller);
       if (hits.length > 0) {
         selectedCube = hits[0].object;
-        console.log('Direct hit on brick');
       } else {
-        // Proximity grab - find nearest brick within range
-        let best = null, bestD = 0.25; // Increased range for easier VR grabbing
-        const ctrlPos = new THREE.Vector3();
-        controller.getWorldPosition(ctrlPos);
-        
+        // Smart proximity fallback along ray, ~1.2m forward
+        const ray = getControllerRay(controller);
+        const grabPoint = ray.origin.clone().addScaledVector(ray.direction, 1.2);
+        let best = null, bestDist = 0.35;
         for (const b of cubes) {
-          if (b.userData.isPlaced) continue; // Skip placed bricks
-          const d = b.position.distanceTo(ctrlPos);
-          if (d < bestD) { 
-            best = b; 
-            bestD = d; 
+          const d = b.position.distanceTo(grabPoint);
+          if (d < bestDist) { best = b; bestDist = d; }
+        }
+        if (!best) {
+          const ctrlPos = new THREE.Vector3();
+          controller.getWorldPosition(ctrlPos);
+          let bd = 0.3;
+          for (const b of cubes) {
+            const d = b.position.distanceTo(ctrlPos);
+            if (d < bd) { best = b; bd = d; }
           }
         }
-        
-        if (best) {
-          selectedCube = best;
-          console.log('Proximity grab on brick');
-        }
+        selectedCube = best || null;
       }
 
       if (selectedCube) {
@@ -1131,47 +1006,29 @@
         VR_STATE.controller = controller;
         setLineColor(controller, VR_STATE.lineColorGrab);
         updateFloorIndicatorForBrick(selectedCube);
-        
-        // Enhanced haptic feedback
-        if (event.target && event.target.gamepad && event.target.gamepad.hapticActuators) {
-          try {
+        try {
+          if (event.target && event.target.gamepad && event.target.gamepad.hapticActuators) {
             event.target.gamepad.hapticActuators[0].pulse(0.5, 100);
-          } catch (e) {
-            console.log('Haptic feedback not supported');
-          }
-        } else if (navigator.vibrate) {
-          navigator.vibrate(15);
-        }
+          } else if (navigator.vibrate) navigator.vibrate(15);
+        } catch {}
       }
     }
-
     function onVRSelectEnd(controller, event) {
       if (!VR_STATE.grabbing || VR_STATE.controller !== controller) return;
-
-      console.log('VR Select End');
-      
       if (selectedCube) {
         selectedCube.userData.isGrabbed = false;
         moves++;
         updateScoreDisplay();
         const snapped = snapToBrickPosition(selectedCube);
-        
         if (snapped) {
-          // Success haptic feedback
-          if (event.target && event.target.gamepad && event.target.gamepad.hapticActuators) {
-            try {
+          try {
+            if (event.target && event.target.gamepad && event.target.gamepad.hapticActuators) {
               event.target.gamepad.hapticActuators[0].pulse(0.8, 200);
-            } catch (e) {
-              console.log('Haptic feedback not supported');
-            }
-          } else if (navigator.vibrate) {
-            navigator.vibrate(60);
-          }
+            } else if (navigator.vibrate) navigator.vibrate(60);
+          } catch {}
         }
-        
         hideFloorIndicator();
       }
-
       selectedCube = null;
       VR_STATE.grabbing = false;
       VR_STATE.controller = null;
@@ -1179,38 +1036,19 @@
       checkWinCondition();
     }
 
-    function onVRSqueezeStart(controller, event) {
-      console.log('VR Squeeze Start - could be used for alternative grab');
-      // Could implement squeeze as alternative grab method
-    }
-
-    function onVRSqueezeEnd(controller, event) {
-      console.log('VR Squeeze End');
-    }
-
     function setupControllers() {
       const controller0 = renderer.xr.getController(0);
       const controller1 = renderer.xr.getController(1);
-      
-      // Add controllers to scene
-      scene.add(controller0);
-      scene.add(controller1);
-
-      // Create controller rigs
-      controllers = [
-        makeControllerRig(controller0, 0),
-        makeControllerRig(controller1, 1),
-      ];
-
-      console.log('VR Controllers initialized');
+      scene.add(controller0); scene.add(controller1);
+      controllers = [ makeControllerRig(controller0, 0), makeControllerRig(controller1, 1) ];
+      console.log('VR Controllers initialized:', controllers.map(c => c && c.controller ? 'ok' : 'missing'));
     }
-
-    // -------- end Enhanced VR controller system --------
+    // -------- end VR helpers --------
 
     function render() {
       if (controls) controls.update();
 
-      // Enhanced VR dragging with better positioning
+      // VR dragging follows ground projection
       if (VR_STATE.grabbing && VR_STATE.controller && selectedCube) {
         const hit = projectToGround(VR_STATE.controller);
         if (hit) {
@@ -1223,14 +1061,10 @@
         }
       }
 
-      // Update controller line visibility and effects
-      controllers.forEach(controllerRig => {
-        const controller = controllerRig.controller;
-        const line = controller.getObjectByName('pointerLine');
-        if (line && controller.visible) {
-          // Make line more visible when grabbing
-          line.material.opacity = VR_STATE.grabbing && VR_STATE.controller === controller ? 1.0 : 0.7;
-        }
+      // Update pointer line emphasis
+      controllers.forEach(rig => {
+        const c = rig.controller, line = c.getObjectByName('pointerLine');
+        if (line && c.visible) line.material.opacity = VR_STATE.grabbing && VR_STATE.controller === c ? 1.0 : 0.7;
       });
 
       renderer.render(scene, camera);
@@ -1247,33 +1081,30 @@
     function setupVRButton() {
       const btn = document.getElementById('vrButton');
       btn.addEventListener('click', async () => {
-        if (!navigator.xr) {
-          showToast('WebXR not supported in this browser');
-          return;
-        }
-
+        if (!navigator.xr) { showToast('WebXR not supported'); return; }
         try {
-          const session = await navigator.xr.requestSession('immersive-vr', { 
-            requiredFeatures: ['local-floor'],
-            optionalFeatures: ['hand-tracking', 'local-floor-bounds']
-          });
-          
+          const session = await navigator.xr.requestSession('immersive-vr', { requiredFeatures: ['local-floor'] });
           if (controls) controls.enabled = false;
           renderer.xr.setSession(session);
-          
-          // Detect VR system when session starts
           detectVRSystem(session);
-          
-        } catch (error) {
-          console.error('Failed to start VR session:', error);
+        } catch (e) {
+          console.warn(e);
           showToast('Could not start VR session');
         }
       });
-      
       document.getElementById('resetButton').addEventListener('click', resetGame);
     }
 
-    // Initialize the game
+    // Utility toast
+    function showToast(text, ms = 2000) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = text;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), ms);
+    }
+
+    // Init
     init();
   </script>
 </body>
