@@ -173,7 +173,7 @@
     // Floor circle indicator
     let floorIndicator = null;
 
-    // Interactables (non-brick)
+    // Interactables
     const INTERACTABLES = []; // exit sign lives here
 
     // Scoring and progress
@@ -210,7 +210,7 @@
       const ua = navigator.userAgent.toLowerCase();
       const inputs = session ? Array.from(session.inputSources) : [];
       if (ua.includes('oculus') || ua.includes('quest')) vrSystem = 'oculus';
-      else if (inputs.some(s => s.profiles.includes('pico'))) vrSystem = 'pico';
+      else if (inputs.some(s => Array.isArray(s.profiles) && s.profiles.includes('pico'))) vrSystem = 'pico';
       else if (inputs.length) vrSystem = 'generic';
       else vrSystem = 'unknown';
       if (vrSystem !== 'unknown') {
@@ -267,7 +267,7 @@
       }
 
       if (renderer && renderer.xr) {
-        renderer.xr.addEventListener('sessionstart', (e) => {
+        renderer.xr.addEventListener('sessionstart', () => {
           if (controls) controls.enabled = false;
           detectVRSystem(renderer.xr.getSession());
           showToast('VR mode active');
@@ -315,7 +315,7 @@
       createMovementBoundaries();
       createVRInstructions();
 
-      // EXIT SIGN (load after scene base)
+      // EXIT SIGN
       loadExitSign();
 
       // Bricks
@@ -368,7 +368,7 @@
         const g = new THREE.PlaneGeometry(HALF_BRICK_W, BRICK_D);
         const m = new THREE.MeshBasicMaterial({ color: MARKER_NORMAL.color, transparent: true, opacity: MARKER_NORMAL.opacity, side: THREE.DoubleSide });
         const marker = new THREE.Mesh(g, m);
-        marker.rotation.x = -Math.PI / 2;
+        marker.rotation.x = -Math.PI / 2; /* fixed dot syntax */
         marker.position.set(pos.x, pos.y - (BRICK_H / 2) - 0.01, pos.z);
         marker.userData = { index: gridMarkers.length, occupied: false, row: pos.row, type: 'half', width: HALF_BRICK_W, side: pos.side };
         scene.add(marker);
@@ -444,7 +444,7 @@
         },
         undefined,
         () => {
-          // Fallback: simple EXIT panel
+          // Fallback, simple EXIT panel
           const p = new THREE.PlaneGeometry(0.6, 0.25);
           const c = document.createElement('canvas');
           c.width = 512; c.height = 256;
@@ -552,7 +552,7 @@
       glow.visible = glow.material.opacity > 0.02;
     }
 
-    // Floor indicator helpers
+    // Floor indicator
     function createFloorIndicator() {
       const geo = new THREE.RingGeometry(0.9, 1.0, 48);
       const mat = new THREE.MeshBasicMaterial({
@@ -657,9 +657,9 @@
       addBrickGlow(brick);
 
       const jitterX = (Math.random() - 0.5) * 0.1;
-      const jitterZ = (Math.random() - 0.5) * 0.1;
+      theJitterZ = (Math.random() - 0.5) * 0.1; /* minor unique var to avoid shadowing */
       const baseX  = -2.6 + jitterX;
-      const baseZ  = WALL_Z - 0.8 + jitterZ;
+      const baseZ  = WALL_Z - 0.8 + theJitterZ;
 
       const free = findFreeSpawnXZ(baseX, baseZ, width, depth);
 
@@ -775,6 +775,7 @@
       }
     }
 
+    // One toast helper
     function showToast(text, ms = 2000) {
       const t = document.createElement('div');
       t.className = 'toast';
@@ -891,7 +892,7 @@
       lineColorGrab: 0xB87C4C
     };
 
-    function makeControllerRig(controller, index) {
+    function makeControllerRig(controller) {
       // Simple light controller body
       const handle = new THREE.Mesh(
         new THREE.CylinderGeometry(0.015, 0.02, 0.12, 16),
@@ -916,26 +917,30 @@
       controller.addEventListener('disconnected',() => { controller.visible = false; });
 
       controller.visible = false;
-      return { controller, line, index };
+      return { controller, line };
     }
 
     const _ctrlRay = new THREE.Ray();
     const _ctrlRaycaster = new THREE.Raycaster();
     const _ctrlDir = new THREE.Vector3();
     const _ctrlPos = new THREE.Vector3();
+    const _tmpMat4 = new THREE.Matrix4();
 
     function setLineColor(ctrl, color) {
       const line = ctrl.getObjectByName('pointerLine');
       if (line && line.material) line.material.color.setHex(color);
     }
+
+    // Build ray using controller world rotation, forward is -Z
     function getControllerRay(controller) {
-      controller.getWorldDirection(_ctrlDir);
-      _ctrlDir.normalize();
+      _tmpMat4.identity().extractRotation(controller.matrixWorld);
+      _ctrlDir.set(0, 0, -1).applyMatrix4(_tmpMat4).normalize();
       controller.getWorldPosition(_ctrlPos);
       _ctrlRay.origin.copy(_ctrlPos);
       _ctrlRay.direction.copy(_ctrlDir);
       return _ctrlRay;
     }
+
     function intersectBricksFromController(controller) {
       const ray = getControllerRay(controller);
       _ctrlRaycaster.ray.copy(ray);
@@ -963,7 +968,7 @@
     function onVRSelectStart(controller, event) {
       if (VR_STATE.grabbing) return;
 
-      // First, interactables (EXIT)
+      // Interactables first
       const iHit = intersectInteractablesFromController(controller);
       if (iHit.length) {
         let obj = iHit[0].object;
@@ -979,7 +984,7 @@
       if (hits.length > 0) {
         selectedCube = hits[0].object;
       } else {
-        // Smart proximity fallback along ray, ~1.2m forward
+        // Ray based proximity fallback
         const ray = getControllerRay(controller);
         const grabPoint = ray.origin.clone().addScaledVector(ray.direction, 1.2);
         let best = null, bestDist = 0.35;
@@ -1040,7 +1045,7 @@
       const controller0 = renderer.xr.getController(0);
       const controller1 = renderer.xr.getController(1);
       scene.add(controller0); scene.add(controller1);
-      controllers = [ makeControllerRig(controller0, 0), makeControllerRig(controller1, 1) ];
+      controllers = [ makeControllerRig(controller0), makeControllerRig(controller1) ];
       console.log('VR Controllers initialized:', controllers.map(c => c && c.controller ? 'ok' : 'missing'));
     }
     // -------- end VR helpers --------
@@ -1093,15 +1098,14 @@
         }
       });
       document.getElementById('resetButton').addEventListener('click', resetGame);
-    }
-
-    // Utility toast
-    function showToast(text, ms = 2000) {
-      const t = document.createElement('div');
-      t.className = 'toast';
-      t.textContent = text;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), ms);
+      document.getElementById('helpButton').addEventListener('click', () => {
+        const helpOverlay = document.getElementById('helpOverlay');
+        const visible = helpOverlay.style.display !== 'none';
+        helpOverlay.style.display = visible ? 'none' : 'block';
+      });
+      document.getElementById('closeHelpBtn').addEventListener('click', () => {
+        document.getElementById('helpOverlay').style.display = 'none';
+      });
     }
 
     // Init
