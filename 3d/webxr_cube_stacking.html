@@ -309,8 +309,8 @@
       camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
       camera.position.set(0, 1, 1.8);
 
-      // Renderer, alpha false for desktop, alpha will be set to transparent for AR
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      // Renderer, alpha must be true so AR can be transparent
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
@@ -361,6 +361,7 @@
           isAR = false;
           scene.background = new THREE.Color(0x87CEEB);  // restore sky
           renderer.setClearAlpha(1.0);
+          renderer.domElement.style.background = '';
           showToast('XR session ended');
         });
       }
@@ -1305,7 +1306,7 @@
         } catch (e) { console.warn(e); showToast('Could not start VR session'); }
       });
 
-      // Start passthrough AR, requires immersive-ar and hit-test
+      // Start passthrough AR, requires immersive ar and hit test
       arBtn.addEventListener('click', async () => {
         if (!navigator.xr) { showToast('WebXR not supported'); return; }
         try {
@@ -1319,6 +1320,7 @@
           isAR = true;
           scene.background = null;          // transparent
           renderer.setClearAlpha(0.0);      // show real world
+          renderer.domElement.style.background = 'transparent';
           const session = await navigator.xr.requestSession('immersive-ar', {
             requiredFeatures: ['local-floor', 'hit-test']
           });
@@ -1379,36 +1381,6 @@
       arReticle.visible = false;
       showToast('Placed, start building');
     }
-
-    /* =========================
-       Rendering helpers already declared above
-       ========================= */
-
-    /* =========================
-       Brick hover feedback, pulsing when idle
-       ========================= */
-    function showToastOnce(key, text) {
-      // small helper if you ever want one time toasts, not used now
-      if (!showToastOnce._shown) showToastOnce._shown = {};
-      if (showToastOnce._shown[key]) return;
-      showToastOnce._shown[key] = true;
-      showToast(text);
-    }
-
-    /* =========================
-       Marker logic continued
-       ========================= */
-    function highlightNearbyPositions(x, z) {
-      // already defined above, left here for readability, kept single version
-    }
-
-    /* =========================
-       Snap and scoring already defined above
-       ========================= */
-
-    /* =========================
-       Spawn next brick and helpers already defined above
-       ========================= */
 
     /* =========================
        Kick off the app
