@@ -1,0 +1,173 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebXR Character Viewer, VR Ready</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body { background: #0e1116; color: #e8e8e8; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    #app { position: fixed; inset: 0; }
+    #overlay {
+      position: fixed; left: 12px; bottom: 12px; right: 12px;
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      pointer-events: none; z-index: 10;
+    }
+    .panel {
+      pointer-events: auto; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px; padding: 10px 12px; backdrop-filter: blur(4px);
+    }
+    #help { max-width: 720px; line-height: 1.45; font-size: 14px; }
+    #fps { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; opacity: 0.8; }
+    a { color: #8cc8ff; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="overlay">
+    <div id="help" class="panel">
+      <strong>Navigation</strong>: Left drag to orbit, right drag to pan, scroll to zoom. On touch, one finger to orbit, two fingers to pan, pinch to zoom. Click the blue button to view in VR.
+    </div>
+    <div id="fps" class="panel">FPS: <span id="fpsv">0</span></div>
+  </div>
+
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js";
+    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/controls/OrbitControls.js";
+    import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js";
+    import { VRButton } from "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/webxr/VRButton.js";
+
+    // Core
+    const container = document.getElementById('app');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x101418);
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+    camera.position.set(2.5, 1.8, 3.5);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    // WebXR
+    renderer.xr.enabled = true;
+    document.body.appendChild(VRButton.createButton(renderer)); // This adds the View in VR button
+
+    // Controls for non VR use
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 1.4, 0);
+    controls.enableDamping = true;
+
+    // Lights
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x333344, 0.8);
+    scene.add(hemi);
+
+    const dir = new THREE.DirectionalLight(0xffffff, 1.1);
+    dir.position.set(5, 8, 3);
+    dir.castShadow = true;
+    dir.shadow.mapSize.set(2048, 2048);
+    dir.shadow.camera.near = 0.5; dir.shadow.camera.far = 50;
+    scene.add(dir);
+
+    // Ground
+    const groundGeo = new THREE.CircleGeometry(20, 64);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a1f27, roughness: 1, metalness: 0 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI * 0.5;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Grid helper, subtle
+    const grid = new THREE.GridHelper(20, 40, 0x2a3340, 0x242a33);
+    grid.position.y = 0.001;
+    scene.add(grid);
+
+    // Load GLB character
+    let mixer = null;
+    const loader = new GLTFLoader();
+    loader.load(
+      // Path relative to this HTML file
+      'assets/Worker.glb',
+      gltf => {
+        const root = gltf.scene || gltf.scenes[0];
+        root.traverse(obj => { if (obj.isMesh) { obj.castShadow = true; obj.receiveShadow = true; } });
+
+        // Center and place model on ground
+        const box = new THREE.Box3().setFromObject(root);
+        const size = new THREE.Vector3();
+        const center = new THREE.Vector3();
+        box.getSize(size); box.getCenter(center);
+        const height = size.y;
+        root.position.y += (height * 0.5) - center.y; // put feet on ground
+        root.position.x -= center.x; // center X
+        root.position.z -= center.z; // center Z
+
+        scene.add(root);
+
+        // If animations exist, play the first one
+        if (gltf.animations && gltf.animations.length > 0) {
+          mixer = new THREE.AnimationMixer(root);
+          const clip = gltf.animations[0];
+          const action = mixer.clipAction(clip);
+          action.play();
+        }
+      },
+      xhr => {
+        // progress, optional
+        // console.log(`Loading: ${(xhr.loaded / xhr.total) * 100}%`);
+      },
+      err => {
+        const msg = `Failed to load assets/Worker.glb, ${err?.message || err}`;
+        console.error(msg);
+        const warn = document.createElement('div');
+        warn.className = 'panel';
+        warn.style.position = 'fixed';
+        warn.style.top = '12px';
+        warn.style.left = '12px';
+        warn.style.maxWidth = '640px';
+        warn.textContent = msg + '. Make sure you are serving files over http or https, file URLs are blocked by browsers.';
+        document.body.appendChild(warn);
+      }
+    );
+
+    // Simple avatar height reference in VR
+    const ref = new THREE.AxesHelper(0.25);
+    ref.position.set(0, 1.4, 0);
+    scene.add(ref);
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // FPS meter
+    const fpsv = document.getElementById('fpsv');
+    let last = performance.now();
+    let acc = 0, frames = 0;
+
+    // Render loop
+    const clock = new THREE.Clock();
+    renderer.setAnimationLoop(() => {
+      const dt = clock.getDelta();
+      if (mixer) mixer.update(dt);
+      controls.update();
+      renderer.render(scene, camera);
+
+      // FPS calc
+      const now = performance.now();
+      const elapsed = now - last; last = now; acc += elapsed; frames += 1;
+      if (acc >= 500) { // update twice a second
+        fpsv.textContent = Math.round(1000 * frames / acc).toString();
+        acc = 0; frames = 0;
+      }
+    });
+  </script>
+</body>
+</html>

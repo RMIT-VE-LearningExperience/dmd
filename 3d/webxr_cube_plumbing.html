@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    WebXR Pipe Connection Puzzle, VR and AR support
+    Connect pipes from source to outlet to complete the water flow
+    Palette: #A8BBA3, #F7F4EA, #EBD9D1, #B87C4C, #4A90E2 (blue)
+  -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>WebXR Pipe Connection Puzzle</title>
+
+  <!-- Three.js core and helpers -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #F7F4EA;
+      color: #1B1A17;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #uiOverlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 1000;
+      background: rgba(247, 244, 234, 0.90);
+      border: 1px solid rgba(184, 124, 76, 0.35);
+      backdrop-filter: blur(6px);
+      padding: 12px 14px;
+      border-radius: 12px;
+      max-width: 320px;
+      line-height: 1.3;
+    }
+    #uiOverlay h2 { margin: 0 0 8px; font-size: 18px; font-weight: 700; color: #B87C4C; }
+    #statusDisplay, #moveDisplay, #timeDisplay { font-size: 14px; color: #1B1A17; margin: 4px 0; }
+
+    #helpOverlay {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      z-index: 1000;
+      background: rgba(235, 217, 209, 0.85);
+      border: 1px solid rgba(184, 124, 76, 0.35);
+      backdrop-filter: blur(6px);
+      padding: 10px 12px 12px;
+      border-radius: 12px;
+      max-width: 520px;
+      font-size: 13px;
+      color: #1B1A17;
+    }
+    #helpOverlay .closeHelp {
+      position: absolute; top: 6px; right: 8px;
+      border: none; border-radius: 8px; padding: 4px 8px; cursor: pointer;
+      background: #B87C4C; color: #F7F4EA; font-size: 12px;
+    }
+
+    #toolboxPanel {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      z-index: 1000;
+      background: rgba(247, 244, 234, 0.90);
+      border: 1px solid rgba(184, 124, 76, 0.35);
+      backdrop-filter: blur(6px);
+      padding: 12px;
+      border-radius: 12px;
+      max-width: 200px;
+    }
+    #toolboxPanel h3 { margin: 0 0 8px; font-size: 14px; color: #B87C4C; }
+    .tool-item {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin: 4px 0;
+      background: #EBD9D1;
+      border: 1px solid #B87C4C;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tool-item:hover { background: #B87C4C; color: #F7F4EA; }
+    .tool-item.selected { background: #A8BBA3; color: #1B1A17; }
+
+    #vrButton, #arButton, #resetButton, #helpButton, #rotateButton, #waterButton {
+      position: absolute;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #F7F4EA;
+      background: #B87C4C;
+      transition: transform .08s ease;
+    }
+    #vrButton { bottom: 20px; right: 20px; }
+    #arButton { bottom: 66px; right: 20px; }
+    #resetButton { bottom: 112px; right: 20px; }
+    #helpButton { bottom: 158px; right: 20px; }
+    #rotateButton { bottom: 204px; right: 20px; }
+    #waterButton { bottom: 250px; right: 20px; }
+    #vrButton:hover, #arButton:hover, #resetButton:hover, #helpButton:hover, #rotateButton:hover, #waterButton:hover {
+      transform: translateY(-1px);
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      top: 72px;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: rgba(235, 217, 209, .92);
+      border: 1px solid rgba(184, 124, 76, .35);
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #1B1A17;
+    }
+  </style>
+</head>
+<body>
+  <div id="uiOverlay">
+    <h2>Pipe Puzzle</h2>
+    <div id="statusDisplay">Connect source to outlet</div>
+    <div id="moveDisplay">Moves: 0</div>
+    <div id="timeDisplay">Time: 0s</div>
+  </div>
+
+  <div id="helpOverlay">
+    <button class="closeHelp" id="closeHelpBtn">Close</button>
+    <strong>Goal:</strong> Connect the blue water source to the outlet using pipe pieces<br>
+    <strong>VR:</strong> Point and squeeze trigger to grab, release to place. Use menu to rotate.<br>
+    <strong>Desktop:</strong> Left click to grab/place pipes. R key to rotate selected piece.<br>
+    <strong>Controls:</strong> Pipes snap to compatible connection points automatically<br>
+    <strong>Tip:</strong> Each piece can be rotated in 90° increments to fit your design
+  </div>
+
+  <div id="toolboxPanel">
+    <h3>Pipe Pieces</h3>
+    <button class="tool-item" data-type="straight">Straight Pipe (2)</button>
+    <button class="tool-item" data-type="elbow">90° Elbow (2)</button>
+    <button class="tool-item" data-type="tjunction">T-Junction (1)</button>
+    <button class="tool-item" data-type="cross">Cross Fitting (1)</button>
+    <button class="tool-item" data-type="outlet">Outlet (1)</button>
+  </div>
+
+  <button id="vrButton">Enter VR</button>
+  <button id="arButton">Enter AR</button>
+  <button id="resetButton">Reset</button>
+  <button id="helpButton">Help</button>
+  <button id="rotateButton">Rotate</button>
+  <button id="waterButton" disabled>Activate Water</button>
+
+  <script>
+    /* =========================
+       Constants and Configuration
+       ========================= */
+    const PIPE_DIAMETER = 0.1;
+    const PIPE_LENGTH = 0.5;
+    const PIPE_WALL_THICKNESS = 0.01;
+    const CURVE_RADIUS = 0.25;
+    const SNAP_DISTANCE = 0.15;
+    const CONNECTION_TOLERANCE = 0.05;
+
+    // Piece inventory
+    const PIECE_INVENTORY = {
+      straight: 2,
+      elbow: 2,
+      tjunction: 1,
+      cross: 1,
+      outlet: 1
+    };
+
+    // Colors
+    const COLORS = {
+      pipe: 0xC0C0C0,        // Light gray
+      pipeRim: 0x808080,     // Darker gray for rims
+      water: 0x4A90E2,       // Blue
+      source: 0x4A90E2,      // Blue glow
+      outlet: 0xB87C4C,      // Brown
+      connection: 0x90EE90   // Light green for valid connections
+    };
+
+    // Level definition, ordered steps with exact targets
+    const LEVEL_STEPS = [
+      { type: 'straight', position: new THREE.Vector3(-1.55, 0.5, 0), rotationY: 0 },
+      { type: 'elbow',    position: new THREE.Vector3(-1.05, 0.5, 0), rotationY: 0 },
+      { type: 'straight', position: new THREE.Vector3(-0.55, 0.5, 0.25), rotationY: Math.PI / 2 },
+      { type: 'tjunction',position: new THREE.Vector3( 0.00, 0.5, 0.25), rotationY: 0 },
+      { type: 'elbow',    position: new THREE.Vector3( 0.55, 0.5, 0.25), rotationY: Math.PI },
+      { type: 'straight', position: new THREE.Vector3( 1.05, 0.5, 0.00), rotationY: 0 },
+      { type: 'outlet',   position: new THREE.Vector3( 1.55, 0.5, 0.00), rotationY: 0 }
+    ];
+    const PLACE_SNAP_TOLERANCE = 0.18;
+
+    let currentStepIndex = 0;
+    let activeDropZone = null;  // THREE.Group, visual target
+    let placedSteps = [];       // placed pieces in order
+
+    /* =========================
+       Globals
+       ========================= */
+    let scene, camera, renderer;
+    let controls = null;
+    let selectedPipe = null;
+    let sourceMesh = null;
+    let outletMesh = null;
+    let pipes = [];
+    let connectionPoints = [];
+    let waterParticles = [];
+    let isFlowing = false;
+
+    // Game state
+    let moves = 0;
+    let startTime = Date.now();
+    let currentPieceType = null;
+    let pieceInventory = { ...PIECE_INVENTORY };
+
+    // VR
+    let controllers = [];
+    let isAR = false;
+    let isMobile = false;
+
+    // Input
+    let mouse = new THREE.Vector2();
+    let raycaster = new THREE.Raycaster();
+
+    // Stage group for AR positioning
+    const stageGroup = new THREE.Group();
+
+    /* =========================
+       Initialization
+       ========================= */
+    function init() {
+      isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x87CEEB);
+
+      camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 1.5, 2);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.xr.enabled = true;
+      document.body.appendChild(renderer.domElement);
+
+      // Controls
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.target.set(0, 0.5, 0);
+      controls.mouseButtons = { LEFT: null, RIGHT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.PAN };
+
+      // Lighting
+      setupLighting();
+
+      // Stage setup
+      scene.add(stageGroup);
+      setupEnvironment();
+      createSourceAndOutlet();
+      showNextDropZone(); // show the first drop zone
+      updateToolbox();
+
+      // Input and UI
+      setupInput();
+      setupUIButtons();
+      setupVRControllers();
+
+      // Game loop
+      renderer.setAnimationLoop(animate);
+      updateUI();
+
+      window.addEventListener('resize', onWindowResize);
+      window.addEventListener('keydown', onKeyDown);
+    }
+
+    function setupLighting() {
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(5, 10, 5);
+      directionalLight.castShadow = true;
+      directionalLight.shadow.mapSize.width = 2048;
+      directionalLight.shadow.mapSize.height = 2048;
+      scene.add(directionalLight);
+    }
+
+    function setupEnvironment() {
+      // Floor
+      const floorGeometry = new THREE.PlaneGeometry(20, 20);
+      const floorMaterial = new THREE.MeshLambertMaterial({ color: 0xF7F4EA });
+      const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -0.5;
+      floor.receiveShadow = true;
+      stageGroup.add(floor);
+
+      // Work surface
+      const surfaceGeometry = new THREE.BoxGeometry(4, 0.05, 2);
+      const surfaceMaterial = new THREE.MeshLambertMaterial({ color: 0xEBD9D1 });
+      const surface = new THREE.Mesh(surfaceGeometry, surfaceMaterial);
+      surface.position.set(0, 0, 0);
+      surface.receiveShadow = true;
+      stageGroup.add(surface);
+    }
+
+    /* =========================
+       Pipe Geometry Creation
+       ========================= */
+    function createStraightPipe() {
+      const group = new THREE.Group();
+      
+      // Outer cylinder
+      const outerGeometry = new THREE.CylinderGeometry(PIPE_DIAMETER/2, PIPE_DIAMETER/2, PIPE_LENGTH, 16);
+      const pipeBody = new THREE.Mesh(outerGeometry, new THREE.MeshStandardMaterial({ 
+        color: COLORS.pipe, 
+        roughness: 0.3, 
+        metalness: 0.7 
+      }));
+      pipeBody.rotation.z = Math.PI / 2;
+      group.add(pipeBody);
+
+      // Inner hollow (for visual effect)
+      const innerGeometry = new THREE.CylinderGeometry(PIPE_DIAMETER/2 - PIPE_WALL_THICKNESS, PIPE_DIAMETER/2 - PIPE_WALL_THICKNESS, PIPE_LENGTH + 0.01, 16);
+      const innerMaterial = new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.BackSide });
+      const inner = new THREE.Mesh(innerGeometry, innerMaterial);
+      inner.rotation.z = Math.PI / 2;
+      group.add(inner);
+
+      // End caps/rims
+      for (let i = 0; i < 2; i++) {
+        const rimGeometry = new THREE.RingGeometry(PIPE_DIAMETER/2 - PIPE_WALL_THICKNESS, PIPE_DIAMETER/2 + 0.005, 16);
+        const rim = new THREE.Mesh(rimGeometry, new THREE.MeshStandardMaterial({ color: COLORS.pipeRim }));
+        rim.position.x = (i === 0 ? -PIPE_LENGTH/2 : PIPE_LENGTH/2);
+        group.add(rim);
+      }
+
+      // Connection points
+      group.userData.connectionPoints = [
+        { position: new THREE.Vector3(-PIPE_LENGTH/2, 0, 0), direction: new THREE.Vector3(-1, 0, 0), connected: false },
+        { position: new THREE.Vector3(PIPE_LENGTH/2, 0, 0), direction: new THREE.Vector3(1, 0, 0), connected: false }
+      ];
+      
+      return group;
+    }
+
+    function createElbowPipe() {
+      const group = new THREE.Group();
+      
+      const torusGeometry = new THREE.TorusGeometry(CURVE_RADIUS, PIPE_DIAMETER/2, 8, 16, Math.PI/2);
+      const elbow = new THREE.Mesh(torusGeometry, new THREE.MeshStandardMaterial({ 
+        color: COLORS.pipe, 
+        roughness: 0.3, 
+        metalness: 0.7 
+      }));
+      elbow.rotation.x = -Math.PI / 2;
+      elbow.position.set(-CURVE_RADIUS, 0, CURVE_RADIUS);
+      group.add(elbow);
+
+      group.userData.connectionPoints = [
+        { position: new THREE.Vector3(-CURVE_RADIUS*2, 0, CURVE_RADIUS), direction: new THREE.Vector3(-1, 0, 0), connected: false },
+        { position: new THREE.Vector3(-CURVE_RADIUS, 0, CURVE_RADIUS*2), direction: new THREE.Vector3(0, 0, 1), connected: false }
+      ];
+      
+      return group;
+    }
+
+    function createTJunction() {
+      const group = new THREE.Group();
+      
+      const mainPipe = createStraightPipe();
+      group.add(mainPipe);
+      
+      const branchGeometry = new THREE.CylinderGeometry(PIPE_DIAMETER/2, PIPE_DIAMETER/2, PIPE_LENGTH/2, 16);
+      const branch = new THREE.Mesh(branchGeometry, new THREE.MeshStandardMaterial({ 
+        color: COLORS.pipe, 
+        roughness: 0.3, 
+        metalness: 0.7 
+      }));
+      branch.position.y = PIPE_LENGTH/4;
+      group.add(branch);
+
+      group.userData.connectionPoints = [
+        { position: new THREE.Vector3(-PIPE_LENGTH/2, 0, 0), direction: new THREE.Vector3(-1, 0, 0), connected: false },
+        { position: new THREE.Vector3(PIPE_LENGTH/2, 0, 0), direction: new THREE.Vector3(1, 0, 0), connected: false },
+        { position: new THREE.Vector3(0, PIPE_LENGTH/2, 0), direction: new THREE.Vector3(0, 1, 0), connected: false }
+      ];
+      
+      return group;
+    }
+
+    function createCrossFitting() {
+      const group = new THREE.Group();
+      
+      const hPipe = createStraightPipe();
+      group.add(hPipe);
+      
+      const vGeometry = new THREE.CylinderGeometry(PIPE_DIAMETER/2, PIPE_DIAMETER/2, PIPE_LENGTH, 16);
+      const vPipe = new THREE.Mesh(vGeometry, new THREE.MeshStandardMaterial({ 
+        color: COLORS.pipe, 
+        roughness: 0.3, 
+        metalness: 0.7 
+      }));
+      group.add(vPipe);
+
+      group.userData.connectionPoints = [
+        { position: new THREE.Vector3(-PIPE_LENGTH/2, 0, 0), direction: new THREE.Vector3(-1, 0, 0), connected: false },
+        { position: new THREE.Vector3(PIPE_LENGTH/2, 0, 0), direction: new THREE.Vector3(1, 0, 0), connected: false },
+        { position: new THREE.Vector3(0, PIPE_LENGTH/2, 0), direction: new THREE.Vector3(0, 1, 0), connected: false },
+        { position: new THREE.Vector3(0, -PIPE_LENGTH/2, 0), direction: new THREE.Vector3(0, -1, 0), connected: false }
+      ];
+      
+      return group;
+    }
+
+    function createOutlet() {
+      const group = new THREE.Group();
+      
+      const capGeometry = new THREE.CylinderGeometry(PIPE_DIAMETER/2 + 0.02, PIPE_DIAMETER/2, 0.05, 16);
+      const cap = new THREE.Mesh(capGeometry, new THREE.MeshStandardMaterial({ 
+        color: COLORS.outlet, 
+        roughness: 0.4, 
+        metalness: 0.6 
+      }));
+      cap.rotation.z = Math.PI / 2;
+      cap.position.x = 0.025;
+      group.add(cap);
+      
+      const spoutGeometry = new THREE.CylinderGeometry(PIPE_DIAMETER/3, PIPE_DIAMETER/3, 0.2, 12);
+      const spout = new THREE.Mesh(spoutGeometry, new THREE.MeshStandardMaterial({ 
+        color: COLORS.outlet, 
+        roughness: 0.4, 
+        metalness: 0.6 
+      }));
+      spout.position.set(0.05, -0.1, 0);
+      group.add(spout);
+
+      group.userData.connectionPoints = [
+        { position: new THREE.Vector3(-0.025, 0, 0), direction: new THREE.Vector3(-1, 0, 0), connected: false }
+      ];
+      
+      group.userData.isOutlet = true;
+      return group;
+    }
+
+    function createDropZoneMesh(type) {
+      const zone = new THREE.Group();
+      const mat = new THREE.MeshStandardMaterial({ color: 0x4A90E2, opacity: 0.25, transparent: true });
+
+      if (type === 'straight') {
+        const g = new THREE.CylinderGeometry(PIPE_DIAMETER/2 + 0.01, PIPE_DIAMETER/2 + 0.01, PIPE_LENGTH, 16);
+        const m = new THREE.Mesh(g, mat); m.rotation.z = Math.PI / 2; zone.add(m);
+      } else if (type === 'elbow') {
+        const g = new THREE.TorusGeometry(CURVE_RADIUS, PIPE_DIAMETER/2 + 0.01, 8, 16, Math.PI/2);
+        const m = new THREE.Mesh(g, mat); m.rotation.x = -Math.PI / 2; m.position.set(-CURVE_RADIUS, 0, CURVE_RADIUS); zone.add(m);
+      } else if (type === 'tjunction') {
+        const h = new THREE.CylinderGeometry(PIPE_DIAMETER/2 + 0.01, PIPE_DIAMETER/2 + 0.01, PIPE_LENGTH, 16);
+        const hm = new THREE.Mesh(h, mat); hm.rotation.z = Math.PI / 2; zone.add(hm);
+        const v = new THREE.CylinderGeometry(PIPE_DIAMETER/2 + 0.01, PIPE_DIAMETER/2 + 0.01, PIPE_LENGTH/2, 16);
+        const vm = new THREE.Mesh(v, mat); vm.position.y = PIPE_LENGTH/4; zone.add(vm);
+      } else if (type === 'cross') {
+        const h = new THREE.CylinderGeometry(PIPE_DIAMETER/2 + 0.01, PIPE_DIAMETER/2 + 0.01, PIPE_LENGTH, 16);
+        const hm = new THREE.Mesh(h, mat); hm.rotation.z = Math.PI / 2; zone.add(hm);
+        const v = new THREE.CylinderGeometry(PIPE_DIAMETER/2 + 0.01, PIPE_DIAMETER/2 + 0.01, PIPE_LENGTH, 16);
+        const vm = new THREE.Mesh(v, mat); zone.add(vm);
+      } else if (type === 'outlet') {
+        const g = new THREE.CylinderGeometry(PIPE_DIAMETER/2 + 0.02, PIPE_DIAMETER/2 + 0.01, 0.05, 16);
+        const m = new THREE.Mesh(g, mat); m.rotation.z = Math.PI / 2; m.position.x = 0.025; zone.add(m);
+        const sp = new THREE.CylinderGeometry(PIPE_DIAMETER/3 + 0.01, PIPE_DIAMETER/3 + 0.01, 0.2, 12);
+        const sm = new THREE.Mesh(sp, mat); sm.position.set(0.05, -0.1, 0); zone.add(sm);
+      }
+      return zone;
+    }
+
+    /* =========================
+       Source and Outlet Setup
+       ========================= */
+    function createSourceAndOutlet() {
+      // Water source (fixed position)
+      const sourceGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+      const sourceMaterial = new THREE.MeshStandardMaterial({ 
+        color: COLORS.source, 
+        emissive: COLORS.source, 
+        emissiveIntensity: 0.3 
+      });
+      sourceMesh = new THREE.Mesh(sourceGeometry, sourceMaterial);
+      sourceMesh.position.set(-2, 0.5, 0);
+      sourceMesh.userData.isSource = true;
+      sourceMesh.userData.connectionPoints = [
+        { position: new THREE.Vector3(0.15, 0, 0), direction: new THREE.Vector3(1, 0, 0), connected: false }
+      ];
+      stageGroup.add(sourceMesh);
+
+      // Add connection point visualization for source
+      const sourceConnector = new THREE.Mesh(
+        new THREE.CylinderGeometry(PIPE_DIAMETER/2, PIPE_DIAMETER/2, 0.05, 16),
+        new THREE.MeshStandardMaterial({ color: COLORS.source })
+      );
+      sourceConnector.rotation.z = Math.PI / 2;
+      sourceConnector.position.x = 0.175;
+      sourceMesh.add(sourceConnector);
+
+      // Visual goal marker only
+      const goalMarkerGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+      const goalMarkerMat = new THREE.MeshStandardMaterial({ color: 0xB87C4C, opacity: 0.35, transparent: true });
+      const goalMarker = new THREE.Mesh(goalMarkerGeo, goalMarkerMat);
+      goalMarker.position.set(1.75, 0.5, 0);
+      stageGroup.add(goalMarker);
+    }
+
+    /* =========================
+       Pipe Management
+       ========================= */
+    function spawnPipe(type) {
+      if (pieceInventory[type] <= 0) return null;
+
+      let pipe;
+      switch (type) {
+        case 'straight': pipe = createStraightPipe(); break;
+        case 'elbow': pipe = createElbowPipe(); break;
+        case 'tjunction': pipe = createTJunction(); break;
+        case 'cross': pipe = createCrossFitting(); break;
+        case 'outlet': pipe = createOutlet(); break;
+        default: return null;
+      }
+
+      pipe.position.set(0, 0.5, -1);
+      pipe.userData.type = type;
+      pipe.userData.placed = false;
+      pipe.userData.rotation = 0;
+      pipe.castShadow = true;
+      pipe.receiveShadow = true;
+
+      stageGroup.add(pipe);
+      pipes.push(pipe);
+      pieceInventory[type]--;
+
+      return pipe;
+    }
+
+    function rotatePipe(pipe) {
+      if (!pipe) return;
+      pipe.rotation.y += Math.PI / 2;
+      pipe.userData.rotation = (pipe.userData.rotation + 90) % 360;
+      updateConnectionPoints(pipe);
+    }
+
+    function updateConnectionPoints(pipe) {
+      if (!pipe.userData.connectionPoints) return;
+      
+      const rotationMatrix = new THREE.Matrix4().makeRotationY(pipe.rotation.y);
+      pipe.userData.connectionPoints.forEach(point => {
+        const originalPos = point.originalPosition || point.position.clone();
+        const originalDir = point.originalDirection || point.direction.clone();
+        
+        if (!point.originalPosition) {
+          point.originalPosition = originalPos.clone();
+          point.originalDirection = originalDir.clone();
+        }
+        
+        point.position.copy(originalPos).applyMatrix4(rotationMatrix);
+        point.direction.copy(originalDir).applyMatrix4(rotationMatrix);
+      });
+    }
+
+    // One-at-a-time drop zones, ordered placement
+    function showNextDropZone() {
+      if (activeDropZone) {
+        stageGroup.remove(activeDropZone);
+        activeDropZone.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); });
+        activeDropZone = null;
+      }
+      if (currentStepIndex >= LEVEL_STEPS.length) return;
+      const step = LEVEL_STEPS[currentStepIndex];
+      activeDropZone = createDropZoneMesh(step.type);
+      activeDropZone.position.copy(step.position);
+      activeDropZone.rotation.y = step.rotationY;
+      stageGroup.add(activeDropZone);
+    }
+
+    function attemptPlaceOnDropZone(pipe) {
+      if (currentStepIndex >= LEVEL_STEPS.length) return false;
+      const step = LEVEL_STEPS[currentStepIndex];
+      if (pipe.userData.type !== step.type) return false;
+
+      const dist = pipe.position.distanceTo(step.position);
+      if (dist > PLACE_SNAP_TOLERANCE) return false;
+
+      pipe.position.copy(step.position);
+      pipe.rotation.set(0, step.rotationY, 0);
+      updateConnectionPoints(pipe);
+      pipe.userData.placed = true;
+      placedSteps.push(pipe);
+      currentStepIndex++;
+      moves++;
+      updateUI();
+
+      if (currentStepIndex >= LEVEL_STEPS.length) {
+        const wbtn = document.getElementById('waterButton');
+        if (wbtn) wbtn.disabled = false;
+        showToast('All pieces placed, activate water!');
+      }
+      showNextDropZone();
+      return true;
+    }
+
+    /* =========================
+       Path Finding and Water Flow
+       ========================= */
+    function checkPuzzleComplete() {
+      const complete = (currentStepIndex >= LEVEL_STEPS.length);
+      if (complete) {
+        document.getElementById('statusDisplay').textContent = 'Ready, press Activate Water';
+      }
+    }
+
+    function startWaterFlow() {
+      const points = [];
+      points.push(sourceMesh.position.clone());
+      placedSteps.forEach(p => points.push(p.position.clone()));
+      const last = placedSteps[placedSteps.length - 1];
+      const endPos = last ? last.position.clone().add(new THREE.Vector3(0.25, -0.1, 0)) : new THREE.Vector3(2, 0.3, 0);
+      points.push(endPos);
+
+      isFlowing = true;
+      createWaterParticlesFromPoints(points);
+    }
+
+    function stopWaterFlow() {
+      isFlowing = false;
+      waterParticles.forEach(particle => {
+        stageGroup.remove(particle);
+        if (particle.geometry) particle.geometry.dispose();
+        if (particle.material) particle.material.dispose();
+      });
+      waterParticles = [];
+    }
+
+    function createWaterParticlesFromPoints(points) {
+      stopWaterFlow();
+      const baseMat = new THREE.MeshBasicMaterial({ color: COLORS.water, transparent: true, opacity: 0.7 });
+      for (let i = 0; i < 24; i++) {
+        const m = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), baseMat.clone());
+        m.userData.points = points.map(p => p.clone());
+        m.userData.t = Math.random();
+        m.userData.speed = 0.6 + Math.random() * 0.4;
+        stageGroup.add(m);
+        waterParticles.push(m);
+      }
+    }
+
+    function animateWaterFlow() {
+      if (!isFlowing || waterParticles.length === 0) return;
+      waterParticles.forEach(p => {
+        const pts = p.userData.points; if (!pts || pts.length < 2) return;
+        p.userData.t += p.userData.speed * 0.008;
+        if (p.userData.t >= pts.length - 1) p.userData.t = 0;
+        const i = Math.floor(p.userData.t);
+        const frac = p.userData.t - i;
+        p.position.lerpVectors(pts[i], pts[i + 1], frac);
+      });
+    }
+
+    /* =========================
+       Input Handling
+       ========================= */
+    function setupInput() {
+      renderer.domElement.addEventListener('pointerdown', onPointerDown);
+      renderer.domElement.addEventListener('pointermove', onPointerMove);
+      renderer.domElement.addEventListener('pointerup', onPointerUp);
+    }
+
+    function onPointerDown(event) {
+      if (event.button !== 0) return;
+      
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      
+      const intersects = raycaster.intersectObjects(pipes, true);
+      if (intersects.length > 0) {
+        let pipe = intersects[0].object;
+        while (pipe.parent && !pipes.includes(pipe)) {
+          pipe = pipe.parent;
+        }
+        if (pipes.includes(pipe) && !pipe.userData.placed) {
+          selectedPipe = pipe;
+          controls.enabled = false;
+        }
+      }
+    }
+
+    function onPointerMove(event) {
+      if (!selectedPipe) return;
+      
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      
+      const planeIntersect = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+      const intersectPoint = new THREE.Vector3();
+      
+      if (raycaster.ray.intersectPlane(planeIntersect, intersectPoint)) {
+        selectedPipe.position.copy(intersectPoint);
+        selectedPipe.position.y = 0.5;
+      }
+    }
+
+    function onPointerUp(event) {
+      if (!selectedPipe) {
+        controls.enabled = true;
+        return;
+      }
+
+      // Only accept placement if it matches the current drop zone
+      const placedOk = attemptPlaceOnDropZone(selectedPipe);
+      if (!placedOk) {
+        showToast('Place the correct piece in the highlighted zone');
+      }
+
+      selectedPipe = null;
+      controls.enabled = true;
+    }
+
+    function onKeyDown(event) {
+      if (event.code === 'KeyR' && selectedPipe) {
+        rotatePipe(selectedPipe);
+      }
+    }
+
+    /* =========================
+       Toolbox UI
+       ========================= */
+    function updateToolbox() {
+      const buttons = document.querySelectorAll('.tool-item');
+      buttons.forEach(button => {
+        const type = button.dataset.type;
+        const count = pieceInventory[type];
+        const typeName = button.textContent.split('(')[0].trim();
+        button.textContent = `${typeName} (${count})`;
+        button.disabled = count <= 0;
+        button.style.opacity = count > 0 ? '1' : '0.5';
+      });
+    }
+
+    function setupToolboxEvents() {
+      document.querySelectorAll('.tool-item').forEach(button => {
+        button.addEventListener('click', () => {
+          const type = button.dataset.type;
+          if (pieceInventory[type] > 0) {
+            const pipe = spawnPipe(type);
+            if (pipe) {
+              selectedPipe = pipe;
+              updateToolbox();
+              showToast(`Selected ${type} pipe`, 1500);
+            }
+          }
+        });
+      });
+    }
+
+    /* =========================
+       VR Controller Setup
+       ========================= */
+    function setupVRControllers() {
+      const controller0 = renderer.xr.getController(0);
+      const controller1 = renderer.xr.getController(1);
+      
+      scene.add(controller0);
+      scene.add(controller1);
+      
+      controllers = [controller0, controller1];
+      
+      controllers.forEach(controller => {
+        controller.addEventListener('selectstart', onVRSelectStart);
+        controller.addEventListener('selectend', onVRSelectEnd);
+      });
+    }
+
+    function onVRSelectStart(event) {
+      const controller = event.target;
+    }
+
+    function onVRSelectEnd(event) {
+      const controller = event.target;
+    }
+
+    /* =========================
+       UI Functions
+       ========================= */
+    function updateUI() {
+      const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+      document.getElementById('moveDisplay').textContent = `Moves: ${moves}`;
+      document.getElementById('timeDisplay').textContent = `Time: ${elapsedTime}s`;
+      
+      document.getElementById('statusDisplay').textContent =
+        (currentStepIndex >= LEVEL_STEPS.length)
+          ? 'Ready, press Activate Water'
+          : `${pipes.filter(p => p.userData.placed).length}/${Object.values(PIECE_INVENTORY).reduce((a,b)=>a+b,0)} pieces placed`;
+    }
+
+    function setupUIButtons() {
+      setupToolboxEvents();
+      
+      // VR Button
+      document.getElementById('vrButton').addEventListener('click', async () => {
+        if (navigator.xr) {
+          try {
+            const session = await navigator.xr.requestSession('immersive-vr');
+            renderer.xr.setSession(session);
+          } catch (error) {
+            showToast('VR not available');
+          }
+        }
+      });
+      
+      // AR Button
+      document.getElementById('arButton').addEventListener('click', async () => {
+        if (navigator.xr) {
+          try {
+            const session = await navigator.xr.requestSession('immersive-ar', {
+              requiredFeatures: ['hit-test']
+            });
+            renderer.xr.setSession(session);
+            isAR = true;
+            scene.background = null;
+          } catch (error) {
+            showToast('AR not available');
+          }
+        }
+      });
+      
+      // Reset Button
+      document.getElementById('resetButton').addEventListener('click', () => {
+        resetGame();
+      });
+      
+      // Rotate Button
+      document.getElementById('rotateButton').addEventListener('click', () => {
+        if (selectedPipe) {
+          rotatePipe(selectedPipe);
+        }
+      });
+      
+      // Help Button
+      document.getElementById('helpButton').addEventListener('click', () => {
+        const helpOverlay = document.getElementById('helpOverlay');
+        helpOverlay.style.display = helpOverlay.style.display === 'none' ? 'block' : 'none';
+      });
+      
+      // Close Help Button
+      document.getElementById('closeHelpBtn').addEventListener('click', () => {
+        document.getElementById('helpOverlay').style.display = 'none';
+      });
+
+      // Water Button
+      const waterBtn = document.getElementById('waterButton');
+      waterBtn.addEventListener('click', () => {
+        if (currentStepIndex >= LEVEL_STEPS.length) {
+          startWaterFlow();
+          showToast('Water activated!');
+          document.getElementById('statusDisplay').textContent = 'Water flowing! Puzzle complete!';
+        } else {
+          showToast('Place all pieces first');
+        }
+      });
+    }
+
+    function resetGame() {
+      // Remove all pipes
+      pipes.forEach(pipe => {
+        stageGroup.remove(pipe);
+        pipe.traverse(child => {
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) child.material.dispose();
+        });
+      });
+      pipes = [];
+      
+      // Reset inventory
+      pieceInventory = { ...PIECE_INVENTORY };
+      
+      // Reset game state
+      moves = 0;
+      startTime = Date.now();
+      selectedPipe = null;
+
+      // reset ordered placement
+      placedSteps = [];
+      currentStepIndex = 0;
+      if (activeDropZone) {
+        stageGroup.remove(activeDropZone);
+        activeDropZone = null;
+      }
+      const wbtn = document.getElementById('waterButton');
+      if (wbtn) wbtn.disabled = true;
+
+      // Reset source connection
+      if (sourceMesh.userData.connectionPoints) {
+        sourceMesh.userData.connectionPoints.forEach(point => {
+          point.connected = false;
+        });
+      }
+      
+      stopWaterFlow();
+      showNextDropZone();
+      updateToolbox();
+      updateUI();
+      showToast('Game Reset');
+    }
+
+    function showToast(message, duration = 2000) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, duration);
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    /* =========================
+       Animation Loop
+       ========================= */
+    function animate() {
+      if (controls) controls.update();
+      animateWaterFlow();
+      updateVisualEffects();
+      renderer.render(scene, camera);
+    }
+
+    function updateVisualEffects() {
+      if (sourceMesh) {
+        const time = Date.now() * 0.002;
+        sourceMesh.material.emissiveIntensity = 0.3 + Math.sin(time) * 0.1;
+      }
+      if (selectedPipe) {
+        // visual highlights can go here if needed
+      }
+    }
+
+    /* =========================
+       Start the game
+       ========================= */
+    init();
+  </script>
+</body>
+</html>
