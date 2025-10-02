@@ -4,508 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://use.typekit.net/vtr4dld.css">
+  <link rel="stylesheet" href="style-quizzes.css">
   <title>Guillotine Safety Scenario</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body { 
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      background: #ffffff;
-      min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      color: #333;
-    }
-    
-    .container { 
-      max-width: 1000px; 
-      width: 90%;
-      margin: 2rem auto; 
-      padding: 2rem;
-      display: flex;
-      gap: 1rem;
-    }
-
-    .quiz-tabs {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      min-width: 120px;
-    }
-
-    .tab {
-  background: #f1f1f1;
-  color: #000054;
-  border: 2px solid #000054;
-  border-radius: 112px;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease;
-  text-align: left;
-}
-.tab:hover {
-  background: #e9e9e9;
-  color: #000054;
-}
-.tab.active {
-  background: #E61E2A;
-  color: #FFFFFF;
-  border-color: #E61E2A;
-}
-.tab.completed {
-  background: #000054;
-  color: #FFFFFF;
-  border-color: #000054;
-}
-
-    .quiz-panel {
-      flex: 1;
-      display: none;
-    }
-    
-    .screen { 
-      display: none; 
-      opacity: 0; 
-      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      transform: translateY(20px);
-    }
-    
-    .screen.active { 
-      display: block; 
-      opacity: 1; 
-      transform: translateY(0);
-      animation: slideInUp 0.6s ease-out;
-    }
-    
-    .card { 
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 20px; 
-      padding: 2.5rem; 
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.1);
-      margin-bottom: 2rem;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-    
-    .illustration {
-      width: 100%;
-      height: 200px;
-      background: #f0f0f0;
-      border-radius: 15px;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .illustration::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 0%, transparent 50%);
-    }
-    
-    .illustration svg {
-      width: 120px;
-      height: 120px;
-      fill: rgba(0,0,0,0.9);
-      z-index: 1;
-    }
-    
-    .illustration-intro {
-      background: #f0f0f0;
-    }
-    
-    .illustration-scene1 {
-      background: #f0f0f0;
-    }
-    
-    .illustration-scene2 {
-      background: #f0f0f0;
-    }
-    
-    .illustration-scene3 {
-      background: #f0f0f0;
-    }
-    
-    .illustration-result {
-      background: #f0f0f0;
-    }
-    
-    h2 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: #000054;
-      text-align: center;
-      font-family: "Museo", sans-serif;
-    }
-    
-    h3 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-     color: #000054;
-      text-align: center;
-      font-family: "Museo", sans-serif;
-    }
-    
-    p {
-      font-size: 1.1rem;
-      line-height: 1.6;
-      color: #000;
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-    
-    .choices { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 1rem; 
-    }
-    
-    .choices button { 
-    padding: 1rem 1.5rem; 
-    border: none; 
-    border-radius: 112px; 
-    font-size: 1rem; 
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    background: #f1f1f1;
-    color: #000054;
-  }
-
-    .choices button.selected {
-      background-color: #000054;
-      color: white;
-      border-color: #000054;
-    }
-    
-    .choices button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-      background: #000054;
-      color: white;
-    }
-    
-    .choices button:active {
-      transform: translateY(0);
-    }
-
-    /* --- Quiz 2 custom button styles --- */
-    #quiz-2 .choices {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 0 1rem;
-    }
-
-    #quiz-2 .choices button {
-      background: #f1f1f1;
-      color: #000054;
-      text-align: left;
-      width: 100%;
-      max-width: 600px;
-      border: none;
-      border-radius: 112px;
-      padding: 1rem 1.5rem;
-      font-size: 1rem;
-      position: relative;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-
-    /* Circular checkbox markers for Quiz 2 */
-    #quiz-2 .choices button::before {
-      content: "";
-      width: 22px;
-      height: 22px;
-      border: 2px solid #000054;
-      border-radius: 50%;
-      display: inline-block;
-      background-color: white;
-      transition: background 0.2s, transform 0.2s, border-color 0.2s;
-      flex-shrink: 0;
-    }
-    #quiz-2 .choices button.selected::before {
-      background-color: #000054;
-      border-color: #000054;
-      transform: scale(1.02);
-    }
-
-    #quiz-2 .choices button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-      background: #000054;
-      color: white;
-    }
-    
-    .btn { 
-      background: #ffffff;
-      color: #000054; 
-      padding: .7rem .7rem; 
-      border: 2px solid #000054; 
-      border-radius: 50px; 
-      font-size: 1.1rem; 
-      font-weight: 600;
-      cursor: pointer; 
-      width: 100%;
-      transition: all 0.3s ease;
-    }
-    
-    .btn:hover {
-      background: #000054;
-      color: #ffffff;
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-      border-radius: 50px;
-      border-color: #000054;
-    }
-
-    /* Cap primary action buttons to 200px and center */
-    #startBtn,
-    #startQuiz2Btn,
-    #retryBtn,
-    #retryQuiz2Btn {
-      max-width: 200px;
-      width: 100%;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .hint {
-      text-align: center;
-      font-style: italic;
-      color: #666;
-      margin-bottom: 0.5rem;
-    }
-    .next-btn {
-      display: block;
-      margin: 1rem auto 0;
-      max-width: 200px;
-    }
-
-    
-    /* Removed #retryQuiz2Btn rule to inherit from .btn */
-    .progress-bar {
-      width: 100%;
-      height: 6px;
-      background: rgba(0,0,0,0.1);
-      border-radius: 3px;
-      margin-bottom: 2rem;
-      overflow: hidden;
-    }
-
-    /* Hide progress bar on start screens */
-    #screen-0 .progress-bar,
-    #quiz2-screen-0 .progress-bar {
-      display: none;
-    }
-    
-    .progress-fill {
-      height: 100%;
-      background: #FFD300;
-      border-radius: 3px;
-      transition: width 0.6s ease;
-    }
-    
-    .result-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    
-    .result-safe {
-      color: #48bb78;
-    }
-    
-    .result-risk {
-      color: #f56565;
-    }
-    
-    .checkmark {
-      display: none;
-      margin-left: 0.5rem;
-      color: #48bb78;
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    .tab.completed .checkmark {
-      display: inline;
-    }
-    
-    @keyframes slideInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-
-    /* Quiz 3: PPE Drag & Drop */
-    #quiz-3 .instructions {
-      font-size: 1rem;
-      margin: 0 auto 20px;
-      max-width: 600px;
-      text-align: center;
-    }
-    #quiz-3 .ppe-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    #quiz-3 .ppe-item {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      flex: 0 0 120px;
-      aspect-ratio: 1/1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: grab;
-      padding: 10px;
-      transition: box-shadow .2s, transform .2s;
-    }
-    #quiz-3 .ppe-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    #quiz-3 .ppe-item img {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
-      margin-bottom: 8px;
-    }
-    #quiz-3 .drop-zone {
-      background: #fff;
-      border: 2px dashed #ccc;
-      border-radius: 12px;
-      flex: 0 0 160px;
-      aspect-ratio: 1/1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 10px;
-      transition: background .2s, border-color .2s;
-    }
-    #quiz-3 .drop-zone.dragover {
-      background: #77DAFF;
-  border-color: #77DAFF;
-  color: #000;
-    }
-    #quiz-3 .zone-title {
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-    #quiz-3 .drop-zone .ppe-item {
-      border: none;
-    }
-    #quiz-3 #notification {
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-top: 10px;
-    }
-    #quiz-3 #resetButton {
-      margin-top: 10px;
-      padding: 8px 16px;
-      font-size: 1rem;
-      cursor: pointer;
-     background: #000054;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-    }
-
-    #quiz-3 #resetButton:hover {
- background: #000054;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        padding: 1rem;
-        flex-direction: column;
-      }
-
-      .quiz-tabs {
-        flex-direction: row;
-        min-width: auto;
-        justify-content: center;
-        margin-bottom: 1rem;
-        gap: 0.5rem;
-      }
-
-      .tab {
-        flex: 1;
-        text-align: center;
-        border-radius: 8px;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.9rem;
-      }
-
-      .quiz-panel {
-        width: 100%;
-      }
-      
-      .card {
-        padding: 1.5rem;
-      }
-      
-      h2 {
-        font-size: 2rem;
-      }
-      
-      .illustration {
-        height: 150px;
-      }
-      
-      .illustration svg {
-        width: 80px;
-        height: 80px;
-      }
-    }
-  </style>
 </head>
 <body>
   <div class="container" role="main" aria-live="polite">
@@ -604,16 +104,16 @@
 
       <div id="quiz2-screen-1" class="screen">
         <div class="card">
-          <h3>When the blade is descending, you should</h3>
+          <h3>What should you never do while the blade is descending? (Select two)</h3>
           <div class="progress-bar">
-            <div class="progress-fill" style="width: 20%"></div>
+            <div class="progress-fill" style="width: 33%"></div>
           </div>
-          <p class="hint">Select one</p>
+          <p class="hint">Select two</p>
           <div class="choices">
-            <button data-correct="false">Re position the sheet</button>
-            <button data-correct="false">Hold the guard</button>
-            <button data-correct="true">Keep hands clear and do not move the sheet</button>
-            <button data-correct="false">Lift the sheet edge</button>
+            <button data-correct="true">Adjust the sheet position</button>
+            <button data-correct="true">Hold the guard</button>
+            <button data-correct="false">Keep hands clear</button>
+            <button data-correct="false">Stand back</button>
           </div>
           <button class="btn next-btn" disabled>Next</button>
         </div>
@@ -621,16 +121,16 @@
 
       <div id="quiz2-screen-2" class="screen">
         <div class="card">
-          <h3>For long or heavy sheets</h3>
+          <h3>For long or heavy sheets, what should you do?</h3>
           <div class="progress-bar">
-            <div class="progress-fill" style="width: 40%"></div>
+            <div class="progress-fill" style="width: 66%"></div>
           </div>
           <p class="hint">Select one</p>
           <div class="choices">
-            <button data-correct="false">Let them hang</button>
             <button data-correct="true">Use a helper or outfeed support</button>
-            <button data-correct="false">Cut diagonally</button>
+            <button data-correct="false">Let them hang freely</button>
             <button data-correct="false">Fold before cutting</button>
+            <button data-correct="false">Angle the sheet diagonally</button>
           </div>
           <button class="btn next-btn" disabled>Next</button>
         </div>
@@ -638,15 +138,15 @@
 
       <div id="quiz2-screen-3" class="screen">
         <div class="card">
-          <h3>After the cut is complete</h3>
+          <h3>After a cut, what are the safe steps? (Select two)</h3>
           <div class="progress-bar">
-            <div class="progress-fill" style="width: 60%"></div>
+            <div class="progress-fill" style="width: 100%"></div>
           </div>
-          <p class="hint">Select one</p>
+          <p class="hint">Select two</p>
           <div class="choices">
-            <button data-correct="false">Reach under the guard to pull the offcut</button>
-            <button data-correct="true">Wait for hold down to release, remove parts safely</button>
-            <button data-correct="false">Push the offcut with fingers</button>
+            <button data-correct="true">Wait for hold-down to release</button>
+            <button data-correct="true">Remove parts safely</button>
+            <button data-correct="false">Reach under the guard to grab offcuts</button>
             <button data-correct="false">Cycle again to eject parts</button>
           </div>
           <button class="btn next-btn" disabled>Next</button>
@@ -654,40 +154,6 @@
       </div>
 
       <div id="quiz2-screen-4" class="screen">
-        <div class="card">
-          <h3>Housekeeping around the guillotine helps prevent incidents. What must be kept clear of the foot pedal area?</h3>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: 80%"></div>
-          </div>
-          <p class="hint">Select one</p>
-          <div class="choices">
-            <button data-correct="false">Option 1</button>
-            <button data-correct="false">Option 2</button>
-            <button data-correct="false">Option 3</button>
-            <button data-correct="false">Option 4</button>
-          </div>
-          <button class="btn next-btn" disabled>Next</button>
-        </div>
-      </div>
-
-      <div id="quiz2-screen-5" class="screen">
-        <div class="card">
-          <h3>During a cut you hear a grinding noise and see misalignment. What is the correct response?</h3>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: 100%"></div>
-          </div>
-          <p class="hint">Select one</p>
-          <div class="choices">
-            <button data-correct="false">Option 1</button>
-            <button data-correct="false">Option 2</button>
-            <button data-correct="false">Option 3</button>
-            <button data-correct="false">Option 4</button>
-          </div>
-          <button class="btn next-btn" disabled>Next</button>
-        </div>
-      </div>
-
-      <div id="quiz2-screen-6" class="screen">
         <div class="card">
           
           <h3 id="quiz2-result-title">Results</h3>
@@ -873,7 +339,7 @@ checkAllComplete();
       // Compute score for Quiz 2
       function computeQuiz2Score() {
         let correctCount = 0, totalCount = 0;
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 3; i++) {
           document.querySelectorAll('#quiz2-screen-' + i + ' .choices button').forEach(btn => {
             if (btn.dataset.correct === "true") {
               totalCount++;
@@ -915,7 +381,7 @@ checkAllComplete();
           if (newNext) newNext.disabled = true;
 
           // If we've reached results screen, compute and display score and outcome
-          if (quiz2Current === 6) {
+          if (quiz2Current === 4) {
             const { correctCount, totalCount } = computeQuiz2Score();
             const passed = correctCount === totalCount; // pass only if all correct, adjust if needed
 
