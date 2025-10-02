@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://use.typekit.net/vtr4dld.css">
-  <title>Pan Brake Safety Scenario</title>
+  <title>Guillotine Safety Scenario</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
@@ -41,26 +41,31 @@
     }
 
     .tab {
-      background: #00205b;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 0.75rem 1rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      text-align: left;
-    }
-
-    .tab:hover {
-      background: #003366;
-    }
-
-    .tab.active {
-      background: #d50032;
-      box-shadow: 0 4px 8px rgba(213, 0, 50, 0.6);
-    }
+  background: #f1f1f1;
+  color: #000054;
+  border: 2px solid #000054;
+  border-radius: 112px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+  text-align: left;
+}
+.tab:hover {
+  background: #e9e9e9;
+  color: #000054;
+}
+.tab.active {
+  background: #E61E2A;
+  color: #FFFFFF;
+  border-color: #E61E2A;
+}
+.tab.completed {
+  background: #000054;
+  color: #FFFFFF;
+  border-color: #000054;
+}
 
     .quiz-panel {
       flex: 1;
@@ -145,7 +150,7 @@
       font-size: 2.5rem;
       font-weight: 700;
       margin-bottom: 1rem;
-      color: #00205b;
+      color: #000054;
       text-align: center;
       font-family: "Museo", sans-serif;
     }
@@ -154,7 +159,7 @@
       font-size: 1.5rem;
       font-weight: 600;
       margin-bottom: 1.5rem;
-      color: #00205b;
+     color: #000054;
       text-align: center;
       font-family: "Museo", sans-serif;
     }
@@ -174,29 +179,30 @@
     }
     
     .choices button { 
-      padding: 1rem 1.5rem; 
-      border: none; 
-      border-radius: 12px; 
-      font-size: 1rem; 
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      background: #00205b;
-      color: #fff;
-    }
+    padding: 1rem 1.5rem; 
+    border: none; 
+    border-radius: 112px; 
+    font-size: 1rem; 
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    background: #f1f1f1;
+    color: #000054;
+  }
 
     .choices button.selected {
-      background-color: #0047AB;
+      background-color: #000054;
       color: white;
-      border-color: #003a8c;
+      border-color: #000054;
     }
     
     .choices button:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-      background: #003366;
+      background: #000054;
+      color: white;
     }
     
     .choices button:active {
@@ -212,53 +218,54 @@
     }
 
     #quiz-2 .choices button {
-      background: none;
-      color: #0047AB;
+      background: #f1f1f1;
+      color: #000054;
       text-align: left;
       width: 100%;
       max-width: 600px;
       border: none;
-      border-radius: 0;
-      padding: 0.5rem 0;
+      border-radius: 112px;
+      padding: 1rem 1.5rem;
       font-size: 1rem;
       position: relative;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 10px;
-      /* box-shadow removed for Quiz 2 answer buttons */
+      gap: 12px;
+      transition: all 0.3s ease;
+      overflow: hidden;
     }
 
+    /* Circular checkbox markers for Quiz 2 */
     #quiz-2 .choices button::before {
       content: "";
-      width: 18px;
-      height: 18px;
-      border: 2px solid #0047AB;
-      border-radius: 4px;
+      width: 22px;
+      height: 22px;
+      border: 2px solid #000054;
+      border-radius: 50%;
       display: inline-block;
       background-color: white;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.2s, border-color 0.2s;
+      flex-shrink: 0;
     }
-
     #quiz-2 .choices button.selected::before {
-      background-color: #0047AB;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20.285 6.709a1 1 0 0 0-1.414-1.418l-9.192 9.193-4.242-4.243a1 1 0 1 0-1.414 1.415l5 5a1 1 0 0 0 1.414 0l10-10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 14px;
+      background-color: #000054;
+      border-color: #000054;
+      transform: scale(1.02);
     }
 
     #quiz-2 .choices button:hover {
-      background: none;
-      text-decoration: underline;
-      box-shadow: none;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      background: #000054;
+      color: white;
     }
     
     .btn { 
-      background: #00205b;
-      color: #fff; 
-      padding: 1rem 2rem; 
-      border: none; 
+      background: #ffffff;
+      color: #000054; 
+      padding: .7rem .7rem; 
+      border: 2px solid #000054; 
       border-radius: 50px; 
       font-size: 1.1rem; 
       font-weight: 600;
@@ -268,10 +275,24 @@
     }
     
     .btn:hover {
-      background: #003366;
+      background: #000054;
+      color: #ffffff;
       transform: translateY(-2px);
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
       border-radius: 50px;
+      border-color: #000054;
+    }
+
+    /* Cap primary action buttons to 200px and center */
+    #startBtn,
+    #startQuiz2Btn,
+    #retryBtn,
+    #retryQuiz2Btn {
+      max-width: 200px;
+      width: 100%;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .hint {
@@ -296,10 +317,16 @@
       margin-bottom: 2rem;
       overflow: hidden;
     }
+
+    /* Hide progress bar on start screens */
+    #screen-0 .progress-bar,
+    #quiz2-screen-0 .progress-bar {
+      display: none;
+    }
     
     .progress-fill {
       height: 100%;
-      background: linear-gradient(45deg, #d50032, #a0002d);
+      background: #FFD300;
       border-radius: 3px;
       transition: width 0.6s ease;
     }
@@ -403,9 +430,9 @@
       transition: background .2s, border-color .2s;
     }
     #quiz-3 .drop-zone.dragover {
-      background: #3498db;
-      border-color: #3498db;
-      color: #fff;
+      background: #77DAFF;
+  border-color: #77DAFF;
+  color: #000;
     }
     #quiz-3 .zone-title {
       font-weight: 700;
@@ -425,14 +452,14 @@
       padding: 8px 16px;
       font-size: 1rem;
       cursor: pointer;
-      background: #00205b;
+     background: #000054;
       color: #fff;
       border: none;
       border-radius: 12px;
     }
 
     #quiz-3 #resetButton:hover {
-      background: #003366;
+ background: #000054;
     }
 
     @media (max-width: 768px) {
@@ -492,8 +519,8 @@
       <div id="screen-0" class="screen active" aria-labelledby="intro-title">
         <div class="card">
           
-          <h2 id="intro-title">Operating a Pan Brake Safely</h2>
-          <p>You're about to operate a Pan Brake. Make safe choices to complete the task and ensure workplace safety.</p>
+          <h2 id="intro-title">Operating a Guillotine Safely</h2>
+          <p>You're about to operate a guillotine, make safe choices to complete the task and ensure workplace safety.</p>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 0%"></div>
           </div>
@@ -503,14 +530,15 @@
 
       <div id="screen-1" class="screen" aria-labelledby="scene1-title">
         <div class="card">
-          <h3 id="scene1-title">You notice gloves left on the clamping area</h3>
+          <h3 id="scene1-title">Main pinch point on a guillotine</h3>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 25%"></div>
           </div>
           <div class="choices">
-            <button data-safe="true" data-next="2">Remove them safely before operating</button>
-            <button data-safe="false" data-next="2">Leave them and continue working</button>
-            <button data-safe="false" data-next="2">Tell someone else to handle it</button>
+            <button data-safe="false" data-next="2">Foot pedal</button>
+            <button data-safe="true" data-next="2">Blade and hold down area</button>
+            <button data-safe="false" data-next="2">Back gauge</button>
+            <button data-safe="false" data-next="2">Power switch</button>
           </div>
         </div>
       </div>
@@ -518,14 +546,15 @@
       <div id="screen-2" class="screen" aria-labelledby="scene2-title">
         <div class="card">
          
-          <h3 id="scene2-title">The material is too thick to bend easily</h3>
+          <h3 id="scene2-title">Before cutting, you must</h3>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 50%"></div>
           </div>
           <div class="choices">
-            <button data-safe="true" data-next="3">Ask your supervisor for guidance</button>
-            <button data-safe="false" data-next="3">Force the machine to work harder</button>
-            <button data-safe="true" data-next="3">Use a different appropriate tool</button>
+            <button data-safe="false" data-next="3">Oil the pedal</button>
+            <button data-safe="true" data-next="3">Set the back gauge and align the sheet</button>
+            <button data-safe="false" data-next="3">Remove the guard</button>
+            <button data-safe="false" data-next="3">Bend the sheet first</button>
           </div>
         </div>
       </div>
@@ -533,13 +562,15 @@
       <div id="screen-3" class="screen" aria-labelledby="scene3-title">
         <div class="card">
          
-          <h3 id="scene3-title">Someone rushes you to finish quickly</h3>
+          <h3 id="scene3-title">Essential PPE for guillotine use</h3>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 75%"></div>
           </div>
           <div class="choices">
-            <button data-safe="false" data-next="4">Rush the job to meet demands</button>
-            <button data-safe="true" data-next="4">Stay focused and work safely</button>
+            <button data-safe="false" data-next="4">Welding helmet</button>
+            <button data-safe="true" data-next="4">Safety glasses and cut resistant gloves</button>
+            <button data-safe="false" data-next="4">Respirator only</button>
+            <button data-safe="false" data-next="4">Hearing protection only</button>
           </div>
         </div>
       </div>
@@ -547,10 +578,11 @@
       <div id="screen-4" class="screen" aria-labelledby="result-title">
         <div class="card">
          
-          <h2 id="result-title">Results</h2>
+          <h3 id="result-title">Results</h3>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 100%"></div>
           </div>
+          <h2 id="result-heading" class="result-heading"></h2>
           <p id="result-message"></p>
           <button id="retryBtn" class="btn">Try Again</button>
         </div>
@@ -561,8 +593,8 @@
       <div id="quiz2-screen-0" class="screen active">
         <div class="card">
           
-          <h2>Pan Brake Safety Quiz</h2>
-          <p>Test your knowledge of pan brake safety and procedures. Answer each question to see your results.</p>
+          <h2>Guillotine Safety Quiz</h2>
+          <p>Test your knowledge of guillotine safety and procedures, answer each question to see your results.</p>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 0%"></div>
           </div>
@@ -572,16 +604,16 @@
 
       <div id="quiz2-screen-1" class="screen">
         <div class="card">
-          <h3>What is the correct action before operating the pan brake?</h3>
+          <h3>When the blade is descending, you should</h3>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 20%"></div>
           </div>
-          <p class="hint">Select all that apply</p>
+          <p class="hint">Select one</p>
           <div class="choices">
-            <button data-correct="true">Inspect the area for hazards</button>
-            <button data-correct="false">Turn it on immediately</button>
-            <button data-correct="false">Call your supervisor</button>
-            <button data-correct="false">Ask a classmate to operate it first</button>
+            <button data-correct="false">Re position the sheet</button>
+            <button data-correct="false">Hold the guard</button>
+            <button data-correct="true">Keep hands clear and do not move the sheet</button>
+            <button data-correct="false">Lift the sheet edge</button>
           </div>
           <button class="btn next-btn" disabled>Next</button>
         </div>
@@ -589,13 +621,16 @@
 
       <div id="quiz2-screen-2" class="screen">
         <div class="card">
-          <h3>What should you do if you notice gloves left in the clamping area of the pan brake?</h3>
-          <p class="hint">Select all that apply</p>
+          <h3>For long or heavy sheets</h3>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 40%"></div>
+          </div>
+          <p class="hint">Select one</p>
           <div class="choices">
-            <button data-correct="true">Remove them safely before operating</button>
-            <button data-correct="false">Tell someone else to handle it</button>
-            <button data-correct="false">Leave them and continue working</button>
-            <button data-correct="false">Ignore it unless you see smoke</button>
+            <button data-correct="false">Let them hang</button>
+            <button data-correct="true">Use a helper or outfeed support</button>
+            <button data-correct="false">Cut diagonally</button>
+            <button data-correct="false">Fold before cutting</button>
           </div>
           <button class="btn next-btn" disabled>Next</button>
         </div>
@@ -603,16 +638,16 @@
 
       <div id="quiz2-screen-3" class="screen">
         <div class="card">
-          <h3>What PPE is essential when using the pan brake?</h3>
+          <h3>After the cut is complete</h3>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 60%"></div>
           </div>
-          <p class="hint">Select all that apply</p>
+          <p class="hint">Select one</p>
           <div class="choices">
-            <button data-correct="true">Boots</button>
-            <button data-correct="true">Safety glasses</button>
-            <button data-correct="true">Dust Coat</button>
-            <button data-correct="true">Long Pants</button>
+            <button data-correct="false">Reach under the guard to pull the offcut</button>
+            <button data-correct="true">Wait for hold down to release, remove parts safely</button>
+            <button data-correct="false">Push the offcut with fingers</button>
+            <button data-correct="false">Cycle again to eject parts</button>
           </div>
           <button class="btn next-btn" disabled>Next</button>
         </div>
@@ -620,16 +655,16 @@
 
       <div id="quiz2-screen-4" class="screen">
         <div class="card">
-          <h3>Why should long sleeves be secured when operating equipment?</h3>
+          <h3>Housekeeping around the guillotine helps prevent incidents. What must be kept clear of the foot pedal area?</h3>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 80%"></div>
           </div>
-          <p class="hint">Select all that apply</p>
+          <p class="hint">Select one</p>
           <div class="choices">
-            <button data-correct="true">To prevent entanglement</button>
-            <button data-correct="false">To stay warm</button>
-            <button data-correct="false">To look professional</button>
-            <button data-correct="false">To avoid contact with chemicals</button>
+            <button data-correct="false">Option 1</button>
+            <button data-correct="false">Option 2</button>
+            <button data-correct="false">Option 3</button>
+            <button data-correct="false">Option 4</button>
           </div>
           <button class="btn next-btn" disabled>Next</button>
         </div>
@@ -637,16 +672,16 @@
 
       <div id="quiz2-screen-5" class="screen">
         <div class="card">
-          <h3>What should you do if the pan brake is not working properly?</h3>
+          <h3>During a cut you hear a grinding noise and see misalignment. What is the correct response?</h3>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 100%"></div>
           </div>
-          <p class="hint">Select all that apply</p>
+          <p class="hint">Select one</p>
           <div class="choices">
-            <button data-correct="true">Report the fault to your teacher</button>
-            <button data-correct="false">Try to fix it yourself</button>
-            <button data-correct="false">Ignore the issue and continue</button>
-            <button data-correct="false">Ask a friend to use it instead</button>
+            <button data-correct="false">Option 1</button>
+            <button data-correct="false">Option 2</button>
+            <button data-correct="false">Option 3</button>
+            <button data-correct="false">Option 4</button>
           </div>
           <button class="btn next-btn" disabled>Next</button>
         </div>
@@ -655,49 +690,54 @@
       <div id="quiz2-screen-6" class="screen">
         <div class="card">
           
-          <h2>Results</h2>
+          <h3 id="quiz2-result-title">Results</h3>
           <div class="progress-bar">
-            <div class="progress-fill" style="width: 100%"></div>
+            <div class="progress-fill" id="quiz2-result-bar" style="width: 100%"></div>
           </div>
-          <p id="quiz2ResultMessage"></p>
+          <h2 id="quiz2-result-heading" class="result-heading"></h2>
+          <p id="quiz2-result-message"></p>
+          <h4 id="quiz2-note-heading" style="margin-top:1rem; text-align:center;"></h4>
+          <p id="quiz2-note-text" style="text-align:center;"></p>
           <button id="retryQuiz2Btn" class="btn">Try Again</button>
         </div>
       </div>
     </div>
 
     <div class="quiz-panel" id="quiz-3" aria-label="Quiz 3">
-  <h2>Pan Brake PPE – Learn &amp; Match</h2>
-  <p class="instructions">Drag each piece of PPE into the correct body zone below.</p>
+  <h2>Hazards and controls, drag and drop</h2>
+  <p class="instructions">Drag each hazard to the correct control</p>
   <div class="ppe-container" id="ppe-items">
-    <div class="ppe-item" draggable="true" id="glasses" title="Protects eyes">
-      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/safety_glasses.png" alt="Safety Glasses">
-      <p>Glasses</p>
+    <div class="ppe-item" draggable="true" id="A" title="Hazard">
+      <p>Fingers near cutting line</p>
     </div>
-    <div class="ppe-item" draggable="true" id="longpants" title="Protects legs">
-      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/longpants.png" alt="Long Pants">
-      <p>Long Pants</p>
+    <div class="ppe-item" draggable="true" id="B" title="Hazard">
+      <p>Sheet drops off the back</p>
     </div>
-    <div class="ppe-item" draggable="true" id="dustcoat" title="Protects torso">
-      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/dustcoat.png" alt="Dust Coat">
-      <p>Dust Coat</p>
+    <div class="ppe-item" draggable="true" id="C" title="Hazard">
+      <p>Blade is blunt</p>
     </div>
-    <div class="ppe-item" draggable="true" id="boots" title="Protects feet">
-      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/boots.png" alt="Safety Boots">
-      <p>Boots</p>
+    <div class="ppe-item" draggable="true" id="D" title="Hazard">
+      <p>Sharp burrs on edges</p>
     </div>
   </div>
   <div class="ppe-container">
-    <div class="drop-zone" data-zone="glasses"><div class="zone-title">Eyes</div></div>
-    <div class="drop-zone" data-zone="longpants"><div class="zone-title">Legs</div></div>
-    <div class="drop-zone" data-zone="dustcoat"><div class="zone-title">Torso</div></div>
-    <div class="drop-zone" data-zone="boots"><div class="zone-title">Feet</div></div>
+    <div class="drop-zone" data-zone="A"><div class="zone-title">Keep hands at least 100 mm from line, use push sticks or clamps</div></div>
+    <div class="drop-zone" data-zone="B"><div class="zone-title">Use back gauge and a helper or support stands</div></div>
+    <div class="drop-zone" data-zone="C"><div class="zone-title">Tag out and report, arrange blade maintenance</div></div>
+    <div class="drop-zone" data-zone="D"><div class="zone-title">Deburr with file or linisher, wear gloves and glasses</div></div>
   </div>
   <div id="notification" style="display:none;"></div>
   <div style="text-align:center; margin-top:10px;">
     <button id="resetButton" style="display:none;">Try Again</button>
   </div>
-</div>
   </div>
+    <!-- Completion Panel -->
+    <div class="quiz-panel" id="completion-panel" style="display:none;">
+      <div class="card">
+        <h2>All Activities Completed</h2>
+        <p>Great work, you have successfully completed all three quizzes. You can close this activity or review any section if you wish.</p>
+      </div>
+    </div>
 
   <script>
     (function(){
@@ -727,43 +767,70 @@
           if (current < 4) {
             showScreen(current);
           } else {
+            const resultHeading = document.getElementById('result-heading');
             const resultMessage = document.getElementById('result-message');
             
             if (atRisk) {
-              resultMessage.innerText = 'At-Risk Operator: You made some unsafe choices. Safety should always be the top priority. Review the scenarios and try again to improve your safety awareness.';
+              resultHeading.textContent = 'At-Risk Operator: You made some unsafe choices.';
+              resultMessage.textContent = 'Safety should always be the top priority. Review the scenarios and try again to improve your safety awareness.';
             } else {
-              resultMessage.innerText = 'Safe Operator: Excellent work! You made safe choices throughout all scenarios. Your commitment to safety helps create a secure workplace for everyone.';
+              resultHeading.textContent = 'Safe Operator: Excellent work!';
+              resultMessage.textContent = 'You made safe choices throughout all scenarios. Your commitment to safety helps create a secure workplace for everyone.';
             }
             
             showScreen(4);
-            const resultBar = document.querySelector('#screen-4 .progress-fill');
+         const resultBar = document.querySelector('#screen-4 .progress-fill');
+if (atRisk) {
+  resultBar.style.background = '#E61E2A'; // RMIT Red
+  window.quiz1Passed = false;
+} else {
+  resultBar.style.background = '#48bb78'; // success green
+  document.querySelector('[data-target="quiz-1"]').classList.add('completed');
+  window.quiz1Passed = true;
+}
+checkAllComplete();
+            
+            // Configure the result button based on outcome
+            const oldRetry = document.getElementById('retryBtn');
+            // Replace node to remove any prior listeners
+            const newRetry = oldRetry.cloneNode(true);
+            oldRetry.replaceWith(newRetry);
             if (atRisk) {
-              resultBar.style.background = '#f56565'; // red
+              newRetry.textContent = 'Try Again';
+              newRetry.addEventListener('click', () => {
+                showScreen(0);
+              });
             } else {
-              resultBar.style.background = '#48bb78'; // green
+              newRetry.textContent = 'Go to Quiz 2';
+              newRetry.addEventListener('click', () => {
+                const tab2 = document.querySelector('[data-target="quiz-2"]');
+                if (tab2) tab2.click();
+              });
             }
-            document.querySelector('[data-target="quiz-1"]').classList.add('completed');
           }
         });
       });
 
-      document.getElementById('retryBtn').addEventListener('click', () => {
-        showScreen(0);
-      });
 
       const tabs = document.querySelectorAll('.tab');
       const panels = document.querySelectorAll('.quiz-panel');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          tabs.forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          panels.forEach(p => p.style.display = 'none');
-          document.getElementById(tab.dataset.target).style.display = 'block';
+
+      function showPanel(panelId) {
+        panels.forEach(p => p.style.display = 'none');
+        const panel = document.getElementById(panelId);
+        if (panel) panel.style.display = 'block';
+      }
+
+      tabs.forEach(t => {
+        t.addEventListener('click', () => {
+          tabs.forEach(x => x.classList.remove('active'));
+          t.classList.add('active');
+          showPanel(t.dataset.target);
         });
       });
-      // Set initial visibility
-      panels.forEach(p => p.style.display = 'none');
-      document.getElementById('quiz-1').style.display = 'block';
+
+      // Initial visibility
+      showPanel('quiz-1');
     // Shuffle answer choices in all .choices containers
     function shuffleChoices() {
       document.querySelectorAll('.choices').forEach(container => {
@@ -777,8 +844,8 @@
     }
     })();
 
-    // Quiz 2 step-by-step logic
-    (function() {
+// Quiz 2 step-by-step logic
+(function() {
       let quiz2Current = 0;
       let quiz2Score = 0;
       // Select only .screen inside #quiz-2, not quiz-1
@@ -844,14 +911,52 @@
           showQuiz2Screen(quiz2Current);
           // disable Next on the new screen until a choice selected
           const newScreen = document.getElementById('quiz2-screen-' + quiz2Current);
-          const newNext = newScreen.querySelector('.next-btn');
+          const newNext = newScreen ? newScreen.querySelector('.next-btn') : null;
           if (newNext) newNext.disabled = true;
 
-          // If we've reached results screen, compute and display score
+          // If we've reached results screen, compute and display score and outcome
           if (quiz2Current === 6) {
             const { correctCount, totalCount } = computeQuiz2Score();
-            const resultMsg = document.getElementById('quiz2ResultMessage');
-            resultMsg.textContent = `You got ${correctCount} out of ${totalCount} correct.`;
+            const passed = correctCount === totalCount; // pass only if all correct, adjust if needed
+
+            const headingEl = document.getElementById('quiz2-result-heading');
+            const messageEl = document.getElementById('quiz2-result-message');
+            const barEl = document.getElementById('quiz2-result-bar');
+            const noteHeading = document.getElementById('quiz2-note-heading');
+            const noteText = document.getElementById('quiz2-note-text');
+
+if (passed) {
+  headingEl.textContent = 'Safe Operator: Excellent work!';
+  messageEl.textContent = 'You made safe choices throughout all scenarios. Your commitment to safety helps create a secure workplace for everyone.';
+  barEl.style.background = '#48bb78'; // green for success
+  const quiz2Tab = document.querySelector('[data-target="quiz-2"]');
+  if (quiz2Tab) quiz2Tab.classList.add('completed');
+  window.quiz2Passed = true;
+} else {
+  headingEl.textContent = 'At-Risk Operator: You made some unsafe choices.';
+  messageEl.textContent = 'Safety should always be the top priority. Review the scenarios and try again to improve your safety awareness.';
+  barEl.style.background = '#E61E2A'; // RMIT Red for fail
+  window.quiz2Passed = false;
+}
+if (noteHeading) noteHeading.style.display = 'none';
+if (noteText) noteText.style.display = 'none';
+checkAllComplete();
+            // Rewire the result button based on pass/fail
+            const oldBtn = document.getElementById('retryQuiz2Btn');
+            const newBtn = oldBtn.cloneNode(true);
+            oldBtn.replaceWith(newBtn);
+            if (passed) {
+              newBtn.textContent = 'Go to Quiz 3';
+              newBtn.addEventListener('click', () => {
+                const tab3 = document.querySelector('[data-target="quiz-3"]');
+                if (tab3) tab3.click();
+              });
+            } else {
+              newBtn.textContent = 'Try Again';
+              newBtn.addEventListener('click', () => {
+                showQuiz2Screen(0);
+              });
+            }
           }
         });
       });
@@ -873,6 +978,7 @@
         });
       }
 
+      // Initial wiring, will be replaced on results based on pass/fail
       const retryQuiz2Btn = document.getElementById('retryQuiz2Btn');
       if (retryQuiz2Btn) {
         retryQuiz2Btn.addEventListener('click', () => {
@@ -880,7 +986,19 @@
         });
       }
     })();
-    // Quiz 3 Drag & Drop logic
+// Quiz 3 Drag & Drop logic
+// Helper to shuffle children of a container
+function shuffleChildren(container) {
+  const children = Array.from(container.children);
+  for (let i = children.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    container.appendChild(children[j]);
+    children.splice(j, 1);
+  }
+}
+const ppeItemsContainer = document.getElementById('ppe-items');
+if (ppeItemsContainer) shuffleChildren(ppeItemsContainer);
+
 document.querySelectorAll('#quiz-3 .ppe-item').forEach(item =>
   item.addEventListener('dragstart', ev =>
     ev.dataTransfer.setData('text/plain', ev.currentTarget.id)
@@ -914,14 +1032,38 @@ function checkQuiz3() {
     : '❌ Some items are incorrect. Try again.';
   note.style.display = 'block';
   document.getElementById('resetButton').style.display = 'inline-block';
+  // If correct, mark Quiz 3 tab as completed (shows ✓)
+  if (correct) {
+  const quiz3Tab = document.querySelector('[data-target="quiz-3"]');
+  if (quiz3Tab) quiz3Tab.classList.add('completed');
+  window.quiz3Passed = true;
+  checkAllComplete();
+} else {
+  window.quiz3Passed = false;
+}
 }
 document.getElementById('resetButton').addEventListener('click', () => {
   const container = document.getElementById('ppe-items');
   document.querySelectorAll('#quiz-3 .drop-zone .ppe-item')
     .forEach(it => container.appendChild(it));
+  // Shuffle the PPE items after resetting
+  if (container) shuffleChildren(container);
   document.getElementById('notification').textContent = '';
   document.getElementById('resetButton').style.display = 'none';
 });
+
+// Global completion flags and checker
+window.quiz1Passed = window.quiz1Passed || false;
+window.quiz2Passed = window.quiz2Passed || false;
+window.quiz3Passed = window.quiz3Passed || false;
+
+function checkAllComplete() {
+  if (window.quiz1Passed && window.quiz2Passed && window.quiz3Passed) {
+    document.querySelectorAll('.quiz-panel').forEach(p => p.style.display = 'none');
+    const comp = document.getElementById('completion-panel');
+    if (comp) comp.style.display = 'block';
+  }
+}
   </script>
 </body>
 </html>
