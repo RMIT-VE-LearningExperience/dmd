@@ -520,7 +520,7 @@
         <div class="card">
           
           <h2 id="intro-title">Operating a Pedestal Drill Safely</h2>
-          <p>You're about to operate a pedestal drill, make safe choices to complete the task and ensure workplace safety.</p>
+          <p>You're about to operate a pedestal drill. Make safe choices to complete the task and ensure workplace safety.</p>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 0%"></div>
           </div>
@@ -594,7 +594,7 @@
         <div class="card">
           
           <h2>Pedestal Drill Safety Quiz</h2>
-          <p>Test your knowledge of pedestal drill safety and procedures, answer each question to see your results.</p>
+          <p>Test your knowledge of pedestal drill safety and procedures. Answer each question to see your results.</p>
           <div class="progress-bar">
             <div class="progress-fill" style="width: 0%"></div>
           </div>
@@ -655,41 +655,6 @@
 
       <div id="quiz2-screen-4" class="screen">
         <div class="card">
-          <h3>Housekeeping around the pedestal drill helps prevent incidents. What must be kept clear of the foot pedal area?</h3>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: 80%"></div>
-          </div>
-          <p class="hint">Select one</p>
-          <div class="choices">
-            <button data-correct="false">Option 1</button>
-            <button data-correct="false">Option 2</button>
-            <button data-correct="false">Option 3</button>
-            <button data-correct="false">Option 4</button>
-          </div>
-          <button class="btn next-btn" disabled>Next</button>
-        </div>
-      </div>
-
-      <div id="quiz2-screen-5" class="screen">
-        <div class="card">
-          <h3>During a bend you hear a grinding noise and see misalignment. What is the correct response?</h3>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: 100%"></div>
-          </div>
-          <p class="hint">Select one</p>
-          <div class="choices">
-            <button data-correct="false">Option 1</button>
-            <button data-correct="false">Option 2</button>
-            <button data-correct="false">Option 3</button>
-            <button data-correct="false">Option 4</button>
-          </div>
-          <button class="btn next-btn" disabled>Next</button>
-        </div>
-      </div>
-
-      <div id="quiz2-screen-6" class="screen">
-        <div class="card">
-          
           <h3 id="quiz2-result-title">Results</h3>
           <div class="progress-bar">
             <div class="progress-fill" id="quiz2-result-bar" style="width: 100%"></div>
@@ -873,7 +838,7 @@ checkAllComplete();
       // Compute score for Quiz 2
       function computeQuiz2Score() {
         let correctCount = 0, totalCount = 0;
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 4; i++) {
           document.querySelectorAll('#quiz2-screen-' + i + ' .choices button').forEach(btn => {
             if (btn.dataset.correct === "true") {
               totalCount++;
@@ -915,7 +880,7 @@ checkAllComplete();
           if (newNext) newNext.disabled = true;
 
           // If we've reached results screen, compute and display score and outcome
-          if (quiz2Current === 6) {
+          if (quiz2Current === 5) {
             const { correctCount, totalCount } = computeQuiz2Score();
             const passed = correctCount === totalCount; // pass only if all correct, adjust if needed
 

@@ -16,7 +16,7 @@
     
     body { 
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      background: #ffffff;
+      background: transparent;
       min-height: 100vh;
       display: flex;
       align-items: flex-start;
@@ -700,37 +700,39 @@
     </div>
 
     <div class="quiz-panel" id="quiz-3" aria-label="Quiz 3">
-  <h2>Pan Brake PPE, Learn &amp; Match</h2>
-  <p class="instructions">Drag each piece of PPE into the correct body zone below.</p>
-  <div class="ppe-container" id="ppe-items">
-    <div class="ppe-item" draggable="true" id="glasses" title="Protects eyes">
-      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/safety_glasses.png" alt="Safety Glasses">
-      <p>Glasses</p>
+      <div class="card">
+        <h2>Pan Brake PPE, Learn &amp; Match</h2>
+        <p class="instructions">Drag each piece of PPE into the correct body zone below.</p>
+        <div class="ppe-container" id="ppe-items">
+          <div class="ppe-item" draggable="true" id="glasses" title="Protects eyes">
+            <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/safety_glasses.png" alt="Safety Glasses">
+            <p>Glasses</p>
+          </div>
+          <div class="ppe-item" draggable="true" id="longpants" title="Protects legs">
+            <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/longpants.png" alt="Long Pants">
+            <p>Long Pants</p>
+          </div>
+          <div class="ppe-item" draggable="true" id="dustcoat" title="Protects torso">
+            <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/dustcoat.png" alt="Dust Coat">
+            <p>Dust Coat</p>
+          </div>
+          <div class="ppe-item" draggable="true" id="boots" title="Protects feet">
+            <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/boots.png" alt="Safety Boots">
+            <p>Boots</p>
+          </div>
+        </div>
+        <div class="ppe-container">
+          <div class="drop-zone" data-zone="glasses"><div class="zone-title">Eyes</div></div>
+          <div class="drop-zone" data-zone="longpants"><div class="zone-title">Legs</div></div>
+          <div class="drop-zone" data-zone="dustcoat"><div class="zone-title">Torso</div></div>
+          <div class="drop-zone" data-zone="boots"><div class="zone-title">Feet</div></div>
+        </div>
+        <div id="notification" style="display:none;"></div>
+        <div style="text-align:center; margin-top:10px;">
+          <button id="resetButton" style="display:none;">Try Again</button>
+        </div>
+      </div>
     </div>
-    <div class="ppe-item" draggable="true" id="longpants" title="Protects legs">
-      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/longpants.png" alt="Long Pants">
-      <p>Long Pants</p>
-    </div>
-    <div class="ppe-item" draggable="true" id="dustcoat" title="Protects torso">
-      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/dustcoat.png" alt="Dust Coat">
-      <p>Dust Coat</p>
-    </div>
-    <div class="ppe-item" draggable="true" id="boots" title="Protects feet">
-      <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/boots.png" alt="Safety Boots">
-      <p>Boots</p>
-    </div>
-  </div>
-  <div class="ppe-container">
-    <div class="drop-zone" data-zone="glasses"><div class="zone-title">Eyes</div></div>
-    <div class="drop-zone" data-zone="longpants"><div class="zone-title">Legs</div></div>
-    <div class="drop-zone" data-zone="dustcoat"><div class="zone-title">Torso</div></div>
-    <div class="drop-zone" data-zone="boots"><div class="zone-title">Feet</div></div>
-  </div>
-  <div id="notification" style="display:none;"></div>
-  <div style="text-align:center; margin-top:10px;">
-    <button id="resetButton" style="display:none;">Try Again</button>
-  </div>
-  </div>
     <!-- Completion Panel -->
     <div class="quiz-panel" id="completion-panel" style="display:none;">
       <div class="card">
