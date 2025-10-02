@@ -169,41 +169,45 @@
       </div>
     </div>
 
-    <div class="quiz-panel" id="quiz-3" aria-label="Quiz 3">
-      <div class="card">
-  <h2>Hazards and controls, drag and drop</h2>
-  <p class="instructions">Drag each hazard to the correct control</p>
-  <div class="ppe-container" id="ppe-items">
-    <div class="ppe-item" draggable="true" id="A" title="Hazard">
-      <p>Fingers near cutting line</p>
-    </div>
-    <div class="ppe-item" draggable="true" id="B" title="Hazard">
-      <p>Sheet drops off the back</p>
-    </div>
-    <div class="ppe-item" draggable="true" id="C" title="Hazard">
-      <p>Blade is blunt</p>
-    </div>
-    <div class="ppe-item" draggable="true" id="D" title="Hazard">
-      <p>Sharp burrs on edges</p>
-    </div>
-  </div>
-  <div class="ppe-container">
-    <div class="drop-zone" data-zone="A"><div class="zone-title">Keep hands at least 100 mm from line, use push sticks or clamps</div></div>
-    <div class="drop-zone" data-zone="B"><div class="zone-title">Use back gauge and a helper or support stands</div></div>
-    <div class="drop-zone" data-zone="C"><div class="zone-title">Tag out and report, arrange blade maintenance</div></div>
-    <div class="drop-zone" data-zone="D"><div class="zone-title">Deburr with file or linisher, wear gloves and glasses</div></div>
-  </div>
-  <div id="notification" style="display:none;"></div>
-  <div style="text-align:center; margin-top:10px;">
-    <button id="resetButton" style="display:none;">Try Again</button>
-  </div>
-    <!-- Completion Panel -->
-    <div class="quiz-panel" id="completion-panel" style="display:none;">
-      <div class="card">
-        <h2>All Activities Completed</h2>
-        <p>Great work, you have successfully completed all three quizzes. You can close this activity or review any section if you wish.</p>
+  <div class="quiz-panel" id="quiz-3" aria-label="Quiz 3">
+    <div class="card">
+      <h2>Hazards and controls, drag and drop</h2>
+      <p class="instructions">Drag each hazard to the correct control</p>
+      <div class="ppe-container" id="ppe-items">
+        <div class="ppe-item" draggable="true" data-id="1" id="A">
+          <img src="images/fingers_near_cutting_line.png" alt="Fingers near cutting line">
+          <span>Fingers near cutting line</span>
+        </div>
+        <div class="ppe-item" draggable="true" data-id="2" id="B">
+          <img src="images/sheet_drops_off_the_back.png" alt="Sheet drops off the back">
+          <span>Sheet drops off the back</span>
+        </div>
+        <div class="ppe-item" draggable="true" data-id="3" id="C">
+          <img src="images/blade_is_blunt.png" alt="Blade is blunt">
+          <span>Blade is blunt</span>
+        </div>
+        <div class="ppe-item" draggable="true" data-id="4" id="D">
+          <img src="images/sharp_burrs_on_edge.png" alt="Sharp burrs on edges">
+          <span>Sharp burrs on edges</span>
+        </div>
       </div>
-    </div>
+      <div class="ppe-container">
+        <div class="drop-zone" data-zone="A"><div class="zone-title">Keep hands at least 100 mm from line, use push sticks or clamps</div></div>
+        <div class="drop-zone" data-zone="B"><div class="zone-title">Use back gauge and a helper or support stands</div></div>
+        <div class="drop-zone" data-zone="C"><div class="zone-title">Tag out and report, arrange blade maintenance</div></div>
+        <div class="drop-zone" data-zone="D"><div class="zone-title">Deburr with file or linisher, wear gloves and glasses</div></div>
+      </div>
+      <div id="notification" style="display:none;"></div>
+      <div style="text-align:center; margin-top:10px;">
+        <button id="resetButton" style="display:none;">Try Again</button>
+      </div>
+      <!-- Completion Panel -->
+      <div class="quiz-panel" id="completion-panel" style="display:none;">
+        <div class="card">
+          <h2>All Activities Completed</h2>
+          <p>Great work, you have successfully completed all three quizzes. You can close this activity or review any section if you wish.</p>
+        </div>
+      </div>
     </div>
 
   <script>

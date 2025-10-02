@@ -482,3 +482,20 @@ p {
     height: 80px;
   }
 }
+
+/* Quiz 3: keep left card visually balanced at end */
+#quiz-3 .dd-left .inner-card {
+  min-height: 240px; /* baseline so it never collapses */
+}
+#quiz-3 .completion-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+  text-align: center;
+}
+#quiz-3 .completion-state .big-mark { font-size: 48px; }
+#quiz-3 .completion-state.success .big-mark { color: #48bb78; }
+#quiz-3 .completion-state.fail .big-mark { color: #E61E2A; }
