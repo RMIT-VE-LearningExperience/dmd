@@ -105,6 +105,24 @@
                 flex-wrap: nowrap;
             }
         }
+        @media (max-width: 680px) {
+            .container {
+                flex-direction: column;
+                overflow: visible;
+                padding: 10px;
+            }
+            .card {
+                max-width: 100%;
+                flex: 1 1 auto;
+                min-height: auto;
+            }
+            .card-image-wrapper {
+                display: none;
+            }
+            .card-content {
+                text-align: left;
+            }
+        }
     </style>
 </head>
 <body>
