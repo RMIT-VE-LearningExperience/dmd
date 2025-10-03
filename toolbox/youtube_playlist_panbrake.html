@@ -16,6 +16,7 @@
         <path d="M23.5 6.2s-.2-1.6-.8-2.3c-.8-.8-1.7-.8-2.1-.9C17.7 2.7 12 2.7 12 2.7h0s-5.7 0-8.6.3c-.4 0-1.3.1-2.1.9C.7 4.6.5 6.2.5 6.2S0 8.1 0 10v.1c0 1.9.5 3.8.5 3.8s.2 1.6.8 2.3c.8.8 1.8.8 2.2.9 1.6.2 6.6.3 8.5.3 0 0 5.7 0 8.6-.3.4 0 1.3-.1 2.1-.9.6-.7.8-2.3.8-2.3S24 11.9 24 10v-.1c0-1.9-.5-3.7-.5-3.7ZM9.5 13.9V6.8l6.3 3.6-6.3 3.5Z"/>
       </svg>
       <h1 class="text-lg md:text-xl font-bold">Making a Toolbox, Playlist</h1>
+      <button id="langToggle" class="px-3 py-1 border border-gray-600 rounded-md hover:bg-gray-800">हिन्दी / EN</button>
     </div>
   </header>
 
@@ -71,16 +72,26 @@
   </template>
 
   <script>
-    let videos = [
-      { id: 'DpEb5JxpGsE', title: 'Part 1 - The Pan Brake', thumb: 'https://i.ytimg.com/vi/DpEb5JxpGsE/mqdefault.jpg' },
-      { id: 'd6S28i0YL7E', title: 'Part 2 - The Pattern', thumb: 'https://i.ytimg.com/vi/d6S28i0YL7E/mqdefault.jpg' },
-      { id: '5AOqs8CBC-E', title: 'Part 3 - 90° Fold', thumb: 'https://i.ytimg.com/vi/5AOqs8CBC-E/mqdefault.jpg' },
-      { id: 'vVU_qMjk058', title: 'Part 4 - The Sides (ends)', thumb: 'https://i.ytimg.com/vi/vVU_qMjk058/mqdefault.jpg' },
-      { id: '9qgv08k_R2s', title: 'Part 5 - Toolbox Assembly', thumb: 'https://i.ytimg.com/vi/9qgv08k_R2s/mqdefault.jpg' },
-      { id: 'Y7dyPzdJYQI', title: 'Part 6 - Toolbox Tray', thumb: 'https://i.ytimg.com/vi/Y7dyPzdJYQI/mqdefault.jpg' },
-      { id: 'U8OFwXyYJPM', title: 'Part 7 - Toolbox Handle', thumb: 'https://i.ytimg.com/vi/U8OFwXyYJPM/mqdefault.jpg' },
-      { id: '8SKFkCJpbPI', title: 'Disposal Instructions', thumb: 'https://i.ytimg.com/vi/8SKFkCJpbPI/mqdefault.jpg' },
-    ];
+    const playlists = {
+      en: [
+        { id: 'DpEb5JxpGsE', title: 'Part 1 - The Pan Brake', thumb: 'https://i.ytimg.com/vi/DpEb5JxpGsE/mqdefault.jpg' },
+        { id: 'd6S28i0YL7E', title: 'Part 2 - The Pattern', thumb: 'https://i.ytimg.com/vi/d6S28i0YL7E/mqdefault.jpg' },
+        { id: '5AOqs8CBC-E', title: 'Part 3 - 90° Fold', thumb: 'https://i.ytimg.com/vi/5AOqs8CBC-E/mqdefault.jpg' },
+        { id: 'vVU_qMjk058', title: 'Part 4 - The Sides (ends)', thumb: 'https://i.ytimg.com/vi/vVU_qMjk058/mqdefault.jpg' },
+        { id: '9qgv08k_R2s', title: 'Part 5 - Toolbox Assembly', thumb: 'https://i.ytimg.com/vi/9qgv08k_R2s/mqdefault.jpg' },
+        { id: 'Y7dyPzdJYQI', title: 'Part 6 - Toolbox Tray', thumb: 'https://i.ytimg.com/vi/Y7dyPzdJYQI/mqdefault.jpg' },
+        { id: 'U8OFwXyYJPM', title: 'Part 7 - Toolbox Handle', thumb: 'https://i.ytimg.com/vi/U8OFwXyYJPM/mqdefault.jpg' },
+        { id: '8SKFkCJpbPI', title: 'Disposal Instructions', thumb: 'https://i.ytimg.com/vi/8SKFkCJpbPI/mqdefault.jpg' },
+      ],
+      hi: [
+        { id: '8XKEC5PxX_w', title: 'Part 1 - The Pan Brake (हिन्दी)', thumb: 'https://i.ytimg.com/vi/8XKEC5PxX_w/mqdefault.jpg' },
+        { id: 'iyF9eO9zna4', title: 'Part 2 - The Pattern (हिन्दी)', thumb: 'https://i.ytimg.com/vi/iyF9eO9zna4/mqdefault.jpg' },
+        { id: 'sGVzbY0Lf8A', title: 'Part 3 - 90° Fold (हिन्दी)', thumb: 'https://i.ytimg.com/vi/sGVzbY0Lf8A/mqdefault.jpg' },
+        { id: 'hKvqW9Dq0EQ', title: 'Part 4 - The Sides (ends) (हिन्दी)', thumb: 'https://i.ytimg.com/vi/hKvqW9Dq0EQ/mqdefault.jpg' },
+      ]
+    };
+    let currentLang = 'en';
+    let videos = playlists[currentLang];
 
     // Utility, extract a YouTube video ID from various URL formats
     function extractId(url) {
@@ -172,6 +183,14 @@
         document.getElementById('player').scrollIntoView({behavior:'smooth'});
       }
     }
+
+    document.getElementById('langToggle').addEventListener('click', () => {
+      currentLang = currentLang === 'en' ? 'hi' : 'en';
+      videos = playlists[currentLang];
+      current = -1;
+      renderList();
+      playIndex(0);
+    });
 
     playerScreen.classList.remove('hidden');
     renderList();
