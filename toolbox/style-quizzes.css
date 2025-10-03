@@ -37,7 +37,7 @@ body {
 .tab {
   background: #f1f1f1;
   color: #000054;
-  border: 2px solid #000054;
+  border: 3px solid #000054;
   border-radius: 64px;
   padding: 0.5rem 0.75rem;
   font-size: 0.95rem;
@@ -223,7 +223,7 @@ p {
   content: "";
   width: 22px;
   height: 22px;
-  border: 2px solid #000054;
+  border: 3px solid #000054;
   border-radius: 50%;
   display: inline-block;
   background-color: white;
@@ -247,7 +247,7 @@ p {
   background: #ffffff;
   color: #000054; 
   padding: .7rem .7rem; 
-  border: 2px solid #000054; 
+  border: 3px solid #000054; 
   border-radius: 50px; 
   font-size: 1rem; 
   font-weight: 600;
