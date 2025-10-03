@@ -203,7 +203,28 @@
       <div class="card">
         <h2>Pan Brake PPE, Learn &amp; Match</h2>
         <p class="instructions">Drag each piece of PPE into the correct body zone below.</p>
-        <div class="ppe-container" id="ppe-items">
+        <div class="dd-layout">
+          <div class="dd-left">
+            <div class="stack">
+              <div class="card ghost g1"></div>
+              <div class="card ghost g2"></div>
+              <div class="card ghost g3"></div>
+              <div class="inner-card">
+                <div id="active-card"></div>
+              </div>
+            </div>
+          </div>
+          <div class="dd-right">
+            <div class="dropzone-grid">
+              <div class="drop-zone" data-zone="glasses"><div class="zone-title">Eyes</div></div>
+              <div class="drop-zone" data-zone="longpants"><div class="zone-title">Legs</div></div>
+              <div class="drop-zone" data-zone="dustcoat"><div class="zone-title">Torso</div></div>
+              <div class="drop-zone" data-zone="boots"><div class="zone-title">Feet</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- keep items list hidden as a queue -->
+        <div class="ppe-container hidden" id="ppe-items">
           <div class="ppe-item" draggable="true" id="glasses" title="Protects eyes">
             <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/safety_glasses.png" alt="Safety Glasses">
             <p>Glasses</p>
@@ -220,12 +241,6 @@
             <img src="https://rmit-ve-learningexperience.github.io/dmd/toolbox/images/boots.png" alt="Safety Boots">
             <p>Boots</p>
           </div>
-        </div>
-        <div class="ppe-container">
-          <div class="drop-zone" data-zone="glasses"><div class="zone-title">Eyes</div></div>
-          <div class="drop-zone" data-zone="longpants"><div class="zone-title">Legs</div></div>
-          <div class="drop-zone" data-zone="dustcoat"><div class="zone-title">Torso</div></div>
-          <div class="drop-zone" data-zone="boots"><div class="zone-title">Feet</div></div>
         </div>
         <div id="notification" style="display:none;"></div>
         <div style="text-align:center; margin-top:10px;">
@@ -488,98 +503,143 @@ checkAllComplete();
         });
       }
     })();
-// Quiz 3 Drag & Drop logic
-// Helper to shuffle children of a container
+// Quiz 3 Drag & Drop logic — one card at a time (stacked deck left)
 function shuffleChildren(container) {
   const children = Array.from(container.children);
   for (let i = children.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    container.appendChild(children[j]);
-    children.splice(j, 1);
+    [children[i], children[j]] = [children[j], children[i]];
   }
+  children.forEach(c => container.appendChild(c));
 }
-const ppeItemsContainer = document.getElementById('ppe-items');
-if (ppeItemsContainer) shuffleChildren(ppeItemsContainer);
+(function(){
+  const itemsContainer = document.querySelector('#quiz-3 #ppe-items');
+  const activeHolder = document.querySelector('#quiz-3 #active-card');
+  if (!itemsContainer || !activeHolder) return;
 
-document.querySelectorAll('#quiz-3 .ppe-item').forEach(item =>
-  item.addEventListener('dragstart', ev =>
-    ev.dataTransfer.setData('text/plain', ev.currentTarget.id)
-  )
-);
-document.querySelectorAll('#quiz-3 .drop-zone').forEach(zone => {
-  zone.addEventListener('dragover', ev => ev.preventDefault());
-  zone.addEventListener('drop', ev => {
-    ev.preventDefault();
-    const id = ev.dataTransfer.getData('text/plain');
-    const item = document.getElementById(id);
-    zone.appendChild(item);
-    zone.classList.remove('dragover');
-    checkQuiz3();
-  });
-  zone.addEventListener('dragenter', () => zone.classList.add('dragover'));
-  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-});
-function checkQuiz3() {
-  const zones = document.querySelectorAll('#quiz-3 .drop-zone');
-  let allPlaced = true, correct = true;
-  zones.forEach(z => {
-    const it = z.querySelector('.ppe-item');
-    if (!it)      { allPlaced = false; correct = false; }
-    else if (it.id !== z.dataset.zone) correct = false;
-  });
-  if (!allPlaced) return;
-  const note = document.getElementById('notification');
-  const resetBtnOld = document.getElementById('resetButton');
-  const resetBtn = resetBtnOld.cloneNode(true);
-  resetBtnOld.replaceWith(resetBtn);
+  // Shuffle the queue
+  shuffleChildren(itemsContainer);
+  let currentIndex = 0;
+  const queue = Array.from(itemsContainer.querySelectorAll('.ppe-item'));
 
-  if (correct) {
-    // Message
-    note.textContent = '🎉 Well done! All correct.';
-    note.style.display = 'block';
+  function syncHeights(){
+    const right = document.querySelector('#quiz-3 .dd-right');
+    const inner = document.querySelector('#quiz-3 .dd-left .inner-card');
+    if (right && inner) {
+      const h = right.getBoundingClientRect().height;
+      if (h > 240) inner.style.minHeight = Math.ceil(h) + 'px';
+    }
+  }
 
-    // Mark passed and tab completed
-    const quiz3Tab = document.querySelector('[data-target="quiz-3"]');
-    if (quiz3Tab) quiz3Tab.classList.add('completed');
-    window.quiz3Passed = true;
-    
-    // Disable further dragging (no retry once passed)
-    document.querySelectorAll('#quiz-3 .ppe-item').forEach(it => it.setAttribute('draggable','false'));
+  function showCompletionCard(correct){
+    activeHolder.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'completion-state ' + (correct ? 'success' : 'fail');
+    wrap.innerHTML = `
+      <div class="big-mark">${correct ? '✓' : '✕'}</div>
+      <div><strong>${correct ? 'All matched correctly' : 'Check your matches'}</strong></div>
+      <p style="margin:0;opacity:.8;">${correct ? 'Great work — you can review or reset if you like.' : 'One or more items are in the wrong zone. Use Try Again to retry.'}</p>
+    `;
+    activeHolder.appendChild(wrap);
+  }
 
-    // Repurpose button to go to next unfinished quiz
-    resetBtn.style.display = 'inline-block';
-    resetBtn.textContent = 'Go to Next Quiz';
-    resetBtn.addEventListener('click', () => {
-      if (!window.quiz1Passed) {
-        const t1 = document.querySelector('[data-target="quiz-1"]');
-        if (t1) t1.click();
-      } else if (!window.quiz2Passed) {
-        const t2 = document.querySelector('[data-target="quiz-2"]');
-        if (t2) t2.click();
+  function renderActive() {
+    activeHolder.innerHTML = '';
+    const item = queue[currentIndex];
+    if (item) {
+      activeHolder.appendChild(item);
+      wireDraggable(item);
+      syncHeights();
+    }
+  }
+
+  function wireDraggable(el){
+    el.addEventListener('dragstart', ev => {
+      ev.dataTransfer.setData('text/plain', ev.currentTarget.id);
+    });
+  }
+
+  document.querySelectorAll('#quiz-3 .drop-zone').forEach(zone => {
+    zone.addEventListener('dragover', ev => ev.preventDefault());
+    zone.addEventListener('drop', ev => {
+      ev.preventDefault();
+      const id = ev.dataTransfer.getData('text/plain');
+      const item = document.getElementById(id);
+      if (!item) return;
+      zone.appendChild(item);
+      zone.classList.remove('dragover');
+      syncHeights();
+      // Advance to next item
+      currentIndex++;
+      if (currentIndex < queue.length) {
+        renderActive();
       } else {
-        checkAllComplete();
+        checkQuiz3();
       }
     });
+    zone.addEventListener('dragenter', () => zone.classList.add('dragover'));
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  });
 
-    // Ensure completion panel shows if others already passed
-    checkAllComplete();
-  } else {
-    // Failure path: allow Try Again
-    note.textContent = '❌ Some items are incorrect. Try again.';
-    note.style.display = 'block';
-    window.quiz3Passed = false;
-
-    resetBtn.style.display = 'inline-block';
-    resetBtn.textContent = 'Try Again';
-    resetBtn.addEventListener('click', () => {
-      const container = document.getElementById('ppe-items');
-      document.querySelectorAll('#quiz-3 .drop-zone .ppe-item').forEach(it => container.appendChild(it));
-      if (container) shuffleChildren(container);
-      document.getElementById('notification').textContent = '';
-      resetBtn.style.display = 'none';
+  function checkQuiz3(){
+    const zones = document.querySelectorAll('#quiz-3 .drop-zone');
+    let allPlaced = true, correct = true;
+    zones.forEach(z => {
+      const it = z.querySelector('.ppe-item');
+      if (!it) { allPlaced = false; correct = false; }
+      else if (it.id !== z.dataset.zone) correct = false;
     });
+    if (!allPlaced) return;
+    showCompletionCard(correct);
+    const note = document.querySelector('#quiz-3 #notification');
+    note.textContent = correct ? '🎉 Well done! All correct.' : '❌ Some items are incorrect. Try again.';
+    note.style.display = 'block';
+    const resetBtn = document.querySelector('#quiz-3 #resetButton');
+    if (correct) {
+      const quiz3Tab = document.querySelector('[data-target="quiz-3"]');
+      if (quiz3Tab) quiz3Tab.classList.add('completed');
+      window.quiz3Passed = true;
+      // disable retry on success
+      document.querySelectorAll('#quiz-3 .ppe-item').forEach(it => it.setAttribute('draggable','false'));
+      if (resetBtn) {
+        resetBtn.style.display = 'inline-block';
+        resetBtn.textContent = 'Go to Next Quiz';
+        resetBtn.onclick = () => {
+          if (!window.quiz1Passed) {
+            const t1 = document.querySelector('[data-target="quiz-1"]');
+            if (t1) t1.click();
+          } else if (!window.quiz2Passed) {
+            const t2 = document.querySelector('[data-target="quiz-2"]');
+            if (t2) t2.click();
+          } else {
+            checkAllComplete();
+          }
+        };
+      }
+      checkAllComplete();
+    } else {
+      window.quiz3Passed = false;
+      if (resetBtn) {
+        resetBtn.style.display = 'inline-block';
+        resetBtn.textContent = 'Try Again';
+        resetBtn.onclick = () => {
+          document.querySelectorAll('#quiz-3 .drop-zone .ppe-item').forEach(it => itemsContainer.appendChild(it));
+          shuffleChildren(itemsContainer);
+          currentIndex = 0;
+          const leftInner = document.querySelector('#quiz-3 .dd-left .inner-card');
+          if (leftInner) leftInner.style.minHeight = '240px';
+          renderActive();
+          note.textContent = '';
+          note.style.display = 'none';
+          resetBtn.style.display = 'none';
+        };
+      }
+    }
   }
-}
+
+  renderActive();
+  syncHeights();
+})();
 
 // Global completion flags and checker
 window.quiz1Passed = window.quiz1Passed || false;
