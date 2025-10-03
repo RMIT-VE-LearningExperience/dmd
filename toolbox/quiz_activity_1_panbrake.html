@@ -529,30 +529,57 @@ function checkQuiz3() {
   });
   if (!allPlaced) return;
   const note = document.getElementById('notification');
-  note.textContent = correct
-    ? '🎉 Well done! All correct.'
-    : '❌ Some items are incorrect. Try again.';
-  note.style.display = 'block';
-  document.getElementById('resetButton').style.display = 'inline-block';
-  // If correct, mark Quiz 3 tab as completed (shows ✓)
+  const resetBtnOld = document.getElementById('resetButton');
+  const resetBtn = resetBtnOld.cloneNode(true);
+  resetBtnOld.replaceWith(resetBtn);
+
   if (correct) {
-  const quiz3Tab = document.querySelector('[data-target="quiz-3"]');
-  if (quiz3Tab) quiz3Tab.classList.add('completed');
-  window.quiz3Passed = true;
-  checkAllComplete();
-} else {
-  window.quiz3Passed = false;
+    // Message
+    note.textContent = '🎉 Well done! All correct.';
+    note.style.display = 'block';
+
+    // Mark passed and tab completed
+    const quiz3Tab = document.querySelector('[data-target="quiz-3"]');
+    if (quiz3Tab) quiz3Tab.classList.add('completed');
+    window.quiz3Passed = true;
+    
+    // Disable further dragging (no retry once passed)
+    document.querySelectorAll('#quiz-3 .ppe-item').forEach(it => it.setAttribute('draggable','false'));
+
+    // Repurpose button to go to next unfinished quiz
+    resetBtn.style.display = 'inline-block';
+    resetBtn.textContent = 'Go to Next Quiz';
+    resetBtn.addEventListener('click', () => {
+      if (!window.quiz1Passed) {
+        const t1 = document.querySelector('[data-target="quiz-1"]');
+        if (t1) t1.click();
+      } else if (!window.quiz2Passed) {
+        const t2 = document.querySelector('[data-target="quiz-2"]');
+        if (t2) t2.click();
+      } else {
+        checkAllComplete();
+      }
+    });
+
+    // Ensure completion panel shows if others already passed
+    checkAllComplete();
+  } else {
+    // Failure path: allow Try Again
+    note.textContent = '❌ Some items are incorrect. Try again.';
+    note.style.display = 'block';
+    window.quiz3Passed = false;
+
+    resetBtn.style.display = 'inline-block';
+    resetBtn.textContent = 'Try Again';
+    resetBtn.addEventListener('click', () => {
+      const container = document.getElementById('ppe-items');
+      document.querySelectorAll('#quiz-3 .drop-zone .ppe-item').forEach(it => container.appendChild(it));
+      if (container) shuffleChildren(container);
+      document.getElementById('notification').textContent = '';
+      resetBtn.style.display = 'none';
+    });
+  }
 }
-}
-document.getElementById('resetButton').addEventListener('click', () => {
-  const container = document.getElementById('ppe-items');
-  document.querySelectorAll('#quiz-3 .drop-zone .ppe-item')
-    .forEach(it => container.appendChild(it));
-  // Shuffle the PPE items after resetting
-  if (container) shuffleChildren(container);
-  document.getElementById('notification').textContent = '';
-  document.getElementById('resetButton').style.display = 'none';
-});
 
 // Global completion flags and checker
 window.quiz1Passed = window.quiz1Passed || false;

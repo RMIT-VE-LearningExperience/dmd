@@ -375,8 +375,8 @@ p {
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
-  flex: 0 0 96px;
-  aspect-ratio: 1/1;
+  width: 140px;
+  height: 140px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -384,6 +384,10 @@ p {
   cursor: grab;
   padding: 10px;
   transition: box-shadow .2s, transform .2s;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
 }
 #quiz-3 .ppe-item:hover {
   transform: translateY(-4px);
@@ -397,17 +401,21 @@ p {
   margin-bottom: 8px;
 }
 #quiz-3 .drop-zone {
-  background: #fff;
+  background: #f1f1f1;
   border: 2px dashed #ccc;
   border-radius: 10px;
-  flex: 0 0 136px;
-  aspect-ratio: 1/1;
+  width: 140px;
+  height: 140px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 10px;
   transition: background .2s, border-color .2s;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
 }
 #quiz-3 .drop-zone.dragover {
   background: #77DAFF;
@@ -415,11 +423,25 @@ p {
   color: #000;
 }
 #quiz-3 .zone-title {
-  font-weight: 700;
+  font-weight: normal;
   margin-bottom: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  text-align: center;
 }
 #quiz-3 .drop-zone .ppe-item {
   border: none;
+}
+
+#quiz-3 .ppe-item span {
+  font-weight: normal;
+  font-size: 1rem;
+  font-family: inherit;
+  text-align: center;
+}
+
+#quiz-3 .drop-zone .zone-title {
+  font-weight: normal;
 }
 #quiz-3 #notification {
   text-align: left;
@@ -499,3 +521,8 @@ p {
 #quiz-3 .completion-state .big-mark { font-size: 48px; }
 #quiz-3 .completion-state.success .big-mark { color: #48bb78; }
 #quiz-3 .completion-state.fail .big-mark { color: #E61E2A; }
+# Keep Quiz 3 draggable cards and drop zones uniform
+#quiz-3 .ppe-item,
+#quiz-3 .drop-zone {
+  /* Uniform sizing and alignment handled above */
+}
