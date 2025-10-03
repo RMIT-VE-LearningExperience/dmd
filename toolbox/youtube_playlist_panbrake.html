@@ -3,18 +3,173 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YouTube Playlist Placeholder</title>
+  <title>Making a Toolbox, Playlist</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      width: 100vw;
-    }
+    /* Scrollbar helpers */
+    .no-scrollbar::-webkit-scrollbar{display:none;}
+    .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none;}
+    /* Truncate */
+    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
   </style>
 </head>
-<body>
-    <iframe width="100%" height="100%" src="https://toolbox-playlist-61367289255.us-west1.run.app" title="YouTube video player" frameborder="0"  allowfullscreen style="border: none; width: 100vw; height: 100vh;"></iframe>
+<body class="bg-gray-900 text-gray-100">
+  <!-- Header -->
+  <header class="relative z-10 bg-gray-900/80 backdrop-blur border-b border-gray-800 p-4 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <!-- Simple YouTube glyph -->
+      <svg class="w-8 h-8 text-red-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M23.5 6.2s-.2-1.6-.8-2.3c-.8-.8-1.7-.8-2.1-.9C17.7 2.7 12 2.7 12 2.7h0s-5.7 0-8.6.3c-.4 0-1.3.1-2.1.9C.7 4.6.5 6.2.5 6.2S0 8.1 0 10v.1c0 1.9.5 3.8.5 3.8s.2 1.6.8 2.3c.8.8 1.8.8 2.2.9 1.6.2 6.6.3 8.5.3 0 0 5.7 0 8.6-.3.4 0 1.3-.1 2.1-.9.6-.7.8-2.3.8-2.3S24 11.9 24 10v-.1c0-1.9-.5-3.7-.5-3.7ZM9.5 13.9V6.8l6.3 3.6-6.3 3.5Z"/>
+      </svg>
+      <h1 class="text-lg md:text-xl font-bold">Making a Toolbox, Playlist</h1>
+    </div>
+  </header>
 
+  <!-- Content -->
+  <main id="app" class="h-[calc(100vh-72px)] flex flex-col">
+    <!-- Setup screen -->
+    <!--
+    <section id="setup" class="flex-1 grid place-items-center p-6">
+      <div class="w-full max-w-3xl bg-gray-800/60 backdrop-blur rounded-xl border border-gray-700 p-6 shadow-xl">
+        <h2 class="text-xl font-semibold mb-2">Enter your YouTube playlist</h2>
+        <p class="text-gray-300 mb-4">Paste YouTube video URLs below, one per line.</p>
+        <textarea id="urls" placeholder="e.g.\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          class="w-full h-44 bg-gray-900/80 border border-gray-700 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"></textarea>
+        <p id="error" class="text-red-400 text-sm mt-2 hidden"></p>
+        <button id="startBtn"
+          class="mt-4 w-full bg-red-600 text-white font-bold py-3 rounded-lg shadow-lg transition-transform duration-300 hover:-translate-y-1 active:translate-y-0">
+          Start playlist
+        </button>
+      </div>
+    </section>
+    -->
+
+    <!-- Player screen -->
+    <section id="playerScreen" class="hidden flex-1 flex flex-col md:flex-row overflow-hidden">
+      <!-- Video area -->
+      <div class="flex-1 flex flex-col p-4 gap-4">
+        <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-gray-800">
+          <iframe id="player" class="w-full h-full" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <div class="flex items-center justify-between gap-2">
+          <button id="prevBtn" class="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800">Prev</button>
+          <div class="text-center flex-1 text-sm text-gray-300" id="nowPlaying">Select a video</div>
+          <button id="nextBtn" class="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800">Next</button>
+        </div>
+      </div>
+
+      <!-- Playlist -->
+      <aside class="w-full md:w-96 border-t md:border-t-0 md:border-l border-gray-800 p-4 overflow-y-auto no-scrollbar bg-gray-900/50">
+        <h3 class="text-lg font-semibold mb-3">Playlist</h3>
+        <div id="playlist" class="space-y-2"></div>
+      </aside>
+    </section>
+  </main>
+
+  <template id="playlistItemTmpl">
+    <button class="w-full flex gap-3 items-center p-2 rounded-lg border border-transparent hover:border-gray-700 hover:bg-gray-800/60 transition">
+      <div class="relative w-28 aspect-video rounded-md overflow-hidden bg-gray-800 border-2 border-white">
+        <img class="w-full h-full object-cover" alt="Thumbnail"/>
+        <div class="absolute inset-0 ring-2 ring-transparent pointer-events-none"></div>
+      </div>
+      <div class="min-w-0 text-left">
+        <div class="font-medium text-sm line-clamp-2 title">Video</div>
+      </div>
+    </button>
+  </template>
+
+  <script>
+    let videos = [
+      { id: 'DpEb5JxpGsE', title: 'Part 1 - The Pan Brake', thumb: 'https://i.ytimg.com/vi/DpEb5JxpGsE/mqdefault.jpg' },
+      { id: 'd6S28i0YL7E', title: 'Part 2 - The Pattern', thumb: 'https://i.ytimg.com/vi/d6S28i0YL7E/mqdefault.jpg' },
+      { id: '5AOqs8CBC-E', title: 'Part 3 - 90° Fold', thumb: 'https://i.ytimg.com/vi/5AOqs8CBC-E/mqdefault.jpg' },
+      { id: 'vVU_qMjk058', title: 'Part 4 - The Sides (ends)', thumb: 'https://i.ytimg.com/vi/vVU_qMjk058/mqdefault.jpg' },
+      { id: '9qgv08k_R2s', title: 'Part 5 - Toolbox Assembly', thumb: 'https://i.ytimg.com/vi/9qgv08k_R2s/mqdefault.jpg' },
+      { id: 'Y7dyPzdJYQI', title: 'Part 6 - Toolbox Tray', thumb: 'https://i.ytimg.com/vi/Y7dyPzdJYQI/mqdefault.jpg' },
+      { id: 'U8OFwXyYJPM', title: 'Part 7 - Toolbox Handle', thumb: 'https://i.ytimg.com/vi/U8OFwXyYJPM/mqdefault.jpg' },
+      { id: '8SKFkCJpbPI', title: 'Disposal Instructions', thumb: 'https://i.ytimg.com/vi/8SKFkCJpbPI/mqdefault.jpg' },
+    ];
+
+    // Utility, extract a YouTube video ID from various URL formats
+    function extractId(url) {
+      try {
+        const u = new URL(url.trim());
+        if (u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+        if (u.searchParams.get('v')) return u.searchParams.get('v');
+        // Shorts format
+        if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/')[2];
+        return null;
+      } catch { return null; }
+    }
+
+    // Build playlist from textarea
+    const setup = document.getElementById('setup');
+    const playerScreen = document.getElementById('playerScreen');
+    const urls = document.getElementById('urls');
+    // const startBtn = document.getElementById('startBtn');
+    const errorEl = document.getElementById('error');
+    const listEl = document.getElementById('playlist');
+    const nowPlaying = document.getElementById('nowPlaying');
+    const player = document.getElementById('player');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    let current = -1;
+
+    function renderList() {
+      listEl.innerHTML = '';
+      const tmpl = document.getElementById('playlistItemTmpl');
+      videos.forEach((v, idx) => {
+        const node = tmpl.content.cloneNode(true);
+        const btn = node.querySelector('button');
+        const img = node.querySelector('img');
+        const title = node.querySelector('.title');
+        // const id = node.querySelector('.id');
+        img.src = v.thumb;
+        title.textContent = v.title || 'Video';
+        // id.textContent = v.id;
+        btn.addEventListener('click', () => playIndex(idx));
+        if (idx === current) {
+          btn.classList.add('bg-gray-800/60','border-gray-700');
+          node.querySelector('.ring-2').classList.add('ring-blue-500');
+        }
+        listEl.appendChild(node);
+      });
+    }
+
+    function ytEmbedSrc(id, autoplay=true){
+      const params = new URLSearchParams({
+        autoplay: autoplay ? '1' : '0',
+        modestbranding: '1',
+        rel: '0',
+        enablejsapi: '1'
+      });
+      return `https://www.youtube.com/embed/${id}?${params.toString()}`;
+    }
+
+    function playIndex(i){
+      if (i < 0 || i >= videos.length) return;
+      current = i;
+      const vid = videos[i];
+      player.src = ytEmbedSrc(vid.id, true);
+      nowPlaying.textContent = vid.title ? `Now playing, ${vid.title}` : `Now playing, ${vid.id}`;
+      renderList();
+      // Scroll into view on narrow screens
+      if (window.innerWidth < 768) {
+        document.getElementById('player').scrollIntoView({behavior:'smooth'});
+      }
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (videos.length) playIndex((current - 1 + videos.length) % videos.length);
+    });
+    nextBtn.addEventListener('click', () => {
+      if (videos.length) playIndex((current + 1) % videos.length);
+    });
+
+    playerScreen.classList.remove('hidden');
+    renderList();
+    playIndex(0);
+  </script>
 </body>
 </html>
