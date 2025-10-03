@@ -5,13 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Making a Toolbox, Playlist</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Scrollbar helpers */
-    .no-scrollbar::-webkit-scrollbar{display:none;}
-    .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none;}
-    /* Truncate */
-    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-  </style>
+  <link rel="stylesheet" href="playlist.css">
 </head>
 <body class="bg-gray-900 text-gray-100">
   <!-- Header -->
@@ -52,9 +46,7 @@
           <iframe id="player" class="w-full h-full" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
         </div>
         <div class="flex items-center justify-between gap-2">
-          <button id="prevBtn" class="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800">Prev</button>
-          <div class="text-center flex-1 text-sm text-gray-300" id="nowPlaying">Select a video</div>
-          <button id="nextBtn" class="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800">Next</button>
+          <div id="nowPlaying" class="text-center flex-1 text-sm text-gray-300">Select a video</div>
         </div>
       </div>
 
@@ -109,10 +101,8 @@
     // const startBtn = document.getElementById('startBtn');
     const errorEl = document.getElementById('error');
     const listEl = document.getElementById('playlist');
-    const nowPlaying = document.getElementById('nowPlaying');
+    let nowPlaying = document.getElementById('nowPlaying');
     const player = document.getElementById('player');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
 
     let current = -1;
 
@@ -124,10 +114,8 @@
         const btn = node.querySelector('button');
         const img = node.querySelector('img');
         const title = node.querySelector('.title');
-        // const id = node.querySelector('.id');
         img.src = v.thumb;
         title.textContent = v.title || 'Video';
-        // id.textContent = v.id;
         btn.addEventListener('click', () => playIndex(idx));
         if (idx === current) {
           btn.classList.add('bg-gray-800/60','border-gray-700');
@@ -147,25 +135,43 @@
       return `https://www.youtube.com/embed/${id}?${params.toString()}`;
     }
 
+    function renderControls() {
+      const controlsContainer = nowPlaying.parentElement;
+      controlsContainer.innerHTML = '';
+      if (current > 0) {
+        const prevBtn = document.createElement('button');
+        prevBtn.textContent = 'Prev';
+        prevBtn.className = 'px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800';
+        prevBtn.addEventListener('click', () => playIndex(current - 1));
+        controlsContainer.appendChild(prevBtn);
+      }
+      const now = document.createElement('div');
+      now.id = 'nowPlaying';
+      now.className = 'text-center flex-1 text-sm text-gray-300';
+      now.textContent = videos[current]?.title ? `Now playing, ${videos[current].title}` : 'Select a video';
+      controlsContainer.appendChild(now);
+      nowPlaying = now;
+      if (current < videos.length - 1) {
+        const nextBtn = document.createElement('button');
+        nextBtn.textContent = 'Next';
+        nextBtn.className = 'px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800';
+        nextBtn.addEventListener('click', () => playIndex(current + 1));
+        controlsContainer.appendChild(nextBtn);
+      }
+    }
+
     function playIndex(i){
       if (i < 0 || i >= videos.length) return;
       current = i;
       const vid = videos[i];
       player.src = ytEmbedSrc(vid.id, true);
-      nowPlaying.textContent = vid.title ? `Now playing, ${vid.title}` : `Now playing, ${vid.id}`;
       renderList();
+      renderControls();
       // Scroll into view on narrow screens
       if (window.innerWidth < 768) {
         document.getElementById('player').scrollIntoView({behavior:'smooth'});
       }
     }
-
-    prevBtn.addEventListener('click', () => {
-      if (videos.length) playIndex((current - 1 + videos.length) % videos.length);
-    });
-    nextBtn.addEventListener('click', () => {
-      if (videos.length) playIndex((current + 1) % videos.length);
-    });
 
     playerScreen.classList.remove('hidden');
     renderList();
