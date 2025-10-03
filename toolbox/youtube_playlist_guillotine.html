@@ -55,51 +55,46 @@
   </template>
 
   <script>
-    const playlists = {
-      en: [
-        { id: 'Gww8QB6jJvA', title: 'Guillotine Safety', thumb: 'https://i.ytimg.com/vi/Gww8QB6jJvA/mqdefault.jpg' },
-        { id: 'WU_gU6WNhl8', title: 'Cutting with Guillotine', thumb: 'https://i.ytimg.com/vi/WU_gU6WNhl8/mqdefault.jpg' },
-      ]
+  (function(){
+    const PAGE = 'youtube_playlist_guillotine.html';
+    const LANG_MAP = {
+      'English': { code: 'en', label: 'English' },
+      'Hindi': { code: 'hi', label: 'हिन्दी' },
+      'Chinese (Traditional)': { code: 'zh-TW', label: '繁體中文' },
+      'Vietnamese': { code: 'vi', label: 'Tiếng Việt' },
+      'Spanish': { code: 'es', label: 'Español' },
+      'French': { code: 'fr', label: 'Français' },
+      'Malay': { code: 'ms', label: 'Bahasa Melayu' }
     };
-    const langSwitcherContainer = document.getElementById('langSwitcherContainer');
-    if (Object.keys(playlists).length > 1) {
-      langSwitcherContainer.innerHTML = `
-        <div class="relative inline-block text-left">
-          <button id="langMenuBtn" class="flex items-center px-3 py-1 border border-gray-600 rounded-md hover:bg-gray-800">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2">
-              <path d="M21.41 8.64v-.05a10 10 0 0 0-18.78 0s0 0 0 .05a9.86 9.86 0 0 0 0 6.72v.05a10 10 0 0 0 18.78 0s0 0 0-.05a9.86 9.86 0 0 0 0-6.72M4.26 14a7.8 7.8 0 0 1 0-4h1.86a16.7 16.7 0 0 0 0 4Zm.82 2h1.4a12 12 0 0 0 1 2.57A8 8 0 0 1 5.08 16m1.4-8h-1.4a8 8 0 0 1 2.37-2.57A12 12 0 0 0 6.48 8M11 19.7A6.34 6.34 0 0 1 8.57 16H11Zm0-5.7H8.14a14.4 14.4 0 0 1 0-4H11Zm0-6H8.57A6.34 6.34 0 0 1 11 4.3Zm7.92 0h-1.4a12 12 0 0 0-1-2.57A8 8 0 0 1 18.92 8M13 4.3A6.34 6.34 0 0 1 15.43 8H13Zm0 15.4V16h2.43A6.34 6.34 0 0 1 13 19.7m2.86-5.7H13v-4h2.86a14.4 14.4 0 0 1 0 4m.69 4.57a12 12 0 0 0 1-2.57h1.4a8 8 0 0 1-2.4 2.57M19.74 14h-1.86a16 16 0 0 0 .12-2a16 16 0 0 0-.12-2h1.86a7.8 7.8 0 0 1 0 4"/>
-            </svg>
-            <span id="currentLangLabel">English</span>
-          </button>
-          <div id="langMenu" class="hidden absolute right-0 mt-2 w-32 bg-gray-800 border border-gray-700 rounded shadow-lg z-20">
-            <button data-lang="en" class="block w-full px-4 py-2 text-left hover:bg-gray-700">English</button>
-            <button data-lang="hi" class="block w-full px-4 py-2 text-left hover:bg-gray-700">हिन्दी</button>
-          </div>
-        </div>`;
-    }
-    let currentLang = 'en';
-    const _lbl = document.getElementById('currentLangLabel');
-    if (_lbl) _lbl.textContent = currentLang === 'en' ? 'English' : 'हिन्दी';
-    let videos = playlists[currentLang];
 
-    // Utility, extract a YouTube video ID from various URL formats
-    function extractId(url) {
+    const langSwitcherContainer = document.getElementById('langSwitcherContainer');
+    const listEl = document.getElementById('playlist');
+    let nowPlaying = document.getElementById('nowPlaying');
+    const player = document.getElementById('player');
+    const playerScreen = document.getElementById('playerScreen');
+
+    let playlists = {}; // { langCode: [{id,title,thumb}] }
+    let currentLang = null;
+    let videos = [];
+    let current = -1;
+
+    function extractId(url){
+      if (!url) return null;
       try {
         const u = new URL(url.trim());
         if (u.hostname.includes('youtu.be')) return u.pathname.slice(1);
         if (u.searchParams.get('v')) return u.searchParams.get('v');
-        // Shorts format
         if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/')[2];
         return null;
       } catch { return null; }
     }
+    function ytThumb(id){ return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`; }
+    function ytEmbed(id){
+      const p = new URLSearchParams({ autoplay: '1', modestbranding: '1', rel: '0', enablejsapi: '1' });
+      return `https://www.youtube.com/embed/${id}?${p.toString()}`;
+    }
 
-    const listEl = document.getElementById('playlist');
-    const nowPlaying = document.getElementById('nowPlaying');
-    const player = document.getElementById('player');
-    let current = -1;
-
-    function renderList() {
+    function renderList(){
       listEl.innerHTML = '';
       const tmpl = document.getElementById('playlistItemTmpl');
       videos.forEach((v, idx) => {
@@ -118,73 +113,99 @@
       });
     }
 
-    function ytEmbedSrc(id, autoplay=true){
-      const params = new URLSearchParams({
-        autoplay: autoplay ? '1' : '0',
-        modestbranding: '1',
-        rel: '0',
-        enablejsapi: '1'
-      });
-      return `https://www.youtube.com/embed/${id}?${params.toString()}`;
-    }
-
-    function renderControls() {
-      const controlsContainer = nowPlaying.parentElement;
-      controlsContainer.innerHTML = '';
+    function renderControls(){
+      const ctrls = nowPlaying.parentElement;
+      ctrls.innerHTML = '';
       if (current > 0) {
-        const prevBtn = document.createElement('button');
-        prevBtn.textContent = 'Prev';
-        prevBtn.className = 'px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800';
-        prevBtn.addEventListener('click', () => playIndex(current - 1));
-        controlsContainer.appendChild(prevBtn);
+        const prev = document.createElement('button');
+        prev.textContent = 'Prev';
+        prev.className = 'px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800';
+        prev.addEventListener('click', () => playIndex(current - 1));
+        ctrls.appendChild(prev);
       }
       const now = document.createElement('div');
       now.id = 'nowPlaying';
       now.className = 'text-center flex-1 text-sm text-gray-300';
       now.textContent = videos[current]?.title ? `Now playing, ${videos[current].title}` : 'Select a video';
-      controlsContainer.appendChild(now);
+      ctrls.appendChild(now);
+      nowPlaying = now;
       if (current < videos.length - 1) {
-        const nextBtn = document.createElement('button');
-        nextBtn.textContent = 'Next';
-        nextBtn.className = 'px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800';
-        nextBtn.addEventListener('click', () => playIndex(current + 1));
-        controlsContainer.appendChild(nextBtn);
+        const next = document.createElement('button');
+        next.textContent = 'Next';
+        next.className = 'px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800';
+        next.addEventListener('click', () => playIndex(current + 1));
+        ctrls.appendChild(next);
       }
     }
 
     function playIndex(i){
       if (i < 0 || i >= videos.length) return;
       current = i;
-      const vid = videos[i];
-      player.src = ytEmbedSrc(vid.id, true);
+      player.src = ytEmbed(videos[i].id);
       renderList();
       renderControls();
-      if (window.innerWidth < 768) {
-        document.getElementById('player').scrollIntoView({behavior:'smooth'});
+      if (window.innerWidth < 768) player.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function injectLangSwitcher(langCodes){
+      if (!langSwitcherContainer) return;
+      if (langCodes.length <= 1) { langSwitcherContainer.innerHTML = ''; return; }
+      const items = langCodes.map(code => {
+        const label = Object.values(LANG_MAP).find(v => v.code === code)?.label || code;
+        return `<button data-lang="${code}" class="block w-full px-4 py-2 text-left hover:bg-gray-700">${label}</button>`;
+      }).join('');
+      langSwitcherContainer.innerHTML = `
+        <div class="relative inline-block text-left">
+          <button id="langMenuBtn" class="flex items-center px-3 py-1 border border-gray-600 rounded-md hover:bg-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2"><path d="M21.41 8.64v-.05a10 10 0 0 0-18.78 0s0 0 0 .05a9.86 9.86 0 0 0 0 6.72v.05a10 10 0 0 0 18.78 0s0 0 0-.05a9.86 9.86 0 0 0 0-6.72M4.26 14a7.8 7.8 0 0 1 0-4h1.86a16.7 16.7 0 0 0 0 4Zm.82 2h1.4a12 12 0 0 0 1 2.57A8 8 0 0 1 5.08 16m1.4-8h-1.4a8 8 0 0 1 2.37-2.57A12 12 0 0 0 6.48 8M11 19.7A6.34 6.34 0 0 1 8.57 16H11Zm0-5.7H8.14a14.4 14.4 0 0 1 0-4H11Zm0-6H8.57A6.34 6.34 0 0 1 11 4.3Zm7.92 0h-1.4a12 12 0 0 0-1-2.57A8 8 0 0 1 18.92 8M13 4.3A6.34 6.34 0 0 1 15.43 8H13Zm0 15.4V16h2.43A6.34 6.34 0 0 1 13 19.7m2.86-5.7H13v-4h2.86a14.4 14.4 0 0 1 0 4m.69 4.57a12 12 0 0 0 1-2.57h1.4a8 8 0 0 1-2.4 2.57M19.74 14h-1.86a16 16 0 0 0 .12-2a16 16 0 0 0-.12-2h1.86a7.8 7.8 0 0 1 0 4"/></svg>
+            <span id="currentLangLabel"></span>
+          </button>
+          <div id="langMenu" class="hidden absolute right-0 mt-2 w-40 bg-gray-800 border border-gray-700 rounded shadow-lg z-20">${items}</div>
+        </div>`;
+      const lbl = document.getElementById('currentLangLabel');
+      if (lbl) lbl.textContent = Object.values(LANG_MAP).find(v => v.code === currentLang)?.label || currentLang;
+      const btn = document.getElementById('langMenuBtn');
+      const menu = document.getElementById('langMenu');
+      if (btn && menu) {
+        btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+        menu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+          currentLang = b.dataset.lang;
+          videos = playlists[currentLang] || [];
+          renderList();
+          playIndex(0);
+          menu.classList.add('hidden');
+          if (lbl) lbl.textContent = Object.values(LANG_MAP).find(v => v.code === currentLang)?.label || currentLang;
+        }));
       }
     }
 
-    const langMenuBtn = document.getElementById('langMenuBtn');
-    const langMenu = document.getElementById('langMenu');
-    if (langMenuBtn && langMenu) {
-      langMenuBtn.addEventListener('click', () => {
-        langMenu.classList.toggle('hidden');
-      });
-      langMenu.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          currentLang = btn.dataset.lang;
-          videos = playlists[currentLang];
-          current = -1;
-          renderList();
-          playIndex(0);
-          langMenu.classList.add('hidden');
-          const lbl = document.getElementById('currentLangLabel');
-          if (lbl) lbl.textContent = currentLang === 'en' ? 'English' : 'हिन्दी';
+    fetch('videos.json')
+      .then(r => r.json())
+      .then(rows => {
+        playlists = {};
+        rows.forEach(row => {
+          if ((row.Page || '').trim() !== PAGE) return;
+          const title = row.Title || 'Video';
+          Object.keys(LANG_MAP).forEach(col => {
+            const url = row[col];
+            if (!url) return;
+            const id = extractId(url);
+            if (!id) return;
+            const lang = LANG_MAP[col].code;
+            (playlists[lang] ||= []).push({ id, title, thumb: ytThumb(id) });
+          });
         });
-      });
-    }
-
-    playIndex(0);
+        const langs = Object.keys(playlists);
+        if (langs.length === 0) return;
+        currentLang = langs.includes('en') ? 'en' : langs[0];
+        videos = playlists[currentLang];
+        injectLangSwitcher(langs);
+        playerScreen.classList.remove('hidden');
+        renderList();
+        playIndex(0);
+      })
+      .catch(err => console.error('Failed to load videos.json', err));
+  })();
   </script>
 </body>
 </html>
