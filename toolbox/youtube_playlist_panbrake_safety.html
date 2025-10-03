@@ -17,6 +17,7 @@
       </svg>
       <h1 class="text-lg md:text-xl font-bold">Making a Toolbox, Playlist</h1>
     </div>
+    <div id="langSwitcherContainer"></div>
   </header>
 
   <!-- Content -->
@@ -71,9 +72,56 @@
   </template>
 
   <script>
-    let videos = [
-      { id: 'QHgmP9JmbDM', title: 'Workshop Safety PPE Video', thumb: 'https://i.ytimg.com/vi/QHgmP9JmbDM/mqdefault.jpg' },
-    ];
+    const playlists = {
+      en: [
+        { id: 'QHgmP9JmbDM', title: 'Workshop Safety PPE Video', thumb: 'https://i.ytimg.com/vi/QHgmP9JmbDM/mqdefault.jpg' },
+      ]
+    };
+
+    const langSwitcherContainer = document.getElementById('langSwitcherContainer');
+    if (Object.keys(playlists).length > 1) {
+      langSwitcherContainer.innerHTML = `
+        <div class="relative inline-block text-left">
+          <button id="langMenuBtn" class="flex items-center px-3 py-1 border border-gray-600 rounded-md hover:bg-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2">
+              <path d="M21.41 8.64v-.05a10 10 0 0 0-18.78 0s0 0 0 .05a9.86 9.86 0 0 0 0 6.72v.05a10 10 0 0 0 18.78 0s0 0 0-.05a9.86 9.86 0 0 0 0-6.72M4.26 14a7.8 7.8 0 0 1 0-4h1.86a16.7 16.7 0 0 0 0 4Zm.82 2h1.4a12 12 0 0 0 1 2.57A8 8 0 0 1 5.08 16m1.4-8h-1.4a8 8 0 0 1 2.37-2.57A12 12 0 0 0 6.48 8M11 19.7A6.34 6.34 0 0 1 8.57 16H11Zm0-5.7H8.14a14.4 14.4 0 0 1 0-4H11Zm0-6H8.57A6.34 6.34 0 0 1 11 4.3Zm7.92 0h-1.4a12 12 0 0 0-1-2.57A8 8 0 0 1 18.92 8M13 4.3A6.34 6.34 0 0 1 15.43 8H13Zm0 15.4V16h2.43A6.34 6.34 0 0 1 13 19.7m2.86-5.7H13v-4h2.86a14.4 14.4 0 0 1 0 4m.69 4.57a12 12 0 0 0 1-2.57h1.4a8 8 0 0 1-2.4 2.57M19.74 14h-1.86a16 16 0 0 0 .12-2a16 16 0 0 0-.12-2h1.86a7.8 7.8 0 0 1 0 4"/>
+            </svg>
+            <span id="currentLangLabel">English</span>
+          </button>
+          <div id="langMenu" class="hidden absolute right-0 mt-2 w-32 bg-gray-800 border border-gray-700 rounded shadow-lg z-20">
+            <button data-lang="en" class="block w-full px-4 py-2 text-left hover:bg-gray-700">English</button>
+            <button data-lang="hi" class="block w-full px-4 py-2 text-left hover:bg-gray-700">हिन्दी</button>
+          </div>
+        </div>`;
+    }
+
+    let currentLang = 'en';
+
+    let videos = playlists[currentLang]; // default to English playlist
+    let current = -1;
+
+    const _lbl = document.getElementById('currentLangLabel');
+    if (_lbl) _lbl.textContent = currentLang === 'en' ? 'English' : 'हिन्दी';
+
+    const langMenuBtn = document.getElementById('langMenuBtn');
+    const langMenu = document.getElementById('langMenu');
+    if (langMenuBtn && langMenu) {
+      langMenuBtn.addEventListener('click', () => {
+        langMenu.classList.toggle('hidden');
+      });
+      langMenu.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentLang = btn.dataset.lang;
+          videos = playlists[currentLang];
+          current = -1;
+          renderList();
+          playIndex(0);
+          langMenu.classList.add('hidden');
+          const lbl = document.getElementById('currentLangLabel');
+          if (lbl) lbl.textContent = currentLang === 'en' ? 'English' : 'हिन्दी';
+        });
+      });
+    }
 
     // Utility, extract a YouTube video ID from various URL formats
     function extractId(url) {
@@ -99,8 +147,6 @@
     // const prevBtn = document.getElementById('prevBtn');
     // const nextBtn = document.getElementById('nextBtn');
 
-    let current = -1;
-
     function renderList() {
       listEl.innerHTML = '';
       const tmpl = document.getElementById('playlistItemTmpl');
@@ -109,10 +155,8 @@
         const btn = node.querySelector('button');
         const img = node.querySelector('img');
         const title = node.querySelector('.title');
-        // const id = node.querySelector('.id');
         img.src = v.thumb;
         title.textContent = v.title || 'Video';
-        // id.textContent = v.id;
         btn.addEventListener('click', () => playIndex(idx));
         if (idx === current) {
           btn.classList.add('bg-gray-800/60','border-gray-700');
@@ -162,7 +206,6 @@
       current = i;
       const vid = videos[i];
       player.src = ytEmbedSrc(vid.id, true);
-      // nowPlaying.textContent = vid.title ? `Now playing, ${vid.title}` : `Now playing, ${vid.id}`;
       renderList();
       renderControls();
       // Scroll into view on narrow screens
@@ -170,13 +213,6 @@
         document.getElementById('player').scrollIntoView({behavior:'smooth'});
       }
     }
-
-    // prevBtn.addEventListener('click', () => {
-    //   if (videos.length) playIndex((current - 1 + videos.length) % videos.length);
-    // });
-    // nextBtn.addEventListener('click', () => {
-    //   if (videos.length) playIndex((current + 1) % videos.length);
-    // });
 
     playerScreen.classList.remove('hidden');
     renderList();

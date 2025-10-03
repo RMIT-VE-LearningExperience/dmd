@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Making a Toolbox, Playlist</title>
+  <title>Making a Toolbox, Playlist, Guillotine</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="playlist.css">
 </head>
@@ -15,31 +15,15 @@
       <svg class="w-8 h-8 text-red-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M23.5 6.2s-.2-1.6-.8-2.3c-.8-.8-1.7-.8-2.1-.9C17.7 2.7 12 2.7 12 2.7h0s-5.7 0-8.6.3c-.4 0-1.3.1-2.1.9C.7 4.6.5 6.2.5 6.2S0 8.1 0 10v.1c0 1.9.5 3.8.5 3.8s.2 1.6.8 2.3c.8.8 1.8.8 2.2.9 1.6.2 6.6.3 8.5.3 0 0 5.7 0 8.6-.3.4 0 1.3-.1 2.1-.9.6-.7.8-2.3.8-2.3S24 11.9 24 10v-.1c0-1.9-.5-3.7-.5-3.7ZM9.5 13.9V6.8l6.3 3.6-6.3 3.5Z"/>
       </svg>
-      <h1 class="text-lg md:text-xl font-bold">Making a Toolbox, Playlist</h1>
+      <h1 class="text-lg md:text-xl font-bold">Making a Toolbox, Playlist, Guillotine</h1>
     </div>
+    <div id="langSwitcherContainer"></div>
   </header>
 
   <!-- Content -->
   <main id="app" class="h-[calc(100vh-72px)] flex flex-col">
-    <!-- Setup screen -->
-    <!--
-    <section id="setup" class="flex-1 grid place-items-center p-6">
-      <div class="w-full max-w-3xl bg-gray-800/60 backdrop-blur rounded-xl border border-gray-700 p-6 shadow-xl">
-        <h2 class="text-xl font-semibold mb-2">Enter your YouTube playlist</h2>
-        <p class="text-gray-300 mb-4">Paste YouTube video URLs below, one per line.</p>
-        <textarea id="urls" placeholder="e.g.\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          class="w-full h-44 bg-gray-900/80 border border-gray-700 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"></textarea>
-        <p id="error" class="text-red-400 text-sm mt-2 hidden"></p>
-        <button id="startBtn"
-          class="mt-4 w-full bg-red-600 text-white font-bold py-3 rounded-lg shadow-lg transition-transform duration-300 hover:-translate-y-1 active:translate-y-0">
-          Start playlist
-        </button>
-      </div>
-    </section>
-    -->
-
     <!-- Player screen -->
-    <section id="playerScreen" class="hidden flex-1 flex flex-col md:flex-row overflow-hidden">
+    <section id="playerScreen" class="flex-1 flex flex-col md:flex-row overflow-hidden">
       <!-- Video area -->
       <div class="flex-1 flex flex-col p-4 gap-4">
         <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-gray-800">
@@ -71,10 +55,32 @@
   </template>
 
   <script>
-    let videos = [
-      { id: 'Gww8QB6jJvA', title: 'Guillotine Safety', thumb: 'https://i.ytimg.com/vi/Gww8QB6jJvA/mqdefault.jpg' },
-      { id: 'WU_gU6WNhl8', title: 'Cutting with Guillotine', thumb: 'https://i.ytimg.com/vi/WU_gU6WNhl8/mqdefault.jpg' },
-    ];
+    const playlists = {
+      en: [
+        { id: 'Gww8QB6jJvA', title: 'Guillotine Safety', thumb: 'https://i.ytimg.com/vi/Gww8QB6jJvA/mqdefault.jpg' },
+        { id: 'WU_gU6WNhl8', title: 'Cutting with Guillotine', thumb: 'https://i.ytimg.com/vi/WU_gU6WNhl8/mqdefault.jpg' },
+      ]
+    };
+    const langSwitcherContainer = document.getElementById('langSwitcherContainer');
+    if (Object.keys(playlists).length > 1) {
+      langSwitcherContainer.innerHTML = `
+        <div class="relative inline-block text-left">
+          <button id="langMenuBtn" class="flex items-center px-3 py-1 border border-gray-600 rounded-md hover:bg-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="mr-2">
+              <path d="M21.41 8.64v-.05a10 10 0 0 0-18.78 0s0 0 0 .05a9.86 9.86 0 0 0 0 6.72v.05a10 10 0 0 0 18.78 0s0 0 0-.05a9.86 9.86 0 0 0 0-6.72M4.26 14a7.8 7.8 0 0 1 0-4h1.86a16.7 16.7 0 0 0 0 4Zm.82 2h1.4a12 12 0 0 0 1 2.57A8 8 0 0 1 5.08 16m1.4-8h-1.4a8 8 0 0 1 2.37-2.57A12 12 0 0 0 6.48 8M11 19.7A6.34 6.34 0 0 1 8.57 16H11Zm0-5.7H8.14a14.4 14.4 0 0 1 0-4H11Zm0-6H8.57A6.34 6.34 0 0 1 11 4.3Zm7.92 0h-1.4a12 12 0 0 0-1-2.57A8 8 0 0 1 18.92 8M13 4.3A6.34 6.34 0 0 1 15.43 8H13Zm0 15.4V16h2.43A6.34 6.34 0 0 1 13 19.7m2.86-5.7H13v-4h2.86a14.4 14.4 0 0 1 0 4m.69 4.57a12 12 0 0 0 1-2.57h1.4a8 8 0 0 1-2.4 2.57M19.74 14h-1.86a16 16 0 0 0 .12-2a16 16 0 0 0-.12-2h1.86a7.8 7.8 0 0 1 0 4"/>
+            </svg>
+            <span id="currentLangLabel">English</span>
+          </button>
+          <div id="langMenu" class="hidden absolute right-0 mt-2 w-32 bg-gray-800 border border-gray-700 rounded shadow-lg z-20">
+            <button data-lang="en" class="block w-full px-4 py-2 text-left hover:bg-gray-700">English</button>
+            <button data-lang="hi" class="block w-full px-4 py-2 text-left hover:bg-gray-700">हिन्दी</button>
+          </div>
+        </div>`;
+    }
+    let currentLang = 'en';
+    const _lbl = document.getElementById('currentLangLabel');
+    if (_lbl) _lbl.textContent = currentLang === 'en' ? 'English' : 'हिन्दी';
+    let videos = playlists[currentLang];
 
     // Utility, extract a YouTube video ID from various URL formats
     function extractId(url) {
@@ -88,17 +94,9 @@
       } catch { return null; }
     }
 
-    // Build playlist from textarea
-    const setup = document.getElementById('setup');
-    const playerScreen = document.getElementById('playerScreen');
-    const urls = document.getElementById('urls');
-    // const startBtn = document.getElementById('startBtn');
-    // const errorEl = document.getElementById('error');
     const listEl = document.getElementById('playlist');
     const nowPlaying = document.getElementById('nowPlaying');
     const player = document.getElementById('player');
-    // Removed prevBtn and nextBtn references as buttons are now dynamic
-
     let current = -1;
 
     function renderList() {
@@ -159,19 +157,33 @@
       current = i;
       const vid = videos[i];
       player.src = ytEmbedSrc(vid.id, true);
-      // nowPlaying.textContent = vid.title ? `Now playing, ${vid.title}` : `Now playing, ${vid.id}`;
       renderList();
       renderControls();
-      // Scroll into view on narrow screens
       if (window.innerWidth < 768) {
         document.getElementById('player').scrollIntoView({behavior:'smooth'});
       }
     }
 
-    // Removed old static event listeners for prevBtn and nextBtn
+    const langMenuBtn = document.getElementById('langMenuBtn');
+    const langMenu = document.getElementById('langMenu');
+    if (langMenuBtn && langMenu) {
+      langMenuBtn.addEventListener('click', () => {
+        langMenu.classList.toggle('hidden');
+      });
+      langMenu.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentLang = btn.dataset.lang;
+          videos = playlists[currentLang];
+          current = -1;
+          renderList();
+          playIndex(0);
+          langMenu.classList.add('hidden');
+          const lbl = document.getElementById('currentLangLabel');
+          if (lbl) lbl.textContent = currentLang === 'en' ? 'English' : 'हिन्दी';
+        });
+      });
+    }
 
-    playerScreen.classList.remove('hidden');
-    renderList();
     playIndex(0);
   </script>
 </body>
