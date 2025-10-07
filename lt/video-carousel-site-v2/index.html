@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CES High Achievers Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @font-face{
+      font-family: 'Museo500';
+      src: url('assets/fonts/museo-500.otf') format('opentype');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face{
+      font-family: 'HelveticaNeueCustom';
+      src: url('assets/fonts/HelveticaNeue.ttc') format('truetype-collection');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    :root{
+      --bg: #0a0c10;
+      --card: #121722;
+      --accent: #2dd4bf;
+      --muted: #9aa3af;
+    }
+    html, body { height: 100%; }
+    body{ background: radial-gradient(120% 120% at 10% 0%, #0f1420 0%, #0a0c10 60%); }
+    .font-brand{ font-family: Museo500, HelveticaNeueCustom, Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen text-slate-200">
+  <header class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="font-brand text-3xl tracking-tight">CES High Achievers 2025 Showcase</h1>
+    <div class="mt-4 flex flex-wrap gap-3">
+      <input id="search" type="search" placeholder="Search name, title, cluster" class="bg-[#0c111a] border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-teal-400" />
+      <select id="clusterFilter" class="bg-[#0c111a] border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-teal-400">
+        <option value="">All clusters</option>
+      </select>
+      <button id="resetBtn" type="button" class="px-3 py-2 rounded-xl border border-slate-700 bg-[#0f1520] hover:border-slate-500">Reset</button>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4">
+    <div id="grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-16"></div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 hidden" aria-hidden="true">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close></div>
+    <div class="relative z-10 max-w-5xl mx-auto my-10 bg-[#0f1520] border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
+      <button class="absolute right-3 top-2 text-3xl leading-none text-slate-300 hover:text-white" aria-label="Close" data-close>&times;</button>
+      <div id="playerContainer" class="aspect-video bg-black border-b border-slate-800"></div>
+      <div class="flex items-center gap-4 p-4">
+        <img id="modalAvatar" class="w-12 h-12 rounded-full border border-slate-700 object-cover" alt="Profile picture" />
+        <div>
+          <h2 id="modalTitle" class="font-brand text-xl"></h2>
+          <p id="modalSubtitle" class="text-slate-400 text-sm"></p>
+          <a id="externalLink" href="#" target="_blank" rel="noopener" class="hidden inline-block mt-1 text-teal-300 underline">External link</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.tailwind.js" defer></script>
+</body>
+</html>
