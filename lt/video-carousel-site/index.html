@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Video Profiles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="container">
+    <h1>Video Profiles</h1>
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search name, title, cluster" />
+      <select id="clusterFilter">
+        <option value="">All clusters</option>
+      </select>
+      <button id="resetBtn" type="button">Reset</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="grid" class="grid"></div>
+  </main>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="close" aria-label="Close" data-close>&times;</button>
+      <div id="playerContainer" class="player"></div>
+      <div class="meta">
+        <img id="modalAvatar" class="avatar" alt="Profile picture" />
+        <div>
+          <h2 id="modalTitle"></h2>
+          <p id="modalSubtitle" class="muted"></p>
+          <a id="externalLink" href="#" target="_blank" rel="noopener" class="external hidden">External link</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="container footer">
+    <small>Built as a static site, data comes from <code>videos.json</code>.</small>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
