@@ -411,15 +411,21 @@ checkAllComplete();
       }
 
       // Allow multiple selections and enable Next
-      document.querySelectorAll('#quiz-2 .choices button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          btn.classList.toggle('selected');
-          const screen = btn.closest('.screen');
-          const nextBtn = screen.querySelector('.next-btn');
-          const anySelected = screen.querySelectorAll('.choices button.selected').length > 0;
-          nextBtn.disabled = !anySelected;
+      function wireQuiz2ChoiceButtons() {
+        document.querySelectorAll('#quiz-2 .choices button').forEach(btn => {
+          // Remove any previous listeners by cloning
+          const newBtn = btn.cloneNode(true);
+          btn.replaceWith(newBtn);
+          newBtn.addEventListener('click', () => {
+            newBtn.classList.toggle('selected');
+            const screen = newBtn.closest('.screen');
+            const nextBtn = screen.querySelector('.next-btn');
+            const anySelected = screen.querySelectorAll('.choices button.selected').length > 0;
+            if (nextBtn) nextBtn.disabled = !anySelected;
+          });
         });
-      });
+      }
+      wireQuiz2ChoiceButtons();
 
       // Next button advances to the next screen
       document.querySelectorAll('#quiz-2 .next-btn').forEach(btn => {
@@ -430,6 +436,8 @@ checkAllComplete();
           const newScreen = document.getElementById('quiz2-screen-' + quiz2Current);
           const newNext = newScreen ? newScreen.querySelector('.next-btn') : null;
           if (newNext) newNext.disabled = true;
+          // Rewire choice buttons for newly shown screen (in case retry)
+          wireQuiz2ChoiceButtons();
 
           // If we've reached results screen, compute and display score and outcome
           if (quiz2Current === 6) {
@@ -471,7 +479,19 @@ checkAllComplete();
             } else {
               newBtn.textContent = 'Try Again';
               newBtn.addEventListener('click', () => {
+                // Clear all selections on retry, re-disable next buttons
+                document.querySelectorAll('#quiz-2 .choices button').forEach(b => b.classList.remove('selected'));
+                // Disable all .next-btns except the intro
+                for (let i = 1; i <= 5; i++) {
+                  const scr = document.getElementById('quiz2-screen-' + i);
+                  if (scr) {
+                    const nb = scr.querySelector('.next-btn');
+                    if (nb) nb.disabled = true;
+                  }
+                }
                 showQuiz2Screen(0);
+                // Rewire click handlers to ensure normal operation
+                wireQuiz2ChoiceButtons();
               });
             }
           }
@@ -499,7 +519,19 @@ checkAllComplete();
       const retryQuiz2Btn = document.getElementById('retryQuiz2Btn');
       if (retryQuiz2Btn) {
         retryQuiz2Btn.addEventListener('click', () => {
+          // Clear all selections
+          document.querySelectorAll('#quiz-2 .choices button').forEach(b => b.classList.remove('selected'));
+          // Disable all .next-btns except the intro
+          for (let i = 1; i <= 5; i++) {
+            const scr = document.getElementById('quiz2-screen-' + i);
+            if (scr) {
+              const nb = scr.querySelector('.next-btn');
+              if (nb) nb.disabled = true;
+            }
+          }
           showQuiz2Screen(0);
+          // Rewire click handlers to ensure normal operation
+          wireQuiz2ChoiceButtons();
         });
       }
     })();
