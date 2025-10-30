@@ -3,61 +3,387 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AR Viewer, rewinder.glb</title>
-
-    <!-- model-viewer web component -->
+    <title>WebXR AR Viewer - Rewinder</title>
+    <!-- model-viewer web component with WebXR support -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
-
     <style>
-      html, body { height: 100%; margin: 0; }
-      body { background: #111; color: #fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-      model-viewer { width: 100%; height: 100vh; background: #222; }
-      /* Optional, custom AR button */
-      #ar-button {
-        position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
-        padding: 10px 16px; border-radius: 22px; border: 1px solid #dadce0; background: #fff; color: #1a73e8;
-        font-size: 14px; cursor: pointer; white-space: nowrap;
+      html, body { 
+        height: 100%; 
+        margin: 0; 
+        overflow: hidden;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       }
-      #ar-button:active { background: #e8eaed; }
-      /* Only show the prompt while AR session is active */
-      #ar-prompt { display: none; position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%); font-size: 13px; opacity: .9; }
-      model-viewer[ar-status="session-started"] #ar-prompt { display: block; }
+      
+      body { 
+        background: #000; 
+        color: #fff; 
+        position: relative;
+      }
+      
+      model-viewer { 
+        width: 100%; 
+        height: 100vh; 
+        background: transparent;
+        --poster-color: transparent;
+      }
+      
+      /* Enhanced AR Controls */
+      .ar-controls {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        z-index: 100;
+      }
+      
+      #ar-button {
+        padding: 12px 24px;
+        border-radius: 25px;
+        border: 2px solid #fff;
+        background: rgba(255, 255, 255, 0.9);
+        color: #000;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+      
+      #ar-button:hover {
+        background: rgba(255, 255, 255, 1);
+        transform: scale(1.05);
+      }
+      
+      #ar-button:active {
+        transform: scale(0.95);
+      }
+      
+      /* AR Session UI */
+      .ar-ui {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        z-index: 50;
+      }
+      
+      #ar-prompt {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 16px 24px;
+        border-radius: 12px;
+        font-size: 16px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 300px;
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 0.8; }
+        50% { opacity: 1; }
+      }
+      
+      /* AR Instructions */
+      .ar-instructions {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: none;
+      }
+      
+      /* Status indicators */
+      .ar-status {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #ff4444;
+        transition: background 0.3s ease;
+      }
+      
+      .ar-status.active {
+        background: #44ff44;
+        box-shadow: 0 0 10px #44ff44;
+      }
+      
+      /* Show AR UI elements when session is active */
+      model-viewer[ar-status="session-started"] #ar-prompt { 
+        display: block; 
+      }
+      
+      model-viewer[ar-status="session-started"] .ar-instructions { 
+        display: block; 
+      }
+      
+      model-viewer[ar-status="session-started"] .ar-status { 
+        background: #44ff44;
+        box-shadow: 0 0 10px #44ff44;
+      }
+      
+      /* Hide regular controls in AR */
+      model-viewer[ar-status="session-started"] .ar-controls {
+        display: none;
+      }
+      
+      /* Exit AR button */
+      .exit-ar {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        padding: 8px 16px;
+        background: rgba(255, 0, 0, 0.8);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 14px;
+        cursor: pointer;
+        display: none;
+        backdrop-filter: blur(10px);
+      }
+      
+      model-viewer[ar-status="session-started"] .exit-ar {
+        display: block;
+      }
+      
+      /* Loading states */
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        z-index: 200;
+      }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top: 3px solid #fff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
       /* Hide slotted content until component upgrades */
       :not(:defined) > * { display: none; }
+      
+      /* Responsive design */
+      @media (max-width: 480px) {
+        #ar-button {
+          font-size: 14px;
+          padding: 10px 20px;
+        }
+        
+        .ar-instructions {
+          font-size: 12px;
+          margin: 10px;
+        }
+      }
     </style>
   </head>
   <body>
-    <!--
-      Notes:
-      1 unit is 1 meter, keep your model centered near 0,0,0 for best placement.
-      iOS can auto-generate USDZ when no ios-src is provided, use Quick Look via ar-modes.
-    -->
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading">
+      <div>
+        <div class="loading-spinner"></div>
+        <div>Loading 3D Model...</div>
+      </div>
+    </div>
+
+    <!-- Main model viewer with WebXR AR support -->
     <model-viewer
       id="viewer"
-      src="rewinder.glb"
-      alt="Rewinder"
+      src="https://rmit-ve-learningexperience.github.io/dmd/3d/rewinder.glb"
+      alt="3D Rewinder Model"
       ar
       ar-modes="webxr scene-viewer quick-look"
       ar-placement="floor"
+      ar-scale="auto"
       camera-controls
       touch-action="pan-y"
       shadow-intensity="1"
+      shadow-softness="0.5"
       exposure="1"
       environment-image="neutral"
       poster=""
       loading="eager"
-      disable-zoom>
+      reveal="auto"
+      auto-rotate
+      auto-rotate-delay="3000"
+      rotation-per-second="30deg">
       
-      <!-- Custom AR button, optional -->
-      <button id="ar-button" slot="ar-button">View in your space</button>
-      <div id="ar-prompt">Move your phone to find a surface</div>
+      <!-- AR Button -->
+      <button id="ar-button" slot="ar-button">
+        📱 View in AR
+      </button>
+      
+      <!-- AR Prompt for surface detection -->
+      <div id="ar-prompt">
+        🎯 Move your device to find a surface, then tap to place
+      </div>
     </model-viewer>
 
+    <!-- AR UI Overlay -->
+    <div class="ar-ui">
+      <!-- Status indicator -->
+      <div class="ar-status" id="ar-status"></div>
+      
+      <!-- Instructions -->
+      <div class="ar-instructions" id="ar-instructions">
+        Move your device slowly to scan for surfaces. Tap when you see the placement indicator.
+      </div>
+      
+      <!-- Exit AR button -->
+      <button class="exit-ar" id="exit-ar" onclick="exitAR()">
+        ✕ Exit AR
+      </button>
+    </div>
+
     <script type="module">
-      // Optional tweaks, keep minimal for a single model
-      const mv = document.getElementById('viewer');
-      // If you want wall placement later, set: mv.setAttribute('ar-placement', 'wall');
-      // If you add a poster image file, set the poster attribute above.
+      const modelViewer = document.getElementById('viewer');
+      const loadingOverlay = document.getElementById('loading');
+      const arStatus = document.getElementById('ar-status');
+      const arInstructions = document.getElementById('ar-instructions');
+      
+      // Hide loading overlay when model is loaded
+      modelViewer.addEventListener('load', () => {
+        loadingOverlay.style.display = 'none';
+      });
+      
+      // Enhanced AR session management
+      modelViewer.addEventListener('ar-status', (event) => {
+        const status = event.detail.status;
+        console.log('AR Status:', status);
+        
+        switch(status) {
+          case 'session-started':
+            console.log('AR session started');
+            arStatus.classList.add('active');
+            updateARInstructions('Scan your environment to find surfaces');
+            break;
+            
+          case 'object-placed':
+            console.log('Object placed in AR');
+            updateARInstructions('Object placed! You can move around to view it from different angles');
+            break;
+            
+          case 'failed':
+            console.log('AR session failed');
+            updateARInstructions('AR failed to start. Please try again.');
+            break;
+            
+          case 'not-presenting':
+            console.log('AR session ended');
+            arStatus.classList.remove('active');
+            break;
+        }
+      });
+      
+      // WebXR support detection
+      if ('xr' in navigator) {
+        navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+          if (supported) {
+            console.log('WebXR AR is supported');
+            updateARButton('📱 View in AR (WebXR)');
+          } else {
+            console.log('WebXR AR not supported, falling back to other AR modes');
+            updateARButton('📱 View in AR');
+          }
+        });
+      } else {
+        console.log('WebXR not available');
+        updateARButton('📱 View in AR');
+      }
+      
+      // Helper functions
+      function updateARInstructions(text) {
+        arInstructions.textContent = text;
+      }
+      
+      function updateARButton(text) {
+        const arButton = document.getElementById('ar-button');
+        arButton.textContent = text;
+      }
+      
+      // Exit AR function
+      window.exitAR = function() {
+        if (modelViewer.canActivateAR) {
+          // Exit AR session
+          modelViewer.activateAR = false;
+        }
+      };
+      
+      // Enhanced error handling
+      modelViewer.addEventListener('error', (event) => {
+        console.error('Model viewer error:', event.detail);
+        loadingOverlay.innerHTML = `
+          <div>
+            <div style="color: #ff4444; margin-bottom: 10px;">⚠️ Error Loading Model</div>
+            <div style="font-size: 14px;">Please check if the model file 'rewinder.glb' exists</div>
+          </div>
+        `;
+      });
+      
+      // Model interaction enhancements
+      modelViewer.addEventListener('camera-change', () => {
+        // Optional: Add camera change handling
+      });
+      
+      // Touch/interaction enhancements for AR
+      modelViewer.addEventListener('ar-tracking', (event) => {
+        const tracking = event.detail.status;
+        if (tracking === 'tracking') {
+          updateARInstructions('Surface detected! Tap to place your object');
+        } else if (tracking === 'not-tracking') {
+          updateARInstructions('Move your device to find a surface');
+        }
+      });
+      
+      // Performance optimization
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js').catch(() => {
+          // Service worker registration failed, but that's okay
+        });
+      }
+      
+      console.log('WebXR AR Viewer initialized');
     </script>
   </body>
 </html>
