@@ -153,6 +153,12 @@
         next.addEventListener('click', () => playIndex(current + 1));
         ctrls.appendChild(next);
       }
+      const dl = document.createElement('button');
+      dl.id = 'downloadTranscriptBtn';
+      dl.textContent = 'Download transcript';
+      dl.className = 'px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-800 disabled:opacity-50';
+      dl.disabled = true; // placeholder until documents are available
+      ctrls.appendChild(dl);
     }
 
     function playIndex(i){
