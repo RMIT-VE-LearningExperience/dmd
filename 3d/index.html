@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AR Viewer, rewinder.glb</title>
+
+    <!-- model-viewer web component -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+
+    <style>
+      html, body { height: 100%; margin: 0; }
+      body { background: #111; color: #fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+      model-viewer { width: 100%; height: 100vh; background: #222; }
+      /* Optional, custom AR button */
+      #ar-button {
+        position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%);
+        padding: 10px 16px; border-radius: 22px; border: 1px solid #dadce0; background: #fff; color: #1a73e8;
+        font-size: 14px; cursor: pointer; white-space: nowrap;
+      }
+      #ar-button:active { background: #e8eaed; }
+      /* Only show the prompt while AR session is active */
+      #ar-prompt { display: none; position: absolute; left: 50%; bottom: 72px; transform: translateX(-50%); font-size: 13px; opacity: .9; }
+      model-viewer[ar-status="session-started"] #ar-prompt { display: block; }
+      /* Hide slotted content until component upgrades */
+      :not(:defined) > * { display: none; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Notes:
+      1 unit is 1 meter, keep your model centered near 0,0,0 for best placement.
+      iOS can auto-generate USDZ when no ios-src is provided, use Quick Look via ar-modes.
+    -->
+    <model-viewer
+      id="viewer"
+      src="rewinder.glb"
+      alt="Rewinder"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      ar-placement="floor"
+      camera-controls
+      touch-action="pan-y"
+      shadow-intensity="1"
+      exposure="1"
+      environment-image="neutral"
+      poster=""
+      loading="eager"
+      disable-zoom>
+      
+      <!-- Custom AR button, optional -->
+      <button id="ar-button" slot="ar-button">View in your space</button>
+      <div id="ar-prompt">Move your phone to find a surface</div>
+    </model-viewer>
+
+    <script type="module">
+      // Optional tweaks, keep minimal for a single model
+      const mv = document.getElementById('viewer');
+      // If you want wall placement later, set: mv.setAttribute('ar-placement', 'wall');
+      // If you add a poster image file, set the poster attribute above.
+    </script>
+  </body>
+</html>
