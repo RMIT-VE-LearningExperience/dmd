@@ -278,125 +278,21 @@
         import { VRButton } from 'three/addons/webxr/VRButton.js';
         import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 
-        // Data
-        const rolesData = {
-  "roles": [
-    {
-      "name": "Building Estimator",
-      "skills": ["Numerical analysis", "Attention to detail", "Problem-solving", "Technical knowledge", "Communication", "Organisation", "Teamwork", "Computer skills"],
-      "education": ["Certificate IV in Building (Construction Estimation)", "Diploma of Building and Construction"],
-      "experience_progression": ["Junior Estimator", "Building Estimator", "Senior Estimator", "Commercial Manager"],
-      "work_style": "Analytical-Formal",
-      "related_roles": ["Contract Administrator", "Quantity Surveyor", "Project Coordinator"]
-    },
-    {
-      "name": "Contract Administrator",
-      "skills": ["Organisation", "Attention to detail", "Knowledge of contracts and law", "Communication", "Negotiation", "Problem-solving"],
-      "education": ["Certificate IV in Building and Construction (Contract Administration)", "Diploma of Construction Management"],
-      "experience_progression": ["Assistant Contract Administrator", "Contract Administrator", "Senior Contract Administrator", "Contract Manager", "Project Manager"],
-      "work_style": "Analytical-Formal",
-      "related_roles": ["Building Estimator", "Quantity Surveyor", "Project Manager"]
-    },
-    {
-      "name": "Quantity Surveyor",
-      "skills": ["Cost planning", "Analytical thinking", "Attention to detail", "Problem-solving", "Financial management", "Negotiation", "Organisation", "IT and digital modelling"],
-      "education": ["Bachelor of Construction Management", "Graduate Diploma of Construction Management"],
-      "experience_progression": ["Graduate Quantity Surveyor", "Quantity Surveyor", "Senior Quantity Surveyor", "Commercial Manager"],
-      "work_style": "Analytical-Formal",
-      "related_roles": ["Building Estimator", "Contract Administrator", "Project Manager"]
-    },
-    {
-      "name": "Project Coordinator",
-      "skills": ["Organisation", "Scheduling", "Communication", "Problem-solving", "Time management", "Documentation", "Attention to detail", "Software proficiency"],
-      "education": ["Certificate IV or Diploma in Project Management or Construction Management"],
-      "experience_progression": ["Project Assistant", "Project Coordinator", "Project Manager"],
-      "work_style": "Organisational-Hybrid",
-      "related_roles": ["Project Manager", "Contract Administrator", "Building Estimator"]
-    },
-    {
-      "name": "Project Manager",
-      "skills": ["Leadership", "Decision-making", "Budget management", "Communication", "Negotiation", "Organisation", "Risk management"],
-      "education": ["Bachelor of Construction Management", "Civil Engineering", "Architecture", "Master of Project Management"],
-      "experience_progression": ["Project Coordinator", "Project Manager", "Senior Project Manager", "Project Director"],
-      "work_style": "Leadership-Formal",
-      "related_roles": ["Project Coordinator", "Quantity Surveyor", "Construction Manager"]
-    },
-    {
-      "name": "Construction Manager",
-      "skills": ["Leadership", "Planning", "Budgeting", "Problem-solving", "Communication", "Time management", "Health & Safety", "Teamwork"],
-      "education": ["Trade Qualification", "Diploma or Bachelor in Construction Management"],
-      "experience_progression": ["Site Supervisor", "Site Manager", "Construction Manager", "Operations Manager", "Director of Construction"],
-      "work_style": "Leadership-HandsOn",
-      "related_roles": ["Project Manager", "Project Engineer", "Health and Safety Officer"]
-    },
-    {
-      "name": "Project Engineer",
-      "skills": ["Engineering principles", "Technical problem-solving", "Coordination", "Documentation", "Communication", "Attention to detail"],
-      "education": ["Bachelor of Civil/Structural/Mechanical Engineering"],
-      "experience_progression": ["Graduate Engineer", "Project Engineer", "Senior Project Engineer", "Engineering Manager"],
-      "work_style": "Technical-Analytical",
-      "related_roles": ["Construction Manager", "Project Manager", "Quantity Surveyor"]
-    },
-    {
-      "name": "Health and Safety Officer",
-      "skills": ["Risk assessment", "Attention to detail", "Communication", "Organisation", "Compliance management", "Training", "Leadership"],
-      "education": ["Certificate IV in Work Health and Safety", "Diploma of WHS"],
-      "experience_progression": ["Assistant Safety Officer", "Health and Safety Officer", "Senior Safety Officer", "Safety Manager"],
-      "work_style": "Compliance-Formal",
-      "related_roles": ["Construction Manager", "Project Manager"]
-    },
-    {
-      "name": "Waterproofer",
-      "skills": ["Attention to detail", "Surface preparation", "Problem-solving", "Teamwork", "Physical fitness", "Tool handling", "Communication"],
-      "education": ["Certificate III in Construction Waterproofing (CPC31420)"],
-      "experience_progression": ["Apprentice Waterproofer", "Qualified Waterproofer", "Supervisor", "Consultant"],
-      "work_style": "HandsOn-Practical",
-      "related_roles": ["Tiler", "Plumber", "Site Supervisor"]
-    },
-    {
-      "name": "Tiler",
-      "skills": ["Precision", "Creativity", "Design sense", "Manual dexterity", "Mathematics", "Surface preparation", "Physical fitness"],
-      "education": ["Certificate III in Wall and Floor Tiling (CPC31320)"],
-      "experience_progression": ["Apprentice Tiler", "Qualified Tiler", "Specialist Tiler", "Site Supervisor", "Business Owner"],
-      "work_style": "HandsOn-Creative",
-      "related_roles": ["Waterproofer", "Plumber", "Estimator"]
-    },
-    {
-      "name": "Plumber",
-      "skills": ["Problem-solving", "Technical knowledge", "Attention to detail", "Physical fitness", "Safety awareness", "Customer service"],
-      "education": ["Certificate III in Plumbing (CPC32420)"],
-      "experience_progression": ["Apprentice Plumber", "Qualified Plumber", "Supervisor", "Contractor"],
-      "work_style": "HandsOn-Practical",
-      "related_roles": ["Waterproofer", "Electrician", "Project Coordinator"]
-    },
-    {
-      "name": "Electrician",
-      "skills": ["Technical knowledge", "Problem-solving", "Attention to detail", "Safety awareness", "Mathematics", "Communication"],
-      "education": ["Certificate III in Electrotechnology (Electrician)", "Apprenticeship 36–48 months"],
-      "experience_progression": ["Electrical Apprentice", "Qualified Electrician", "Senior Electrician", "Project Manager", "Electrical Contractor"],
-      "work_style": "HandsOn-Technical",
-      "related_roles": ["Plumber", "Project Engineer", "Estimator"]
-    },
-    {
-      "name": "Crane Operator",
-      "skills": ["Technical precision", "Safety awareness", "Coordination", "Communication", "Problem-solving", "Focus"],
-      "education": ["Certificate III in Rigging or Crane Operations", "High Risk Work Licence"],
-      "experience_progression": ["Trainee Operator", "Crane Operator", "Senior Operator", "Crane Supervisor"],
-      "work_style": "HandsOn-Structured",
-      "related_roles": ["Heavy Vehicle Operator", "Construction Manager"]
-    },
-    {
-      "name": "Heavy Vehicle Operator",
-      "skills": ["Vehicle operation", "Safety awareness", "Attention to detail", "Teamwork", "Problem-solving", "Physical stamina"],
-      "education": ["Heavy Rigid or Heavy Combination Licence", "On-the-job training"],
-      "experience_progression": ["Trainee Operator", "Heavy Vehicle Operator", "Senior Operator", "Supervisor"],
-      "work_style": "HandsOn-Structured",
-      "related_roles": ["Crane Operator", "Construction Manager"]
-    }
-  ]
-};
-
-        // Work style colors
+        // Fetch data from external JSON
+        let rolesData;
+        
+        fetch('https://rmit-ve-learningexperience.github.io/dmd/wis_demo/wis.json')
+            .then(response => response.json())
+            .then(data => {
+                rolesData = data;
+                initVisualization();
+            })
+            .catch(error => {
+                console.error('Error loading data:', error);
+                alert('Failed to load construction roles data. Please check your internet connection.');
+            });
+        
+        function initVisualization() {
         const workStyleColors = {
             "Analytical-Formal": 0x4169E1,
             "Organisational-Hybrid": 0x20B2AA,
@@ -916,6 +812,7 @@
 
         // Start animation
         animate();
+        } // End of initVisualization
     </script>
 </body>
 </html>
