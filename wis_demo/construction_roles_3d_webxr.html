@@ -479,6 +479,7 @@
             sphere.userData = role;
             sphere.userData.velocity = new THREE.Vector3();
             sphere.userData.radius = radius;
+            sphere.userData.originalColor = workStyleColors[role.work_style] || 0x999999;
             
             scene.add(sphere);
             nodes.push(sphere);
@@ -758,8 +759,10 @@
                 if (activeFilter === style) {
                     activeFilter = null;
                     item.classList.remove('active');
-                    // Reset all nodes
+                    // Reset all nodes to original colors
                     nodes.forEach(node => {
+                        node.material.color.setHex(node.userData.originalColor);
+                        node.material.emissive.setHex(node.userData.originalColor);
                         node.material.opacity = 1;
                         node.material.transparent = false;
                         node.material.emissiveIntensity = 0.3;
@@ -774,9 +777,12 @@
                     activeFilter = style;
                     item.classList.add('active');
                     
-                    // Highlight matching nodes
+                    // Highlight matching nodes, grey out others
                     nodes.forEach(node => {
                         if (node.userData.work_style === style) {
+                            // Highlight - restore original color
+                            node.material.color.setHex(node.userData.originalColor);
+                            node.material.emissive.setHex(node.userData.originalColor);
                             node.material.opacity = 1;
                             node.material.transparent = false;
                             node.material.emissiveIntensity = 0.8;
@@ -785,12 +791,15 @@
                                 node.userData.label.material.opacity = 1;
                             }
                         } else {
-                            node.material.opacity = 0.2;
+                            // Turn grey
+                            node.material.color.setHex(0x8b8b8b);
+                            node.material.emissive.setHex(0x8b8b8b);
+                            node.material.opacity = 0.5;
                             node.material.transparent = true;
                             node.material.emissiveIntensity = 0.1;
                             node.scale.set(1, 1, 1);
                             if (node.userData.label) {
-                                node.userData.label.material.opacity = 0.2;
+                                node.userData.label.material.opacity = 0.3;
                             }
                         }
                     });
