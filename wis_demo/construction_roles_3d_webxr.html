@@ -271,6 +271,12 @@
     <div id="legend">
         <h3>Work Styles</h3>
         <div id="legend-items"></div>
+        <hr style="border: none; border-top: 1px solid #d7e0e3; margin: 15px 0;">
+        <h3 style="font-size: 13px; margin-bottom: 10px;">Connection Types</h3>
+        <div style="font-size: 11px; color: #525252; line-height: 1.6;">
+            <div style="margin: 5px 0;"><span style="color: #659bb0;">●</span> <strong>Blue lines:</strong> Career progression</div>
+            <div style="margin: 5px 0;"><span style="color: #c9a179;">●</span> <strong>Clay lines:</strong> Related roles</div>
+        </div>
     </div>
 
     <div id="tooltip"></div>
@@ -361,22 +367,122 @@
         controls.minDistance = 20;
         controls.maxDistance = 150;
 
-        // Process data
+        // Process data - Create nodes for all levels and related roles
         const nodes = [];
         const nodeMap = new Map();
         const links = [];
+        const allNodesData = [];
+        const nodeConnectionsMap = new Map(); // Track which nodes connect to which
+        
+        // First pass: Create node data for all levels
+        rolesData.roles.forEach(role => {
+            role.levels.forEach((level, levelIndex) => {
+                const nodeData = {
+                    id: level.title,
+                    name: level.title,
+                    parentRole: role.name,
+                    overview: level.summary,
+                    typical_experience: level.typical_experience,
+                    core_skills: role.core_skills,
+                    core_education: role.core_education,
+                    work_style: role.work_style,
+                    level_index: levelIndex,
+                    progresses_to: level.progresses_to || [],
+                    related_roles: level.related_roles || [],
+                    is_level: true
+                };
+                allNodesData.push(nodeData);
+                
+                // Track connections for this node
+                const connections = [...level.progresses_to, ...level.related_roles];
+                nodeConnectionsMap.set(level.title, connections);
+            });
+            
+            // Also add connections from the parent role level
+            if (role.related_roles) {
+                role.related_roles.forEach(relatedName => {
+                    // Find if this related role exists as a level title
+                    const existingNode = allNodesData.find(n => n.id === relatedName);
+                    if (!existingNode) {
+                        // Create a generic node for this related role
+                        const relatedRoleData = rolesData.roles.find(r => r.name === relatedName);
+                        if (relatedRoleData) {
+                            // Add the first level of this related role if not already added
+                            if (relatedRoleData.levels && relatedRoleData.levels.length > 0) {
+                                const firstLevel = relatedRoleData.levels[0];
+                                if (!allNodesData.find(n => n.id === firstLevel.title)) {
+                                    allNodesData.push({
+                                        id: firstLevel.title,
+                                        name: firstLevel.title,
+                                        parentRole: relatedRoleData.name,
+                                        overview: firstLevel.summary,
+                                        typical_experience: firstLevel.typical_experience,
+                                        core_skills: relatedRoleData.core_skills,
+                                        core_education: relatedRoleData.core_education,
+                                        work_style: relatedRoleData.work_style,
+                                        level_index: 0,
+                                        progresses_to: firstLevel.progresses_to || [],
+                                        related_roles: firstLevel.related_roles || [],
+                                        is_level: true
+                                    });
+                                }
+                            }
+                        } else {
+                            // Create a placeholder node for unknown related roles
+                            allNodesData.push({
+                                id: relatedName,
+                                name: relatedName,
+                                parentRole: "Unknown",
+                                overview: "Related role",
+                                typical_experience: "N/A",
+                                core_skills: [],
+                                core_education: [],
+                                work_style: "Unknown",
+                                level_index: 0,
+                                progresses_to: [],
+                                related_roles: [],
+                                is_level: false,
+                                is_placeholder: true
+                            });
+                        }
+                    }
+                });
+            }
+        });
+        
+        // Calculate connections for node sizing
+        const connectionCount = {};
+        allNodesData.forEach(nodeData => {
+            connectionCount[nodeData.id] = 0;
+        });
+        
+        // Count connections
+        allNodesData.forEach(nodeData => {
+            nodeData.progresses_to.forEach(target => {
+                connectionCount[nodeData.id] = (connectionCount[nodeData.id] || 0) + 1;
+                connectionCount[target] = (connectionCount[target] || 0) + 1;
+            });
+            nodeData.related_roles.forEach(target => {
+                connectionCount[nodeData.id] = (connectionCount[nodeData.id] || 0) + 1;
+                connectionCount[target] = (connectionCount[target] || 0) + 1;
+            });
+        });
 
         // Create nodes
-        rolesData.roles.forEach((role, index) => {
-            const connectionCount = role.related_roles.length;
-            const radius = 1 + connectionCount * 0.3;
+        allNodesData.forEach((nodeData, index) => {
+            const connections = connectionCount[nodeData.id] || 1;
+            const radius = 0.8 + connections * 0.2;
+            
+            const color = workStyleColors[nodeData.work_style] || 0x999999;
             
             const geometry = new THREE.SphereGeometry(radius, 32, 32);
             const material = new THREE.MeshPhongMaterial({
-                color: workStyleColors[role.work_style] || 0x999999,
-                emissive: workStyleColors[role.work_style] || 0x999999,
-                emissiveIntensity: 0.3,
-                shininess: 100
+                color: color,
+                emissive: color,
+                emissiveIntensity: nodeData.is_placeholder ? 0.2 : 0.3,
+                shininess: 100,
+                transparent: nodeData.is_placeholder,
+                opacity: nodeData.is_placeholder ? 0.6 : 1
             });
             
             const sphere = new THREE.Mesh(geometry, material);
@@ -384,28 +490,22 @@
             // Position nodes in a sphere initially
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos(2 * Math.random() - 1);
-            const r = 40;
+            const r = 50;
             
             sphere.position.x = r * Math.sin(phi) * Math.cos(theta);
             sphere.position.y = r * Math.sin(phi) * Math.sin(theta);
             sphere.position.z = r * Math.cos(phi);
             
             sphere.userData = {
-                name: role.name,
-                overview: role.overview,
-                core_skills: role.core_skills,
-                core_education: role.core_education,
-                work_style: role.work_style,
-                levels: role.levels,
-                related_roles: role.related_roles,
+                ...nodeData,
                 velocity: new THREE.Vector3(),
                 radius: radius,
-                originalColor: workStyleColors[role.work_style] || 0x999999
+                originalColor: color
             };
             
             scene.add(sphere);
             nodes.push(sphere);
-            nodeMap.set(role.name, sphere);
+            nodeMap.set(nodeData.id, sphere);
 
             // Add text label
             const canvas = document.createElement('canvas');
@@ -416,16 +516,16 @@
             context.fillStyle = 'rgba(237, 237, 237, 0.9)';
             context.fillRect(0, 0, canvas.width, canvas.height);
             
-            context.font = 'Bold 40px Arial';
+            context.font = 'Bold 32px Arial';
             context.fillStyle = '#525252';
             context.textAlign = 'center';
             context.textBaseline = 'middle';
-            context.fillText(role.name, canvas.width / 2, canvas.height / 2);
+            context.fillText(nodeData.name, canvas.width / 2, canvas.height / 2);
             
             const texture = new THREE.CanvasTexture(canvas);
             const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
             const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.scale.set(10, 2.5, 1);
+            sprite.scale.set(12, 3, 1);
             sprite.position.copy(sphere.position);
             sprite.position.y += radius + 2;
             
@@ -433,25 +533,49 @@
             sphere.userData.label = sprite;
         });
 
-        // Create links
-        const lineMaterial = new THREE.LineBasicMaterial({ 
+        // Create links based on career progression and related roles
+        const lineMaterialProgression = new THREE.LineBasicMaterial({ 
             color: 0x659bb0, 
+            opacity: 0.6, 
+            transparent: true,
+            linewidth: 2
+        });
+        
+        const lineMaterialRelated = new THREE.LineBasicMaterial({ 
+            color: 0xc9a179, 
             opacity: 0.3, 
             transparent: true 
         });
 
-        rolesData.roles.forEach(role => {
-            const sourceNode = nodeMap.get(role.name);
-            role.related_roles.forEach(relatedName => {
-                const targetNode = nodeMap.get(relatedName);
-                if (sourceNode && targetNode) {
+        allNodesData.forEach(nodeData => {
+            const sourceNode = nodeMap.get(nodeData.id);
+            if (!sourceNode) return;
+            
+            // Create progression links (career advancement)
+            nodeData.progresses_to.forEach(targetId => {
+                const targetNode = nodeMap.get(targetId);
+                if (targetNode) {
                     const geometry = new THREE.BufferGeometry().setFromPoints([
                         sourceNode.position,
                         targetNode.position
                     ]);
-                    const line = new THREE.Line(geometry, lineMaterial);
+                    const line = new THREE.Line(geometry, lineMaterialProgression);
                     scene.add(line);
-                    links.push({ line, source: sourceNode, target: targetNode });
+                    links.push({ line, source: sourceNode, target: targetNode, type: 'progression' });
+                }
+            });
+            
+            // Create related role links
+            nodeData.related_roles.forEach(targetId => {
+                const targetNode = nodeMap.get(targetId);
+                if (targetNode) {
+                    const geometry = new THREE.BufferGeometry().setFromPoints([
+                        sourceNode.position,
+                        targetNode.position
+                    ]);
+                    const line = new THREE.Line(geometry, lineMaterialRelated);
+                    scene.add(line);
+                    links.push({ line, source: sourceNode, target: targetNode, type: 'related' });
                 }
             });
         });
@@ -549,30 +673,37 @@
 
                     // Show tooltip
                     const data = node.userData;
-                    const levelTitles = data.levels ? data.levels.map(l => l.title).join(' → ') : 'N/A';
                     
                     tooltip.innerHTML = `
                         <h3>${data.name}</h3>
+                        <div class="section">
+                            <strong>Parent Role:</strong>
+                            <p>${data.parentRole}</p>
+                        </div>
                         <div class="section">
                             <strong>Overview:</strong>
                             <p>${data.overview || 'N/A'}</p>
                         </div>
                         <div class="section">
+                            <strong>Typical Experience:</strong>
+                            <p>${data.typical_experience || 'N/A'}</p>
+                        </div>
+                        <div class="section">
                             <strong>Work Style:</strong>
                             <p>${data.work_style}</p>
                         </div>
+                        ${data.progresses_to && data.progresses_to.length > 0 ? `
+                        <div class="section">
+                            <strong>Progresses To:</strong>
+                            <p>${data.progresses_to.join(', ')}</p>
+                        </div>
+                        ` : ''}
+                        ${data.core_skills && data.core_skills.length > 0 ? `
                         <div class="section">
                             <strong>Key Skills:</strong>
-                            <ul>${data.core_skills.slice(0, 5).map(s => `<li>${s}</li>`).join('')}</ul>
+                            <ul>${data.core_skills.slice(0, 4).map(s => `<li>${s}</li>`).join('')}</ul>
                         </div>
-                        <div class="section">
-                            <strong>Education:</strong>
-                            <ul>${data.core_education.map(e => `<li>${e}</li>`).join('')}</ul>
-                        </div>
-                        <div class="section">
-                            <strong>Career Levels:</strong>
-                            <p>${levelTitles}</p>
-                        </div>
+                        ` : ''}
                     `;
                     tooltip.style.left = event.clientX + 15 + 'px';
                     tooltip.style.top = event.clientY + 15 + 'px';
@@ -738,18 +869,36 @@
         });
 
         // Flow diagram functions
-        function showFlowDiagram(roleData) {
+        function showFlowDiagram(levelData) {
             const flowContent = document.getElementById('flowContent');
             const flowDiagram = document.getElementById('flowDiagram');
-            const color = '#' + workStyleColors[roleData.work_style].toString(16).padStart(6, '0');
+            const color = '#' + workStyleColors[levelData.work_style].toString(16).padStart(6, '0');
             
-            // Build career progression from levels
-            const careerLevelsHTML = roleData.levels.map((level, index) => {
+            // Find the parent role to get full career path
+            const parentRole = rolesData.roles.find(r => r.name === levelData.parentRole);
+            
+            if (!parentRole) {
+                flowContent.innerHTML = `
+                    <h2>${levelData.name}</h2>
+                    <div class="flow-container">
+                        <div style="background: white; padding: 20px; border-radius: 12px;">
+                            <p>${levelData.overview}</p>
+                        </div>
+                    </div>
+                `;
+                flowDiagram.classList.add('visible');
+                return;
+            }
+            
+            // Build career progression from parent role levels
+            const careerLevelsHTML = parentRole.levels.map((level, index) => {
+                const isCurrent = level.title === levelData.name;
                 return `
                     <div>
                         ${index > 0 ? '<div class="arrow">↓</div>' : ''}
-                        <div class="flow-node" style="border-color: ${color}">
+                        <div class="flow-node ${isCurrent ? 'center' : ''}" style="border-color: ${color}">
                             <h4>${level.title}</h4>
+                            ${isCurrent ? '<p style="color: #7ea67e; font-weight: bold;">← You are here</p>' : ''}
                             <p>${level.summary}</p>
                             <p style="font-size: 11px; color: #659bb0; margin-top: 8px;">${level.typical_experience}</p>
                         </div>
@@ -757,54 +906,75 @@
                 `;
             }).join('');
             
-            // Get all unique related roles from all levels
-            const allRelatedRoles = new Set();
-            roleData.levels.forEach(level => {
-                level.related_roles.forEach(role => allRelatedRoles.add(role));
-            });
-            roleData.related_roles.forEach(role => allRelatedRoles.add(role));
-            
-            // Build related roles section
-            const relatedRolesHTML = Array.from(allRelatedRoles).slice(0, 6).map(relatedName => {
-                const relatedRole = rolesData.roles.find(r => r.name === relatedName);
-                if (relatedRole) {
-                    const relatedColor = '#' + workStyleColors[relatedRole.work_style].toString(16).padStart(6, '0');
+            // Get related roles from current level
+            const relatedRolesHTML = levelData.related_roles && levelData.related_roles.length > 0 ? 
+                levelData.related_roles.slice(0, 6).map(relatedName => {
+                    // Try to find the node data
+                    const relatedNode = allNodesData.find(n => n.id === relatedName || n.name === relatedName);
+                    if (relatedNode) {
+                        const relatedColor = '#' + workStyleColors[relatedNode.work_style].toString(16).padStart(6, '0');
+                        return `
+                            <div class="flow-node" style="border-color: ${relatedColor}">
+                                <h4>${relatedName}</h4>
+                                <p><strong>Work Style:</strong> ${relatedNode.work_style}</p>
+                                ${relatedNode.overview ? `<p>${relatedNode.overview.substring(0, 100)}...</p>` : ''}
+                            </div>
+                        `;
+                    }
                     return `
-                        <div class="flow-node" style="border-color: ${relatedColor}">
+                        <div class="flow-node" style="border-color: #8b8b8b">
                             <h4>${relatedName}</h4>
-                            <p><strong>Work Style:</strong> ${relatedRole.work_style}</p>
-                            <p><strong>Key Skills:</strong> ${relatedRole.core_skills.slice(0, 3).join(', ')}</p>
                         </div>
                     `;
-                }
-                return `
-                    <div class="flow-node" style="border-color: #8b8b8b">
-                        <h4>${relatedName}</h4>
-                    </div>
-                `;
-            }).join('');
+                }).join('') : '';
+            
+            // Get progression paths from current level
+            const progressionHTML = levelData.progresses_to && levelData.progresses_to.length > 0 ?
+                levelData.progresses_to.map(nextTitle => {
+                    const nextNode = allNodesData.find(n => n.id === nextTitle);
+                    if (nextNode) {
+                        const nextColor = '#' + workStyleColors[nextNode.work_style].toString(16).padStart(6, '0');
+                        return `
+                            <div class="flow-node" style="border-color: ${nextColor}">
+                                <h4>${nextTitle}</h4>
+                                <p>${nextNode.overview}</p>
+                            </div>
+                        `;
+                    }
+                    return '';
+                }).join('') : '';
             
             flowContent.innerHTML = `
-                <h2>${roleData.name} - Career Pathway</h2>
+                <h2>${parentRole.name} - Career Pathway</h2>
+                <p style="text-align: center; color: #659bb0; font-size: 14px; margin-bottom: 20px;">Currently viewing: <strong>${levelData.name}</strong></p>
                 
                 <div class="flow-container">
                     <div class="flow-section">
-                        <div class="flow-label">Overview</div>
+                        <div class="flow-label">About ${parentRole.name}</div>
                         <div style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                            <p style="color: #525252; line-height: 1.6;">${roleData.overview}</p>
+                            <p style="color: #525252; line-height: 1.6;">${parentRole.overview}</p>
                         </div>
                     </div>
                     
                     <div class="flow-section">
-                        <div class="flow-label">Career Progression Levels</div>
+                        <div class="flow-label">Complete Career Progression Path</div>
                         <div style="display: flex; flex-direction: column; align-items: center;">
                             ${careerLevelsHTML}
                         </div>
                     </div>
                     
+                    ${progressionHTML ? `
+                    <div class="flow-section" style="margin-top: 40px;">
+                        <div class="flow-label">Next Steps from ${levelData.name}</div>
+                        <div class="flow-row">
+                            ${progressionHTML}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
                     ${relatedRolesHTML ? `
                     <div class="flow-section" style="margin-top: 40px;">
-                        <div class="flow-label">Related Roles & Career Transitions</div>
+                        <div class="flow-label">Related Roles at This Level</div>
                         <div class="flow-row">
                             ${relatedRolesHTML}
                         </div>
@@ -812,23 +982,23 @@
                     ` : ''}
                     
                     <div class="flow-section" style="margin-top: 40px;">
-                        <div class="flow-label">Core Requirements</div>
+                        <div class="flow-label">Core Requirements for ${parentRole.name}</div>
                         <div class="flow-row">
                             <div class="flow-node" style="border-color: #659bb0">
                                 <h4>Core Skills</h4>
                                 <ul style="text-align: left;">
-                                    ${roleData.core_skills.map(skill => `<li>${skill}</li>`).join('')}
+                                    ${parentRole.core_skills.map(skill => `<li>${skill}</li>`).join('')}
                                 </ul>
                             </div>
                             <div class="flow-node" style="border-color: #c9a179">
                                 <h4>Core Education</h4>
                                 <ul style="text-align: left;">
-                                    ${roleData.core_education.map(edu => `<li>${edu}</li>`).join('')}
+                                    ${parentRole.core_education.map(edu => `<li>${edu}</li>`).join('')}
                                 </ul>
                             </div>
                             <div class="flow-node" style="border-color: #7ea67e">
                                 <h4>Work Style</h4>
-                                <p style="font-size: 16px; font-weight: bold; color: #525252; margin: 10px 0;">${roleData.work_style}</p>
+                                <p style="font-size: 16px; font-weight: bold; color: #525252; margin: 10px 0;">${parentRole.work_style}</p>
                                 <p style="font-size: 12px;">This determines your daily work environment and approach.</p>
                             </div>
                         </div>
