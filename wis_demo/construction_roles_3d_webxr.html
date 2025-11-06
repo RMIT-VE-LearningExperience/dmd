@@ -217,6 +217,19 @@
             font-size: 12px;
             color: #525252;
             margin: 4px 0;
+            line-height: 1.4;
+        }
+        
+        .flow-node ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .flow-node li {
+            font-size: 12px;
+            color: #525252;
+            margin: 4px 0;
+            line-height: 1.4;
         }
 
         .flow-container {
@@ -224,6 +237,10 @@
             flex-direction: column;
             align-items: center;
             gap: 30px;
+        }
+        
+        .flow-section {
+            width: 100%;
         }
 
         .flow-row {
@@ -246,6 +263,7 @@
             font-size: 24px;
             color: #659bb0;
             margin: 10px 0;
+            text-align: center;
         }
     </style>
 </head>
@@ -372,10 +390,18 @@
             sphere.position.y = r * Math.sin(phi) * Math.sin(theta);
             sphere.position.z = r * Math.cos(phi);
             
-            sphere.userData = role;
-            sphere.userData.velocity = new THREE.Vector3();
-            sphere.userData.radius = radius;
-            sphere.userData.originalColor = workStyleColors[role.work_style] || 0x999999;
+            sphere.userData = {
+                name: role.name,
+                overview: role.overview,
+                core_skills: role.core_skills,
+                core_education: role.core_education,
+                work_style: role.work_style,
+                levels: role.levels,
+                related_roles: role.related_roles,
+                velocity: new THREE.Vector3(),
+                radius: radius,
+                originalColor: workStyleColors[role.work_style] || 0x999999
+            };
             
             scene.add(sphere);
             nodes.push(sphere);
@@ -523,21 +549,29 @@
 
                     // Show tooltip
                     const data = node.userData;
+                    const levelTitles = data.levels ? data.levels.map(l => l.title).join(' → ') : 'N/A';
+                    
                     tooltip.innerHTML = `
                         <h3>${data.name}</h3>
                         <div class="section">
-                            <strong>Work Style:</strong> ${data.work_style}
+                            <strong>Overview:</strong>
+                            <p>${data.overview || 'N/A'}</p>
+                        </div>
+                        <div class="section">
+                            <strong>Work Style:</strong>
+                            <p>${data.work_style}</p>
                         </div>
                         <div class="section">
                             <strong>Key Skills:</strong>
-                            <ul>${data.skills.slice(0, 4).map(s => `<li>${s}</li>`).join('')}</ul>
+                            <ul>${data.core_skills.slice(0, 5).map(s => `<li>${s}</li>`).join('')}</ul>
                         </div>
                         <div class="section">
                             <strong>Education:</strong>
-                            <ul>${data.education.map(e => `<li>${e}</li>`).join('')}</ul>
+                            <ul>${data.core_education.map(e => `<li>${e}</li>`).join('')}</ul>
                         </div>
                         <div class="section">
-                            <strong>Progression:</strong> ${data.experience_progression.join(' → ')}
+                            <strong>Career Levels:</strong>
+                            <p>${levelTitles}</p>
                         </div>
                     `;
                     tooltip.style.left = event.clientX + 15 + 'px';
@@ -707,66 +741,95 @@
         function showFlowDiagram(roleData) {
             const flowContent = document.getElementById('flowContent');
             const flowDiagram = document.getElementById('flowDiagram');
+            const color = '#' + workStyleColors[roleData.work_style].toString(16).padStart(6, '0');
+            
+            // Build career progression from levels
+            const careerLevelsHTML = roleData.levels.map((level, index) => {
+                return `
+                    <div>
+                        ${index > 0 ? '<div class="arrow">↓</div>' : ''}
+                        <div class="flow-node" style="border-color: ${color}">
+                            <h4>${level.title}</h4>
+                            <p>${level.summary}</p>
+                            <p style="font-size: 11px; color: #659bb0; margin-top: 8px;">${level.typical_experience}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Get all unique related roles from all levels
+            const allRelatedRoles = new Set();
+            roleData.levels.forEach(level => {
+                level.related_roles.forEach(role => allRelatedRoles.add(role));
+            });
+            roleData.related_roles.forEach(role => allRelatedRoles.add(role));
+            
+            // Build related roles section
+            const relatedRolesHTML = Array.from(allRelatedRoles).slice(0, 6).map(relatedName => {
+                const relatedRole = rolesData.roles.find(r => r.name === relatedName);
+                if (relatedRole) {
+                    const relatedColor = '#' + workStyleColors[relatedRole.work_style].toString(16).padStart(6, '0');
+                    return `
+                        <div class="flow-node" style="border-color: ${relatedColor}">
+                            <h4>${relatedName}</h4>
+                            <p><strong>Work Style:</strong> ${relatedRole.work_style}</p>
+                            <p><strong>Key Skills:</strong> ${relatedRole.core_skills.slice(0, 3).join(', ')}</p>
+                        </div>
+                    `;
+                }
+                return `
+                    <div class="flow-node" style="border-color: #8b8b8b">
+                        <h4>${relatedName}</h4>
+                    </div>
+                `;
+            }).join('');
             
             flowContent.innerHTML = `
                 <h2>${roleData.name} - Career Pathway</h2>
+                
                 <div class="flow-container">
                     <div class="flow-section">
-                        <div class="flow-label">Career Progression</div>
-                        <div class="flow-row">
-                            ${roleData.experience_progression.map((stage, index) => {
-                                const isCenter = stage === roleData.name;
-                                const color = '#' + workStyleColors[roleData.work_style].toString(16).padStart(6, '0');
-                                return `
-                                    <div>
-                                        ${index > 0 ? '<div class="arrow">→</div>' : ''}
-                                        <div class="flow-node ${isCenter ? 'center' : ''}" style="border-color: ${color}">
-                                            <h4>${stage}</h4>
-                                            ${isCenter ? '<p><strong>Current Role</strong></p>' : ''}
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
+                        <div class="flow-label">Overview</div>
+                        <div style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <p style="color: #525252; line-height: 1.6;">${roleData.overview}</p>
                         </div>
                     </div>
                     
+                    <div class="flow-section">
+                        <div class="flow-label">Career Progression Levels</div>
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            ${careerLevelsHTML}
+                        </div>
+                    </div>
+                    
+                    ${relatedRolesHTML ? `
                     <div class="flow-section" style="margin-top: 40px;">
                         <div class="flow-label">Related Roles & Career Transitions</div>
                         <div class="flow-row">
-                            ${roleData.related_roles.map(relatedName => {
-                                const relatedRole = rolesData.roles.find(r => r.name === relatedName);
-                                if (!relatedRole) return '';
-                                const color = '#' + workStyleColors[relatedRole.work_style].toString(16).padStart(6, '0');
-                                return `
-                                    <div class="flow-node" style="border-color: ${color}">
-                                        <h4>${relatedName}</h4>
-                                        <p><strong>Work Style:</strong> ${relatedRole.work_style}</p>
-                                        <p><strong>Key Skills:</strong> ${relatedRole.skills.slice(0, 3).join(', ')}</p>
-                                    </div>
-                                `;
-                            }).join('')}
+                            ${relatedRolesHTML}
                         </div>
                     </div>
+                    ` : ''}
                     
                     <div class="flow-section" style="margin-top: 40px;">
-                        <div class="flow-label">Key Information</div>
+                        <div class="flow-label">Core Requirements</div>
                         <div class="flow-row">
                             <div class="flow-node" style="border-color: #659bb0">
-                                <h4>Required Skills</h4>
-                                <ul>
-                                    ${roleData.skills.map(skill => `<li>${skill}</li>`).join('')}
+                                <h4>Core Skills</h4>
+                                <ul style="text-align: left;">
+                                    ${roleData.core_skills.map(skill => `<li>${skill}</li>`).join('')}
                                 </ul>
                             </div>
                             <div class="flow-node" style="border-color: #c9a179">
-                                <h4>Education Requirements</h4>
-                                <ul>
-                                    ${roleData.education.map(edu => `<li>${edu}</li>`).join('')}
+                                <h4>Core Education</h4>
+                                <ul style="text-align: left;">
+                                    ${roleData.core_education.map(edu => `<li>${edu}</li>`).join('')}
                                 </ul>
                             </div>
                             <div class="flow-node" style="border-color: #7ea67e">
                                 <h4>Work Style</h4>
-                                <p><strong>${roleData.work_style}</strong></p>
-                                <p>This determines your daily work environment and approach.</p>
+                                <p style="font-size: 16px; font-weight: bold; color: #525252; margin: 10px 0;">${roleData.work_style}</p>
+                                <p style="font-size: 12px;">This determines your daily work environment and approach.</p>
                             </div>
                         </div>
                     </div>
