@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Construction Roles Pathway Map - 3D WebXR</title>
+    <title>Construction Roles Pathway Map - 3D Interactive</title>
     <style>
         * {
             margin: 0;
@@ -14,7 +14,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
-            background: #000;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
         }
 
         #info {
@@ -22,13 +22,14 @@
             top: 20px;
             left: 20px;
             color: white;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             padding: 20px;
             border-radius: 10px;
             max-width: 350px;
             font-size: 14px;
             z-index: 100;
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(79, 195, 247, 0.3);
         }
 
         #info h1 {
@@ -42,45 +43,16 @@
             line-height: 1.5;
         }
 
-        #vrButton {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 30px;
-            font-size: 16px;
-            font-weight: bold;
-            color: white;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s;
-        }
-
-        #vrButton:hover {
-            transform: translateX(-50%) scale(1.05);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        #vrButton:disabled {
-            background: #666;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
         #tooltip {
             position: absolute;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             color: white;
             padding: 15px;
             border-radius: 8px;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.3s;
-            max-width: 300px;
+            max-width: 350px;
             font-size: 12px;
             z-index: 1000;
             border: 2px solid #4FC3F7;
@@ -93,15 +65,19 @@
         #tooltip h3 {
             margin: 0 0 10px 0;
             color: #4FC3F7;
-            font-size: 14px;
+            font-size: 16px;
+            border-bottom: 1px solid #4FC3F7;
+            padding-bottom: 5px;
         }
 
         #tooltip .section {
-            margin: 8px 0;
+            margin: 10px 0;
         }
 
         #tooltip strong {
             color: #81D4FA;
+            display: block;
+            margin-bottom: 5px;
         }
 
         #tooltip ul {
@@ -111,6 +87,11 @@
 
         #tooltip li {
             margin: 3px 0;
+            line-height: 1.4;
+        }
+
+        #tooltip p {
+            line-height: 1.4;
         }
 
         .controls {
@@ -118,12 +99,13 @@
             top: 20px;
             right: 20px;
             color: white;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             padding: 15px;
             border-radius: 10px;
             font-size: 12px;
             z-index: 100;
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(79, 195, 247, 0.3);
         }
 
         .controls h3 {
@@ -137,12 +119,29 @@
             line-height: 1.4;
         }
 
+        .controls button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin: 5px 0;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .controls button:hover {
+            transform: scale(1.05);
+        }
+
         #legend {
             position: absolute;
             bottom: 20px;
             right: 20px;
             color: white;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             padding: 15px;
             border-radius: 10px;
             max-height: 400px;
@@ -150,6 +149,7 @@
             font-size: 11px;
             z-index: 100;
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(79, 195, 247, 0.3);
         }
 
         #legend h3 {
@@ -171,22 +171,35 @@
             margin-right: 8px;
             border: 1px solid white;
         }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
+    <div id="loading">Loading 3D Visualization...</div>
+    
     <div id="info">
-        <h1>🏗️ Construction Roles 3D WebXR</h1>
-        <p><strong>Desktop:</strong> Click and drag to rotate • Scroll to zoom • Hover for details</p>
-        <p><strong>VR Mode:</strong> Point controllers at nodes • Trigger to select</p>
-        <p>Node size = connectivity • Node color = work style</p>
+        <h1>🏗️ Construction Roles 3D Map</h1>
+        <p><strong>🖱️ Left Drag:</strong> Rotate view</p>
+        <p><strong>🖱️ Right Drag:</strong> Pan camera</p>
+        <p><strong>🎡 Scroll:</strong> Zoom in/out</p>
+        <p><strong>👆 Hover:</strong> View role details</p>
+        <p><strong>💫 Double-click:</strong> Reset view</p>
     </div>
 
     <div class="controls">
-        <h3>Controls</h3>
-        <p>🖱️ <strong>Left Click:</strong> Rotate view</p>
-        <p>🖱️ <strong>Right Click:</strong> Pan</p>
-        <p>🎡 <strong>Scroll:</strong> Zoom in/out</p>
-        <p>👆 <strong>Hover:</strong> Show info</p>
+        <h3>View Controls</h3>
+        <button onclick="resetCamera()">Reset Camera</button>
+        <button onclick="toggleRotation()">Auto-Rotate: ON</button>
+        <button onclick="togglePhysics()">Physics: ON</button>
     </div>
 
     <div id="legend">
@@ -194,15 +207,10 @@
         <div id="legend-items"></div>
     </div>
 
-    <button id="vrButton">ENTER VR</button>
     <div id="tooltip"></div>
 
-    <script type="module">
-        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
-        import { VRButton } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/webxr/VRButton.js';
-        import { XRControllerModelFactory } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/webxr/XRControllerModelFactory.js';
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
         // Data
         const rolesData = {
   "roles": [
@@ -223,7 +231,7 @@
       "related_roles": ["Building Estimator", "Quantity Surveyor", "Project Manager"]
     },
     {
-      "name": "Quantit Surveyor",
+      "name": "Quantity Surveyor",
       "skills": ["Cost planning", "Analytical thinking", "Attention to detail", "Problem-solving", "Financial management", "Negotiation", "Organisation", "IT and digital modelling"],
       "education": ["Bachelor of Construction Management", "Graduate Diploma of Construction Management"],
       "experience_progression": ["Graduate Quantity Surveyor", "Quantity Surveyor", "Senior Quantity Surveyor", "Commercial Manager"],
@@ -346,12 +354,12 @@
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.xr.enabled = true;
         document.body.appendChild(renderer.domElement);
 
-        // Add VR button
-        const vrButton = VRButton.createButton(renderer);
-        document.getElementById('vrButton').replaceWith(vrButton);
+        // Hide loading message
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+        }, 1000);
 
         // Lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -369,12 +377,49 @@
         pointLight2.position.set(-30, -30, -30);
         scene.add(pointLight2);
 
-        // Controls
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.minDistance = 20;
-        controls.maxDistance = 150;
+        // OrbitControls (manual implementation)
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let autoRotate = true;
+        let physicsEnabled = true;
+
+        renderer.domElement.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+
+        renderer.domElement.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+
+                if (e.button === 0 || e.buttons === 1) { // Left button
+                    camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), deltaX * 0.005);
+                    const axis = new THREE.Vector3(1, 0, 0);
+                    axis.applyQuaternion(camera.quaternion);
+                    camera.position.applyAxisAngle(axis, deltaY * 0.005);
+                }
+
+                camera.lookAt(scene.position);
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        renderer.domElement.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        renderer.domElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomSpeed = 0.1;
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+            camera.position.addScaledVector(direction, -e.deltaY * zoomSpeed);
+        });
+
+        renderer.domElement.addEventListener('dblclick', () => {
+            resetCamera();
+        });
 
         // Process data
         const nodes = [];
@@ -405,15 +450,18 @@
             sphere.position.y = r * Math.sin(phi) * Math.sin(theta);
             sphere.position.z = r * Math.cos(phi);
             
-            sphere.userData = role;
-            sphere.userData.velocity = new THREE.Vector3();
-            sphere.userData.radius = radius;
+            sphere.userData = {
+                ...role,
+                velocity: new THREE.Vector3(),
+                radius: radius,
+                originalColor: workStyleColors[role.work_style] || 0x999999
+            };
             
             scene.add(sphere);
             nodes.push(sphere);
             nodeMap.set(role.name, sphere);
 
-            // Add text label
+            // Add text label using canvas
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.width = 512;
@@ -428,7 +476,9 @@
             context.textBaseline = 'middle';
             context.fillText(role.name, canvas.width / 2, canvas.height / 2);
             
-            const texture = new THREE.CanvasTexture(canvas);
+            const texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
+            
             const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
             const sprite = new THREE.Sprite(spriteMaterial);
             sprite.scale.set(10, 2.5, 1);
@@ -451,10 +501,9 @@
             role.related_roles.forEach(relatedName => {
                 const targetNode = nodeMap.get(relatedName);
                 if (sourceNode && targetNode) {
-                    const geometry = new THREE.BufferGeometry().setFromPoints([
-                        sourceNode.position,
-                        targetNode.position
-                    ]);
+                    const geometry = new THREE.Geometry();
+                    geometry.vertices.push(sourceNode.position.clone());
+                    geometry.vertices.push(targetNode.position.clone());
                     const line = new THREE.Line(geometry, lineMaterial);
                     scene.add(line);
                     links.push({ line, source: sourceNode, target: targetNode });
@@ -462,8 +511,10 @@
             });
         });
 
-        // Physics simulation (simplified force-directed)
+        // Physics simulation
         function updatePhysics() {
+            if (!physicsEnabled) return;
+            
             const attractionStrength = 0.001;
             const repulsionStrength = 5;
             const damping = 0.9;
@@ -500,7 +551,7 @@
                 }
             });
 
-            // Update links based on connected nodes' attraction
+            // Update links based on connected nodes
             links.forEach(({ source, target }) => {
                 const diff = new THREE.Vector3().subVectors(target.position, source.position);
                 const distance = diff.length();
@@ -516,14 +567,9 @@
 
             // Update line geometries
             links.forEach(({ line, source, target }) => {
-                const positions = line.geometry.attributes.position.array;
-                positions[0] = source.position.x;
-                positions[1] = source.position.y;
-                positions[2] = source.position.z;
-                positions[3] = target.position.x;
-                positions[4] = target.position.y;
-                positions[5] = target.position.z;
-                line.geometry.attributes.position.needsUpdate = true;
+                line.geometry.vertices[0].copy(source.position);
+                line.geometry.vertices[1].copy(target.position);
+                line.geometry.verticesNeedUpdate = true;
             });
         }
 
@@ -534,6 +580,8 @@
         let hoveredNode = null;
 
         function onMouseMove(event) {
+            if (isDragging) return;
+
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -558,18 +606,24 @@
                     tooltip.innerHTML = `
                         <h3>${data.name}</h3>
                         <div class="section">
-                            <strong>Work Style:</strong> ${data.work_style}
+                            <strong>Work Style:</strong>
+                            <p>${data.work_style}</p>
                         </div>
                         <div class="section">
                             <strong>Key Skills:</strong>
-                            <ul>${data.skills.slice(0, 4).map(s => `<li>${s}</li>`).join('')}</ul>
+                            <ul>${data.skills.slice(0, 5).map(s => `<li>${s}</li>`).join('')}</ul>
                         </div>
                         <div class="section">
                             <strong>Education:</strong>
                             <ul>${data.education.map(e => `<li>${e}</li>`).join('')}</ul>
                         </div>
                         <div class="section">
-                            <strong>Progression:</strong> ${data.experience_progression.join(' → ')}
+                            <strong>Career Progression:</strong>
+                            <p>${data.experience_progression.join(' → ')}</p>
+                        </div>
+                        <div class="section">
+                            <strong>Related Roles:</strong>
+                            <p>${data.related_roles.join(', ')}</p>
                         </div>
                     `;
                     tooltip.style.left = event.clientX + 15 + 'px';
@@ -587,62 +641,6 @@
         }
 
         window.addEventListener('mousemove', onMouseMove);
-
-        // VR Controllers
-        const controllerModelFactory = new XRControllerModelFactory();
-
-        const controller1 = renderer.xr.getController(0);
-        controller1.addEventListener('selectstart', onSelectStart);
-        controller1.addEventListener('selectend', onSelectEnd);
-        scene.add(controller1);
-
-        const controller2 = renderer.xr.getController(1);
-        controller2.addEventListener('selectstart', onSelectStart);
-        controller2.addEventListener('selectend', onSelectEnd);
-        scene.add(controller2);
-
-        const controllerGrip1 = renderer.xr.getControllerGrip(0);
-        controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
-        scene.add(controllerGrip1);
-
-        const controllerGrip2 = renderer.xr.getControllerGrip(1);
-        controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2));
-        scene.add(controllerGrip2);
-
-        // Add pointer lines to controllers
-        const geometry = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(0, 0, 0),
-            new THREE.Vector3(0, 0, -1)
-        ]);
-        const line = new THREE.Line(geometry);
-        line.scale.z = 5;
-
-        controller1.add(line.clone());
-        controller2.add(line.clone());
-
-        function onSelectStart(event) {
-            const controller = event.target;
-            const tempMatrix = new THREE.Matrix4();
-            tempMatrix.identity().extractRotation(controller.matrixWorld);
-            
-            raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-            raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-            
-            const intersects = raycaster.intersectObjects(nodes);
-            if (intersects.length > 0) {
-                const node = intersects[0].object;
-                node.material.emissiveIntensity = 1.0;
-                node.scale.set(1.5, 1.5, 1.5);
-                console.log('Selected:', node.userData.name);
-            }
-        }
-
-        function onSelectEnd(event) {
-            if (hoveredNode) {
-                hoveredNode.material.emissiveIntensity = 0.3;
-                hoveredNode.scale.set(1, 1, 1);
-            }
-        }
 
         // Create legend
         const legendItems = document.getElementById('legend-items');
@@ -662,25 +660,50 @@
             legendItems.appendChild(item);
         });
 
+        // Control functions
+        function resetCamera() {
+            camera.position.set(0, 20, 80);
+            camera.lookAt(scene.position);
+        }
+
+        function toggleRotation() {
+            autoRotate = !autoRotate;
+            event.target.textContent = `Auto-Rotate: ${autoRotate ? 'ON' : 'OFF'}`;
+        }
+
+        function togglePhysics() {
+            physicsEnabled = !physicsEnabled;
+            event.target.textContent = `Physics: ${physicsEnabled ? 'ON' : 'OFF'}`;
+        }
+
         // Animation loop
         let physicsCounter = 0;
+        let rotationAngle = 0;
+
         function animate() {
-            renderer.setAnimationLoop(() => {
-                // Run physics less frequently for performance
-                if (physicsCounter++ % 2 === 0) {
-                    updatePhysics();
-                }
+            requestAnimationFrame(animate);
 
-                controls.update();
-                renderer.render(scene, camera);
+            // Run physics less frequently
+            if (physicsCounter++ % 2 === 0) {
+                updatePhysics();
+            }
 
-                // Rotate lights for dynamic effect
-                const time = Date.now() * 0.0005;
-                pointLight1.position.x = Math.sin(time) * 40;
-                pointLight1.position.z = Math.cos(time) * 40;
-                pointLight2.position.x = Math.cos(time) * 40;
-                pointLight2.position.z = Math.sin(time) * 40;
-            });
+            // Auto-rotate camera
+            if (autoRotate && !isDragging) {
+                rotationAngle += 0.001;
+                camera.position.x = Math.sin(rotationAngle) * 80;
+                camera.position.z = Math.cos(rotationAngle) * 80;
+                camera.lookAt(scene.position);
+            }
+
+            // Rotate lights
+            const time = Date.now() * 0.0005;
+            pointLight1.position.x = Math.sin(time) * 40;
+            pointLight1.position.z = Math.cos(time) * 40;
+            pointLight2.position.x = Math.cos(time) * 40;
+            pointLight2.position.z = Math.sin(time) * 40;
+
+            renderer.render(scene, camera);
         }
 
         // Handle window resize
