@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+charset<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -215,10 +215,12 @@
     let isDragging = false;
     let dragElement = null;
     let offsetX = 0, offsetY = 0;
+    let dragStartX = 0, dragStartY = 0;
     let isMovingWindow = false;
     let windowOffsetX = 0, windowOffsetY = 0;
     let selectedIcon = null;
     let fileInFolder = false;
+    let lastTapTime = 0;
 
     // DOM elements
     const desktop = document.getElementById('desktop');
@@ -243,25 +245,21 @@
     // Event listeners for file icon
     fileIcon.addEventListener('mousedown', (e) => {
         if (e.button === 0) { // Left mouse button
+            // Single click selects the icon only
             selectIcon(fileIcon);
             
-            // Start drag
+            // Prepare for potential drag, but do not start it yet
             if (!fileInFolder) {
-                isDragging = true;
                 dragElement = fileIcon;
+                isDragging = false;
                 
-                // Calculate offset
                 const rect = fileIcon.getBoundingClientRect();
                 offsetX = e.clientX - rect.left;
                 offsetY = e.clientY - rect.top;
                 
-                // Create drag visual
-                const clone = fileIcon.cloneNode(true);
-                clone.id = 'dragging-element';
-                clone.classList.add('dragging');
-                clone.style.left = e.clientX - offsetX + 'px';
-                clone.style.top = e.clientY - offsetY + 'px';
-                document.body.appendChild(clone);
+                // Record where the drag started so we can detect movement
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
             }
         }
     });
@@ -305,16 +303,37 @@
 
     // Global mouse events for dragging
     document.addEventListener('mousemove', (e) => {
-        // Handle file dragging
-        if (isDragging && dragElement) {
-            const draggingElement = document.getElementById('dragging-element');
-            if (draggingElement) {
-                draggingElement.style.left = e.clientX - offsetX + 'px';
-                draggingElement.style.top = e.clientY - offsetY + 'px';
+        // Handle file dragging with movement threshold
+        if (dragElement && !fileInFolder) {
+            // If we are not yet dragging, check if the mouse moved enough to start a drag
+            if (!isDragging) {
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Only start dragging if the cursor has moved a few pixels
+                if (distance > 4 && e.buttons === 1) {
+                    isDragging = true;
+                    
+                    // Create drag visual once dragging actually starts
+                    const clone = dragElement.cloneNode(true);
+                    clone.id = 'dragging-element';
+                    clone.classList.add('dragging');
+                    clone.style.left = e.clientX - offsetX + 'px';
+                    clone.style.top = e.clientY - offsetY + 'px';
+                    document.body.appendChild(clone);
+                }
+            } else {
+                // Already dragging, move the clone with the cursor
+                const draggingElement = document.getElementById('dragging-element');
+                if (draggingElement) {
+                    draggingElement.style.left = e.clientX - offsetX + 'px';
+                    draggingElement.style.top = e.clientY - offsetY + 'px';
+                }
             }
         }
         
-        // Handle window moving
+        // Handle window moving (leave this part as it is now)
         if (isMovingWindow) {
             const windows = document.querySelectorAll('.window:not(.window-hidden)');
             windows.forEach(window => {
@@ -520,9 +539,60 @@
         };
     }
 
+</script>
     // Enable dragging icons across desktop
     makeDraggableIcon(documentsIcon, openFolderWindow);
     makeDraggableIcon(fileIcon, null);
+
+    // ---- Touch support for file icon (mobile) ----
+    // Converts touch events to mouse events and adds double-tap rename for the Supplier Excel file
+    document.addEventListener('touchstart', function (e) {
+      const target = e.target.closest('#file-icon');
+      if (!target) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      const mouseDown = new MouseEvent('mousedown', {
+        clientX: t.clientX,
+        clientY: t.clientY,
+        button: 0,
+        bubbles: true
+      });
+      target.dispatchEvent(mouseDown);
+    }, { passive: false });
+
+    document.addEventListener('touchmove', function (e) {
+      if (!dragElement) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      const mouseMove = new MouseEvent('mousemove', {
+        clientX: t.clientX,
+        clientY: t.clientY,
+        buttons: 1,
+        bubbles: true
+      });
+      document.dispatchEvent(mouseMove);
+    }, { passive: false });
+
+    document.addEventListener('touchend', function (e) {
+      const target = e.target.closest('#file-icon');
+      const t = e.changedTouches[0];
+      // Always trigger existing drop logic
+      const mouseUp = new MouseEvent('mouseup', {
+        clientX: t.clientX,
+        clientY: t.clientY,
+        button: 0,
+        bubbles: true
+      });
+      document.dispatchEvent(mouseUp);
+      if (!target) return;
+      e.preventDefault();
+      // Double-tap detection: open rename modal
+      const now = Date.now();
+      if (now - lastTapTime < 300) {
+        openRenameModal(fileIcon);
+      }
+      lastTapTime = now;
+    }, { passive: false });
 </script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
