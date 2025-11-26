@@ -1,4 +1,4 @@
-charset<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -440,6 +440,15 @@ charset<!DOCTYPE html>
             e.stopPropagation();
             openRenameModal(fileIconInFolder);
         });
+        // Allow rename via double-tap on mobile when file is inside the folder
+        fileIconInFolder.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+                openRenameModal(fileIconInFolder);
+            }
+            lastTapTime = now;
+        }, { passive: false });
 
         // Hide original file icon on desktop
         fileIcon.style.visibility = 'hidden';
@@ -539,7 +548,6 @@ charset<!DOCTYPE html>
         };
     }
 
-</script>
     // Enable dragging icons across desktop
     makeDraggableIcon(documentsIcon, openFolderWindow);
     makeDraggableIcon(fileIcon, null);
