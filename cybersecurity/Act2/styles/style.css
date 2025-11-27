@@ -834,3 +834,56 @@ background-color: transparent;
   padding-left: 10px;
     font-size: 12px;
 }
+@media (max-width: 600px) {
+  #fullscreen-toggle {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  #fullscreen-toggle {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .md-card,
+  .window,
+  .desktopmodal,
+  .defrag-modal,
+  #disk-cleanup-modal {
+    position: fixed !important;
+    top: 60px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 90vw !important;
+    max-width: 380px !important;
+    min-width: 0 !important;
+    max-height: 70vh;
+    overflow: hidden;
+  }
+
+  .window-content,
+  .modal-content {
+    overflow-y: auto;
+  }
+
+  #folder-window .status-bar {
+    position: static;
+  }
+}
+
+/* Force scrollable list inside Application Updates window */
+#apps-update-list {
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 600px) {
+  #apps-update-list {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  #update-manager-modal .modal-content {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
