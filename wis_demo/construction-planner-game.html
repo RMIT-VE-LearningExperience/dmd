@@ -1775,22 +1775,22 @@
                 // Store source info before removal
                 const sourceDay = parseInt(dragSourceSlot.dataset.day);
                 const sourceSlotNum = parseInt(dragSourceSlot.dataset.slot);
-                
+
                 // For concrete, we can't move individual slots
                 if (workerType === 'concrete') {
                     showFeedback('concrete', "Concrete work is a full-day job! Drag me back to the staff panel to reschedule the entire day.");
                     return;
                 }
-                
+
                 // Try to place in new slot first (validates the move)
-                const canPlace = validatePlacement(workerType, day, slotNum, slot, true);
+                const canPlace = validatePlacement(workerType, day, slotNum, slot, true, dragSourceSlot);
                 if (!canPlace) return;
-                
+
                 // Remove from source
                 const sourceKey = `${sourceDay}-${sourceSlotNum}`;
                 delete gameState.schedule[sourceKey];
                 resetSlotAppearance(dragSourceSlot);
-                
+
                 // Place in new slot (don't increment counter since we're moving)
                 const slotKey = `${day}-${slotNum}`;
                 gameState.schedule[slotKey] = workerType;
@@ -1802,7 +1802,7 @@
         }
 
         // Validation without side effects (for move operations)
-        function validatePlacement(workerType, day, slotNum, slotElement, isMove = false) {
+        function validatePlacement(workerType, day, slotNum, slotElement, isMove = false, sourceSlot = null) {
             const worker = workers[workerType];
             const slotKey = `${day}-${slotNum}`;
             const weather = weatherData[slotKey];
@@ -1836,6 +1836,39 @@
             if (workerType === 'carpenter' && gameState.settingDay !== null) {
                 if (day <= gameState.settingDay) {
                     showFeedback(workerType, `I can't work on Day ${day} - I need to work after Day ${gameState.settingDay} when the concrete finishes setting!`, "🧱 Concreter needs a full day to pour + the next day for concrete to set.");
+                    return false;
+                }
+            }
+
+            // For crane moves: Check if this move leaves room for concrete and carpenter
+            // Only check if concrete is NOT already placed
+            if (workerType === 'crane' && isMove && gameState.concreteDay === null && sourceSlot) {
+                // Create simulated schedule: remove from source, add to target
+                const sourceKey = `${sourceSlot.dataset.day}-${sourceSlot.dataset.slot}`;
+                const simulatedSchedule = {};
+
+                // Copy current schedule except the source slot
+                for (const [key, value] of Object.entries(gameState.schedule)) {
+                    if (key !== sourceKey) {
+                        simulatedSchedule[key] = value;
+                    }
+                }
+
+                // Add target slot to simulation
+                simulatedSchedule[slotKey] = 'crane';
+
+                // Check if there's still a valid day for concrete
+                const validConcreteDays = findValidConcreteDays(simulatedSchedule);
+                if (validConcreteDays.length === 0) {
+                    showFeedback(workerType, "If I move here, there won't be a full day left with good weather for the Concreter! Choose a different slot.", "🔄 Remember: Concreter needs a full day (AM, Midday, PM) with good weather, plus the next day for setting.");
+                    return false;
+                }
+
+                // Check if there are enough slots for carpenter after earliest concrete day
+                const earliestConcreteDay = Math.min(...validConcreteDays);
+                const carpenterSlotsAvailable = countCarpenterSlotsAfterDay(earliestConcreteDay + 1, simulatedSchedule);
+                if (carpenterSlotsAvailable < 3) {
+                    showFeedback(workerType, "If I move here, there won't be enough slots left for the Carpenter after the concrete sets! Choose a different slot.", "🔄 Work Order: Crane → Concreter (full day + setting) → Carpenter (needs 3 slots)");
                     return false;
                 }
             }
