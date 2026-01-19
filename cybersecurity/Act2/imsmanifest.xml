@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="com.rmit.cybersecurity.act2" version="1.0"
+          xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
+          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd
+                              http://www.imsglobal.org/xsd/imsmd_rootv1p2p1 imsmd_rootv1p2p1.xsd
+                              http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+  </metadata>
+
+  <organizations default="ORG-001">
+    <organization identifier="ORG-001">
+      <title>Cybersecurity Activity 2</title>
+      <item identifier="ITEM-001" identifierref="RES-001">
+        <title>Cybersecurity Activity 2</title>
+      </item>
+    </organization>
+  </organizations>
+
+  <resources>
+    <resource identifier="RES-001" type="webcontent" adlcp:scormtype="sco" href="index.html">
+      <file href="index.html"/>
+      <file href="fonts/segoeuithibd.ttf"/>
+      <file href="fonts/segoeuithis.ttf"/>
+      <file href="fonts/segoeuithisi.ttf"/>
+      <file href="fonts/segoeuithisz.ttf"/>
+      <file href="images/18359926.png"/>
+      <file href="images/18479944.png"/>
+      <file href="images/18975679.png"/>
+      <file href="images/2.png"/>
+      <file href="images/2099239.png"/>
+      <file href="images/226777.png"/>
+      <file href="images/2292038.png"/>
+      <file href="images/3.jpg"/>
+      <file href="images/3098090 (1).png"/>
+      <file href="images/3098090.png"/>
+      <file href="images/4.jpg"/>
+      <file href="images/5968377.png"/>
+      <file href="images/5968827.png"/>
+      <file href="images/732239.png"/>
+      <file href="images/8680085.png"/>
+      <file href="images/888846.png"/>
+      <file href="images/888867.png"/>
+      <file href="images/906329.png"/>
+      <file href="images/auslogics-connect.png"/>
+      <file href="images/barcode.png"/>
+      <file href="images/ccleaner.png"/>
+      <file href="images/certificate.png"/>
+      <file href="images/congratulations.gif"/>
+      <file href="images/congratulations_pdf.png"/>
+      <file href="images/defragment.png"/>
+      <file href="images/fullscreen.svg"/>
+      <file href="images/ico1.png"/>
+      <file href="images/ico2.png"/>
+      <file href="images/ico3.png"/>
+      <file href="images/ico4.png"/>
+      <file href="images/ico5.png"/>
+      <file href="images/logo.png"/>
+      <file href="images/malwarebytes.png"/>
+      <file href="images/no_button.png"/>
+      <file href="images/popup.jpg"/>
+      <file href="images/question_button.svg"/>
+      <file href="images/redcross.png"/>
+      <file href="images/registry_cleaner.png"/>
+      <file href="images/scan_button.png"/>
+      <file href="images/scaredface.png"/>
+      <file href="images/service_tag.png"/>
+      <file href="images/software_update.png"/>
+      <file href="images/step3.jpg"/>
+      <file href="images/taskbar-blank.png"/>
+      <file href="images/taskbar.png"/>
+      <file href="images/tick.png"/>
+      <file href="images/toolbox-menu-icon.svg"/>
+      <file href="images/windows_10_screen.jpg"/>
+      <file href="images/windows_symbol.png"/>
+      <file href="images/yes_button.png"/>
+      <file href="script/certificate-generator.js"/>
+      <file href="script/script.js"/>
+      <file href="styles/styles.css"/>
+    </resource>
+  </resources>
+
+</manifest>
