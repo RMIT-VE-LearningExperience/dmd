@@ -948,7 +948,7 @@ function showSuccessModal() {
     doc.text('• Uninstalled outdated or unauthorised programs', 20, 130);
     doc.text('• Updated essential applications.', 20, 140);
     doc.text(`Date: ${date}`, 20, 170);
-    doc.save(`Certificate_${name.replace(/\\s+/g, '_')}.pdf`);
+    doc.save(`Certificate_${name.replace(/\s+/g, '_')}.pdf`);
   });
   // Close handler
   successModal.querySelector('#close-success').onclick = () => successModal.remove();
