@@ -778,6 +778,314 @@
                 border-bottom-color: #333;
             }
         }
+
+        /* Feedback Button */
+        .feedback-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .feedback-badge {
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        /* Comment Overlay */
+        .comment-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1003;
+            padding: 20px;
+        }
+
+        .comment-overlay.show {
+            display: flex;
+        }
+
+        .comment-popup {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: popIn 0.3s ease;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .comment-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .close-comment {
+            background: #e0e0e0;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.3em;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .close-comment:hover {
+            background: #d0d0d0;
+            transform: rotate(90deg);
+        }
+
+        .comment-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .comment-tab {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .comment-tab:hover {
+            color: #667eea;
+        }
+
+        .comment-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .comment-section {
+            display: none;
+        }
+
+        .comment-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-hint {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .comment-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .comment-type-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .comment-type-badge.bug {
+            background: #ff4757;
+        }
+
+        .comment-type-badge.suggestion {
+            background: #ffa502;
+        }
+
+        .comment-type-badge.general {
+            background: #667eea;
+        }
+
+        .comment-date {
+            font-size: 0.85em;
+            color: #888;
+        }
+
+        .comment-author {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .comment-text {
+            color: #555;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .no-comments {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+
+        .no-comments-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .export-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+
+        .export-btn:hover {
+            background: #45a049;
+            transform: scale(1.02);
+        }
+
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -1063,6 +1371,72 @@
         <div class="success-title">Project Complete!</div>
         <div class="success-message">Great job scheduling all the tradies!</div>
         <button class="reset-btn" onclick="resetGame()">Play Again</button>
+    </div>
+
+    <!-- Feedback Button -->
+    <button class="feedback-btn" onclick="openCommentSection()">
+        💬 Give Feedback
+        <span class="feedback-badge" id="feedbackCount">0</span>
+    </button>
+
+    <!-- Comment Overlay -->
+    <div class="comment-overlay" id="commentOverlay">
+        <div class="comment-popup">
+            <div class="comment-header">
+                <div class="comment-title">Feedback & Comments</div>
+                <button class="close-comment" onclick="closeCommentSection()">×</button>
+            </div>
+
+            <div class="comment-tabs">
+                <button class="comment-tab active" onclick="switchTab('submit')">Submit Feedback</button>
+                <button class="comment-tab" onclick="switchTab('view')">View All Feedback</button>
+            </div>
+
+            <!-- Submit Feedback Section -->
+            <div class="comment-section active" id="submitSection">
+                <div id="successMsg" style="display: none;" class="success-message">
+                    Thank you for your feedback! Your input helps improve the game.
+                </div>
+
+                <form id="feedbackForm" onsubmit="submitFeedback(event)">
+                    <div class="form-group">
+                        <label class="form-label">Your Name (Optional)</label>
+                        <input type="text" class="form-input" id="userName" placeholder="Enter your name">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email (Optional)</label>
+                        <input type="email" class="form-input" id="userEmail" placeholder="your.email@example.com">
+                        <div class="form-hint">We'll only use this to follow up if needed</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Feedback Type *</label>
+                        <select class="form-select" id="feedbackType" required>
+                            <option value="">Select type...</option>
+                            <option value="bug">🐛 Bug Report - Something isn't working</option>
+                            <option value="suggestion">💡 Suggestion - Idea for improvement</option>
+                            <option value="general">💬 General Feedback - Other comments</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Your Feedback *</label>
+                        <textarea class="form-textarea" id="feedbackText" required
+                            placeholder="Tell us what's working, what's not working, or share your suggestions..."></textarea>
+                        <div class="form-hint">Be as detailed as possible to help us improve</div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Feedback</button>
+                </form>
+            </div>
+
+            <!-- View Feedback Section -->
+            <div class="comment-section" id="viewSection">
+                <button class="export-btn" onclick="exportFeedback()">📥 Export All Feedback (JSON)</button>
+                <div id="commentsList" class="comments-list"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1969,6 +2343,200 @@
         if (document.readyState !== 'loading') {
             initDragAndDrop();
         }
+
+        console.log('Construction Planner Game initialized!');
+
+        // ========== COMMENT/FEEDBACK SYSTEM ==========
+
+        // LocalStorage key for storing feedback
+        const FEEDBACK_STORAGE_KEY = 'constructionPlannerFeedback';
+
+        // Load feedback count on page load
+        function updateFeedbackCount() {
+            const feedback = getFeedbackFromStorage();
+            const count = feedback.length;
+            document.getElementById('feedbackCount').textContent = count;
+        }
+
+        // Get all feedback from localStorage
+        function getFeedbackFromStorage() {
+            const stored = localStorage.getItem(FEEDBACK_STORAGE_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        // Save feedback to localStorage
+        function saveFeedbackToStorage(feedback) {
+            localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(feedback));
+        }
+
+        // Open comment section
+        function openCommentSection() {
+            document.getElementById('commentOverlay').classList.add('show');
+            switchTab('submit'); // Always start on submit tab
+            loadAndDisplayFeedback(); // Load feedback when opening
+        }
+
+        // Close comment section
+        function closeCommentSection() {
+            document.getElementById('commentOverlay').classList.remove('show');
+            // Hide success message
+            document.getElementById('successMsg').style.display = 'none';
+        }
+
+        // Close when clicking outside
+        document.getElementById('commentOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'commentOverlay') {
+                closeCommentSection();
+            }
+        });
+
+        // Switch between tabs
+        function switchTab(tab) {
+            // Update tab buttons
+            const tabs = document.querySelectorAll('.comment-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+
+            // Update sections
+            const sections = document.querySelectorAll('.comment-section');
+            sections.forEach(s => s.classList.remove('active'));
+
+            if (tab === 'submit') {
+                tabs[0].classList.add('active');
+                document.getElementById('submitSection').classList.add('active');
+            } else if (tab === 'view') {
+                tabs[1].classList.add('active');
+                document.getElementById('viewSection').classList.add('active');
+                loadAndDisplayFeedback();
+            }
+        }
+
+        // Submit feedback
+        function submitFeedback(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('userName').value.trim() || 'Anonymous';
+            const email = document.getElementById('userEmail').value.trim() || '';
+            const type = document.getElementById('feedbackType').value;
+            const text = document.getElementById('feedbackText').value.trim();
+
+            if (!type || !text) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Create feedback object
+            const feedback = {
+                id: Date.now(),
+                name: name,
+                email: email,
+                type: type,
+                text: text,
+                timestamp: new Date().toISOString(),
+                date: new Date().toLocaleString()
+            };
+
+            // Get existing feedback and add new one
+            const allFeedback = getFeedbackFromStorage();
+            allFeedback.push(feedback);
+            saveFeedbackToStorage(allFeedback);
+
+            // Show success message
+            document.getElementById('successMsg').style.display = 'block';
+
+            // Reset form
+            document.getElementById('feedbackForm').reset();
+
+            // Update feedback count
+            updateFeedbackCount();
+
+            // Hide success message after 3 seconds
+            setTimeout(() => {
+                document.getElementById('successMsg').style.display = 'none';
+            }, 3000);
+
+            console.log('Feedback submitted:', feedback);
+        }
+
+        // Load and display all feedback
+        function loadAndDisplayFeedback() {
+            const feedback = getFeedbackFromStorage();
+            const commentsList = document.getElementById('commentsList');
+
+            if (feedback.length === 0) {
+                commentsList.innerHTML = `
+                    <div class="no-comments">
+                        <div class="no-comments-icon">📭</div>
+                        <div>No feedback submitted yet. Be the first to share your thoughts!</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by newest first
+            feedback.sort((a, b) => b.id - a.id);
+
+            // Display feedback
+            commentsList.innerHTML = feedback.map(item => `
+                <div class="comment-item">
+                    <div class="comment-meta">
+                        <span class="comment-type-badge ${item.type}">${getTypeLabel(item.type)}</span>
+                        <span class="comment-date">${item.date}</span>
+                    </div>
+                    <div class="comment-author">${item.name}${item.email ? ` (${item.email})` : ''}</div>
+                    <div class="comment-text">${escapeHtml(item.text)}</div>
+                </div>
+            `).join('');
+        }
+
+        // Get type label
+        function getTypeLabel(type) {
+            const labels = {
+                'bug': '🐛 Bug Report',
+                'suggestion': '💡 Suggestion',
+                'general': '💬 General'
+            };
+            return labels[type] || type;
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Export feedback as JSON
+        function exportFeedback() {
+            const feedback = getFeedbackFromStorage();
+
+            if (feedback.length === 0) {
+                alert('No feedback to export yet!');
+                return;
+            }
+
+            // Create JSON blob
+            const dataStr = JSON.stringify(feedback, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+            // Create download link
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `construction-planner-feedback-${new Date().toISOString().split('T')[0]}.json`;
+
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            console.log(`Exported ${feedback.length} feedback items`);
+        }
+
+        // Initialize feedback count on page load
+        updateFeedbackCount();
+
+        // ========== END COMMENT/FEEDBACK SYSTEM ==========
 
         console.log('Construction Planner Game initialized!');
     </script>
