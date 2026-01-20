@@ -1300,8 +1300,21 @@
         </div>
     </div>
 
-    <!-- Intro Popup -->
+    <!-- Intro Popup (Simple Welcome) -->
     <div class="intro-overlay" id="introOverlay">
+        <div class="intro-popup">
+            <div class="slide-icon">🏗️</div>
+            <div class="slide-title">Welcome, Construction Manager!</div>
+            <div class="slide-description" style="margin-bottom: 30px;">
+                You're in charge of scheduling tradies for a construction project.<br><br>
+                Your goal: Schedule the <strong>Crane Operator</strong>, <strong>Concreter</strong>, and <strong>Carpenter</strong> to complete the job on time while working around the weather.
+            </div>
+            <button class="nav-btn primary" onclick="startGame()" style="width: 100%;">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Rules Popup (Detailed Carousel) -->
+    <div class="intro-overlay hidden" id="rulesOverlay">
         <div class="intro-popup">
             <div class="carousel-container">
                 <!-- Slide 0: Welcome -->
@@ -1310,28 +1323,28 @@
                     <div class="slide-title">Construction Planner</div>
                     <div class="slide-description">Welcome! You're the Construction Manager. Schedule your tradies wisely to complete the project on time.</div>
                 </div>
-                
+
                 <!-- Slide 1: Time Slots -->
                 <div class="carousel-slide" data-slide="1">
                     <div class="slide-icon">📋</div>
                     <div class="slide-title">Time Slots</div>
                     <div class="slide-description">Each trade needs <strong>3 time slots</strong> to complete their work. Drag workers from the staff panel to the calendar.</div>
                 </div>
-                
+
                 <!-- Slide 2: Work Order -->
                 <div class="carousel-slide" data-slide="2">
                     <div class="slide-icon">🔄</div>
                     <div class="slide-title">Work Order</div>
                     <div class="slide-description">Trades must work in order:<br><strong>Crane Operator → Concreter → Carpenter</strong><br>Each trade must finish before the next can start.</div>
                 </div>
-                
+
                 <!-- Slide 3: Concreter Rules -->
                 <div class="carousel-slide" data-slide="3">
                     <div class="slide-icon">🧱</div>
                     <div class="slide-title">Concreter Special Rules</div>
                     <div class="slide-description">The Concreter must work a <strong>full day</strong> (all 3 slots: AM, Midday, PM). The concrete then needs the <strong>next day to set</strong> before the Carpenter can start.</div>
                 </div>
-                
+
                 <!-- Slide 4: Weather -->
                 <div class="carousel-slide" data-slide="4">
                     <div class="slide-icon">🌤️</div>
@@ -1339,7 +1352,7 @@
                     <div class="slide-description">Check the weather! <strong>Crane</strong> can't work in 💨🌧️⚡<br><strong>Concreter</strong> can't work in 💨🌧️<br><strong>Carpenter</strong> works in any weather.</div>
                 </div>
             </div>
-            
+
             <div class="carousel-dots">
                 <div class="carousel-dot active" data-dot="0"></div>
                 <div class="carousel-dot" data-dot="1"></div>
@@ -1347,7 +1360,7 @@
                 <div class="carousel-dot" data-dot="3"></div>
                 <div class="carousel-dot" data-dot="4"></div>
             </div>
-            
+
             <div class="carousel-nav">
                 <button class="nav-btn" id="prevBtn" onclick="prevSlide()" disabled>Back</button>
                 <button class="nav-btn primary" id="nextBtn" onclick="nextSlide()">Next</button>
@@ -2126,14 +2139,12 @@
         function showRules() {
             // Reset to first slide when opening rules
             currentSlide = 0;
-            // Mark all dots as completed since user has seen them
-            if (gameStarted) {
-                document.querySelectorAll('.carousel-dot').forEach(dot => {
-                    dot.classList.add('completed');
-                });
-            }
-            document.getElementById('introOverlay').classList.remove('hidden');
             updateCarousel();
+            document.getElementById('rulesOverlay').classList.remove('hidden');
+        }
+
+        function closeRules() {
+            document.getElementById('rulesOverlay').classList.add('hidden');
         }
 
         function nextSlide() {
@@ -2141,7 +2152,7 @@
                 currentSlide++;
                 updateCarousel();
             } else {
-                startGame();
+                closeRules();
             }
         }
 
@@ -2153,11 +2164,8 @@
         }
 
         function goToSlide(index) {
-            // Only allow going to slides that have been viewed or if game already started
-            if (gameStarted || index <= currentSlide) {
-                currentSlide = index;
-                updateCarousel();
-            }
+            currentSlide = index;
+            updateCarousel();
         }
 
         function updateCarousel() {
@@ -2186,7 +2194,7 @@
             prevBtn.disabled = currentSlide === 0;
 
             if (currentSlide === totalSlides - 1) {
-                nextBtn.textContent = gameStarted ? 'Resume' : 'Start Game';
+                nextBtn.textContent = 'Close';
             } else {
                 nextBtn.textContent = 'Next';
             }
