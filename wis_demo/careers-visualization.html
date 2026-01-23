@@ -185,65 +185,253 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            max-width: 350px;
+            width: 450px;
+            max-height: calc(100vh - 40px);
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 16px;
+            padding: 0;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
             z-index: 1000;
-            transform: translateX(400px);
+            transform: translateX(500px);
             transition: transform 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .info-panel.visible {
             transform: translateX(0);
         }
 
+        .panel-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            position: relative;
+        }
+
+        .panel-content {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
         .info-panel h2 {
-            font-size: 20px;
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .salary {
+            font-size: 18px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 8px;
+        }
+
+        .work-style {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
             color: #2d3748;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin-bottom: 12px;
         }
 
-        .info-panel p {
+        .overview-text {
+            font-size: 15px;
+            color: #4a5568;
+            line-height: 1.7;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+
+        .skill-tag:hover {
+            transform: translateY(-2px);
+        }
+
+        .skill-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .skill-tag:nth-child(4n+1) {
+            background: #e6f7ff;
+            color: #0066cc;
+        }
+
+        .skill-tag:nth-child(4n+1) .skill-dot {
+            background: #0066cc;
+        }
+
+        .skill-tag:nth-child(4n+2) {
+            background: #f0f9ff;
+            color: #0284c7;
+        }
+
+        .skill-tag:nth-child(4n+2) .skill-dot {
+            background: #0284c7;
+        }
+
+        .skill-tag:nth-child(4n+3) {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .skill-tag:nth-child(4n+3) .skill-dot {
+            background: #059669;
+        }
+
+        .skill-tag:nth-child(4n) {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .skill-tag:nth-child(4n) .skill-dot {
+            background: #d97706;
+        }
+
+        .education-list {
+            list-style: none;
+        }
+
+        .education-item {
+            padding: 10px 0;
+            padding-left: 20px;
+            position: relative;
             font-size: 14px;
             color: #4a5568;
             line-height: 1.6;
-            margin-bottom: 12px;
         }
 
-        .info-panel .work-style {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #e6fffa;
-            color: #234e52;
-            border-radius: 12px;
+        .education-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 16px;
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+        }
+
+        .levels-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .level-card {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 14px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .level-card:hover {
+            background: #edf2f7;
+            transform: translateX(4px);
+        }
+
+        .level-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 6px;
+        }
+
+        .level-summary {
+            font-size: 13px;
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .level-experience {
             font-size: 12px;
-            font-weight: 500;
+            color: #718096;
+            font-style: italic;
         }
 
         .close-btn {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 24px;
-            height: 24px;
-            background: none;
+            top: 20px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
             border: none;
+            border-radius: 50%;
             cursor: pointer;
             font-size: 20px;
-            color: #a0aec0;
-            transition: color 0.2s;
+            color: white;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
         }
 
         .close-btn:hover {
-            color: #4a5568;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
         }
 
         @media (max-width: 768px) {
             .info-panel {
-                max-width: calc(100% - 40px);
+                width: calc(100% - 40px);
+                max-width: 450px;
             }
+        }
+
+        /* Scrollbar styling */
+        .panel-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .panel-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .panel-content::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        .panel-content::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
         }
     </style>
 </head>
@@ -258,93 +446,48 @@
         <div id="careers-container"></div>
 
         <div class="info-panel" id="infoPanel">
-            <button class="close-btn" id="closeBtn">×</button>
-            <h2 id="careerTitle"></h2>
-            <div id="careerWorkStyle"></div>
-            <p id="careerOverview"></p>
+            <div class="panel-header">
+                <button class="close-btn" id="closeBtn">×</button>
+                <h2 id="careerTitle"></h2>
+                <div class="salary" id="careerSalary"></div>
+                <div id="careerWorkStyle"></div>
+            </div>
+            <div class="panel-content">
+                <div class="section">
+                    <div class="section-title">Overview</div>
+                    <p class="overview-text" id="careerOverview"></p>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Core Skills</div>
+                    <div class="skills-container" id="coreSkills"></div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Core Education</div>
+                    <ul class="education-list" id="coreEducation"></ul>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Career Levels</div>
+                    <div class="levels-container" id="careerLevels"></div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <script src="wis.json"></script>
     <script>
-        const careersData = {
-            "roles": [
-                {
-                    "name": "Building Estimator",
-                    "overview": "Building estimators calculate the cost of construction projects, working closely with designers, engineers and contractors to make sure projects are financially viable.",
-                    "work_style": "Analytical-Formal"
-                },
-                {
-                    "name": "Contract Administrator",
-                    "overview": "Contract administrators manage the paperwork, contracts and financial documentation that keep construction projects on track and compliant.",
-                    "work_style": "Analytical-Formal"
-                },
-                {
-                    "name": "Quantity Surveyor",
-                    "overview": "Quantity surveyors are cost experts who plan, manage and report on construction costs from early design through to project completion.",
-                    "work_style": "Analytical-Formal"
-                },
-                {
-                    "name": "Project Coordinator",
-                    "overview": "Project coordinators keep projects organised by managing schedules, documentation and communication between stakeholders.",
-                    "work_style": "Organisational-Hybrid"
-                },
-                {
-                    "name": "Project Manager",
-                    "overview": "Project managers are responsible for delivering projects safely, on time and on budget, while coordinating teams and stakeholders.",
-                    "work_style": "Leadership-Formal"
-                },
-                {
-                    "name": "Construction Manager",
-                    "overview": "Construction managers oversee on-site delivery of projects, leading site teams and making sure work is completed safely and efficiently.",
-                    "work_style": "Leadership-HandsOn"
-                },
-                {
-                    "name": "Project Engineer",
-                    "overview": "Project engineers handle the technical aspects of construction, linking design and on-site delivery.",
-                    "work_style": "Technical-Analytical"
-                },
-                {
-                    "name": "Health and Safety Officer",
-                    "overview": "Health and safety officers focus on keeping workers safe, ensuring legal compliance and promoting a positive safety culture.",
-                    "work_style": "Compliance-Formal"
-                },
-                {
-                    "name": "Waterproofer",
-                    "overview": "Waterproofers protect buildings from leaks and moisture damage by installing specialised membranes and systems.",
-                    "work_style": "HandsOn-Practical"
-                },
-                {
-                    "name": "Tiler",
-                    "overview": "Tilers install tiles on walls and floors in bathrooms, kitchens and other spaces, combining precision with a sense of design.",
-                    "work_style": "HandsOn-Creative"
-                },
-                {
-                    "name": "Plumber",
-                    "overview": "Plumbers install and maintain water, drainage and gas systems, playing a key role in making buildings safe and liveable.",
-                    "work_style": "HandsOn-Practical"
-                },
-                {
-                    "name": "Electrician",
-                    "overview": "Electricians install, maintain and repair electrical systems, making sure buildings are safe, reliable and energy efficient.",
-                    "work_style": "HandsOn-Technical"
-                },
-                {
-                    "name": "Crane Operator",
-                    "overview": "Crane operators operate lifting equipment to move heavy materials and equipment safely around construction sites.",
-                    "work_style": "HandsOn-Structured"
-                },
-                {
-                    "name": "Heavy Vehicle Operator",
-                    "overview": "Heavy vehicle operators drive trucks and plant that move materials, equipment and waste to and from construction sites.",
-                    "work_style": "HandsOn-Structured"
-                },
-                {
-                    "name": "Site Supervisor",
-                    "overview": "Site supervisors coordinate day-to-day work on site, looking after teams, safety, quality and short-term scheduling.",
-                    "work_style": "Leadership-HandsOn"
-                }
-            ]
-        };
+        // Load careers data from wis.json
+        async function loadCareersData() {
+            try {
+                const response = await fetch('wis.json');
+                return await response.json();
+            } catch (error) {
+                console.error('Error loading careers data:', error);
+                return null;
+            }
+        }
 
         const container = document.getElementById('careers-container');
         const infoPanel = document.getElementById('infoPanel');
@@ -414,10 +557,58 @@
         }
 
         function showCareerInfo(career) {
+            // Header info
             document.getElementById('careerTitle').textContent = career.name;
-            document.getElementById('careerOverview').textContent = career.overview;
+            document.getElementById('careerSalary').textContent = career.salary_range || 'Salary varies';
             document.getElementById('careerWorkStyle').innerHTML =
                 `<span class="work-style">${career.work_style}</span>`;
+
+            // Overview
+            document.getElementById('careerOverview').textContent = career.overview;
+
+            // Core Skills
+            const skillsContainer = document.getElementById('coreSkills');
+            skillsContainer.innerHTML = '';
+            if (career.core_skills && career.core_skills.length > 0) {
+                career.core_skills.forEach(skill => {
+                    const tag = document.createElement('div');
+                    tag.className = 'skill-tag';
+                    tag.innerHTML = `
+                        <div class="skill-dot"></div>
+                        <span>${skill}</span>
+                    `;
+                    skillsContainer.appendChild(tag);
+                });
+            }
+
+            // Core Education
+            const educationList = document.getElementById('coreEducation');
+            educationList.innerHTML = '';
+            if (career.core_education && career.core_education.length > 0) {
+                career.core_education.forEach(edu => {
+                    const li = document.createElement('li');
+                    li.className = 'education-item';
+                    li.textContent = edu;
+                    educationList.appendChild(li);
+                });
+            }
+
+            // Career Levels
+            const levelsContainer = document.getElementById('careerLevels');
+            levelsContainer.innerHTML = '';
+            if (career.levels && career.levels.length > 0) {
+                career.levels.forEach(level => {
+                    const card = document.createElement('div');
+                    card.className = 'level-card';
+                    card.innerHTML = `
+                        <div class="level-title">${level.title}</div>
+                        <div class="level-summary">${level.summary}</div>
+                        <div class="level-experience">${level.typical_experience}</div>
+                    `;
+                    levelsContainer.appendChild(card);
+                });
+            }
+
             infoPanel.classList.add('visible');
         }
 
@@ -435,9 +626,17 @@
         });
 
         // Initialize careers
-        const careerElements = [];
-        careersData.roles.forEach((career, index) => {
-            careerElements.push(createCareerItem(career, index, careersData.roles.length));
+        let careerElements = [];
+
+        loadCareersData().then(data => {
+            if (data && data.roles) {
+                data.roles.forEach((career, index) => {
+                    careerElements.push(createCareerItem(career, index, data.roles.length));
+                });
+
+                // Start animation after careers are loaded
+                animate();
+            }
         });
 
         // Animation loop
@@ -464,8 +663,6 @@
 
             requestAnimationFrame(animate);
         }
-
-        animate();
 
         // Handle window resize
         window.addEventListener('resize', () => {
