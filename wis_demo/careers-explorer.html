@@ -13,9 +13,145 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f5f7fa;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            overflow-x: hidden;
+        }
+
+        /* Desktop Floating View */
+        .floating-view {
+            display: none;
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            top: 0;
+            left: 0;
+        }
+
+        .floating-view.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .explore-center {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(100, 200, 255, 0.15) 0%, rgba(150, 255, 200, 0.15) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .explore-center::before {
+            content: '';
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(100, 200, 255, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .explore-text {
+            font-size: 32px;
+            font-weight: 300;
+            color: #4a5568;
+            letter-spacing: 2px;
+        }
+
+        .career-item {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .career-item:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            z-index: 50;
+        }
+
+        .career-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .career-dot.blue {
+            background: #4299e1;
+        }
+
+        .career-dot.green {
+            background: #48bb78;
+        }
+
+        .career-name {
+            font-size: 13px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .career-item.clicked {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .career-item.clicked .career-name {
+            color: white;
+        }
+
+        .video-badge {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            background: #ff4757;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Card View */
+        .card-view {
+            display: none;
+            min-height: 100vh;
             padding: 16px;
-            padding-bottom: 80px;
+            padding-bottom: 100px;
+        }
+
+        .card-view.active {
+            display: block;
         }
 
         .header {
@@ -34,7 +170,8 @@
             color: #48bb78;
         }
 
-        .career-selector {
+        /* Filters */
+        .filters-container {
             background: white;
             border-radius: 16px;
             padding: 20px;
@@ -42,100 +179,327 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
-        .career-selector label {
+        .filter-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-label {
             display: block;
             font-size: 14px;
             font-weight: 600;
             color: #4a5568;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
-        .career-select {
+        .filter-select {
             width: 100%;
-            padding: 12px 16px;
+            padding: 10px 12px;
             border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 14px;
             background: white;
             color: #2d3748;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a5568' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
             cursor: pointer;
         }
 
-        .career-content {
-            display: none;
+        .skills-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
         }
 
-        .career-content.active {
-            display: block;
-        }
-
-        .section-card {
-            background: white;
+        .skill-filter-tag {
+            padding: 6px 12px;
+            border: 2px solid #e2e8f0;
             border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            font-size: 12px;
+            background: white;
+            color: #4a5568;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
-        .section-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        .skill-filter-tag.active {
+            background: #4299e1;
+            border-color: #4299e1;
+            color: white;
         }
 
-        .section-header {
+        .clear-filters {
+            padding: 8px 16px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clear-filters:hover {
+            background: #edf2f7;
+        }
+
+        /* Career Cards Grid */
+        .careers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .career-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .career-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .career-card-header {
             display: flex;
-            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .career-card-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .career-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            line-height: 1.4;
+        }
+
+        .career-card-salary {
+            display: inline-block;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .career-card-overview {
+            font-size: 13px;
+            color: #4a5568;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .career-card.has-video::after {
+            content: 'VIDEO';
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: #ff4757;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* View Toggle (Desktop Only) */
+        .view-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn.active {
+            background: #4299e1;
+            color: white;
+        }
+
+        .toggle-btn:hover:not(.active) {
+            background: #f7fafc;
+        }
+
+        /* Pause Button (Floating View Only) */
+        .pause-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            display: none;
             align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+
+        .pause-btn.visible {
+            display: flex;
+        }
+
+        .pause-btn:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: scale(1.05);
+        }
+
+        .pause-btn::before,
+        .pause-btn::after {
+            content: '';
+            width: 3px;
+            height: 14px;
+            background: #666;
+            border-radius: 2px;
+        }
+
+        .pause-btn::before {
+            margin-right: 4px;
+        }
+
+        .pause-btn.paused::before,
+        .pause-btn.paused::after {
+            display: none;
+        }
+
+        .pause-btn.paused::before {
+            display: block;
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 12px solid #666;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            margin: 0;
+            margin-left: 3px;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 450px;
+            max-height: calc(100vh - 40px);
+            background: white;
+            border-radius: 16px;
+            padding: 0;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+            z-index: 1002;
+            transform: translateX(500px);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-panel.visible {
+            transform: translateX(0);
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            position: relative;
+        }
+
+        .panel-content {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .info-panel h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .salary {
+            font-size: 18px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 12px;
+        }
+
+        .video-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .video-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .section {
+            margin-bottom: 24px;
         }
 
         .section-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 600;
             color: #2d3748;
-        }
-
-        .section-icon {
-            font-size: 24px;
-        }
-
-        .chevron {
-            font-size: 20px;
-            color: #a0aec0;
-            transition: transform 0.3s ease;
-        }
-
-        .section-card.expanded .chevron {
-            transform: rotate(180deg);
-        }
-
-        .section-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .section-card.expanded .section-content {
-            max-height: 2000px;
-            margin-top: 20px;
-        }
-
-        .salary-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 20px;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
         }
 
         .overview-text {
@@ -144,250 +508,361 @@
             line-height: 1.7;
         }
 
-        .skills-grid {
+        .skills-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .skill-pill {
-            padding: 10px 18px;
-            border-radius: 24px;
-            font-size: 14px;
+        .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
             font-weight: 500;
-            border: 2px solid #e2e8f0;
-            background: white;
-            color: #2d3748;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease;
         }
 
-        .skill-pill:nth-child(4n+1) {
+        .skill-tag:hover {
+            transform: translateY(-2px);
+        }
+
+        .skill-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .skill-tag:nth-child(4n+1) {
             background: #e6f7ff;
-            border-color: #91d5ff;
             color: #0066cc;
         }
 
-        .skill-pill:nth-child(4n+2) {
+        .skill-tag:nth-child(4n+1) .skill-dot {
+            background: #0066cc;
+        }
+
+        .skill-tag:nth-child(4n+2) {
             background: #f0f9ff;
-            border-color: #7dd3fc;
             color: #0284c7;
         }
 
-        .skill-pill:nth-child(4n+3) {
+        .skill-tag:nth-child(4n+2) .skill-dot {
+            background: #0284c7;
+        }
+
+        .skill-tag:nth-child(4n+3) {
             background: #ecfdf5;
-            border-color: #6ee7b7;
             color: #059669;
         }
 
-        .skill-pill:nth-child(4n) {
+        .skill-tag:nth-child(4n+3) .skill-dot {
+            background: #059669;
+        }
+
+        .skill-tag:nth-child(4n) {
             background: #fef3c7;
-            border-color: #fcd34d;
             color: #d97706;
+        }
+
+        .skill-tag:nth-child(4n) .skill-dot {
+            background: #d97706;
         }
 
         .education-list {
             list-style: none;
-            margin-top: 12px;
         }
 
         .education-item {
-            padding: 12px 0;
-            padding-left: 24px;
+            padding: 10px 0;
+            padding-left: 20px;
             position: relative;
-            font-size: 15px;
+            font-size: 14px;
             color: #4a5568;
             line-height: 1.6;
-            border-left: 3px solid #e2e8f0;
         }
 
         .education-item::before {
             content: '';
             position: absolute;
-            left: -8px;
-            top: 18px;
-            width: 12px;
-            height: 12px;
+            left: 0;
+            top: 16px;
+            width: 8px;
+            height: 8px;
             background: #667eea;
             border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 0 0 2px #667eea;
         }
 
         .levels-container {
-            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
         .level-card {
             background: #f7fafc;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
             border-left: 4px solid #667eea;
+            padding: 14px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .level-card:hover {
+            background: #edf2f7;
+            transform: translateX(4px);
         }
 
         .level-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             color: #2d3748;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .level-summary {
-            font-size: 14px;
+            font-size: 13px;
             color: #4a5568;
             line-height: 1.6;
             margin-bottom: 8px;
         }
 
         .level-experience {
-            font-size: 13px;
+            font-size: 12px;
             color: #718096;
             font-style: italic;
         }
 
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 12px 16px;
-            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            gap: 12px;
-        }
-
-        .nav-btn {
-            flex: 1;
-            padding: 14px;
-            border: 2px solid #e2e8f0;
-            background: white;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #4a5568;
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .nav-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .nav-btn.primary {
-            background: #4299e1;
+            font-size: 20px;
             color: white;
-            border-color: #4299e1;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
         }
 
-        .nav-btn:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
         }
 
-        .empty-state {
+        .panel-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .panel-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .panel-content::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        .panel-content::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .view-toggle {
+                display: none !important;
+            }
+
+            .floating-view {
+                display: none !important;
+            }
+
+            .card-view {
+                display: block !important;
+            }
+
+            .info-panel {
+                width: calc(100% - 40px);
+                max-width: 450px;
+                right: 20px;
+                left: 20px;
+                transform: translateY(100vh);
+                max-height: 70vh;
+            }
+
+            .info-panel.visible {
+                transform: translateY(0);
+            }
+
+            .careers-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .info-panel {
+                top: auto;
+                bottom: 0;
+                border-radius: 16px 16px 0 0;
+                max-height: 80vh;
+            }
+
+            .panel-header {
+                padding: 20px 16px;
+            }
+
+            .panel-content {
+                padding: 16px;
+            }
+
+            .info-panel h2 {
+                font-size: 20px;
+            }
+
+            .salary {
+                font-size: 16px;
+            }
+
+            .filter-row {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                min-width: 100%;
+            }
+        }
+
+        /* Desktop Only - Show Toggle */
+        @media (min-width: 769px) {
+            .view-toggle {
+                display: flex;
+            }
+
+            .card-view {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+        }
+
+        .no-results {
             text-align: center;
-            padding: 40px 20px;
+            padding: 60px 20px;
             color: #a0aec0;
         }
 
-        .empty-state-icon {
+        .no-results-icon {
             font-size: 48px;
             margin-bottom: 16px;
-        }
-
-        @media (min-width: 768px) {
-            body {
-                max-width: 600px;
-                margin: 0 auto;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>career <span>explorer</span></h1>
+    <!-- View Toggle (Desktop Only) -->
+    <div class="view-toggle">
+        <button class="toggle-btn active" data-view="floating">Floating View</button>
+        <button class="toggle-btn" data-view="cards">Card View</button>
     </div>
 
-    <div class="career-selector">
-        <label for="careerSelect">Select a career to explore</label>
-        <select id="careerSelect" class="career-select">
-            <option value="">Choose a construction career...</option>
-        </select>
+    <!-- Pause Button (Floating View Only) -->
+    <button class="pause-btn" id="pauseBtn"></button>
+
+    <!-- Floating View -->
+    <div class="floating-view active" id="floatingView">
+        <div class="explore-center">
+            <div class="explore-text">Explore</div>
+        </div>
+        <div id="floatingCareersContainer"></div>
     </div>
 
-    <div id="careerContent" class="career-content">
-        <!-- Overview Section -->
-        <div class="section-card" data-section="overview">
-            <div class="section-header">
-                <div class="section-title">
-                    <span class="section-icon">📋</span>
-                    <span>Overview</span>
+    <!-- Card View -->
+    <div class="card-view" id="cardView">
+        <div class="header">
+            <h1>career <span>explorer</span></h1>
+        </div>
+
+        <div class="filters-container">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Salary Range</label>
+                    <select class="filter-select" id="salaryFilter">
+                        <option value="">All Salary Ranges</option>
+                        <option value="0-60">Up to $60,000</option>
+                        <option value="60-80">$60,000 - $80,000</option>
+                        <option value="80-100">$80,000 - $100,000</option>
+                        <option value="100-150">$100,000 - $150,000</option>
+                        <option value="150+">$150,000+</option>
+                    </select>
                 </div>
-                <span class="chevron">▼</span>
+                <div class="filter-group">
+                    <button class="clear-filters" id="clearFilters">Clear All Filters</button>
+                </div>
             </div>
-            <div class="section-content">
-                <div class="salary-badge" id="careerSalary"></div>
+            <div class="filter-row">
+                <div class="filter-group" style="flex: none; width: 100%;">
+                    <label class="filter-label">Filter by Skills</label>
+                    <div class="skills-filter" id="skillsFilterContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="careers-grid" id="careersGrid"></div>
+
+        <div class="no-results" id="noResults" style="display: none;">
+            <div class="no-results-icon">🔍</div>
+            <p>No careers match your filters. Try adjusting your criteria.</p>
+        </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="info-panel" id="infoPanel">
+        <div class="panel-header">
+            <button class="close-btn" id="closeBtn">×</button>
+            <h2 id="careerTitle"></h2>
+            <div class="salary" id="careerSalary"></div>
+            <a class="video-link" id="videoLink" href="" target="_blank" style="display: none;">
+                <span>▶</span>
+                <span>Watch Video</span>
+            </a>
+        </div>
+        <div class="panel-content">
+            <div class="section">
+                <div class="section-title">Overview</div>
                 <p class="overview-text" id="careerOverview"></p>
             </div>
-        </div>
 
-        <!-- Core Skills Section -->
-        <div class="section-card" data-section="skills">
-            <div class="section-header">
-                <div class="section-title">
-                    <span class="section-icon">💪</span>
-                    <span>Core Skills</span>
-                </div>
-                <span class="chevron">▼</span>
+            <div class="section">
+                <div class="section-title">Core Skills</div>
+                <div class="skills-container" id="coreSkills"></div>
             </div>
-            <div class="section-content">
-                <div class="skills-grid" id="coreSkills"></div>
-            </div>
-        </div>
 
-        <!-- Education Section -->
-        <div class="section-card" data-section="education">
-            <div class="section-header">
-                <div class="section-title">
-                    <span class="section-icon">🎓</span>
-                    <span>Education</span>
-                </div>
-                <span class="chevron">▼</span>
-            </div>
-            <div class="section-content">
+            <div class="section">
+                <div class="section-title">Core Education</div>
                 <ul class="education-list" id="coreEducation"></ul>
             </div>
-        </div>
 
-        <!-- Career Levels Section -->
-        <div class="section-card" data-section="levels">
-            <div class="section-header">
-                <div class="section-title">
-                    <span class="section-icon">📈</span>
-                    <span>Career Progression</span>
-                </div>
-                <span class="chevron">▼</span>
-            </div>
-            <div class="section-content">
+            <div class="section">
+                <div class="section-title">Career Levels</div>
                 <div class="levels-container" id="careerLevels"></div>
             </div>
         </div>
     </div>
 
-    <div id="emptyState" class="empty-state">
-        <div class="empty-state-icon">🏗️</div>
-        <p>Select a career above to explore</p>
-    </div>
-
     <script>
-        // Embedded careers data
+        // Embedded careers data with video URLs for 5 random careers
         const careersData = {
             "roles": [
                 {
                     "name": "Building Estimator",
                     "salary_range": "$65,000 - $120,000",
+                    "video_url": "https://youtu.be/TfnWEG_u9GY?si=WDnz8nB5EGVN4H8V",
                     "overview": "Building estimators calculate the cost of construction projects, working closely with designers, engineers and contractors to make sure projects are financially viable.",
                     "core_skills": ["Numerical analysis", "Attention to detail", "Problem-solving", "Technical knowledge of construction", "Communication", "Organisation", "Teamwork", "Computer and digital modelling skills"],
                     "core_education": ["Certificate IV in Building (Construction Estimation)", "Diploma of Building and Construction"],
@@ -427,6 +902,7 @@
                 {
                     "name": "Project Coordinator",
                     "salary_range": "$55,000 - $95,000",
+                    "video_url": "https://youtu.be/TfnWEG_u9GY?si=WDnz8nB5EGVN4H8V",
                     "overview": "Project coordinators keep projects organised by managing schedules, documentation and communication between stakeholders.",
                     "core_skills": ["Organisation", "Scheduling", "Communication", "Problem-solving", "Time management", "Documentation", "Attention to detail", "Software proficiency"],
                     "core_education": ["Certificate IV or Diploma in Project Management", "Certificate IV or Diploma in Construction Management"],
@@ -452,6 +928,7 @@
                 {
                     "name": "Construction Manager",
                     "salary_range": "$100,000 - $180,000",
+                    "video_url": "https://youtu.be/TfnWEG_u9GY?si=WDnz8nB5EGVN4H8V",
                     "overview": "Construction managers oversee on-site delivery of projects, leading site teams and making sure work is completed safely and efficiently.",
                     "core_skills": ["Leadership", "Planning", "Budgeting", "Problem-solving", "Communication", "Time management", "Health & Safety", "Teamwork"],
                     "core_education": ["Trade Qualification", "Diploma or Bachelor in Construction Management"],
@@ -517,6 +994,7 @@
                 {
                     "name": "Plumber",
                     "salary_range": "$60,000 - $110,000",
+                    "video_url": "https://youtu.be/TfnWEG_u9GY?si=WDnz8nB5EGVN4H8V",
                     "overview": "Plumbers install and maintain water, drainage and gas systems, playing a key role in making buildings safe and liveable.",
                     "core_skills": ["Problem-solving", "Technical knowledge", "Attention to detail", "Physical fitness", "Safety awareness", "Customer service"],
                     "core_education": ["Certificate III in Plumbing (CPC32420)", "Apprenticeship"],
@@ -545,6 +1023,7 @@
                 {
                     "name": "Crane Operator",
                     "salary_range": "$70,000 - $130,000",
+                    "video_url": "https://youtu.be/TfnWEG_u9GY?si=WDnz8nB5EGVN4H8V",
                     "overview": "Crane operators operate lifting equipment to move heavy materials and equipment safely around construction sites.",
                     "core_skills": ["Technical precision", "Safety awareness", "Coordination", "Communication", "Problem-solving", "Focus"],
                     "core_education": ["Certificate III in Rigging or Crane Operations", "High Risk Work Licence"],
@@ -583,40 +1062,261 @@
             ]
         };
 
-        const careerSelect = document.getElementById('careerSelect');
-        const careerContent = document.getElementById('careerContent');
-        const emptyState = document.getElementById('emptyState');
+        // State
+        let currentView = 'floating';
+        let isPaused = false;
+        let selectedCareer = null;
+        let careerElements = [];
+        let filteredCareers = [...careersData.roles];
+        let selectedSkills = new Set();
 
-        // Populate dropdown
+        // DOM Elements
+        const floatingView = document.getElementById('floatingView');
+        const cardView = document.getElementById('cardView');
+        const floatingContainer = document.getElementById('floatingCareersContainer');
+        const careersGrid = document.getElementById('careersGrid');
+        const infoPanel = document.getElementById('infoPanel');
+        const closeBtn = document.getElementById('closeBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const salaryFilter = document.getElementById('salaryFilter');
+        const skillsFilterContainer = document.getElementById('skillsFilterContainer');
+        const clearFiltersBtn = document.getElementById('clearFilters');
+        const noResults = document.getElementById('noResults');
+
+        // Extract all unique skills
+        const allSkills = new Set();
         careersData.roles.forEach(career => {
-            const option = document.createElement('option');
-            option.value = career.name;
-            option.textContent = career.name;
-            careerSelect.appendChild(option);
-        });
-
-        // Handle career selection
-        careerSelect.addEventListener('change', (e) => {
-            const selectedCareerName = e.target.value;
-            if (selectedCareerName) {
-                const career = careersData.roles.find(c => c.name === selectedCareerName);
-                displayCareer(career);
-                emptyState.style.display = 'none';
-                careerContent.classList.add('active');
-
-                // Scroll to content
-                setTimeout(() => {
-                    careerContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 100);
-            } else {
-                careerContent.classList.remove('active');
-                emptyState.style.display = 'block';
+            if (career.core_skills) {
+                career.core_skills.forEach(skill => allSkills.add(skill));
             }
         });
 
-        function displayCareer(career) {
-            // Salary and Overview
+        // Create skill filter tags
+        Array.from(allSkills).sort().forEach(skill => {
+            const tag = document.createElement('div');
+            tag.className = 'skill-filter-tag';
+            tag.textContent = skill;
+            tag.dataset.skill = skill;
+            tag.addEventListener('click', () => toggleSkillFilter(skill, tag));
+            skillsFilterContainer.appendChild(tag);
+        });
+
+        // View Toggle
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const view = btn.dataset.view;
+                switchView(view);
+            });
+        });
+
+        function switchView(view) {
+            currentView = view;
+
+            if (view === 'floating') {
+                floatingView.classList.add('active');
+                cardView.classList.remove('active');
+                pauseBtn.classList.add('visible');
+
+                document.querySelectorAll('.toggle-btn').forEach(b => {
+                    b.classList.toggle('active', b.dataset.view === 'floating');
+                });
+
+                // Reinitialize floating view
+                if (careerElements.length === 0) {
+                    initFloatingView();
+                }
+            } else {
+                floatingView.classList.remove('active');
+                cardView.classList.add('active');
+                pauseBtn.classList.remove('visible');
+
+                document.querySelectorAll('.toggle-btn').forEach(b => {
+                    b.classList.toggle('active', b.dataset.view === 'cards');
+                });
+            }
+        }
+
+        // Initialize on desktop
+        if (window.innerWidth >= 769) {
+            switchView('floating');
+        } else {
+            switchView('cards');
+        }
+
+        // Floating View Functions
+        function getRandomPosition(index, total) {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            const orbit = Math.floor(index / 5);
+            const angleOffset = (index % 5) * (2 * Math.PI / 5);
+
+            const baseRadius = 250;
+            const orbitSpacing = 120;
+            const radius = baseRadius + (orbit * orbitSpacing);
+
+            const radiusVariation = (Math.random() - 0.5) * 50;
+            const angleVariation = (Math.random() - 0.5) * 0.5;
+
+            const angle = angleOffset + angleVariation + (orbit * 0.3);
+            const finalRadius = radius + radiusVariation;
+
+            const x = centerX + Math.cos(angle) * finalRadius;
+            const y = centerY + Math.sin(angle) * finalRadius;
+
+            return { x, y, angle, radius: finalRadius };
+        }
+
+        function createFloatingCareerItem(career, index, total) {
+            const item = document.createElement('div');
+            item.className = 'career-item';
+
+            const dot = document.createElement('div');
+            dot.className = `career-dot ${Math.random() > 0.5 ? 'blue' : 'green'}`;
+
+            const name = document.createElement('div');
+            name.className = 'career-name';
+            name.textContent = career.name;
+
+            item.appendChild(dot);
+            item.appendChild(name);
+
+            // Add video badge if career has video
+            if (career.video_url) {
+                const badge = document.createElement('div');
+                badge.className = 'video-badge';
+                badge.textContent = 'VIDEO';
+                item.appendChild(badge);
+            }
+
+            const pos = getRandomPosition(index, total);
+            item.style.left = `${pos.x}px`;
+            item.style.top = `${pos.y}px`;
+            item.style.transform = 'translate(-50%, -50%)';
+
+            item.dataset.angle = pos.angle;
+            item.dataset.radius = pos.radius;
+            item.dataset.speed = 0.0002 + Math.random() * 0.0003;
+            item.dataset.career = JSON.stringify(career);
+
+            item.addEventListener('click', () => {
+                if (selectedCareer) {
+                    selectedCareer.classList.remove('clicked');
+                }
+                item.classList.add('clicked');
+                selectedCareer = item;
+                showCareerInfo(career);
+            });
+
+            floatingContainer.appendChild(item);
+            return item;
+        }
+
+        function initFloatingView() {
+            floatingContainer.innerHTML = '';
+            careerElements = [];
+
+            filteredCareers.forEach((career, index) => {
+                careerElements.push(createFloatingCareerItem(career, index, filteredCareers.length));
+            });
+
+            animate();
+        }
+
+        function animate() {
+            if (!isPaused && currentView === 'floating') {
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+
+                careerElements.forEach(item => {
+                    let angle = parseFloat(item.dataset.angle);
+                    const radius = parseFloat(item.dataset.radius);
+                    const speed = parseFloat(item.dataset.speed);
+
+                    angle += speed;
+                    item.dataset.angle = angle;
+
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+
+                    item.style.left = `${x}px`;
+                    item.style.top = `${y}px`;
+                });
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Card View Functions
+        function createCareerCard(career) {
+            const card = document.createElement('div');
+            card.className = 'career-card';
+            if (career.video_url) {
+                card.classList.add('has-video');
+            }
+
+            const header = document.createElement('div');
+            header.className = 'career-card-header';
+
+            const dot = document.createElement('div');
+            dot.className = `career-card-dot ${Math.random() > 0.5 ? 'blue' : 'green'}`;
+            dot.style.background = Math.random() > 0.5 ? '#4299e1' : '#48bb78';
+
+            const title = document.createElement('div');
+            title.className = 'career-card-title';
+            title.textContent = career.name;
+
+            header.appendChild(dot);
+            header.appendChild(title);
+
+            const salary = document.createElement('div');
+            salary.className = 'career-card-salary';
+            salary.textContent = career.salary_range;
+
+            const overview = document.createElement('div');
+            overview.className = 'career-card-overview';
+            overview.textContent = career.overview;
+
+            card.appendChild(header);
+            card.appendChild(salary);
+            card.appendChild(overview);
+
+            card.addEventListener('click', () => {
+                showCareerInfo(career);
+            });
+
+            return card;
+        }
+
+        function renderCareerCards() {
+            careersGrid.innerHTML = '';
+
+            if (filteredCareers.length === 0) {
+                noResults.style.display = 'block';
+                return;
+            }
+
+            noResults.style.display = 'none';
+
+            filteredCareers.forEach(career => {
+                careersGrid.appendChild(createCareerCard(career));
+            });
+        }
+
+        // Show Career Info
+        function showCareerInfo(career) {
+            document.getElementById('careerTitle').textContent = career.name;
             document.getElementById('careerSalary').textContent = career.salary_range || 'Salary varies';
+
+            // Video link
+            const videoLink = document.getElementById('videoLink');
+            if (career.video_url) {
+                videoLink.href = career.video_url;
+                videoLink.style.display = 'inline-flex';
+            } else {
+                videoLink.style.display = 'none';
+            }
+
             document.getElementById('careerOverview').textContent = career.overview;
 
             // Core Skills
@@ -624,10 +1324,13 @@
             skillsContainer.innerHTML = '';
             if (career.core_skills && career.core_skills.length > 0) {
                 career.core_skills.forEach(skill => {
-                    const pill = document.createElement('div');
-                    pill.className = 'skill-pill';
-                    pill.textContent = skill;
-                    skillsContainer.appendChild(pill);
+                    const tag = document.createElement('div');
+                    tag.className = 'skill-tag';
+                    tag.innerHTML = `
+                        <div class="skill-dot"></div>
+                        <span>${skill}</span>
+                    `;
+                    skillsContainer.appendChild(tag);
                 });
             }
 
@@ -659,19 +1362,115 @@
                 });
             }
 
-            // Reset all sections to collapsed
-            document.querySelectorAll('.section-card').forEach(card => {
-                card.classList.remove('expanded');
-            });
+            infoPanel.classList.add('visible');
         }
 
-        // Handle section expansion
-        document.querySelectorAll('.section-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (!e.target.closest('a')) {
-                    card.classList.toggle('expanded');
+        // Filters
+        function parseSalaryRange(salaryString) {
+            const match = salaryString.match(/\$?([\d,]+)/g);
+            if (!match) return { min: 0, max: 0 };
+
+            const numbers = match.map(s => parseInt(s.replace(/,/g, '')));
+            return {
+                min: numbers[0] || 0,
+                max: numbers[1] || numbers[0] || 0
+            };
+        }
+
+        function filterCareers() {
+            const salaryRange = salaryFilter.value;
+
+            filteredCareers = careersData.roles.filter(career => {
+                // Salary filter
+                if (salaryRange) {
+                    const careerSalary = parseSalaryRange(career.salary_range);
+                    const [min, max] = salaryRange.includes('+')
+                        ? [parseInt(salaryRange), Infinity]
+                        : salaryRange.split('-').map(s => parseInt(s));
+
+                    if (max === undefined) {
+                        if (careerSalary.max < min * 1000) return false;
+                    } else if (max === Infinity) {
+                        if (careerSalary.max < min * 1000) return false;
+                    } else {
+                        if (careerSalary.max < min * 1000 || careerSalary.min > max * 1000) return false;
+                    }
                 }
+
+                // Skills filter
+                if (selectedSkills.size > 0) {
+                    const hasAnySkill = career.core_skills && career.core_skills.some(skill =>
+                        selectedSkills.has(skill)
+                    );
+                    if (!hasAnySkill) return false;
+                }
+
+                return true;
             });
+
+            renderCareerCards();
+
+            // Update floating view if active
+            if (currentView === 'floating') {
+                careerElements = [];
+                initFloatingView();
+            }
+        }
+
+        function toggleSkillFilter(skill, element) {
+            if (selectedSkills.has(skill)) {
+                selectedSkills.delete(skill);
+                element.classList.remove('active');
+            } else {
+                selectedSkills.add(skill);
+                element.classList.add('active');
+            }
+            filterCareers();
+        }
+
+        salaryFilter.addEventListener('change', filterCareers);
+
+        clearFiltersBtn.addEventListener('click', () => {
+            salaryFilter.value = '';
+            selectedSkills.clear();
+            document.querySelectorAll('.skill-filter-tag').forEach(tag => {
+                tag.classList.remove('active');
+            });
+            filterCareers();
+        });
+
+        // Event Listeners
+        closeBtn.addEventListener('click', () => {
+            infoPanel.classList.remove('visible');
+            if (selectedCareer) {
+                selectedCareer.classList.remove('clicked');
+                selectedCareer = null;
+            }
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            pauseBtn.classList.toggle('paused');
+        });
+
+        // Initialize
+        renderCareerCards();
+
+        // Handle window resize
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (currentView === 'floating' && careerElements.length > 0) {
+                    careerElements.forEach((item, index) => {
+                        const pos = getRandomPosition(index, careerElements.length);
+                        item.dataset.angle = pos.angle;
+                        item.dataset.radius = pos.radius;
+                        item.style.left = `${pos.x}px`;
+                        item.style.top = `${pos.y}px`;
+                    });
+                }
+            }, 250);
         });
     </script>
 </body>
