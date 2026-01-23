@@ -2,6 +2,7 @@
   "roles": [
     {
       "name": "Building Estimator",
+      "salary_range": "$65,000 - $120,000",
       "overview": "Building estimators calculate the cost of construction projects, working closely with designers, engineers and contractors to make sure projects are financially viable.",
       "core_skills": [
         "Numerical analysis",
@@ -96,6 +97,7 @@
     },
     {
       "name": "Contract Administrator",
+      "salary_range": "$60,000 - $110,000",
       "overview": "Contract administrators manage the paperwork, contracts and financial documentation that keep construction projects on track and compliant.",
       "core_skills": [
         "Organisation",
@@ -193,6 +195,7 @@
     },
     {
       "name": "Quantity Surveyor",
+      "salary_range": "$70,000 - $140,000",
       "overview": "Quantity surveyors are cost experts who plan, manage and report on construction costs from early design through to project completion.",
       "core_skills": [
         "Cost planning",
@@ -283,6 +286,7 @@
     },
     {
       "name": "Project Coordinator",
+      "salary_range": "$55,000 - $95,000",
       "overview": "Project coordinators keep projects organised by managing schedules, documentation and communication between stakeholders.",
       "core_skills": [
         "Organisation",
@@ -362,6 +366,7 @@
     },
     {
       "name": "Project Manager",
+      "salary_range": "$90,000 - $160,000",
       "overview": "Project managers are responsible for delivering projects safely, on time and on budget, while coordinating teams and stakeholders.",
       "core_skills": [
         "Leadership",
@@ -462,6 +467,7 @@
     },
     {
       "name": "Construction Manager",
+      "salary_range": "$100,000 - $180,000",
       "overview": "Construction managers oversee on-site delivery of projects, leading site teams and making sure work is completed safely and efficiently.",
       "core_skills": [
         "Leadership",
@@ -563,6 +569,7 @@
     },
     {
       "name": "Project Engineer",
+      "salary_range": "$70,000 - $130,000",
       "overview": "Project engineers handle the technical aspects of construction, linking design and on-site delivery.",
       "core_skills": [
         "Engineering principles",
@@ -645,6 +652,7 @@
     },
     {
       "name": "Health and Safety Officer",
+      "salary_range": "$65,000 - $115,000",
       "overview": "Health and safety officers focus on keeping workers safe, ensuring legal compliance and promoting a positive safety culture.",
       "core_skills": [
         "Risk assessment",
@@ -732,6 +740,7 @@
     },
     {
       "name": "Waterproofer",
+      "salary_range": "$55,000 - $95,000",
       "overview": "Waterproofers protect buildings from leaks and moisture damage by installing specialised membranes and systems.",
       "core_skills": [
         "Attention to detail",
@@ -812,6 +821,7 @@
     },
     {
       "name": "Tiler",
+      "salary_range": "$50,000 - $90,000",
       "overview": "Tilers install tiles on walls and floors in bathrooms, kitchens and other spaces, combining precision with a sense of design.",
       "core_skills": [
         "Precision",
@@ -893,6 +903,7 @@
     },
     {
       "name": "Plumber",
+      "salary_range": "$60,000 - $110,000",
       "overview": "Plumbers install and maintain water, drainage and gas systems, playing a key role in making buildings safe and liveable.",
       "core_skills": [
         "Problem-solving",
@@ -975,6 +986,7 @@
     },
     {
       "name": "Electrician",
+      "salary_range": "$65,000 - $120,000",
       "overview": "Electricians install, maintain and repair electrical systems, making sure buildings are safe, reliable and energy efficient.",
       "core_skills": [
         "Technical knowledge",
@@ -1080,6 +1092,7 @@
     },
     {
       "name": "Crane Operator",
+      "salary_range": "$70,000 - $130,000",
       "overview": "Crane operators operate lifting equipment to move heavy materials and equipment safely around construction sites.",
       "core_skills": [
         "Technical precision",
@@ -1159,6 +1172,7 @@
     },
     {
       "name": "Heavy Vehicle Operator",
+      "salary_range": "$60,000 - $100,000",
       "overview": "Heavy vehicle operators drive trucks and plant that move materials, equipment and waste to and from construction sites.",
       "core_skills": [
         "Vehicle operation",
@@ -1238,6 +1252,7 @@
     },
     {
       "name": "Site Supervisor",
+      "salary_range": "$75,000 - $130,000",
       "overview": "Site supervisors coordinate day-to-day work on site, looking after teams, safety, quality and short-term scheduling.",
       "core_skills": [
         "On-site leadership",
