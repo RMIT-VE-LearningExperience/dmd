@@ -17,6 +17,28 @@
         "Certificate IV in Building (Construction Estimation)",
         "Diploma of Building and Construction"
       ],
+      "salary_range_aud": {
+        "entry": "80000-95000",
+        "mid": "100000-130000",
+        "senior": "130000-170000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "VET",
+          "course": "Certificate IV in Building and Construction",
+          "code": "CPC40120",
+          "url": "https://training.gov.au/training/details/CPC40120",
+          "notes": "Common pathway for site supervision and estimating-focused roles."
+        },
+        {
+          "type": "VET",
+          "course": "Diploma of Building and Construction (Management)",
+          "code": "CPC50320",
+          "url": "https://training.gov.au/training/details/CPC50320",
+          "notes": "Supports tendering, contracts, and commercial management skills."
+        }
+      ]
       "work_style": "Analytical-Formal",
       "levels": [
         {
@@ -87,6 +109,35 @@
         "Certificate IV in Building and Construction (Contract Administration)",
         "Diploma of Construction Management"
       ],
+      "salary_range_aud": {
+        "entry": "85000-110000",
+        "mid": "110000-145000",
+        "senior": "145000-180000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "VET",
+          "course": "Diploma of Building and Construction (Management)",
+          "code": "CPC50320",
+          "url": "https://training.gov.au/training/details/CPC50320",
+          "notes": "Strong alignment with contract admin and commercial project roles."
+        },
+        {
+          "type": "VET",
+          "course": "Certificate IV in Project Management Practice",
+          "code": "BSB40920",
+          "url": "https://training.gov.au/training/details/BSB40920",
+          "notes": "Useful for coordination, scheduling, and stakeholder communication."
+        },
+        {
+          "type": "VET",
+          "course": "Diploma of Project Management",
+          "code": "BSB50820",
+          "url": "https://training.gov.au/training/details/BSB50820",
+          "notes": "Builds project controls and leadership capability."
+        }
+      ]
       "work_style": "Analytical-Formal",
       "levels": [
         {
@@ -157,6 +208,28 @@
         "Bachelor of Construction Management",
         "Graduate Diploma of Construction Management"
       ],
+      "salary_range_aud": {
+        "entry": "80000-100000",
+        "mid": "100000-140000",
+        "senior": "140000-180000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "University",
+          "course": "Construction Management / Quantity Surveying degree",
+          "code": null,
+          "url": null,
+          "notes": "Many QS roles require a relevant bachelor degree; VET diplomas can be a stepping stone."
+        },
+        {
+          "type": "VET",
+          "course": "Diploma of Building and Construction (Management)",
+          "code": "CPC50320",
+          "url": "https://training.gov.au/training/details/CPC50320",
+          "notes": "Often used as a pathway into commercial/cost roles before specialising."
+        }
+      ]
       "work_style": "Analytical-Formal",
       "levels": [
         {
@@ -225,6 +298,28 @@
         "Certificate IV or Diploma in Project Management",
         "Certificate IV or Diploma in Construction Management"
       ],
+      "salary_range_aud": {
+        "entry": "65000-85000",
+        "mid": "85000-105000",
+        "senior": "105000-125000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "VET",
+          "course": "Certificate IV in Project Management Practice",
+          "code": "BSB40920",
+          "url": "https://training.gov.au/training/details/BSB40920",
+          "notes": "Entry pathway for project coordination and admin roles."
+        },
+        {
+          "type": "VET",
+          "course": "Diploma of Project Management",
+          "code": "BSB50820",
+          "url": "https://training.gov.au/training/details/BSB50820",
+          "notes": "Supports progression into project management roles."
+        }
+      ]
       "work_style": "Organisational-Hybrid",
       "levels": [
         {
@@ -283,6 +378,35 @@
         "Architecture",
         "Master of Project Management"
       ],
+      "salary_range_aud": {
+        "entry": "120000-150000",
+        "mid": "150000-200000",
+        "senior": "200000-250000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "VET",
+          "course": "Diploma of Project Management",
+          "code": "BSB50820",
+          "url": "https://training.gov.au/training/details/BSB50820",
+          "notes": "Common VET pathway for project leadership skills."
+        },
+        {
+          "type": "VET",
+          "course": "Diploma of Building and Construction (Management)",
+          "code": "CPC50320",
+          "url": "https://training.gov.au/training/details/CPC50320",
+          "notes": "Construction-specific management pathway."
+        },
+        {
+          "type": "University",
+          "course": "Construction Management / Engineering / Architecture degree",
+          "code": null,
+          "url": null,
+          "notes": "Many PM roles prefer a relevant degree plus site experience."
+        }
+      ]
       "work_style": "Leadership-Formal",
       "levels": [
         {
@@ -353,6 +477,35 @@
         "Trade Qualification",
         "Diploma or Bachelor in Construction Management"
       ],
+      "salary_range_aud": {
+        "entry": "130000-160000",
+        "mid": "160000-210000",
+        "senior": "210000-260000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "VET",
+          "course": "Certificate IV in Building and Construction",
+          "code": "CPC40120",
+          "url": "https://training.gov.au/training/details/CPC40120",
+          "notes": "Common pathway for supervisors moving into site leadership roles."
+        },
+        {
+          "type": "VET",
+          "course": "Diploma of Building and Construction (Building)",
+          "code": "CPC50220",
+          "url": "https://training.gov.au/Training/Details/CPC50220",
+          "notes": "Builds capability for managing building work, risk, and financials."
+        },
+        {
+          "type": "VET",
+          "course": "Diploma of Building and Construction (Management)",
+          "code": "CPC50320",
+          "url": "https://training.gov.au/training/details/CPC50320",
+          "notes": "Construction management pathway for senior site and operations roles."
+        }
+      ]
       "work_style": "Leadership-HandsOn",
       "levels": [
         {
@@ -424,6 +577,21 @@
         "Bachelor of Structural Engineering",
         "Bachelor of Mechanical Engineering"
       ],
+      "salary_range_aud": {
+        "entry": "85000-105000",
+        "mid": "105000-140000",
+        "senior": "140000-180000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "University",
+          "course": "Civil / Structural / Mechanical Engineering degree",
+          "code": null,
+          "url": null,
+          "notes": "Project engineer roles typically require an accredited engineering degree."
+        }
+      ]
       "work_style": "Technical-Analytical",
       "levels": [
         {
@@ -491,6 +659,28 @@
         "Certificate IV in Work Health and Safety",
         "Diploma of Work Health and Safety"
       ],
+      "salary_range_aud": {
+        "entry": "80000-95000",
+        "mid": "95000-125000",
+        "senior": "125000-160000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "VET",
+          "course": "Certificate IV in Work Health and Safety",
+          "code": "BSB41419",
+          "url": "https://training.gov.au/training/details/BSB41419",
+          "notes": "Common entry pathway for WHS officer and advisor roles."
+        },
+        {
+          "type": "VET",
+          "course": "Diploma of Work Health and Safety",
+          "code": "BSB51319",
+          "url": "https://training.gov.au/training/details/BSB51319",
+          "notes": "Supports progression into WHS coordinator, manager, and lead roles."
+        }
+      ]
       "work_style": "Compliance-Formal",
       "levels": [
         {
@@ -555,6 +745,21 @@
       "core_education": [
         "Certificate III in Construction Waterproofing (CPC31420)"
       ],
+      "salary_range_aud": {
+        "entry": "55000-70000",
+        "mid": "70000-90000",
+        "senior": "90000-115000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "VET",
+          "course": "Certificate III in Construction Waterproofing",
+          "code": "CPC31420",
+          "url": "https://www.yourcareer.gov.au/learn-and-train/courses/CPC31420",
+          "notes": "Trade qualification pathway for waterproofing work in construction."
+        }
+      ]
       "work_style": "HandsOn-Practical",
       "levels": [
         {
@@ -620,6 +825,21 @@
       "core_education": [
         "Certificate III in Wall and Floor Tiling (CPC31320)"
       ],
+      "salary_range_aud": {
+        "entry": "55000-70000",
+        "mid": "70000-95000",
+        "senior": "95000-125000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "VET",
+          "course": "Certificate III in Wall and Floor Tiling",
+          "code": "CPC31320",
+          "url": "https://training.gov.au/training/details/CPC31320",
+          "notes": "Trade outcome for residential and commercial tiling."
+        }
+      ]
       "work_style": "HandsOn-Creative",
       "levels": [
         {
@@ -686,6 +906,21 @@
         "Certificate III in Plumbing (CPC32420)",
         "Apprenticeship"
       ],
+      "salary_range_aud": {
+        "entry": "65000-85000",
+        "mid": "90000-120000",
+        "senior": "120000-160000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "VET",
+          "course": "Certificate III in Plumbing",
+          "code": "CPC32420",
+          "url": "https://www.yourcareer.gov.au/learn-and-train/courses/CPC32420",
+          "notes": "Typically completed via apprenticeship, plus licensing/registration requirements vary by state."
+        }
+      ]
       "work_style": "HandsOn-Practical",
       "levels": [
         {
@@ -753,6 +988,21 @@
         "Certificate III in Electrotechnology (Electrician)",
         "Electrical Apprenticeship (typically 3–4 years)"
       ],
+      "salary_range_aud": {
+        "entry": "65000-90000",
+        "mid": "95000-125000",
+        "senior": "125000-170000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "VET",
+          "course": "Certificate III in Electrotechnology Electrician",
+          "code": "UEE30820",
+          "url": "https://training.gov.au/training/details/UEE30820",
+          "notes": "Typically completed via apprenticeship, plus licensing requirements vary by state."
+        }
+      ]
       "work_style": "HandsOn-Technical",
       "levels": [
         {
@@ -843,6 +1093,21 @@
         "Certificate III in Rigging or Crane Operations",
         "High Risk Work Licence"
       ],
+      "salary_range_aud": {
+        "entry": "110000-140000",
+        "mid": "140000-180000",
+        "senior": "180000-220000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "Licensing",
+          "course": "High Risk Work Licence (crane classes)",
+          "code": null,
+          "url": null,
+          "notes": "Licensing requirements apply; training is typically delivered by registered providers."
+        }
+      ]
       "work_style": "HandsOn-Structured",
       "levels": [
         {
@@ -907,6 +1172,21 @@
         "Heavy Rigid (HR) or Heavy Combination (HC) Licence",
         "On-the-job training"
       ],
+      "salary_range_aud": {
+        "entry": "65000-85000",
+        "mid": "85000-110000",
+        "senior": "110000-140000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "Licensing",
+          "course": "Heavy vehicle licence (HR/HC/MC)",
+          "code": null,
+          "url": null,
+          "notes": "Licensing class depends on vehicle type and state requirements."
+        }
+      ]
       "work_style": "HandsOn-Structured",
       "levels": [
         {
@@ -973,6 +1253,21 @@
         "Trade Qualification (e.g. Carpentry, Tiling, Waterproofing, Plumbing, Electrical)",
         "Certificate IV in Building and Construction (Site Management) or equivalent"
       ],
+      "salary_range_aud": {
+        "entry": "95000-115000",
+        "mid": "115000-135000",
+        "senior": "135000-170000",
+        "basis": "Indicative annual ranges (AUD)"
+      },
+      "education_pathways": [
+        {
+          "type": "VET",
+          "course": "Certificate IV in Building and Construction",
+          "code": "CPC40120",
+          "url": "https://training.gov.au/training/details/CPC40120",
+          "notes": "Common supervisor/site leadership qualification, often after trade experience."
+        }
+      ]
       "work_style": "Leadership-HandsOn",
       "levels": [
         {
