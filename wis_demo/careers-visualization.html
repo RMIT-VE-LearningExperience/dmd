@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careers Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pause-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .pause-btn:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: scale(1.05);
+        }
+
+        .pause-btn::before,
+        .pause-btn::after {
+            content: '';
+            width: 3px;
+            height: 14px;
+            background: #666;
+            border-radius: 2px;
+        }
+
+        .pause-btn::before {
+            margin-right: 4px;
+        }
+
+        .pause-btn.paused::before,
+        .pause-btn.paused::after {
+            display: none;
+        }
+
+        .pause-btn.paused {
+            position: relative;
+        }
+
+        .pause-btn.paused::before {
+            display: block;
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 12px solid #666;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            margin: 0;
+            margin-left: 3px;
+        }
+
+        .explore-center {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(100, 200, 255, 0.15) 0%, rgba(150, 255, 200, 0.15) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .explore-center::before {
+            content: '';
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(100, 200, 255, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .explore-text {
+            font-size: 32px;
+            font-weight: 300;
+            color: #4a5568;
+            letter-spacing: 2px;
+        }
+
+        .career-item {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .career-item:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            z-index: 50;
+        }
+
+        .career-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .career-dot.blue {
+            background: #4299e1;
+        }
+
+        .career-dot.green {
+            background: #48bb78;
+        }
+
+        .career-name {
+            font-size: 13px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .career-item.clicked {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .career-item.clicked .career-name {
+            color: white;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            max-width: 350px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .info-panel.visible {
+            transform: translateX(0);
+        }
+
+        .info-panel h2 {
+            font-size: 20px;
+            color: #2d3748;
+            margin-bottom: 12px;
+        }
+
+        .info-panel p {
+            font-size: 14px;
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .info-panel .work-style {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e6fffa;
+            color: #234e52;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 24px;
+            height: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #a0aec0;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #4a5568;
+        }
+
+        @media (max-width: 768px) {
+            .info-panel {
+                max-width: calc(100% - 40px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="pause-btn" id="pauseBtn"></button>
+
+        <div class="explore-center">
+            <div class="explore-text">Explore</div>
+        </div>
+
+        <div id="careers-container"></div>
+
+        <div class="info-panel" id="infoPanel">
+            <button class="close-btn" id="closeBtn">×</button>
+            <h2 id="careerTitle"></h2>
+            <div id="careerWorkStyle"></div>
+            <p id="careerOverview"></p>
+        </div>
+    </div>
+
+    <script>
+        const careersData = {
+            "roles": [
+                {
+                    "name": "Building Estimator",
+                    "overview": "Building estimators calculate the cost of construction projects, working closely with designers, engineers and contractors to make sure projects are financially viable.",
+                    "work_style": "Analytical-Formal"
+                },
+                {
+                    "name": "Contract Administrator",
+                    "overview": "Contract administrators manage the paperwork, contracts and financial documentation that keep construction projects on track and compliant.",
+                    "work_style": "Analytical-Formal"
+                },
+                {
+                    "name": "Quantity Surveyor",
+                    "overview": "Quantity surveyors are cost experts who plan, manage and report on construction costs from early design through to project completion.",
+                    "work_style": "Analytical-Formal"
+                },
+                {
+                    "name": "Project Coordinator",
+                    "overview": "Project coordinators keep projects organised by managing schedules, documentation and communication between stakeholders.",
+                    "work_style": "Organisational-Hybrid"
+                },
+                {
+                    "name": "Project Manager",
+                    "overview": "Project managers are responsible for delivering projects safely, on time and on budget, while coordinating teams and stakeholders.",
+                    "work_style": "Leadership-Formal"
+                },
+                {
+                    "name": "Construction Manager",
+                    "overview": "Construction managers oversee on-site delivery of projects, leading site teams and making sure work is completed safely and efficiently.",
+                    "work_style": "Leadership-HandsOn"
+                },
+                {
+                    "name": "Project Engineer",
+                    "overview": "Project engineers handle the technical aspects of construction, linking design and on-site delivery.",
+                    "work_style": "Technical-Analytical"
+                },
+                {
+                    "name": "Health and Safety Officer",
+                    "overview": "Health and safety officers focus on keeping workers safe, ensuring legal compliance and promoting a positive safety culture.",
+                    "work_style": "Compliance-Formal"
+                },
+                {
+                    "name": "Waterproofer",
+                    "overview": "Waterproofers protect buildings from leaks and moisture damage by installing specialised membranes and systems.",
+                    "work_style": "HandsOn-Practical"
+                },
+                {
+                    "name": "Tiler",
+                    "overview": "Tilers install tiles on walls and floors in bathrooms, kitchens and other spaces, combining precision with a sense of design.",
+                    "work_style": "HandsOn-Creative"
+                },
+                {
+                    "name": "Plumber",
+                    "overview": "Plumbers install and maintain water, drainage and gas systems, playing a key role in making buildings safe and liveable.",
+                    "work_style": "HandsOn-Practical"
+                },
+                {
+                    "name": "Electrician",
+                    "overview": "Electricians install, maintain and repair electrical systems, making sure buildings are safe, reliable and energy efficient.",
+                    "work_style": "HandsOn-Technical"
+                },
+                {
+                    "name": "Crane Operator",
+                    "overview": "Crane operators operate lifting equipment to move heavy materials and equipment safely around construction sites.",
+                    "work_style": "HandsOn-Structured"
+                },
+                {
+                    "name": "Heavy Vehicle Operator",
+                    "overview": "Heavy vehicle operators drive trucks and plant that move materials, equipment and waste to and from construction sites.",
+                    "work_style": "HandsOn-Structured"
+                },
+                {
+                    "name": "Site Supervisor",
+                    "overview": "Site supervisors coordinate day-to-day work on site, looking after teams, safety, quality and short-term scheduling.",
+                    "work_style": "Leadership-HandsOn"
+                }
+            ]
+        };
+
+        const container = document.getElementById('careers-container');
+        const infoPanel = document.getElementById('infoPanel');
+        const closeBtn = document.getElementById('closeBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        let isPaused = false;
+        let selectedCareer = null;
+
+        function getRandomPosition(index, total) {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            // Create multiple orbits
+            const orbit = Math.floor(index / 5);
+            const angleOffset = (index % 5) * (2 * Math.PI / 5);
+            const baseRadius = 250 + (orbit * 120);
+
+            // Add some randomness
+            const radiusVariation = (Math.random() - 0.5) * 50;
+            const angleVariation = (Math.random() - 0.5) * 0.5;
+
+            const angle = angleOffset + angleVariation + (orbit * 0.3);
+            const radius = baseRadius + radiusVariation;
+
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+
+            return { x, y, angle, radius };
+        }
+
+        function createCareerItem(career, index, total) {
+            const item = document.createElement('div');
+            item.className = 'career-item';
+
+            const dot = document.createElement('div');
+            dot.className = `career-dot ${Math.random() > 0.5 ? 'blue' : 'green'}`;
+
+            const name = document.createElement('div');
+            name.className = 'career-name';
+            name.textContent = career.name;
+
+            item.appendChild(dot);
+            item.appendChild(name);
+
+            const pos = getRandomPosition(index, total);
+            item.style.left = `${pos.x}px`;
+            item.style.top = `${pos.y}px`;
+            item.style.transform = 'translate(-50%, -50%)';
+
+            // Store position data for animation
+            item.dataset.angle = pos.angle;
+            item.dataset.radius = pos.radius;
+            item.dataset.speed = 0.0002 + Math.random() * 0.0003;
+            item.dataset.career = JSON.stringify(career);
+
+            item.addEventListener('click', () => {
+                if (selectedCareer) {
+                    selectedCareer.classList.remove('clicked');
+                }
+                item.classList.add('clicked');
+                selectedCareer = item;
+                showCareerInfo(career);
+            });
+
+            container.appendChild(item);
+            return item;
+        }
+
+        function showCareerInfo(career) {
+            document.getElementById('careerTitle').textContent = career.name;
+            document.getElementById('careerOverview').textContent = career.overview;
+            document.getElementById('careerWorkStyle').innerHTML =
+                `<span class="work-style">${career.work_style}</span>`;
+            infoPanel.classList.add('visible');
+        }
+
+        closeBtn.addEventListener('click', () => {
+            infoPanel.classList.remove('visible');
+            if (selectedCareer) {
+                selectedCareer.classList.remove('clicked');
+                selectedCareer = null;
+            }
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            pauseBtn.classList.toggle('paused');
+        });
+
+        // Initialize careers
+        const careerElements = [];
+        careersData.roles.forEach((career, index) => {
+            careerElements.push(createCareerItem(career, index, careersData.roles.length));
+        });
+
+        // Animation loop
+        function animate() {
+            if (!isPaused) {
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+
+                careerElements.forEach(item => {
+                    let angle = parseFloat(item.dataset.angle);
+                    const radius = parseFloat(item.dataset.radius);
+                    const speed = parseFloat(item.dataset.speed);
+
+                    angle += speed;
+                    item.dataset.angle = angle;
+
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+
+                    item.style.left = `${x}px`;
+                    item.style.top = `${y}px`;
+                });
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            careerElements.forEach(item => {
+                const angle = parseFloat(item.dataset.angle);
+                const radius = parseFloat(item.dataset.radius);
+
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+
+                item.style.left = `${x}px`;
+                item.style.top = `${y}px`;
+            });
+        });
+    </script>
+</body>
+</html>
