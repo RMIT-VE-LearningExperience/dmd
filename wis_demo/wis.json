@@ -18,35 +18,15 @@
         "Certificate IV in Building (Construction Estimation)",
         "Diploma of Building and Construction"
       ],
-      "salary_range_aud": {
-        "entry": "80000-95000",
-        "mid": "100000-130000",
-        "senior": "130000-170000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "VET",
-          "course": "Certificate IV in Building and Construction",
-          "code": "CPC40120",
-          "url": "https://training.gov.au/training/details/CPC40120",
-          "notes": "Common pathway for site supervision and estimating-focused roles."
-        },
-        {
-          "type": "VET",
-          "course": "Diploma of Building and Construction (Management)",
-          "code": "CPC50320",
-          "url": "https://training.gov.au/training/details/CPC50320",
-          "notes": "Supports tendering, contracts, and commercial management skills."
-        }
-      ]
       "work_style": "Analytical-Formal",
       "levels": [
         {
           "title": "Junior Estimator",
           "summary": "Supports senior estimators by measuring quantities from drawings, updating spreadsheets and assisting with basic cost estimates.",
           "typical_experience": "Entry-level role for people with a trade background, certificate-level study or strong numeracy skills.",
-          "progresses_to": ["Building Estimator"],
+          "progresses_to": [
+            "Building Estimator"
+          ],
           "related_roles": [
             "Project Assistant",
             "Graduate Quantity Surveyor",
@@ -57,8 +37,10 @@
         {
           "title": "Building Estimator",
           "summary": "Prepares detailed cost estimates, researches material and labour rates and helps prepare competitive tenders.",
-          "typical_experience": "1–3 years’ experience in estimating or a related construction role plus Certificate IV in Building (Estimation) or similar.",
-          "progresses_to": ["Senior Estimator"],
+          "typical_experience": "1\u20133 years\u2019 experience in estimating or a related construction role plus Certificate IV in Building (Estimation) or similar.",
+          "progresses_to": [
+            "Senior Estimator"
+          ],
           "related_roles": [
             "Contract Administrator",
             "Quantity Surveyor",
@@ -69,7 +51,9 @@
           "title": "Senior Estimator",
           "summary": "Leads estimating on larger or more complex projects, reviews junior work and works directly with clients and project managers.",
           "typical_experience": "Several years as a building estimator, strong track record on medium to large projects.",
-          "progresses_to": ["Commercial Manager"],
+          "progresses_to": [
+            "Commercial Manager"
+          ],
           "related_roles": [
             "Senior Quantity Surveyor",
             "Senior Contract Administrator",
@@ -80,7 +64,10 @@
           "title": "Commercial Manager (Estimating Focus)",
           "summary": "Oversees the financial performance of projects or a business unit, sets pricing strategies and manages commercial risk.",
           "typical_experience": "Extensive experience as a senior estimator or quantity surveyor, often with leadership responsibilities.",
-          "progresses_to": ["Commercial Director", "Construction Manager"],
+          "progresses_to": [
+            "Commercial Director",
+            "Construction Manager"
+          ],
           "related_roles": [
             "Commercial Manager (QS)",
             "Construction Manager",
@@ -111,42 +98,15 @@
         "Certificate IV in Building and Construction (Contract Administration)",
         "Diploma of Construction Management"
       ],
-      "salary_range_aud": {
-        "entry": "85000-110000",
-        "mid": "110000-145000",
-        "senior": "145000-180000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "VET",
-          "course": "Diploma of Building and Construction (Management)",
-          "code": "CPC50320",
-          "url": "https://training.gov.au/training/details/CPC50320",
-          "notes": "Strong alignment with contract admin and commercial project roles."
-        },
-        {
-          "type": "VET",
-          "course": "Certificate IV in Project Management Practice",
-          "code": "BSB40920",
-          "url": "https://training.gov.au/training/details/BSB40920",
-          "notes": "Useful for coordination, scheduling, and stakeholder communication."
-        },
-        {
-          "type": "VET",
-          "course": "Diploma of Project Management",
-          "code": "BSB50820",
-          "url": "https://training.gov.au/training/details/BSB50820",
-          "notes": "Builds project controls and leadership capability."
-        }
-      ]
       "work_style": "Analytical-Formal",
       "levels": [
         {
           "title": "Assistant Contract Administrator",
           "summary": "Supports the contract admin team with document control, registers, reports and basic claims.",
           "typical_experience": "Entry-level, often while completing relevant VET or degree-level study.",
-          "progresses_to": ["Contract Administrator"],
+          "progresses_to": [
+            "Contract Administrator"
+          ],
           "related_roles": [
             "Project Assistant",
             "Junior Estimator",
@@ -156,8 +116,10 @@
         {
           "title": "Contract Administrator",
           "summary": "Manages contract documentation, RFIs, variations and progress claims for specific projects.",
-          "typical_experience": "1–3 years in an assistant CA or project admin role.",
-          "progresses_to": ["Senior Contract Administrator"],
+          "typical_experience": "1\u20133 years in an assistant CA or project admin role.",
+          "progresses_to": [
+            "Senior Contract Administrator"
+          ],
           "related_roles": [
             "Building Estimator",
             "Quantity Surveyor",
@@ -168,7 +130,10 @@
           "title": "Senior Contract Administrator",
           "summary": "Leads contract administration on larger projects, mentors junior staff and advises on contractual risks.",
           "typical_experience": "Several years as a contract administrator on mid to large projects.",
-          "progresses_to": ["Contract Manager", "Project Manager"],
+          "progresses_to": [
+            "Contract Manager",
+            "Project Manager"
+          ],
           "related_roles": [
             "Senior Quantity Surveyor",
             "Project Manager",
@@ -179,7 +144,10 @@
           "title": "Contract Manager",
           "summary": "Oversees multiple contracts or major projects, negotiates major agreements and sets standards for contract processes.",
           "typical_experience": "Extensive CA experience plus strong client and negotiation skills.",
-          "progresses_to": ["Commercial Manager", "Project Director"],
+          "progresses_to": [
+            "Commercial Manager",
+            "Project Director"
+          ],
           "related_roles": [
             "Commercial Manager",
             "Construction Manager"
@@ -211,35 +179,15 @@
         "Bachelor of Construction Management",
         "Graduate Diploma of Construction Management"
       ],
-      "salary_range_aud": {
-        "entry": "80000-100000",
-        "mid": "100000-140000",
-        "senior": "140000-180000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "University",
-          "course": "Construction Management / Quantity Surveying degree",
-          "code": null,
-          "url": null,
-          "notes": "Many QS roles require a relevant bachelor degree; VET diplomas can be a stepping stone."
-        },
-        {
-          "type": "VET",
-          "course": "Diploma of Building and Construction (Management)",
-          "code": "CPC50320",
-          "url": "https://training.gov.au/training/details/CPC50320",
-          "notes": "Often used as a pathway into commercial/cost roles before specialising."
-        }
-      ]
       "work_style": "Analytical-Formal",
       "levels": [
         {
           "title": "Graduate Quantity Surveyor",
           "summary": "Supports senior QS staff with measurement, basic cost plans and financial reporting.",
           "typical_experience": "Recent graduate or final-year student in construction management or related field.",
-          "progresses_to": ["Quantity Surveyor"],
+          "progresses_to": [
+            "Quantity Surveyor"
+          ],
           "related_roles": [
             "Junior Estimator",
             "Assistant Contract Administrator"
@@ -248,8 +196,10 @@
         {
           "title": "Quantity Surveyor",
           "summary": "Prepares detailed cost plans, bills of quantities and monitors project costs during construction.",
-          "typical_experience": "1–3 years in a QS or estimating role.",
-          "progresses_to": ["Senior Quantity Surveyor"],
+          "typical_experience": "1\u20133 years in a QS or estimating role.",
+          "progresses_to": [
+            "Senior Quantity Surveyor"
+          ],
           "related_roles": [
             "Building Estimator",
             "Contract Administrator",
@@ -260,7 +210,9 @@
           "title": "Senior Quantity Surveyor",
           "summary": "Leads cost management on major projects and provides strategic cost advice to clients and project teams.",
           "typical_experience": "Extensive QS experience and responsibility for large or complex projects.",
-          "progresses_to": ["Commercial Manager (QS)"],
+          "progresses_to": [
+            "Commercial Manager (QS)"
+          ],
           "related_roles": [
             "Senior Estimator",
             "Senior Contract Administrator",
@@ -271,7 +223,9 @@
           "title": "Commercial Manager (QS)",
           "summary": "Manages the commercial performance of multiple projects or a portfolio, including risk, claims and high-level reporting.",
           "typical_experience": "Senior QS/estimating background with leadership responsibilities.",
-          "progresses_to": ["Commercial Director"],
+          "progresses_to": [
+            "Commercial Director"
+          ],
           "related_roles": [
             "Commercial Manager (Estimating Focus)",
             "Construction Manager"
@@ -302,35 +256,15 @@
         "Certificate IV or Diploma in Project Management",
         "Certificate IV or Diploma in Construction Management"
       ],
-      "salary_range_aud": {
-        "entry": "65000-85000",
-        "mid": "85000-105000",
-        "senior": "105000-125000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "VET",
-          "course": "Certificate IV in Project Management Practice",
-          "code": "BSB40920",
-          "url": "https://training.gov.au/training/details/BSB40920",
-          "notes": "Entry pathway for project coordination and admin roles."
-        },
-        {
-          "type": "VET",
-          "course": "Diploma of Project Management",
-          "code": "BSB50820",
-          "url": "https://training.gov.au/training/details/BSB50820",
-          "notes": "Supports progression into project management roles."
-        }
-      ]
       "work_style": "Organisational-Hybrid",
       "levels": [
         {
           "title": "Project Assistant",
           "summary": "Supports project teams with meeting notes, document management and basic reporting.",
           "typical_experience": "Entry-level or early career admin/coordination role.",
-          "progresses_to": ["Project Coordinator"],
+          "progresses_to": [
+            "Project Coordinator"
+          ],
           "related_roles": [
             "Assistant Contract Administrator",
             "Junior Estimator"
@@ -339,8 +273,10 @@
         {
           "title": "Project Coordinator",
           "summary": "Coordinates meetings, schedules, documentation and communication for one or more projects.",
-          "typical_experience": "1–3 years in project support or coordination roles.",
-          "progresses_to": ["Project Manager"],
+          "typical_experience": "1\u20133 years in project support or coordination roles.",
+          "progresses_to": [
+            "Project Manager"
+          ],
           "related_roles": [
             "Contract Administrator",
             "Site Supervisor",
@@ -351,7 +287,9 @@
           "title": "Senior Project Coordinator",
           "summary": "Supports complex or multiple projects, often taking on quasi-project management responsibilities.",
           "typical_experience": "Several years as a project coordinator on medium to large projects.",
-          "progresses_to": ["Project Manager"],
+          "progresses_to": [
+            "Project Manager"
+          ],
           "related_roles": [
             "Assistant Project Manager",
             "Project Engineer"
@@ -383,42 +321,15 @@
         "Architecture",
         "Master of Project Management"
       ],
-      "salary_range_aud": {
-        "entry": "120000-150000",
-        "mid": "150000-200000",
-        "senior": "200000-250000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "VET",
-          "course": "Diploma of Project Management",
-          "code": "BSB50820",
-          "url": "https://training.gov.au/training/details/BSB50820",
-          "notes": "Common VET pathway for project leadership skills."
-        },
-        {
-          "type": "VET",
-          "course": "Diploma of Building and Construction (Management)",
-          "code": "CPC50320",
-          "url": "https://training.gov.au/training/details/CPC50320",
-          "notes": "Construction-specific management pathway."
-        },
-        {
-          "type": "University",
-          "course": "Construction Management / Engineering / Architecture degree",
-          "code": null,
-          "url": null,
-          "notes": "Many PM roles prefer a relevant degree plus site experience."
-        }
-      ]
       "work_style": "Leadership-Formal",
       "levels": [
         {
           "title": "Assistant Project Manager",
           "summary": "Supports a project manager with planning, reporting and coordination tasks.",
           "typical_experience": "Experienced project coordinator or engineer stepping into management.",
-          "progresses_to": ["Project Manager"],
+          "progresses_to": [
+            "Project Manager"
+          ],
           "related_roles": [
             "Project Coordinator",
             "Project Engineer",
@@ -429,7 +340,9 @@
           "title": "Project Manager",
           "summary": "Manages scope, time, cost, quality and risk for a project, coordinating teams and resources.",
           "typical_experience": "Several years in coordination, engineering or site roles.",
-          "progresses_to": ["Senior Project Manager"],
+          "progresses_to": [
+            "Senior Project Manager"
+          ],
           "related_roles": [
             "Construction Manager",
             "Senior Quantity Surveyor",
@@ -440,7 +353,9 @@
           "title": "Senior Project Manager",
           "summary": "Leads complex or multiple projects, mentors other project managers and contributes to business strategy.",
           "typical_experience": "Extensive PM experience and strong stakeholder management skills.",
-          "progresses_to": ["Project Director"],
+          "progresses_to": [
+            "Project Director"
+          ],
           "related_roles": [
             "Construction Manager",
             "Commercial Manager",
@@ -483,42 +398,15 @@
         "Trade Qualification",
         "Diploma or Bachelor in Construction Management"
       ],
-      "salary_range_aud": {
-        "entry": "130000-160000",
-        "mid": "160000-210000",
-        "senior": "210000-260000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "VET",
-          "course": "Certificate IV in Building and Construction",
-          "code": "CPC40120",
-          "url": "https://training.gov.au/training/details/CPC40120",
-          "notes": "Common pathway for supervisors moving into site leadership roles."
-        },
-        {
-          "type": "VET",
-          "course": "Diploma of Building and Construction (Building)",
-          "code": "CPC50220",
-          "url": "https://training.gov.au/Training/Details/CPC50220",
-          "notes": "Builds capability for managing building work, risk, and financials."
-        },
-        {
-          "type": "VET",
-          "course": "Diploma of Building and Construction (Management)",
-          "code": "CPC50320",
-          "url": "https://training.gov.au/training/details/CPC50320",
-          "notes": "Construction management pathway for senior site and operations roles."
-        }
-      ]
       "work_style": "Leadership-HandsOn",
       "levels": [
         {
           "title": "Site Supervisor",
           "summary": "Manages day-to-day site activities for a specific area of work, coordinating trades and monitoring safety.",
           "typical_experience": "Experienced tradesperson or leading hand with supervisory training.",
-          "progresses_to": ["Site Manager"],
+          "progresses_to": [
+            "Site Manager"
+          ],
           "related_roles": [
             "Leading Hand",
             "Project Coordinator",
@@ -529,7 +417,9 @@
           "title": "Site Manager",
           "summary": "Responsible for the whole site, including program, logistics, site safety and quality.",
           "typical_experience": "Several years as a site supervisor or foreperson on busy projects.",
-          "progresses_to": ["Construction Manager"],
+          "progresses_to": [
+            "Construction Manager"
+          ],
           "related_roles": [
             "Project Manager",
             "Health and Safety Officer",
@@ -540,7 +430,10 @@
           "title": "Construction Manager",
           "summary": "Oversees multiple sites or large projects, sets delivery strategy and supports site and project managers.",
           "typical_experience": "Extensive experience as a site manager or project manager.",
-          "progresses_to": ["Operations Manager", "Director of Construction"],
+          "progresses_to": [
+            "Operations Manager",
+            "Director of Construction"
+          ],
           "related_roles": [
             "Operations Manager",
             "Commercial Manager",
@@ -551,7 +444,9 @@
           "title": "Operations Manager",
           "summary": "Manages construction operations across a region or business unit, aligning resources and strategy.",
           "typical_experience": "Senior-level construction leadership across multiple projects.",
-          "progresses_to": ["Director of Construction"],
+          "progresses_to": [
+            "Director of Construction"
+          ],
           "related_roles": [
             "Director of Construction",
             "General Manager"
@@ -584,28 +479,15 @@
         "Bachelor of Structural Engineering",
         "Bachelor of Mechanical Engineering"
       ],
-      "salary_range_aud": {
-        "entry": "85000-105000",
-        "mid": "105000-140000",
-        "senior": "140000-180000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "University",
-          "course": "Civil / Structural / Mechanical Engineering degree",
-          "code": null,
-          "url": null,
-          "notes": "Project engineer roles typically require an accredited engineering degree."
-        }
-      ]
       "work_style": "Technical-Analytical",
       "levels": [
         {
           "title": "Graduate Engineer",
           "summary": "Rotates through different areas of the project, learning design, site work and documentation.",
           "typical_experience": "Recent engineering graduate.",
-          "progresses_to": ["Project Engineer"],
+          "progresses_to": [
+            "Project Engineer"
+          ],
           "related_roles": [
             "Graduate Quantity Surveyor",
             "Project Assistant"
@@ -614,19 +496,23 @@
         {
           "title": "Project Engineer",
           "summary": "Manages technical queries, coordinates design changes and quality tests and supports the site team.",
-          "typical_experience": "1–3 years in engineering roles with site exposure.",
-          "progresses_to": ["Senior Project Engineer"],
+          "typical_experience": "1\u20133 years in engineering roles with site exposure.",
+          "progresses_to": [
+            "Senior Project Engineer"
+          ],
           "related_roles": [
             "Project Manager",
             "Site Manager",
-            "Electrician (Senior level – commercial projects)"
+            "Electrician (Senior level \u2013 commercial projects)"
           ]
         },
         {
           "title": "Senior Project Engineer",
           "summary": "Leads engineering teams, coordinates complex technical packages and supports project planning.",
           "typical_experience": "Strong experience across multiple projects.",
-          "progresses_to": ["Engineering Manager"],
+          "progresses_to": [
+            "Engineering Manager"
+          ],
           "related_roles": [
             "Senior Project Manager",
             "Construction Manager"
@@ -667,35 +553,15 @@
         "Certificate IV in Work Health and Safety",
         "Diploma of Work Health and Safety"
       ],
-      "salary_range_aud": {
-        "entry": "80000-95000",
-        "mid": "95000-125000",
-        "senior": "125000-160000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "VET",
-          "course": "Certificate IV in Work Health and Safety",
-          "code": "BSB41419",
-          "url": "https://training.gov.au/training/details/BSB41419",
-          "notes": "Common entry pathway for WHS officer and advisor roles."
-        },
-        {
-          "type": "VET",
-          "course": "Diploma of Work Health and Safety",
-          "code": "BSB51319",
-          "url": "https://training.gov.au/training/details/BSB51319",
-          "notes": "Supports progression into WHS coordinator, manager, and lead roles."
-        }
-      ]
       "work_style": "Compliance-Formal",
       "levels": [
         {
           "title": "Assistant Safety Officer",
           "summary": "Supports the WHS team with inspections, incident reporting and toolbox talks.",
           "typical_experience": "Entry-level role, often with trade or site experience.",
-          "progresses_to": ["Health and Safety Officer"],
+          "progresses_to": [
+            "Health and Safety Officer"
+          ],
           "related_roles": [
             "Site Supervisor",
             "Leading Hand"
@@ -704,8 +570,10 @@
         {
           "title": "Health and Safety Officer",
           "summary": "Conducts site inspections, risk assessments and safety training and supports investigations.",
-          "typical_experience": "1–3 years in WHS roles or relevant on-site experience.",
-          "progresses_to": ["Senior Safety Officer"],
+          "typical_experience": "1\u20133 years in WHS roles or relevant on-site experience.",
+          "progresses_to": [
+            "Senior Safety Officer"
+          ],
           "related_roles": [
             "Site Manager",
             "Construction Manager"
@@ -715,7 +583,9 @@
           "title": "Senior Safety Officer",
           "summary": "Leads safety on major projects, coaches teams and drives safety initiatives.",
           "typical_experience": "Extensive WHS experience on large and complex projects.",
-          "progresses_to": ["Safety Manager"],
+          "progresses_to": [
+            "Safety Manager"
+          ],
           "related_roles": [
             "Safety Manager",
             "Operations Manager"
@@ -754,28 +624,15 @@
       "core_education": [
         "Certificate III in Construction Waterproofing (CPC31420)"
       ],
-      "salary_range_aud": {
-        "entry": "55000-70000",
-        "mid": "70000-90000",
-        "senior": "90000-115000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "VET",
-          "course": "Certificate III in Construction Waterproofing",
-          "code": "CPC31420",
-          "url": "https://www.yourcareer.gov.au/learn-and-train/courses/CPC31420",
-          "notes": "Trade qualification pathway for waterproofing work in construction."
-        }
-      ]
       "work_style": "HandsOn-Practical",
       "levels": [
         {
           "title": "Apprentice Waterproofer",
           "summary": "Learns surface preparation, membrane systems and safety procedures under supervision.",
           "typical_experience": "Entry-level trade assistant or apprentice.",
-          "progresses_to": ["Qualified Waterproofer"],
+          "progresses_to": [
+            "Qualified Waterproofer"
+          ],
           "related_roles": [
             "Apprentice Tiler",
             "Apprentice Plumber"
@@ -785,7 +642,9 @@
           "title": "Qualified Waterproofer",
           "summary": "Installs waterproofing systems in bathrooms, rooftops, balconies and basements.",
           "typical_experience": "Completed apprenticeship or Certificate III in Waterproofing.",
-          "progresses_to": ["Waterproofing Supervisor"],
+          "progresses_to": [
+            "Waterproofing Supervisor"
+          ],
           "related_roles": [
             "Qualified Tiler",
             "Qualified Plumber",
@@ -796,7 +655,10 @@
           "title": "Waterproofing Supervisor",
           "summary": "Leads waterproofing teams, coordinates work with other trades and checks compliance with standards.",
           "typical_experience": "Experienced tradesperson with leadership responsibility.",
-          "progresses_to": ["Waterproofing Consultant", "Site Supervisor"],
+          "progresses_to": [
+            "Waterproofing Consultant",
+            "Site Supervisor"
+          ],
           "related_roles": [
             "Site Supervisor",
             "Construction Manager"
@@ -835,28 +697,15 @@
       "core_education": [
         "Certificate III in Wall and Floor Tiling (CPC31320)"
       ],
-      "salary_range_aud": {
-        "entry": "55000-70000",
-        "mid": "70000-95000",
-        "senior": "95000-125000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "VET",
-          "course": "Certificate III in Wall and Floor Tiling",
-          "code": "CPC31320",
-          "url": "https://training.gov.au/training/details/CPC31320",
-          "notes": "Trade outcome for residential and commercial tiling."
-        }
-      ]
       "work_style": "HandsOn-Creative",
       "levels": [
         {
           "title": "Apprentice Tiler",
           "summary": "Learns how to prepare surfaces, cut tiles and lay them accurately under supervision.",
           "typical_experience": "Entry-level trade role.",
-          "progresses_to": ["Qualified Tiler"],
+          "progresses_to": [
+            "Qualified Tiler"
+          ],
           "related_roles": [
             "Apprentice Waterproofer",
             "Apprentice Plumber"
@@ -866,7 +715,10 @@
           "title": "Qualified Tiler",
           "summary": "Installs wall and floor tiles, follows plans and ensures quality finishes.",
           "typical_experience": "Completed tiling apprenticeship or equivalent experience.",
-          "progresses_to": ["Specialist Tiler", "Tiling Supervisor"],
+          "progresses_to": [
+            "Specialist Tiler",
+            "Tiling Supervisor"
+          ],
           "related_roles": [
             "Qualified Waterproofer",
             "Qualified Plumber",
@@ -877,7 +729,10 @@
           "title": "Specialist Tiler",
           "summary": "Works on complex patterns, feature walls or high-end materials such as mosaic and stone.",
           "typical_experience": "Several years tiling experience and strong design skills.",
-          "progresses_to": ["Business Owner", "Site Supervisor (finishes)"],
+          "progresses_to": [
+            "Business Owner",
+            "Site Supervisor (finishes)"
+          ],
           "related_roles": [
             "Interior Finishes Specialist",
             "Site Supervisor"
@@ -917,28 +772,15 @@
         "Certificate III in Plumbing (CPC32420)",
         "Apprenticeship"
       ],
-      "salary_range_aud": {
-        "entry": "65000-85000",
-        "mid": "90000-120000",
-        "senior": "120000-160000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "VET",
-          "course": "Certificate III in Plumbing",
-          "code": "CPC32420",
-          "url": "https://www.yourcareer.gov.au/learn-and-train/courses/CPC32420",
-          "notes": "Typically completed via apprenticeship, plus licensing/registration requirements vary by state."
-        }
-      ]
       "work_style": "HandsOn-Practical",
       "levels": [
         {
           "title": "Apprentice Plumber",
           "summary": "Learns how to install and maintain plumbing systems under supervision.",
           "typical_experience": "Entry-level trade apprentice.",
-          "progresses_to": ["Qualified Plumber"],
+          "progresses_to": [
+            "Qualified Plumber"
+          ],
           "related_roles": [
             "Apprentice Electrician",
             "Apprentice Waterproofer",
@@ -949,7 +791,10 @@
           "title": "Qualified Plumber",
           "summary": "Installs, maintains and repairs plumbing systems in residential or commercial settings.",
           "typical_experience": "Completed apprenticeship and licensing requirements.",
-          "progresses_to": ["Plumbing Supervisor", "Specialist Plumber"],
+          "progresses_to": [
+            "Plumbing Supervisor",
+            "Specialist Plumber"
+          ],
           "related_roles": [
             "Qualified Electrician",
             "Qualified Waterproofer",
@@ -960,7 +805,9 @@
           "title": "Plumbing Supervisor",
           "summary": "Leads a team of plumbers, coordinates site work and liaises with builders and inspectors.",
           "typical_experience": "Several years as a qualified plumber with leadership skills.",
-          "progresses_to": ["Plumbing Contractor"],
+          "progresses_to": [
+            "Plumbing Contractor"
+          ],
           "related_roles": [
             "Site Supervisor",
             "Project Coordinator"
@@ -998,30 +845,17 @@
       ],
       "core_education": [
         "Certificate III in Electrotechnology (Electrician)",
-        "Electrical Apprenticeship (typically 3–4 years)"
+        "Electrical Apprenticeship (typically 3\u20134 years)"
       ],
-      "salary_range_aud": {
-        "entry": "65000-90000",
-        "mid": "95000-125000",
-        "senior": "125000-170000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "VET",
-          "course": "Certificate III in Electrotechnology Electrician",
-          "code": "UEE30820",
-          "url": "https://training.gov.au/training/details/UEE30820",
-          "notes": "Typically completed via apprenticeship, plus licensing requirements vary by state."
-        }
-      ]
       "work_style": "HandsOn-Technical",
       "levels": [
         {
           "title": "Electrical Apprentice",
           "summary": "Learns basic wiring, installation and fault-finding under supervision while completing formal training.",
           "typical_experience": "Entry-level trade apprentice.",
-          "progresses_to": ["Qualified Electrician"],
+          "progresses_to": [
+            "Qualified Electrician"
+          ],
           "related_roles": [
             "Apprentice Plumber",
             "Apprentice Refrigeration Mechanic",
@@ -1032,7 +866,10 @@
           "title": "Qualified Electrician",
           "summary": "Installs, maintains and repairs electrical systems in residential, commercial or industrial settings.",
           "typical_experience": "Completed apprenticeship and licensing requirements.",
-          "progresses_to": ["Senior Electrician", "Electrical Specialist"],
+          "progresses_to": [
+            "Senior Electrician",
+            "Electrical Specialist"
+          ],
           "related_roles": [
             "Qualified Plumber",
             "Project Engineer (building services)",
@@ -1043,7 +880,10 @@
           "title": "Senior Electrician / Leading Hand",
           "summary": "Leads small teams, tackles complex faults and mentors apprentices on site.",
           "typical_experience": "Several years as a qualified electrician with leadership responsibilities.",
-          "progresses_to": ["Electrical Supervisor", "Electrical Project Manager"],
+          "progresses_to": [
+            "Electrical Supervisor",
+            "Electrical Project Manager"
+          ],
           "related_roles": [
             "Site Supervisor (services)",
             "Project Coordinator",
@@ -1054,7 +894,10 @@
           "title": "Electrical Supervisor / Project Electrician",
           "summary": "Plans and coordinates electrical works across larger projects, including safety, quality and scheduling.",
           "typical_experience": "Experienced senior electrician comfortable with documentation and coordination.",
-          "progresses_to": ["Electrical Project Manager", "Electrical Contractor / Business Owner"],
+          "progresses_to": [
+            "Electrical Project Manager",
+            "Electrical Contractor / Business Owner"
+          ],
           "related_roles": [
             "Project Engineer",
             "Project Manager",
@@ -1065,7 +908,10 @@
           "title": "Electrical Project Manager",
           "summary": "Manages electrical packages on large projects, overseeing time, cost and quality and coordinating with other trades.",
           "typical_experience": "Strong field and coordination experience plus project management skills.",
-          "progresses_to": ["Senior Project Manager", "Construction Manager"],
+          "progresses_to": [
+            "Senior Project Manager",
+            "Construction Manager"
+          ],
           "related_roles": [
             "Project Manager",
             "Project Engineer",
@@ -1106,28 +952,15 @@
         "Certificate III in Rigging or Crane Operations",
         "High Risk Work Licence"
       ],
-      "salary_range_aud": {
-        "entry": "110000-140000",
-        "mid": "140000-180000",
-        "senior": "180000-220000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "Licensing",
-          "course": "High Risk Work Licence (crane classes)",
-          "code": null,
-          "url": null,
-          "notes": "Licensing requirements apply; training is typically delivered by registered providers."
-        }
-      ]
       "work_style": "HandsOn-Structured",
       "levels": [
         {
           "title": "Trainee Crane Operator",
           "summary": "Learns basic crane operations, hand signals and safety procedures under supervision.",
           "typical_experience": "Entry-level role, often moving from general labouring or dogging.",
-          "progresses_to": ["Crane Operator"],
+          "progresses_to": [
+            "Crane Operator"
+          ],
           "related_roles": [
             "Dogman / Rigger",
             "General Labourer"
@@ -1137,7 +970,9 @@
           "title": "Crane Operator",
           "summary": "Operates cranes to lift and move materials safely on site within a team.",
           "typical_experience": "Completed training and licence requirements.",
-          "progresses_to": ["Senior Crane Operator"],
+          "progresses_to": [
+            "Senior Crane Operator"
+          ],
           "related_roles": [
             "Heavy Vehicle Operator",
             "Site Supervisor (logistics)"
@@ -1147,7 +982,9 @@
           "title": "Senior Crane Operator",
           "summary": "Handles complex lifts, mentors junior operators and works closely with site management on lift planning.",
           "typical_experience": "Strong experience operating cranes on busy sites.",
-          "progresses_to": ["Crane Supervisor"],
+          "progresses_to": [
+            "Crane Supervisor"
+          ],
           "related_roles": [
             "Crane Supervisor",
             "Construction Manager (logistics focus)"
@@ -1186,28 +1023,15 @@
         "Heavy Rigid (HR) or Heavy Combination (HC) Licence",
         "On-the-job training"
       ],
-      "salary_range_aud": {
-        "entry": "65000-85000",
-        "mid": "85000-110000",
-        "senior": "110000-140000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "Licensing",
-          "course": "Heavy vehicle licence (HR/HC/MC)",
-          "code": null,
-          "url": null,
-          "notes": "Licensing class depends on vehicle type and state requirements."
-        }
-      ]
       "work_style": "HandsOn-Structured",
       "levels": [
         {
           "title": "Trainee Heavy Vehicle Operator",
           "summary": "Drives under supervision and learns site access, loading and safety procedures.",
           "typical_experience": "Junior driver or labourer obtaining heavy vehicle licence.",
-          "progresses_to": ["Heavy Vehicle Operator"],
+          "progresses_to": [
+            "Heavy Vehicle Operator"
+          ],
           "related_roles": [
             "General Labourer",
             "Plant Operator"
@@ -1217,7 +1041,9 @@
           "title": "Heavy Vehicle Operator",
           "summary": "Transports materials and equipment safely to and around construction sites.",
           "typical_experience": "Licensed heavy vehicle driver with some site experience.",
-          "progresses_to": ["Senior Heavy Vehicle Operator"],
+          "progresses_to": [
+            "Senior Heavy Vehicle Operator"
+          ],
           "related_roles": [
             "Crane Operator",
             "Plant Operator",
@@ -1228,7 +1054,9 @@
           "title": "Senior Heavy Vehicle Operator",
           "summary": "Manages more complex vehicle operations and supports planning of logistics.",
           "typical_experience": "Several years of heavy vehicle driving on busy construction or civil sites.",
-          "progresses_to": ["Transport Supervisor"],
+          "progresses_to": [
+            "Transport Supervisor"
+          ],
           "related_roles": [
             "Crane Supervisor",
             "Site Supervisor (logistics)"
@@ -1268,28 +1096,15 @@
         "Trade Qualification (e.g. Carpentry, Tiling, Waterproofing, Plumbing, Electrical)",
         "Certificate IV in Building and Construction (Site Management) or equivalent"
       ],
-      "salary_range_aud": {
-        "entry": "95000-115000",
-        "mid": "115000-135000",
-        "senior": "135000-170000",
-        "basis": "Indicative annual ranges (AUD)"
-      },
-      "education_pathways": [
-        {
-          "type": "VET",
-          "course": "Certificate IV in Building and Construction",
-          "code": "CPC40120",
-          "url": "https://training.gov.au/training/details/CPC40120",
-          "notes": "Common supervisor/site leadership qualification, often after trade experience."
-        }
-      ]
       "work_style": "Leadership-HandsOn",
       "levels": [
         {
           "title": "Leading Hand",
           "summary": "Senior tradesperson who supports the supervisor and coordinates small teams or specific tasks.",
           "typical_experience": "Experienced tradesperson trusted to lead others.",
-          "progresses_to": ["Site Supervisor"],
+          "progresses_to": [
+            "Site Supervisor"
+          ],
           "related_roles": [
             "Qualified Electrician",
             "Qualified Plumber",
@@ -1300,7 +1115,10 @@
           "title": "Site Supervisor",
           "summary": "Manages day-to-day site operations, safety and quality for specific areas of work or smaller projects.",
           "typical_experience": "Several years in a trade plus leadership experience.",
-          "progresses_to": ["Site Manager", "Construction Manager"],
+          "progresses_to": [
+            "Site Manager",
+            "Construction Manager"
+          ],
           "related_roles": [
             "Waterproofing Supervisor",
             "Plumbing Supervisor",
@@ -1312,7 +1130,9 @@
           "title": "Senior Site Supervisor / General Foreperson",
           "summary": "Oversees multiple work fronts and coordinates several crews and subcontractors.",
           "typical_experience": "Extensive supervisory experience across different types of projects.",
-          "progresses_to": ["Site Manager"],
+          "progresses_to": [
+            "Site Manager"
+          ],
           "related_roles": [
             "Site Manager",
             "Construction Manager"
