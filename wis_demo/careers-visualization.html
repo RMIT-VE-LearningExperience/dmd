@@ -102,6 +102,31 @@
             border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
+        @media (max-width: 480px) {
+            .explore-center {
+                width: 140px;
+                height: 140px;
+            }
+
+            .explore-text {
+                font-size: 22px;
+            }
+
+            .career-item {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .career-name {
+                font-size: 11px;
+            }
+
+            .career-dot {
+                width: 6px;
+                height: 6px;
+            }
+        }
+
         .explore-center::before {
             content: '';
             position: absolute;
@@ -413,6 +438,39 @@
             .info-panel {
                 width: calc(100% - 40px);
                 max-width: 450px;
+                right: 20px;
+                left: 20px;
+                transform: translateY(100vh);
+                max-height: 70vh;
+            }
+
+            .info-panel.visible {
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .info-panel {
+                top: auto;
+                bottom: 0;
+                border-radius: 16px 16px 0 0;
+                max-height: 80vh;
+            }
+
+            .panel-header {
+                padding: 20px 16px;
+            }
+
+            .panel-content {
+                padding: 16px;
+            }
+
+            .info-panel h2 {
+                font-size: 20px;
+            }
+
+            .salary {
+                font-size: 16px;
             }
         }
 
@@ -704,22 +762,40 @@
             const centerX = window.innerWidth / 2;
             const centerY = window.innerHeight / 2;
 
-            // Create multiple orbits
+            // Responsive orbit sizing
+            const isMobile = window.innerWidth < 768;
+            const isSmallMobile = window.innerWidth < 480;
+
+            // Create multiple orbits with mobile-friendly sizing
             const orbit = Math.floor(index / 5);
             const angleOffset = (index % 5) * (2 * Math.PI / 5);
-            const baseRadius = 250 + (orbit * 120);
 
-            // Add some randomness
-            const radiusVariation = (Math.random() - 0.5) * 50;
+            // Adjust base radius and spacing based on screen size
+            let baseRadius, orbitSpacing;
+            if (isSmallMobile) {
+                baseRadius = 140;
+                orbitSpacing = 70;
+            } else if (isMobile) {
+                baseRadius = 180;
+                orbitSpacing = 85;
+            } else {
+                baseRadius = 250;
+                orbitSpacing = 120;
+            }
+
+            const radius = baseRadius + (orbit * orbitSpacing);
+
+            // Add some randomness (less on mobile)
+            const radiusVariation = isMobile ? (Math.random() - 0.5) * 30 : (Math.random() - 0.5) * 50;
             const angleVariation = (Math.random() - 0.5) * 0.5;
 
             const angle = angleOffset + angleVariation + (orbit * 0.3);
-            const radius = baseRadius + radiusVariation;
+            const finalRadius = radius + radiusVariation;
 
-            const x = centerX + Math.cos(angle) * radius;
-            const y = centerY + Math.sin(angle) * radius;
+            const x = centerX + Math.cos(angle) * finalRadius;
+            const y = centerY + Math.sin(angle) * finalRadius;
 
-            return { x, y, angle, radius };
+            return { x, y, angle, radius: finalRadius };
         }
 
         function createCareerItem(career, index, total) {
@@ -867,21 +943,21 @@
         // Start animation
         animate();
 
-        // Handle window resize
+        // Handle window resize - recalculate positions for responsive sizing
+        let resizeTimeout;
         window.addEventListener('resize', () => {
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                // Recalculate all positions with new responsive sizing
+                careerElements.forEach((item, index) => {
+                    const pos = getRandomPosition(index, careerElements.length);
+                    item.dataset.angle = pos.angle;
+                    item.dataset.radius = pos.radius;
 
-            careerElements.forEach(item => {
-                const angle = parseFloat(item.dataset.angle);
-                const radius = parseFloat(item.dataset.radius);
-
-                const x = centerX + Math.cos(angle) * radius;
-                const y = centerY + Math.sin(angle) * radius;
-
-                item.style.left = `${x}px`;
-                item.style.top = `${y}px`;
-            });
+                    item.style.left = `${pos.x}px`;
+                    item.style.top = `${pos.y}px`;
+                });
+            }, 250);
         });
     </script>
 </body>
