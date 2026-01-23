@@ -251,18 +251,6 @@
             font-size: 18px;
             font-weight: 600;
             color: rgba(255, 255, 255, 0.95);
-            margin-bottom: 8px;
-        }
-
-        .work-style {
-            display: inline-block;
-            padding: 6px 14px;
-            background: rgba(255, 255, 255, 0.25);
-            color: white;
-            border-radius: 16px;
-            font-size: 13px;
-            font-weight: 500;
-            backdrop-filter: blur(10px);
         }
 
         .section {
@@ -508,7 +496,6 @@
                 <button class="close-btn" id="closeBtn">×</button>
                 <h2 id="careerTitle"></h2>
                 <div class="salary" id="careerSalary"></div>
-                <div id="careerWorkStyle"></div>
             </div>
             <div class="panel-content">
                 <div class="section">
@@ -840,8 +827,6 @@
             // Header info
             document.getElementById('careerTitle').textContent = career.name;
             document.getElementById('careerSalary').textContent = career.salary_range || 'Salary varies';
-            document.getElementById('careerWorkStyle').innerHTML =
-                `<span class="work-style">${career.work_style}</span>`;
 
             // Overview
             document.getElementById('careerOverview').textContent = career.overview;
