@@ -1070,6 +1070,13 @@ body {
     flex: 1;
 }
 
+/* Desktop: ensure proper grid on desktop */
+@media (min-width: 769px) {
+    .comparison-content {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}
+
 .comparison-side {
     background: white;
     padding: 24px;
@@ -1080,6 +1087,27 @@ body {
     font-weight: 600;
     color: #2d3748;
     margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.change-career-btn {
+    padding: 6px 14px;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.change-career-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: scale(1.05);
 }
 
 .comparison-salary {
@@ -1143,18 +1171,99 @@ body {
 @media (max-width: 768px) {
     .comparison-content {
         grid-template-columns: 1fr;
+        display: block;
     }
 
     .comparison-side {
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: none;
+        padding: 0;
     }
 
-    .comparison-side:last-child {
-        border-bottom: none;
+    .comparison-side h3 {
+        font-size: 16px;
     }
 
     .comparison-header h2 {
         font-size: 18px;
+    }
+
+    /* Mobile: section-by-section layout */
+    .comparison-section {
+        padding: 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .comparison-section:last-child {
+        border-bottom: none;
+    }
+
+    .comparison-section-title {
+        font-size: 12px;
+        margin-bottom: 16px;
+        text-align: center;
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    /* Mobile: show careers side by side within each section */
+    .mobile-comparison-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .mobile-career-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .mobile-career-content {
+        padding: 12px;
+        background: #f7fafc;
+        border-radius: 8px;
+    }
+
+    .comparison-salary {
+        font-size: 11px;
+        padding: 4px 10px;
+        margin-bottom: 12px;
+    }
+
+    .comparison-text {
+        font-size: 12px;
+    }
+
+    .skills-container {
+        gap: 6px;
+    }
+
+    .skill-tag {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+
+    .education-list {
+        font-size: 12px;
+    }
+
+    .education-item {
+        font-size: 12px;
+        padding: 6px 0;
+        padding-left: 16px;
+    }
+
+    .education-item::before {
+        width: 6px;
+        height: 6px;
+        top: 12px;
+    }
+
+    .change-career-btn {
+        font-size: 10px;
+        padding: 4px 10px;
     }
 
     /* Mobile: always show compare button */

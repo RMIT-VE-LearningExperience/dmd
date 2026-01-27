@@ -369,54 +369,221 @@ function showLimitReachedFeedback(cardElement) {
 function showComparison() {
     const leftCareer = comparisonCareers[0];
     const rightCareer = comparisonCareers[1];
+    const comparisonContent = document.getElementById('comparisonContent');
 
-    // Populate left side
-    document.getElementById('compareLeftTitle').textContent = leftCareer.name;
-    document.getElementById('compareLeftSalary').textContent = leftCareer.salary_range;
-    document.getElementById('compareLeftOverview').textContent = leftCareer.overview;
+    // Check if mobile
+    const isMobile = window.innerWidth <= 768;
 
-    const leftSkills = document.getElementById('compareLeftSkills');
-    leftSkills.innerHTML = '';
-    leftCareer.core_skills.forEach(skill => {
-        const tag = document.createElement('div');
-        tag.className = 'skill-tag';
-        tag.innerHTML = `<div class="skill-dot"></div><span>${skill}</span>`;
-        leftSkills.appendChild(tag);
-    });
+    if (isMobile) {
+        // Mobile: section-by-section layout
+        comparisonContent.innerHTML = `
+            <!-- Titles Section -->
+            <div class="comparison-section">
+                <div class="mobile-comparison-row">
+                    <div class="mobile-career-content">
+                        <h3 style="font-size: 16px; margin-bottom: 8px;">${leftCareer.name}</h3>
+                        <button class="change-career-btn" onclick="changeCareer(0)">Change</button>
+                        <div class="comparison-salary" style="margin-top: 8px;">${leftCareer.salary_range}</div>
+                    </div>
+                    <div class="mobile-career-content">
+                        <h3 style="font-size: 16px; margin-bottom: 8px;">${rightCareer.name}</h3>
+                        <button class="change-career-btn" onclick="changeCareer(1)">Change</button>
+                        <div class="comparison-salary" style="margin-top: 8px;">${rightCareer.salary_range}</div>
+                    </div>
+                </div>
+            </div>
 
-    const leftEducation = document.getElementById('compareLeftEducation');
-    leftEducation.innerHTML = '';
-    leftCareer.core_education.forEach(edu => {
-        const li = document.createElement('li');
-        li.className = 'education-item';
-        li.textContent = edu;
-        leftEducation.appendChild(li);
-    });
+            <!-- Overview Section -->
+            <div class="comparison-section">
+                <div class="comparison-section-title">Overview</div>
+                <div class="mobile-comparison-row">
+                    <div class="mobile-career-content">
+                        <div class="mobile-career-name">${leftCareer.name}</div>
+                        <p class="comparison-text">${leftCareer.overview}</p>
+                    </div>
+                    <div class="mobile-career-content">
+                        <div class="mobile-career-name">${rightCareer.name}</div>
+                        <p class="comparison-text">${rightCareer.overview}</p>
+                    </div>
+                </div>
+            </div>
 
-    // Populate right side
-    document.getElementById('compareRightTitle').textContent = rightCareer.name;
-    document.getElementById('compareRightSalary').textContent = rightCareer.salary_range;
-    document.getElementById('compareRightOverview').textContent = rightCareer.overview;
+            <!-- Skills Section -->
+            <div class="comparison-section">
+                <div class="comparison-section-title">Core Skills</div>
+                <div class="mobile-comparison-row">
+                    <div class="mobile-career-content">
+                        <div class="mobile-career-name">${leftCareer.name}</div>
+                        <div class="skills-container" id="mobileLeftSkills"></div>
+                    </div>
+                    <div class="mobile-career-content">
+                        <div class="mobile-career-name">${rightCareer.name}</div>
+                        <div class="skills-container" id="mobileRightSkills"></div>
+                    </div>
+                </div>
+            </div>
 
-    const rightSkills = document.getElementById('compareRightSkills');
-    rightSkills.innerHTML = '';
-    rightCareer.core_skills.forEach(skill => {
-        const tag = document.createElement('div');
-        tag.className = 'skill-tag';
-        tag.innerHTML = `<div class="skill-dot"></div><span>${skill}</span>`;
-        rightSkills.appendChild(tag);
-    });
+            <!-- Education Section -->
+            <div class="comparison-section">
+                <div class="comparison-section-title">Core Education</div>
+                <div class="mobile-comparison-row">
+                    <div class="mobile-career-content">
+                        <div class="mobile-career-name">${leftCareer.name}</div>
+                        <ul class="education-list" id="mobileLeftEducation"></ul>
+                    </div>
+                    <div class="mobile-career-content">
+                        <div class="mobile-career-name">${rightCareer.name}</div>
+                        <ul class="education-list" id="mobileRightEducation"></ul>
+                    </div>
+                </div>
+            </div>
+        `;
 
-    const rightEducation = document.getElementById('compareRightEducation');
-    rightEducation.innerHTML = '';
-    rightCareer.core_education.forEach(edu => {
-        const li = document.createElement('li');
-        li.className = 'education-item';
-        li.textContent = edu;
-        rightEducation.appendChild(li);
-    });
+        // Populate skills for mobile
+        const mobileLeftSkills = document.getElementById('mobileLeftSkills');
+        leftCareer.core_skills.forEach(skill => {
+            const tag = document.createElement('div');
+            tag.className = 'skill-tag';
+            tag.innerHTML = `<div class="skill-dot"></div><span>${skill}</span>`;
+            mobileLeftSkills.appendChild(tag);
+        });
+
+        const mobileRightSkills = document.getElementById('mobileRightSkills');
+        rightCareer.core_skills.forEach(skill => {
+            const tag = document.createElement('div');
+            tag.className = 'skill-tag';
+            tag.innerHTML = `<div class="skill-dot"></div><span>${skill}</span>`;
+            mobileRightSkills.appendChild(tag);
+        });
+
+        // Populate education for mobile
+        const mobileLeftEducation = document.getElementById('mobileLeftEducation');
+        leftCareer.core_education.forEach(edu => {
+            const li = document.createElement('li');
+            li.className = 'education-item';
+            li.textContent = edu;
+            mobileLeftEducation.appendChild(li);
+        });
+
+        const mobileRightEducation = document.getElementById('mobileRightEducation');
+        rightCareer.core_education.forEach(edu => {
+            const li = document.createElement('li');
+            li.className = 'education-item';
+            li.textContent = edu;
+            mobileRightEducation.appendChild(li);
+        });
+    } else {
+        // Desktop: side-by-side layout
+        comparisonContent.innerHTML = `
+            <div class="comparison-side">
+                <h3>
+                    <span id="compareLeftTitle">${leftCareer.name}</span>
+                    <button class="change-career-btn" onclick="changeCareer(0)">Change</button>
+                </h3>
+                <div class="comparison-salary">${leftCareer.salary_range}</div>
+
+                <div class="comparison-section">
+                    <div class="comparison-section-title">Overview</div>
+                    <p class="comparison-text">${leftCareer.overview}</p>
+                </div>
+
+                <div class="comparison-section">
+                    <div class="comparison-section-title">Core Skills</div>
+                    <div class="skills-container" id="compareLeftSkills"></div>
+                </div>
+
+                <div class="comparison-section">
+                    <div class="comparison-section-title">Core Education</div>
+                    <ul class="education-list" id="compareLeftEducation"></ul>
+                </div>
+            </div>
+
+            <div class="comparison-side">
+                <h3>
+                    <span id="compareRightTitle">${rightCareer.name}</span>
+                    <button class="change-career-btn" onclick="changeCareer(1)">Change</button>
+                </h3>
+                <div class="comparison-salary">${rightCareer.salary_range}</div>
+
+                <div class="comparison-section">
+                    <div class="comparison-section-title">Overview</div>
+                    <p class="comparison-text">${rightCareer.overview}</p>
+                </div>
+
+                <div class="comparison-section">
+                    <div class="comparison-section-title">Core Skills</div>
+                    <div class="skills-container" id="compareRightSkills"></div>
+                </div>
+
+                <div class="comparison-section">
+                    <div class="comparison-section-title">Core Education</div>
+                    <ul class="education-list" id="compareRightEducation"></ul>
+                </div>
+            </div>
+        `;
+
+        // Populate skills for desktop
+        const leftSkills = document.getElementById('compareLeftSkills');
+        leftCareer.core_skills.forEach(skill => {
+            const tag = document.createElement('div');
+            tag.className = 'skill-tag';
+            tag.innerHTML = `<div class="skill-dot"></div><span>${skill}</span>`;
+            leftSkills.appendChild(tag);
+        });
+
+        const rightSkills = document.getElementById('compareRightSkills');
+        rightCareer.core_skills.forEach(skill => {
+            const tag = document.createElement('div');
+            tag.className = 'skill-tag';
+            tag.innerHTML = `<div class="skill-dot"></div><span>${skill}</span>`;
+            rightSkills.appendChild(tag);
+        });
+
+        // Populate education for desktop
+        const leftEducation = document.getElementById('compareLeftEducation');
+        leftCareer.core_education.forEach(edu => {
+            const li = document.createElement('li');
+            li.className = 'education-item';
+            li.textContent = edu;
+            leftEducation.appendChild(li);
+        });
+
+        const rightEducation = document.getElementById('compareRightEducation');
+        rightCareer.core_education.forEach(edu => {
+            const li = document.createElement('li');
+            li.className = 'education-item';
+            li.textContent = edu;
+            rightEducation.appendChild(li);
+        });
+    }
 
     comparisonPanel.classList.add('visible');
+}
+
+// Global function to change a career in comparison
+function changeCareer(index) {
+    // Remove the career at the specified index
+    const removedCareer = comparisonCareers[index];
+    comparisonCareers.splice(index, 1);
+
+    // Close comparison panel
+    comparisonPanel.classList.remove('visible');
+
+    // Update visual states
+    document.querySelectorAll('.career-card').forEach(card => {
+        const careerName = card.querySelector('.career-card-title').textContent;
+        if (careerName === removedCareer.name) {
+            card.classList.remove('selected', 'pending');
+            const btn = card.querySelector('.compare-btn');
+            if (btn) {
+                btn.classList.remove('selected', 'pending');
+                btn.innerHTML = '+';
+            }
+        }
+    });
+
+    // Update remaining career to pending state
+    updateComparisonStates();
 }
 
 function clearComparison() {
@@ -638,6 +805,7 @@ renderCareerCards();
 
 // Handle window resize
 let resizeTimeout;
+let previousWidth = window.innerWidth;
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
@@ -650,5 +818,16 @@ window.addEventListener('resize', () => {
                 item.style.top = `${pos.y}px`;
             });
         }
+
+        // Regenerate comparison if open and crossed mobile/desktop threshold
+        const currentWidth = window.innerWidth;
+        const crossedThreshold = (previousWidth <= 768 && currentWidth > 768) ||
+                                (previousWidth > 768 && currentWidth <= 768);
+
+        if (crossedThreshold && comparisonPanel.classList.contains('visible') && comparisonCareers.length === 2) {
+            showComparison();
+        }
+
+        previousWidth = currentWidth;
     }, 250);
 });
