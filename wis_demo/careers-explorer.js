@@ -106,8 +106,18 @@ if (salaryMinSlider && salaryMaxSlider) {
     salaryMinSlider.addEventListener('input', updateRangeSlider);
     salaryMaxSlider.addEventListener('input', updateRangeSlider);
 
-    // Initialize slider display
-    updateRangeSlider();
+    // Initialize slider display (just update UI, don't filter yet)
+    const minValue = parseInt(salaryMinSlider.value);
+    const maxValue = parseInt(salaryMaxSlider.value);
+    if (salaryRangeDisplay) {
+        salaryRangeDisplay.textContent = `$${minValue}k - $${maxValue}k`;
+    }
+    if (rangeFill) {
+        const minPercent = ((minValue - 40) / (200 - 40)) * 100;
+        const maxPercent = ((maxValue - 40) / (200 - 40)) * 100;
+        rangeFill.style.left = minPercent + '%';
+        rangeFill.style.width = (maxPercent - minPercent) + '%';
+    }
 }
 
 // View Toggle
@@ -900,12 +910,9 @@ pauseBtn.addEventListener('click', () => {
     pauseBtn.classList.toggle('paused');
 });
 
-// Initialize
-// Only initialize sliders if elements exist, otherwise just render all careers
-if (!salaryMinSlider || !salaryMaxSlider) {
-    filteredCareers = careersData.roles;
-    renderCareerCards();
-}
+// Initialize - always render all careers on load
+filteredCareers = careersData.roles;
+renderCareerCards();
 
 // Handle window resize
 let resizeTimeout;
