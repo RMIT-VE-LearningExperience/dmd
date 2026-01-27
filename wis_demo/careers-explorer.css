@@ -860,3 +860,192 @@ body {
     font-size: 48px;
     margin-bottom: 16px;
 }
+
+/* Compare Button */
+.compare-btn {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 16px;
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.compare-btn:hover {
+    background: #3182ce;
+    transform: translateY(-2px);
+}
+
+/* Comparison Panel */
+.comparison-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.comparison-panel.visible {
+    display: flex;
+}
+
+.comparison-container {
+    background: white;
+    border-radius: 16px;
+    max-width: 1200px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.comparison-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comparison-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.close-comparison-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.close-comparison-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.comparison-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #e2e8f0;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.comparison-side {
+    background: white;
+    padding: 24px;
+}
+
+.comparison-side h3 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 8px;
+}
+
+.comparison-salary {
+    display: inline-block;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.comparison-section {
+    margin-bottom: 24px;
+}
+
+.comparison-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.comparison-text {
+    font-size: 14px;
+    color: #4a5568;
+    line-height: 1.7;
+}
+
+/* Related Roles Section */
+.related-roles-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.related-role-tag {
+    padding: 8px 16px;
+    background: #f0f9ff;
+    color: #0284c7;
+    border: 2px solid #bae6fd;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.related-role-tag:hover {
+    background: #0284c7;
+    color: white;
+    border-color: #0284c7;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .comparison-content {
+        grid-template-columns: 1fr;
+    }
+
+    .comparison-side {
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .comparison-side:last-child {
+        border-bottom: none;
+    }
+
+    .comparison-header h2 {
+        font-size: 18px;
+    }
+
+    .compare-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}
