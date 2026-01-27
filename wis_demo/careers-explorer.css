@@ -866,21 +866,134 @@ body {
     position: absolute;
     bottom: 16px;
     right: 16px;
-    padding: 8px 16px;
+    width: 36px;
+    height: 36px;
     background: #4299e1;
     color: white;
     border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: 300;
+    line-height: 1;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     z-index: 2;
+    opacity: 0;
+    transform: scale(0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.compare-btn:hover {
-    background: #3182ce;
-    transform: translateY(-2px);
+.career-card:hover .compare-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.compare-btn::after {
+    content: 'compare';
+    position: absolute;
+    right: calc(100% + 10px);
+    white-space: nowrap;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.compare-btn:hover::after {
+    opacity: 1;
+}
+
+/* Selected state - green checkmark */
+.compare-btn.selected {
+    background: #48bb78;
+    opacity: 1;
+    transform: scale(1);
+}
+
+.compare-btn.selected::before {
+    content: '✓';
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.compare-btn.selected::after {
+    content: 'selected - click to remove';
+}
+
+/* Pending state - orange pulsing */
+.compare-btn.pending {
+    background: #f59e0b;
+    opacity: 1;
+    transform: scale(1);
+    animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+.compare-btn.pending::after {
+    content: 'waiting for 2nd selection';
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+    }
+}
+
+/* Card selected states */
+.career-card.selected {
+    border: 3px solid #48bb78;
+    box-shadow: 0 4px 20px rgba(72, 187, 120, 0.3);
+}
+
+.career-card.pending {
+    border: 3px solid #f59e0b;
+    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+}
+
+/* Checkmark badge on selected cards */
+.career-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    background: #48bb78;
+    border-radius: 50%;
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    box-shadow: 0 2px 8px rgba(72, 187, 120, 0.5);
+}
+
+.career-card.pending::after {
+    content: '1';
+    background: #f59e0b;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.5);
+}
+
+/* Shake animation for limit reached */
+@keyframes shake {
+    0%, 100% { transform: translateX(0) translateY(-4px); }
+    25% { transform: translateX(-10px) translateY(-4px); }
+    75% { transform: translateX(10px) translateY(-4px); }
+}
+
+.career-card.shake {
+    animation: shake 0.5s ease-in-out;
 }
 
 /* Comparison Panel */
@@ -1044,8 +1157,24 @@ body {
         font-size: 18px;
     }
 
+    /* Mobile: always show compare button */
     .compare-btn {
-        padding: 6px 12px;
-        font-size: 12px;
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Mobile: hide tooltip on touch devices */
+    .compare-btn::after {
+        display: none;
+    }
+
+    /* Mobile: smaller selected badge */
+    .career-card.selected::after,
+    .career-card.pending::after {
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+        top: 8px;
+        right: 8px;
     }
 }

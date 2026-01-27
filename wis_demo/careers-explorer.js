@@ -246,10 +246,10 @@ function createCareerCard(career) {
     // Compare button
     const compareBtn = document.createElement('button');
     compareBtn.className = 'compare-btn';
-    compareBtn.textContent = 'Compare';
+    compareBtn.innerHTML = '+';
     compareBtn.onclick = (e) => {
         e.stopPropagation();
-        addToComparison(career);
+        toggleComparison(career, card, compareBtn);
     };
 
     card.appendChild(header);
@@ -275,29 +275,95 @@ function renderCareerCards() {
     noResults.style.display = 'none';
 
     filteredCareers.forEach(career => {
-        careersGrid.appendChild(createCareerCard(career));
+        const card = createCareerCard(career);
+
+        // Restore selected state if career is in comparison
+        const isInComparison = comparisonCareers.find(c => c.name === career.name);
+        if (isInComparison) {
+            card.classList.add('selected');
+            const btn = card.querySelector('.compare-btn');
+            btn.classList.add('selected');
+
+            if (comparisonCareers.length === 1) {
+                card.classList.add('pending');
+                btn.classList.add('pending');
+            }
+        }
+
+        careersGrid.appendChild(card);
     });
 }
 
 // Comparison Functions
-function addToComparison(career) {
+function toggleComparison(career, cardElement, buttonElement) {
+    const careerIndex = comparisonCareers.findIndex(c => c.name === career.name);
+
+    // If already in comparison, remove it
+    if (careerIndex !== -1) {
+        comparisonCareers.splice(careerIndex, 1);
+        cardElement.classList.remove('selected', 'pending');
+        buttonElement.classList.remove('selected', 'pending');
+        buttonElement.innerHTML = '+';
+
+        // Update other cards' pending state
+        updateComparisonStates();
+        return;
+    }
+
+    // Check if limit reached
     if (comparisonCareers.length >= 2) {
-        alert('You can only compare 2 careers at a time. Clear the comparison first.');
+        // Show visual feedback - shake animation
+        showLimitReachedFeedback(cardElement);
         return;
     }
 
-    if (comparisonCareers.find(c => c.name === career.name)) {
-        alert('This career is already in the comparison.');
-        return;
-    }
-
+    // Add to comparison
     comparisonCareers.push(career);
+    cardElement.classList.add('selected');
+    buttonElement.classList.add('selected');
 
-    if (comparisonCareers.length === 2) {
-        showComparison();
+    // If first selection, add pending state
+    if (comparisonCareers.length === 1) {
+        buttonElement.classList.add('pending');
+        cardElement.classList.add('pending');
     } else {
-        alert('Added to comparison. Select one more career to compare.');
+        // Second selection - remove pending from first, trigger comparison
+        updateComparisonStates();
+        setTimeout(() => {
+            showComparison();
+        }, 300);
     }
+}
+
+function updateComparisonStates() {
+    // Find all cards and update their states
+    document.querySelectorAll('.career-card').forEach(card => {
+        const btn = card.querySelector('.compare-btn');
+        if (!btn) return;
+
+        const careerName = card.querySelector('.career-card-title').textContent;
+        const isSelected = comparisonCareers.find(c => c.name === careerName);
+
+        if (isSelected) {
+            if (comparisonCareers.length === 1) {
+                btn.classList.add('pending');
+                card.classList.add('pending');
+                card.classList.remove('selected');
+            } else {
+                btn.classList.remove('pending');
+                card.classList.remove('pending');
+                card.classList.add('selected');
+            }
+        }
+    });
+}
+
+function showLimitReachedFeedback(cardElement) {
+    // Add shake animation
+    cardElement.classList.add('shake');
+    setTimeout(() => {
+        cardElement.classList.remove('shake');
+    }, 500);
 }
 
 function showComparison() {
@@ -356,6 +422,16 @@ function showComparison() {
 function clearComparison() {
     comparisonCareers = [];
     comparisonPanel.classList.remove('visible');
+
+    // Remove all selected and pending states
+    document.querySelectorAll('.career-card').forEach(card => {
+        card.classList.remove('selected', 'pending');
+        const btn = card.querySelector('.compare-btn');
+        if (btn) {
+            btn.classList.remove('selected', 'pending');
+            btn.innerHTML = '+';
+        }
+    });
 }
 
 // Show Career Info
