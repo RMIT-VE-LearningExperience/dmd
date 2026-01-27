@@ -827,8 +827,6 @@ function filterCareers() {
     const filterMin = parseInt(salaryMinSlider.value) * 1000;
     const filterMax = parseInt(salaryMaxSlider.value) * 1000;
 
-    console.log('Filtering with range:', filterMin, '-', filterMax);
-
     // Store matching levels for each career
     const careerMatchingLevels = new Map();
 
@@ -838,8 +836,6 @@ function filterCareers() {
 
         // Check if ranges overlap
         const overlaps = careerSalary.max >= filterMin && careerSalary.min <= filterMax;
-
-        console.log(career.name, 'salary:', careerSalary, 'overlaps:', overlaps);
 
         if (!overlaps) return false;
 
@@ -858,8 +854,6 @@ function filterCareers() {
 
         return true;
     });
-
-    console.log('Filtered careers count:', filteredCareers.length, 'out of', careersData.roles.length);
 
     renderCareerCards(careerMatchingLevels);
 
