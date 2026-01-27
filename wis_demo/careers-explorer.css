@@ -303,6 +303,98 @@ body {
     background: #edf2f7;
 }
 
+/* Dual Range Slider */
+.salary-range-display {
+    font-size: 18px;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.range-slider-container {
+    position: relative;
+    height: 40px;
+    margin-top: 8px;
+}
+
+.range-track {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    z-index: 1;
+}
+
+.range-fill {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 6px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 3px;
+    z-index: 2;
+}
+
+.range-slider {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 3px solid #667eea;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+}
+
+.range-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
+}
+
+.range-slider::-webkit-slider-thumb:active {
+    transform: scale(1.05);
+}
+
+.range-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 3px solid #667eea;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+}
+
+.range-slider::-moz-range-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
+}
+
+.range-slider::-moz-range-thumb:active {
+    transform: scale(1.05);
+}
+
 /* Career Cards Grid */
 .careers-grid {
     display: grid;
@@ -994,6 +1086,19 @@ body {
 
 .career-card.shake {
     animation: shake 0.5s ease-in-out;
+}
+
+/* Salary level match indicator */
+.salary-level-note {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 8px;
 }
 
 /* Comparison Panel */

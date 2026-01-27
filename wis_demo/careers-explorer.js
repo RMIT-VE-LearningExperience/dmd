@@ -48,7 +48,10 @@ const careersGrid = document.getElementById('careersGrid');
 const infoPanel = document.getElementById('infoPanel');
 const closeBtn = document.getElementById('closeBtn');
 const pauseBtn = document.getElementById('pauseBtn');
-const salaryFilter = document.getElementById('salaryFilter');
+const salaryMinSlider = document.getElementById('salaryMin');
+const salaryMaxSlider = document.getElementById('salaryMax');
+const salaryRangeDisplay = document.getElementById('salaryRangeDisplay');
+const rangeFill = document.getElementById('rangeFill');
 const skillsFilterContainer = document.getElementById('skillsFilterContainer');
 const clearFiltersBtn = document.getElementById('clearFilters');
 const noResults = document.getElementById('noResults');
@@ -65,6 +68,36 @@ Object.keys(skillCategories).forEach(category => {
     tag.addEventListener('click', () => toggleCategoryFilter(category, tag));
     skillsFilterContainer.appendChild(tag);
 });
+
+// Salary Range Slider Logic
+function updateRangeSlider() {
+    let minValue = parseInt(salaryMinSlider.value);
+    let maxValue = parseInt(salaryMaxSlider.value);
+
+    // Ensure min doesn't exceed max
+    if (minValue > maxValue) {
+        minValue = maxValue;
+        salaryMinSlider.value = minValue;
+    }
+
+    // Update display
+    salaryRangeDisplay.textContent = `$${minValue}k - $${maxValue}k`;
+
+    // Update fill bar
+    const minPercent = ((minValue - 40) / (200 - 40)) * 100;
+    const maxPercent = ((maxValue - 40) / (200 - 40)) * 100;
+    rangeFill.style.left = minPercent + '%';
+    rangeFill.style.width = (maxPercent - minPercent) + '%';
+
+    // Trigger filtering
+    filterCareers();
+}
+
+salaryMinSlider.addEventListener('input', updateRangeSlider);
+salaryMaxSlider.addEventListener('input', updateRangeSlider);
+
+// Initialize slider display
+updateRangeSlider();
 
 // View Toggle
 document.querySelectorAll('.toggle-btn').forEach(btn => {
@@ -214,7 +247,7 @@ function animate() {
 }
 
 // Card View Functions
-function createCareerCard(career) {
+function createCareerCard(career, matchingLevels = null) {
     const card = document.createElement('div');
     card.className = 'career-card';
     if (career.video_url) {
@@ -255,6 +288,26 @@ function createCareerCard(career) {
     card.appendChild(header);
     card.appendChild(salary);
     card.appendChild(overview);
+
+    // Salary level match note
+    if (matchingLevels && matchingLevels.length > 0 && career.levels) {
+        const levelNote = document.createElement('div');
+        levelNote.className = 'salary-level-note';
+
+        if (matchingLevels.length === career.levels.length) {
+            levelNote.textContent = '✓ All levels match your range';
+        } else if (matchingLevels.length === 1) {
+            const levelTitle = career.levels[matchingLevels[0]].title;
+            levelNote.textContent = `✓ ${levelTitle} matches your range`;
+        } else {
+            const firstLevel = career.levels[matchingLevels[0]].title;
+            const lastLevel = career.levels[matchingLevels[matchingLevels.length - 1]].title;
+            levelNote.textContent = `✓ ${firstLevel} to ${lastLevel}`;
+        }
+
+        card.appendChild(levelNote);
+    }
+
     card.appendChild(compareBtn);
 
     card.addEventListener('click', () => {
@@ -264,7 +317,7 @@ function createCareerCard(career) {
     return card;
 }
 
-function renderCareerCards() {
+function renderCareerCards(careerMatchingLevels = null) {
     careersGrid.innerHTML = '';
 
     if (filteredCareers.length === 0) {
@@ -275,7 +328,8 @@ function renderCareerCards() {
     noResults.style.display = 'none';
 
     filteredCareers.forEach(career => {
-        const card = createCareerCard(career);
+        const matchingLevels = careerMatchingLevels ? careerMatchingLevels.get(career.name) : null;
+        const card = createCareerCard(career, matchingLevels);
 
         // Restore selected state if career is in comparison
         const isInComparison = comparisonCareers.find(c => c.name === career.name);
@@ -713,32 +767,53 @@ function parseSalaryRange(salaryString) {
     };
 }
 
+// Calculate which career levels fall within a salary range
+function getMatchingLevels(career, filterMin, filterMax) {
+    if (!career.levels || career.levels.length === 0) {
+        return null;
+    }
+
+    const careerSalary = parseSalaryRange(career.salary_range);
+    const levelCount = career.levels.length;
+
+    // Distribute salary range evenly across levels
+    const salaryPerLevel = (careerSalary.max - careerSalary.min) / levelCount;
+
+    const matchingLevels = [];
+
+    for (let i = 0; i < levelCount; i++) {
+        const levelMin = careerSalary.min + (salaryPerLevel * i);
+        const levelMax = careerSalary.min + (salaryPerLevel * (i + 1));
+
+        // Check if this level overlaps with filter range
+        if (levelMax >= filterMin && levelMin <= filterMax) {
+            matchingLevels.push(i);
+        }
+    }
+
+    return matchingLevels;
+}
+
 function filterCareers() {
-    const salaryRange = salaryFilter.value;
+    const filterMin = parseInt(salaryMinSlider.value) * 1000;
+    const filterMax = parseInt(salaryMaxSlider.value) * 1000;
+
+    // Store matching levels for each career
+    const careerMatchingLevels = new Map();
 
     filteredCareers = careersData.roles.filter(career => {
-        // Salary filter - FIXED LOGIC
-        if (salaryRange) {
-            const careerSalary = parseSalaryRange(career.salary_range);
+        // Salary filter
+        const careerSalary = parseSalaryRange(career.salary_range);
 
-            // Parse filter range
-            let filterMin, filterMax;
-            if (salaryRange.includes('+')) {
-                filterMin = parseInt(salaryRange) * 1000;
-                filterMax = Infinity;
-            } else {
-                const parts = salaryRange.split('-').map(s => parseInt(s) * 1000);
-                filterMin = parts[0];
-                filterMax = parts[1] || parts[0];
-            }
+        // Check if ranges overlap
+        const overlaps = careerSalary.max >= filterMin && careerSalary.min <= filterMax;
 
-            // Check if ranges overlap
-            // Career range: [careerSalary.min, careerSalary.max]
-            // Filter range: [filterMin, filterMax]
-            // Ranges overlap if: careerMax >= filterMin AND careerMin <= filterMax
-            const overlaps = careerSalary.max >= filterMin && careerSalary.min <= filterMax;
+        if (!overlaps) return false;
 
-            if (!overlaps) return false;
+        // Calculate which levels match
+        const matchingLevels = getMatchingLevels(career, filterMin, filterMax);
+        if (matchingLevels && matchingLevels.length > 0) {
+            careerMatchingLevels.set(career.name, matchingLevels);
         }
 
         // Category filter
@@ -751,7 +826,7 @@ function filterCareers() {
         return true;
     });
 
-    renderCareerCards();
+    renderCareerCards(careerMatchingLevels);
 
     // Update floating view if active
     if (currentView === 'floating') {
@@ -771,10 +846,10 @@ function toggleCategoryFilter(category, element) {
     filterCareers();
 }
 
-salaryFilter.addEventListener('change', filterCareers);
-
 clearFiltersBtn.addEventListener('click', () => {
-    salaryFilter.value = '';
+    salaryMinSlider.value = 40;
+    salaryMaxSlider.value = 200;
+    updateRangeSlider();
     selectedCategories.clear();
     document.querySelectorAll('.skill-filter-tag').forEach(tag => {
         tag.classList.remove('active');

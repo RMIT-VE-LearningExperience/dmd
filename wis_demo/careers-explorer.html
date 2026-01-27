@@ -38,16 +38,15 @@
 
         <div class="filters-container">
             <div class="filter-row">
-                <div class="filter-group">
+                <div class="filter-group" style="flex: 2;">
                     <label class="filter-label">Salary Range</label>
-                    <select class="filter-select" id="salaryFilter">
-                        <option value="">All Salary Ranges</option>
-                        <option value="0-60">Up to $60,000</option>
-                        <option value="60-80">$60,000 - $80,000</option>
-                        <option value="80-100">$80,000 - $100,000</option>
-                        <option value="100-150">$100,000 - $150,000</option>
-                        <option value="150+">$150,000+</option>
-                    </select>
+                    <div class="salary-range-display" id="salaryRangeDisplay">$40k - $200k</div>
+                    <div class="range-slider-container">
+                        <input type="range" id="salaryMin" class="range-slider range-min" min="40" max="200" value="40" step="10">
+                        <input type="range" id="salaryMax" class="range-slider range-max" min="40" max="200" value="200" step="10">
+                        <div class="range-track"></div>
+                        <div class="range-fill" id="rangeFill"></div>
+                    </div>
                 </div>
                 <div class="filter-group">
                     <button class="clear-filters" id="clearFilters">Clear All Filters</button>
