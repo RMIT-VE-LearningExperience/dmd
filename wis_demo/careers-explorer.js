@@ -71,6 +71,11 @@ Object.keys(skillCategories).forEach(category => {
 
 // Salary Range Slider Logic
 function updateRangeSlider() {
+    if (!salaryMinSlider || !salaryMaxSlider) {
+        console.error('Slider elements not found');
+        return;
+    }
+
     let minValue = parseInt(salaryMinSlider.value);
     let maxValue = parseInt(salaryMaxSlider.value);
 
@@ -81,23 +86,29 @@ function updateRangeSlider() {
     }
 
     // Update display
-    salaryRangeDisplay.textContent = `$${minValue}k - $${maxValue}k`;
+    if (salaryRangeDisplay) {
+        salaryRangeDisplay.textContent = `$${minValue}k - $${maxValue}k`;
+    }
 
     // Update fill bar
-    const minPercent = ((minValue - 40) / (200 - 40)) * 100;
-    const maxPercent = ((maxValue - 40) / (200 - 40)) * 100;
-    rangeFill.style.left = minPercent + '%';
-    rangeFill.style.width = (maxPercent - minPercent) + '%';
+    if (rangeFill) {
+        const minPercent = ((minValue - 40) / (200 - 40)) * 100;
+        const maxPercent = ((maxValue - 40) / (200 - 40)) * 100;
+        rangeFill.style.left = minPercent + '%';
+        rangeFill.style.width = (maxPercent - minPercent) + '%';
+    }
 
     // Trigger filtering
     filterCareers();
 }
 
-salaryMinSlider.addEventListener('input', updateRangeSlider);
-salaryMaxSlider.addEventListener('input', updateRangeSlider);
+if (salaryMinSlider && salaryMaxSlider) {
+    salaryMinSlider.addEventListener('input', updateRangeSlider);
+    salaryMaxSlider.addEventListener('input', updateRangeSlider);
 
-// Initialize slider display
-updateRangeSlider();
+    // Initialize slider display
+    updateRangeSlider();
+}
 
 // View Toggle
 document.querySelectorAll('.toggle-btn').forEach(btn => {
@@ -795,6 +806,14 @@ function getMatchingLevels(career, filterMin, filterMax) {
 }
 
 function filterCareers() {
+    // Safety check for slider elements
+    if (!salaryMinSlider || !salaryMaxSlider) {
+        console.error('Salary sliders not found');
+        filteredCareers = careersData.roles;
+        renderCareerCards();
+        return;
+    }
+
     const filterMin = parseInt(salaryMinSlider.value) * 1000;
     const filterMax = parseInt(salaryMaxSlider.value) * 1000;
 
@@ -876,7 +895,11 @@ pauseBtn.addEventListener('click', () => {
 });
 
 // Initialize
-renderCareerCards();
+// Only initialize sliders if elements exist, otherwise just render all careers
+if (!salaryMinSlider || !salaryMaxSlider) {
+    filteredCareers = careersData.roles;
+    renderCareerCards();
+}
 
 // Handle window resize
 let resizeTimeout;
