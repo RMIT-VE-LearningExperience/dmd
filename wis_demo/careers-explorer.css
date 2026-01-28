@@ -39,6 +39,23 @@ body {
     z-index: 100;
     backdrop-filter: blur(10px);
     border: 2px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.explore-center:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, rgba(100, 200, 255, 0.25) 0%, rgba(150, 255, 200, 0.25) 100%);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.explore-center:hover::before {
+    animation: pulse-hover 2s ease-in-out infinite;
+}
+
+.explore-center:active {
+    transform: scale(0.98);
 }
 
 .explore-center::before {
@@ -63,11 +80,28 @@ body {
     }
 }
 
+@keyframes pulse-hover {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+}
+
 .explore-text {
     font-size: 32px;
     font-weight: 300;
     color: #4a5568;
     letter-spacing: 2px;
+    transition: all 0.3s ease;
+}
+
+.explore-center:hover .explore-text {
+    color: #2d3748;
+    font-weight: 400;
 }
 
 .career-item {
