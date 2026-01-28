@@ -4,11 +4,12 @@ const careersData = {"roles": [{"name": "Building Estimator", "salary_range": "$
 
 // Skill categories mapping
 const skillCategories = {
-    "Technical": ["Technical knowledge", "Engineering principles", "Technical problem-solving", "Technical precision", "Computer and digital modelling skills", "IT and digital modelling", "Tool handling", "Mathematics", "Design sense", "Numerical analysis", "Cost planning", "Vehicle operation"],
-    "Leadership & Management": ["Leadership", "Decision-making", "Budget management", "Budgeting", "On-site leadership", "Planning", "Coordination", "Team coordination"],
-    "Communication & Organisation": ["Communication", "Organisation", "Scheduling", "Documentation", "Time management", "Negotiation", "Teamwork"],
-    "Safety & Compliance": ["Safety awareness", "Health & Safety", "Risk assessment", "Compliance management", "Risk management", "Attention to detail"],
-    "Hands-On Skills": ["Problem-solving", "Creativity", "Manual dexterity", "Precision", "Physical fitness", "Physical stamina", "Surface preparation", "Focus", "Customer service", "Training", "Software proficiency", "Knowledge of contracts and law", "Analytical thinking", "Financial management", "Trade knowledge"]
+    "Technical": ["Technical knowledge", "Technical knowledge of construction", "Engineering principles", "Technical problem-solving", "Technical precision", "Computer and digital modelling skills", "IT and digital modelling", "Mathematics", "Numerical analysis", "Cost planning", "Software proficiency", "Trade knowledge", "Tool handling", "Vehicle operation"],
+    "Leadership & Management": ["Leadership", "On-site leadership", "Decision-making", "Budget management", "Budgeting", "Planning", "Team coordination"],
+    "Communication & Organisation": ["Communication", "Organisation", "Scheduling", "Documentation", "Time management", "Negotiation", "Teamwork", "Coordination"],
+    "Safety & Compliance": ["Safety awareness", "Health & Safety", "Risk assessment", "Risk management", "Compliance management", "Attention to detail"],
+    "Physical & Trade": ["Manual dexterity", "Precision", "Physical fitness", "Physical stamina", "Surface preparation", "Design sense", "Creativity"],
+    "Professional & Analytical": ["Problem-solving", "Analytical thinking", "Financial management", "Knowledge of contracts and law", "Focus", "Customer service", "Training"]
 };
 
 // Function to categorize a skill
