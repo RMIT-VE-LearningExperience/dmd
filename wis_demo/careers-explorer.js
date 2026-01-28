@@ -787,7 +787,7 @@ function parseSalaryRange(salaryString) {
         return { min: 0, max: 0 };
     }
 
-    const numbers = match.map(s => parseInt(s.replace(/,/g, '')));
+    const numbers = match.map(s => parseInt(s.replace(/[$,]/g, '')));
     const result = {
         min: numbers[0] || 0,
         max: numbers[1] || numbers[0] || 0
