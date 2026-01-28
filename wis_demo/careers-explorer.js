@@ -61,6 +61,7 @@ const noResults = document.getElementById('noResults');
 const videoLegend = document.getElementById('videoLegend');
 const comparisonPanel = document.getElementById('comparisonPanel');
 const closeComparisonBtn = document.getElementById('closeComparisonBtn');
+const exploreCenter = document.getElementById('exploreCenter');
 
 // Create skill category filter tags
 Object.keys(skillCategories).forEach(category => {
@@ -951,6 +952,13 @@ videoLegend.addEventListener('click', () => {
         filterCareers();
     }
 });
+
+// Explore center click to switch to card view
+if (exploreCenter) {
+    exploreCenter.addEventListener('click', () => {
+        switchView('cards');
+    });
+}
 
 // Initialize - always render all careers on load
 console.log('🎯 INITIALIZING: Rendering', careersData.roles.length, 'careers');
