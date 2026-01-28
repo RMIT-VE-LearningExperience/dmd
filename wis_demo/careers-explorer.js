@@ -779,13 +779,18 @@ function showCareerInfo(career) {
 // Filters - FIXED SALARY LOGIC
 function parseSalaryRange(salaryString) {
     const match = salaryString.match(/\$?([\d,]+)/g);
-    if (!match) return { min: 0, max: 0 };
+    if (!match) {
+        console.log('❌ No match found for:', salaryString);
+        return { min: 0, max: 0 };
+    }
 
     const numbers = match.map(s => parseInt(s.replace(/,/g, '')));
-    return {
+    const result = {
         min: numbers[0] || 0,
         max: numbers[1] || numbers[0] || 0
     };
+    console.log('📊 Parsed', salaryString, '→', result);
+    return result;
 }
 
 // Calculate which career levels fall within a salary range
@@ -827,6 +832,9 @@ function filterCareers() {
     const filterMin = parseInt(salaryMinSlider.value) * 1000;
     const filterMax = parseInt(salaryMaxSlider.value) * 1000;
 
+    console.log('🔍 FILTERING with range: $' + (filterMin/1000) + 'k - $' + (filterMax/1000) + 'k');
+    console.log('   Filter range:', filterMin, '-', filterMax);
+
     // Store matching levels for each career
     const careerMatchingLevels = new Map();
 
@@ -836,6 +844,10 @@ function filterCareers() {
 
         // Check if ranges overlap
         const overlaps = careerSalary.max >= filterMin && careerSalary.min <= filterMax;
+
+        console.log('   ' + career.name + ':',
+            'Career range:', careerSalary.min, '-', careerSalary.max,
+            'Overlaps?', overlaps);
 
         if (!overlaps) return false;
 
@@ -854,6 +866,9 @@ function filterCareers() {
 
         return true;
     });
+
+    console.log('✅ RESULT: ' + filteredCareers.length + ' out of ' + careersData.roles.length + ' careers match');
+    console.log('---');
 
     renderCareerCards(careerMatchingLevels);
 
