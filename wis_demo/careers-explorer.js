@@ -41,6 +41,7 @@ let careerElements = [];
 let filteredCareers = [...careersData.roles];
 let selectedCategories = new Set();
 let comparisonCareers = [];
+let videoFilterActive = false;
 
 // DOM Elements
 const floatingView = document.getElementById('floatingView');
@@ -868,6 +869,11 @@ function filterCareers() {
             if (!hasAnyCategory) return false;
         }
 
+        // Video filter
+        if (videoFilterActive) {
+            if (!career.video_url) return false;
+        }
+
         return true;
     });
 
@@ -902,6 +908,8 @@ clearFiltersBtn.addEventListener('click', () => {
     document.querySelectorAll('.skill-filter-tag').forEach(tag => {
         tag.classList.remove('active');
     });
+    videoFilterActive = false;
+    videoLegend.classList.remove('active');
     filterCareers();
 });
 
@@ -921,6 +929,27 @@ closeComparisonBtn.addEventListener('click', () => {
 pauseBtn.addEventListener('click', () => {
     isPaused = !isPaused;
     pauseBtn.classList.toggle('paused');
+});
+
+// Video legend click to filter
+videoLegend.addEventListener('click', () => {
+    videoFilterActive = !videoFilterActive;
+    videoLegend.classList.toggle('active');
+
+    // In floating view, filter the careers
+    if (currentView === 'floating') {
+        filteredCareers = careersData.roles.filter(career => {
+            if (videoFilterActive) {
+                return career.video_url;
+            }
+            return true;
+        });
+        careerElements = [];
+        initFloatingView();
+    } else {
+        // In card view, use the main filter function
+        filterCareers();
+    }
 });
 
 // Initialize - always render all careers on load

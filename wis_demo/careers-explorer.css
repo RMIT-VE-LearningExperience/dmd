@@ -159,10 +159,33 @@ body {
     align-items: center;
     gap: 8px;
     z-index: 1000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.video-legend:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
 }
 
 .video-legend.visible {
     display: flex;
+}
+
+.video-legend.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.video-legend.active .video-legend-text {
+    color: white;
+}
+
+.video-legend.active .video-legend-icon {
+    background: white;
+}
+
+.video-legend.active .video-legend-icon::before {
+    border-left-color: #ff4757;
 }
 
 .video-legend-icon {
