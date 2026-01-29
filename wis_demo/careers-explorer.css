@@ -42,11 +42,6 @@ body {
     align-items: center;
 }
 
-.floating-view > * {
-    position: relative;
-    z-index: 2;
-}
-
 .explore-center {
     position: absolute;
     width: 200px;
