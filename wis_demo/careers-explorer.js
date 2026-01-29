@@ -175,18 +175,29 @@ function getRandomPosition(index, total) {
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
 
+    // Calculate max safe radius based on viewport (leave 100px margin from edges)
+    const maxSafeRadius = Math.min(
+        window.innerWidth / 2 - 100,
+        window.innerHeight / 2 - 100
+    );
+
     const orbit = Math.floor(index / 5);
     const angleOffset = (index % 5) * (2 * Math.PI / 5);
 
-    const baseRadius = 250;
-    const orbitSpacing = 120;
+    // Tighter orbits: start at 180px, spacing of 70px
+    // Explore button is 100px radius, so 180px keeps items clear
+    const baseRadius = 180;
+    const orbitSpacing = 70;
     const radius = baseRadius + (orbit * orbitSpacing);
 
-    const radiusVariation = (Math.random() - 0.5) * 50;
+    const radiusVariation = (Math.random() - 0.5) * 30;
     const angleVariation = (Math.random() - 0.5) * 0.5;
 
     const angle = angleOffset + angleVariation + (orbit * 0.3);
-    const finalRadius = radius + radiusVariation;
+    let finalRadius = radius + radiusVariation;
+
+    // Ensure items don't go beyond safe radius
+    finalRadius = Math.min(finalRadius, maxSafeRadius);
 
     const x = centerX + Math.cos(angle) * finalRadius;
     const y = centerY + Math.sin(angle) * finalRadius;
