@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Pathway Quiz</title>
+
+    <!-- Prevent caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <link rel="stylesheet" href="quiz.css?v=1.0.0">
+</head>
+<body>
+    <!-- Intro Screen -->
+    <div class="screen active" id="intro">
+        <div class="container">
+            <div class="card">
+                <h1>Career Pathway Quiz</h1>
+                <p class="intro-text">Discover which construction careers align with your interests and working style. Answer three quick questions to find your best career matches.</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+                <button id="startBtn" class="btn btn-primary pulse">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question 1 Screen -->
+    <div class="screen" id="question-1">
+        <div class="container">
+            <div class="card">
+                <div class="question-number">Question 1 of 3</div>
+                <h2 class="question-text">What excites you most when tackling a new project?</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 33%"></div>
+                </div>
+                <div class="answers">
+                    <button class="answer-btn" data-careers='["Construction Manager", "Quantity Surveyor"]'>
+                        Diving into the details and figuring out exact measurements or estimates.
+                    </button>
+                    <button class="answer-btn" data-careers='["Electrician", "Plumber"]'>
+                        Being hands-on and actually working with tools or materials right away.
+                    </button>
+                    <button class="answer-btn" data-careers='["Construction Manager"]'>
+                        Overseeing the big picture and coordinating different tasks on site.
+                    </button>
+                    <button class="answer-btn" data-careers='["Construction Manager", "Quantity Surveyor"]'>
+                        Innovating with digital tools and data (e.g., BIM models, drones, AR).
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question 2 Screen -->
+    <div class="screen" id="question-2">
+        <div class="container">
+            <div class="card">
+                <div class="question-number">Question 2 of 3</div>
+                <h2 class="question-text">Which environment do you see yourself enjoying the most?</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 67%"></div>
+                </div>
+                <div class="answers">
+                    <button class="answer-btn" data-careers='["Construction Manager", "Quantity Surveyor"]'>
+                        In an office or at a desk, working through plans and calculations.
+                    </button>
+                    <button class="answer-btn" data-careers='["Electrician", "Plumber"]'>
+                        On the site, actively building or fixing things with my hands.
+                    </button>
+                    <button class="answer-btn" data-careers='["Electrician", "Quantity Surveyor"]'>
+                        A mix of both—sometimes planning, sometimes overseeing others in the field.
+                    </button>
+                    <button class="answer-btn" data-careers='["Quantity Surveyor"]'>
+                        Remote/anywhere - computer-focused work on a laptop.
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question 3 Screen -->
+    <div class="screen" id="question-3">
+        <div class="container">
+            <div class="card">
+                <div class="question-number">Question 3 of 3</div>
+                <h2 class="question-text">What's your favorite part of working on a project?</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%"></div>
+                </div>
+                <div class="answers">
+                    <button class="answer-btn" data-careers='["Quantity Surveyor"]'>
+                        Making sure all the numbers and details line up perfectly before we start.
+                    </button>
+                    <button class="answer-btn" data-careers='["Crane Operator"]'>
+                        Seeing the physical structure come to life as you work on it.
+                    </button>
+                    <button class="answer-btn" data-careers='["Construction Manager"]'>
+                        Ensuring everyone works together smoothly and the project stays on track.
+                    </button>
+                    <button class="answer-btn" data-careers='["Quantity Surveyor"]'>
+                        Using software and tech to optimise the build (models, reports, drones).
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div class="screen" id="results">
+        <div class="container">
+            <div class="card">
+                <h1>Your Best Career Matches</h1>
+                <p class="results-intro">Based on your answers, here are the construction careers that align best with your interests:</p>
+                <div class="results-grid" id="resultsGrid">
+                    <!-- Results dynamically inserted by JavaScript -->
+                </div>
+                <div class="results-actions">
+                    <button id="exploreBtn" class="btn btn-primary">Explore All Career Pathways</button>
+                    <button id="retakeBtn" class="btn btn-secondary">Retake Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="quiz.js?v=1.0.0"></script>
+</body>
+</html>
