@@ -138,28 +138,54 @@ function switchView(view) {
     currentView = view;
 
     if (view === 'floating') {
-        floatingView.classList.add('active');
+        // First remove active from card view to trigger fade-out
         cardView.classList.remove('active');
-        pauseBtn.classList.add('visible');
-        videoLegend.classList.add('visible');
 
-        document.querySelectorAll('.toggle-btn').forEach(b => {
-            b.classList.toggle('active', b.dataset.view === 'floating');
-        });
+        // Wait for fade-out, then show floating view
+        setTimeout(() => {
+            floatingView.style.display = 'flex';
+            // Trigger reflow to enable transition
+            floatingView.offsetHeight;
+            floatingView.classList.add('active');
+            pauseBtn.classList.add('visible');
+            videoLegend.classList.add('visible');
 
-        // Reinitialize floating view
-        if (careerElements.length === 0) {
-            initFloatingView();
-        }
+            document.querySelectorAll('.toggle-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.view === 'floating');
+            });
+
+            // Reinitialize floating view
+            if (careerElements.length === 0) {
+                initFloatingView();
+            }
+
+            // Hide card view after transition
+            setTimeout(() => {
+                cardView.style.display = 'none';
+            }, 500);
+        }, 500);
     } else {
+        // First remove active from floating view to trigger fade-out
         floatingView.classList.remove('active');
-        cardView.classList.add('active');
-        pauseBtn.classList.remove('visible');
-        videoLegend.classList.remove('visible');
 
-        document.querySelectorAll('.toggle-btn').forEach(b => {
-            b.classList.toggle('active', b.dataset.view === 'cards');
-        });
+        // Wait for fade-out, then show card view
+        setTimeout(() => {
+            cardView.style.display = 'block';
+            // Trigger reflow to enable transition
+            cardView.offsetHeight;
+            cardView.classList.add('active');
+            pauseBtn.classList.remove('visible');
+            videoLegend.classList.remove('visible');
+
+            document.querySelectorAll('.toggle-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.view === 'cards');
+            });
+
+            // Hide floating view after transition
+            setTimeout(() => {
+                floatingView.style.display = 'none';
+            }, 500);
+        }, 500);
     }
 }
 
@@ -230,6 +256,10 @@ function createFloatingCareerItem(career, index, total) {
     item.style.left = `${pos.x}px`;
     item.style.top = `${pos.y}px`;
     item.style.transform = 'translate(-50%, -50%)';
+
+    // Add random animation duration for organic floating effect (2.5-3.5s)
+    const floatDuration = 2.5 + Math.random() * 1;
+    item.style.animationDuration = `${floatDuration}s`;
 
     item.dataset.angle = pos.angle;
     item.dataset.radius = pos.radius;
@@ -355,7 +385,21 @@ function createCareerCard(career, matchingLevels = null) {
     return card;
 }
 
-function renderCareerCards(careerMatchingLevels = null) {
+function renderCareerCards(careerMatchingLevels = null, isFiltering = false) {
+    // If filtering, add fade-out effect first
+    if (isFiltering && careersGrid.children.length > 0) {
+        careersGrid.classList.add('filtering');
+
+        setTimeout(() => {
+            renderCareerCardsInternal(careerMatchingLevels);
+            careersGrid.classList.remove('filtering');
+        }, 300);
+    } else {
+        renderCareerCardsInternal(careerMatchingLevels);
+    }
+}
+
+function renderCareerCardsInternal(careerMatchingLevels = null) {
     careersGrid.innerHTML = '';
 
     if (filteredCareers.length === 0) {
@@ -365,9 +409,19 @@ function renderCareerCards(careerMatchingLevels = null) {
 
     noResults.style.display = 'none';
 
-    filteredCareers.forEach(career => {
+    filteredCareers.forEach((career, index) => {
         const matchingLevels = careerMatchingLevels ? careerMatchingLevels.get(career.name) : null;
         const card = createCareerCard(career, matchingLevels);
+
+        // Reset and re-apply animation delay for fresh animation
+        card.style.animation = 'none';
+        // Trigger reflow
+        card.offsetHeight;
+        card.style.animation = '';
+
+        // Add staggered animation delay (max 50ms per card, capped at 800ms)
+        const delay = Math.min(index * 50, 800);
+        card.style.animationDelay = `${delay}ms`;
 
         // Restore selected state if career is in comparison
         const isInComparison = comparisonCareers.find(c => c.name === career.name);
@@ -892,7 +946,8 @@ function filterCareers() {
     console.log('✅ RESULT: ' + filteredCareers.length + ' out of ' + careersData.roles.length + ' careers match');
     console.log('---');
 
-    renderCareerCards(careerMatchingLevels);
+    // Pass isFiltering=true to trigger animation
+    renderCareerCards(careerMatchingLevels, true);
 
     // Update floating view if active
     if (currentView === 'floating') {
