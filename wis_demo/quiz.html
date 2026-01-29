@@ -10,7 +10,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-    <link rel="stylesheet" href="quiz.css?v=1.1.0">
+    <link rel="stylesheet" href="quiz.css?v=2.0.0">
 </head>
 <body>
     <!-- Intro Screen -->
@@ -18,7 +18,7 @@
         <div class="container">
             <div class="card">
                 <h1>Career Pathway Quiz</h1>
-                <p class="intro-text">Discover which construction careers align with your interests and working style. Answer three quick questions to find your best career matches.</p>
+                <p class="intro-text">Discover which construction careers align with your skills and interests. Answer three quick questions to find your best career matches from all available pathways.</p>
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: 0%"></div>
                 </div>
@@ -32,22 +32,22 @@
         <div class="container">
             <div class="card">
                 <div class="question-number">Question 1 of 3</div>
-                <h2 class="question-text">What excites you most when tackling a new project?</h2>
+                <h2 class="question-text">What type of work energizes you?</h2>
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: 33%"></div>
                 </div>
                 <div class="answers">
-                    <button class="answer-btn" data-careers='["Construction Manager", "Quantity Surveyor"]'>
-                        Diving into the details and figuring out exact measurements or estimates.
+                    <button class="answer-btn" data-skills='["Analytical thinking", "Problem-solving", "Cost planning", "Financial management", "Numerical analysis"]'>
+                        Solving complex problems with data, calculations, and analysis
                     </button>
-                    <button class="answer-btn" data-careers='["Electrician", "Plumber"]'>
-                        Being hands-on and actually working with tools or materials right away.
+                    <button class="answer-btn" data-skills='["Manual dexterity", "Physical fitness", "Tool handling", "Precision", "Surface preparation"]'>
+                        Working with my hands, using tools, and creating tangible results
                     </button>
-                    <button class="answer-btn" data-careers='["Construction Manager"]'>
-                        Overseeing the big picture and coordinating different tasks on site.
+                    <button class="answer-btn" data-skills='["Leadership", "On-site leadership", "Decision-making", "Team coordination", "Planning"]'>
+                        Leading teams, making decisions, and coordinating projects
                     </button>
-                    <button class="answer-btn" data-careers='["Construction Manager", "Quantity Surveyor"]'>
-                        Innovating with digital tools and data (e.g., BIM models, drones, AR).
+                    <button class="answer-btn" data-skills='["Organisation", "Documentation", "Communication", "Scheduling", "Time management"]'>
+                        Organizing information, managing schedules, and communicating with stakeholders
                     </button>
                 </div>
             </div>
@@ -59,22 +59,22 @@
         <div class="container">
             <div class="card">
                 <div class="question-number">Question 2 of 3</div>
-                <h2 class="question-text">Which environment do you see yourself enjoying the most?</h2>
+                <h2 class="question-text">Which work environment suits you best?</h2>
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: 67%"></div>
                 </div>
                 <div class="answers">
-                    <button class="answer-btn" data-careers='["Construction Manager", "Quantity Surveyor"]'>
-                        In an office or at a desk, working through plans and calculations.
+                    <button class="answer-btn" data-skills='["Safety awareness", "Risk assessment", "Health & Safety", "Compliance management", "Training"]'>
+                        A safety-focused environment where protocols and compliance matter
                     </button>
-                    <button class="answer-btn" data-careers='["Electrician", "Plumber"]'>
-                        On the site, actively building or fixing things with my hands.
+                    <button class="answer-btn" data-skills='["Creativity", "Design sense", "Attention to detail", "Mathematics", "Physical stamina"]'>
+                        A creative space where aesthetics and precision are valued
                     </button>
-                    <button class="answer-btn" data-careers='["Electrician", "Quantity Surveyor"]'>
-                        A mix of both—sometimes planning, sometimes overseeing others in the field.
+                    <button class="answer-btn" data-skills='["IT and digital modelling", "Software proficiency", "Computer and digital modelling skills", "Technical knowledge"]'>
+                        A tech-forward workplace using software and digital tools
                     </button>
-                    <button class="answer-btn" data-careers='["Quantity Surveyor"]'>
-                        Remote/anywhere - computer-focused work on a laptop.
+                    <button class="answer-btn" data-skills='["Customer service", "Negotiation", "Teamwork", "Communication", "Problem-solving"]'>
+                        A people-focused role with client interaction and collaboration
                     </button>
                 </div>
             </div>
@@ -86,22 +86,22 @@
         <div class="container">
             <div class="card">
                 <div class="question-number">Question 3 of 3</div>
-                <h2 class="question-text">What's your favorite part of working on a project?</h2>
+                <h2 class="question-text">What aspects of a project excite you most?</h2>
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: 100%"></div>
                 </div>
                 <div class="answers">
-                    <button class="answer-btn" data-careers='["Quantity Surveyor"]'>
-                        Making sure all the numbers and details line up perfectly before we start.
+                    <button class="answer-btn" data-skills='["Financial management", "Budget management", "Budgeting", "Cost planning", "Negotiation"]'>
+                        Managing budgets, controlling costs, and financial planning
                     </button>
-                    <button class="answer-btn" data-careers='["Crane Operator"]'>
-                        Seeing the physical structure come to life as you work on it.
+                    <button class="answer-btn" data-skills='["Engineering principles", "Technical precision", "Technical problem-solving", "Coordination", "Documentation"]'>
+                        Engineering challenges and technical problem-solving
                     </button>
-                    <button class="answer-btn" data-careers='["Construction Manager"]'>
-                        Ensuring everyone works together smoothly and the project stays on track.
+                    <button class="answer-btn" data-skills='["Planning", "Time management", "Coordination", "Scheduling", "Risk management"]'>
+                        Planning timelines, coordinating activities, and meeting deadlines
                     </button>
-                    <button class="answer-btn" data-careers='["Quantity Surveyor"]'>
-                        Using software and tech to optimise the build (models, reports, drones).
+                    <button class="answer-btn" data-skills='["Vehicle operation", "Focus", "Technical knowledge of construction", "Trade knowledge", "Knowledge of contracts and law"]'>
+                        Operating equipment, applying trade expertise, and hands-on construction work
                     </button>
                 </div>
             </div>
@@ -125,6 +125,6 @@
         </div>
     </div>
 
-    <script src="quiz.js?v=1.0.0"></script>
+    <script src="quiz.js?v=2.0.0"></script>
 </body>
 </html>
