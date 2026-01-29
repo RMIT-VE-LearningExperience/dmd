@@ -18,12 +18,33 @@ body {
     height: 100vh;
     top: 0;
     left: 0;
+    background-image: url('images/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.floating-view::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(1px);
+    z-index: 1;
 }
 
 .floating-view.active {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.floating-view > * {
+    position: relative;
+    z-index: 2;
 }
 
 .explore-center {
