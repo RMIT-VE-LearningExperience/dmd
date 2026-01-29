@@ -1,27 +1,48 @@
 console.log('🚀 Quiz loaded! quiz.js is running');
 
+// Career data loaded from wis.json
+let careersData = null;
+
 // Career color mapping (consistent with career explorer)
-const careerColors = {
+const careerColorMap = {
     'Construction Manager': 'blue',
     'Quantity Surveyor': 'green',
     'Electrician': 'blue',
     'Plumber': 'green',
-    'Crane Operator': 'blue'
+    'Crane Operator': 'blue',
+    'Building Estimator': 'green',
+    'Contract Administrator': 'blue',
+    'Project Coordinator': 'green',
+    'Project Manager': 'blue',
+    'Project Engineer': 'green',
+    'Health and Safety Officer': 'blue',
+    'Waterproofer': 'green',
+    'Tiler': 'blue',
+    'Heavy Vehicle Operator': 'green',
+    'Site Supervisor': 'blue'
 };
 
-// Career descriptions for results page
-const careerDescriptions = {
-    'Construction Manager': 'Oversee on-site delivery of projects, leading site teams and ensuring work is completed safely and efficiently.',
-    'Quantity Surveyor': 'Plan, manage and report on construction costs from early design through to project completion.',
-    'Electrician': 'Install, maintain and repair electrical systems, making sure buildings are safe, reliable and energy efficient.',
-    'Plumber': 'Install and maintain water, drainage and gas systems, playing a key role in making buildings safe and liveable.',
-    'Crane Operator': 'Operate lifting equipment to move heavy materials and equipment safely around construction sites.'
-};
+// Function to get consistent color for a career
+function getCareerColor(careerName) {
+    return careerColorMap[careerName] || 'blue';
+}
+
+// Load career data from JSON file
+async function loadCareerData() {
+    try {
+        const response = await fetch('wis.json');
+        careersData = await response.json();
+        console.log('✅ Career data loaded from wis.json:', careersData.roles.length, 'careers');
+    } catch (error) {
+        console.error('❌ Failed to load career data:', error);
+        careersData = { roles: [] };
+    }
+}
 
 // State management
 let currentQuestionIndex = 0;
-let selectedAnswers = [];
-let scores = {};
+let selectedSkills = []; // Changed from selectedAnswers - now accumulating skills
+let careerScores = {};
 
 // DOM elements
 const startBtn = document.getElementById('startBtn');
@@ -75,8 +96,8 @@ function initializeEventListeners() {
 function startQuiz() {
     console.log('📝 Starting quiz...');
     currentQuestionIndex = 0;
-    selectedAnswers = [];
-    scores = {};
+    selectedSkills = [];
+    careerScores = {};
 
     // Hide intro, show first question
     switchScreen(screens.intro, screens.question1);
@@ -104,17 +125,19 @@ function switchScreen(fromScreen, toScreen) {
 function selectAnswer(button, questionIndex) {
     console.log(`✅ Answer selected for question ${questionIndex + 1}`);
 
-    // Get the careers from the button data
-    const careersData = button.getAttribute('data-careers');
-    const careers = JSON.parse(careersData);
+    // Get the skills from the button data
+    const skillsData = button.getAttribute('data-skills');
+    const skills = JSON.parse(skillsData);
 
     // Visual feedback - highlight selected answer
     const allAnswers = button.parentElement.querySelectorAll('.answer-btn');
     allAnswers.forEach(btn => btn.classList.remove('selected'));
     button.classList.add('selected');
 
-    // Store the answer
-    selectedAnswers[questionIndex] = careers;
+    // Accumulate the skills from this answer
+    selectedSkills.push(...skills);
+    console.log(`📝 Skills selected:`, skills);
+    console.log(`📝 Total skills accumulated:`, selectedSkills);
 
     // Wait a moment for visual feedback, then proceed
     setTimeout(() => {
@@ -138,48 +161,75 @@ function nextQuestion() {
     }
 }
 
-// Calculate scores based on answers
+// Calculate scores based on skill matching
 function calculateScores() {
-    console.log('🧮 Calculating scores...');
-    scores = {};
+    console.log('🧮 Calculating skill-based scores...');
+    console.log('📝 Selected skills:', selectedSkills);
 
-    // Initialize scores for all possible careers
-    Object.keys(careerColors).forEach(career => {
-        scores[career] = 0;
+    careerScores = {};
+
+    if (!careersData || !careersData.roles) {
+        console.error('❌ No career data available for scoring');
+        return;
+    }
+
+    // Calculate match score for each career
+    careersData.roles.forEach(career => {
+        const careerSkills = career.core_skills || [];
+
+        // Find matching skills between user selections and career requirements
+        const matchingSkills = careerSkills.filter(skill =>
+            selectedSkills.includes(skill)
+        );
+
+        // Calculate score as percentage of selected skills that match this career
+        const score = selectedSkills.length > 0
+            ? (matchingSkills.length / selectedSkills.length) * 100
+            : 0;
+
+        careerScores[career.name] = {
+            score: Math.round(score),
+            matchingSkills: matchingSkills,
+            totalCareerSkills: careerSkills.length,
+            matchCount: matchingSkills.length
+        };
+
+        console.log(`   ${career.name}: ${Math.round(score)}% (${matchingSkills.length}/${selectedSkills.length} skills match)`);
     });
 
-    // Add points for each answer
-    selectedAnswers.forEach(careers => {
-        careers.forEach(career => {
-            if (scores[career] !== undefined) {
-                scores[career]++;
-            }
-        });
-    });
-
-    console.log('📊 Final scores:', scores);
+    console.log('📊 Final career scores:', careerScores);
 }
 
 // Show results screen
 function showResults() {
     console.log('🎉 Showing results...');
 
-    // Sort careers by score (descending), then alphabetically
-    const sortedResults = Object.entries(scores)
-        .map(([name, score]) => ({
-            name,
-            score,
-            percentage: Math.round((score / 3) * 100),
-            color: careerColors[name] || 'blue',
-            description: careerDescriptions[name] || ''
-        }))
+    // Get career data from careersData
+    const sortedResults = Object.entries(careerScores)
+        .map(([name, scoreData]) => {
+            // Find the full career object from careersData
+            const careerObj = careersData.roles.find(c => c.name === name);
+
+            return {
+                name,
+                score: scoreData.score,
+                percentage: scoreData.score,
+                matchCount: scoreData.matchCount,
+                color: getCareerColor(name),
+                description: careerObj ? careerObj.overview : '',
+                matchingSkills: scoreData.matchingSkills
+            };
+        })
         .sort((a, b) => {
+            // Sort by score descending, then alphabetically
             if (b.score !== a.score) {
                 return b.score - a.score;
             }
             return a.name.localeCompare(b.name);
         })
-        .filter(career => career.score > 0); // Only show careers with at least 1 match
+        .filter(career => career.score > 0); // Only show careers with at least 1% match
+
+    console.log('🎯 Sorted results:', sortedResults);
 
     // Render result cards
     renderResults(sortedResults);
@@ -242,11 +292,14 @@ function createResultCard(career) {
     const dots = document.createElement('div');
     dots.className = 'match-dots';
 
-    // Create 3 dots, fill based on score
+    // Create 3 dots, fill based on percentage thresholds
+    // 0-33% = 1 dot, 34-66% = 2 dots, 67-100% = 3 dots
+    const dotCount = career.percentage >= 67 ? 3 : (career.percentage >= 34 ? 2 : 1);
+
     for (let i = 0; i < 3; i++) {
         const matchDot = document.createElement('div');
         matchDot.className = 'match-dot';
-        if (i < career.score) {
+        if (i < dotCount) {
             matchDot.classList.add('filled');
         }
         dots.appendChild(matchDot);
@@ -265,11 +318,18 @@ function createResultCard(career) {
 
 // Save quiz results to localStorage
 function saveToLocalStorage(results) {
+    // Convert careerScores to simple score object for backward compatibility
+    const simpleScores = {};
+    Object.entries(careerScores).forEach(([name, data]) => {
+        simpleScores[name] = data.score;
+    });
+
     const quizData = {
         timestamp: Date.now(),
-        scores: scores,
+        scores: simpleScores,
+        selectedSkills: selectedSkills,
         topMatches: results.slice(0, 3).map(r => r.name),
-        colors: careerColors
+        colors: careerColorMap
     };
 
     try {
@@ -300,8 +360,8 @@ function retakeQuiz() {
 
     // Reset state
     currentQuestionIndex = 0;
-    selectedAnswers = [];
-    scores = {};
+    selectedSkills = [];
+    careerScores = {};
 
     // Clear all selected answers visually
     questionScreens.forEach(screen => {
@@ -314,8 +374,17 @@ function retakeQuiz() {
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log('✅ DOM loaded, initializing quiz...');
+
+    // Load career data from wis.json
+    await loadCareerData();
+
+    if (!careersData || !careersData.roles) {
+        console.error('❌ Failed to load career data - quiz cannot function');
+        return;
+    }
+
     initializeEventListeners();
 
     // Check if there are existing quiz results
