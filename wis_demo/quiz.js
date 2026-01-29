@@ -227,9 +227,10 @@ function showResults() {
             }
             return a.name.localeCompare(b.name);
         })
-        .filter(career => career.score > 0); // Only show careers with at least 1% match
+        .filter(career => career.score > 0) // Only show careers with at least 1% match
+        .slice(0, 3); // Limit to top 3 matches
 
-    console.log('🎯 Sorted results:', sortedResults);
+    console.log('🎯 Top 3 results:', sortedResults);
 
     // Render result cards
     renderResults(sortedResults);
