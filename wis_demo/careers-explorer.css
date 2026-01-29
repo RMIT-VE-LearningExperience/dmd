@@ -22,6 +22,8 @@ body {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.5s ease;
 }
 
 .floating-view::before {
@@ -40,6 +42,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    opacity: 1;
 }
 
 .explore-center {
@@ -271,10 +274,13 @@ body {
     min-height: 100vh;
     padding: 16px;
     padding-bottom: 100px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
 }
 
 .card-view.active {
     display: block;
+    opacity: 1;
 }
 
 .header {
@@ -490,6 +496,11 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 16px;
     margin-bottom: 24px;
+    transition: opacity 0.3s ease;
+}
+
+.careers-grid.filtering {
+    opacity: 0.3;
 }
 
 .career-card {
