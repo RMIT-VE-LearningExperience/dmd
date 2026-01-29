@@ -231,6 +231,10 @@ function createFloatingCareerItem(career, index, total) {
     item.style.top = `${pos.y}px`;
     item.style.transform = 'translate(-50%, -50%)';
 
+    // Add random animation duration for organic floating effect (2.5-3.5s)
+    const floatDuration = 2.5 + Math.random() * 1;
+    item.style.animationDuration = `${floatDuration}s`;
+
     item.dataset.angle = pos.angle;
     item.dataset.radius = pos.radius;
     item.dataset.speed = 0.0002 + Math.random() * 0.0003;
@@ -365,9 +369,13 @@ function renderCareerCards(careerMatchingLevels = null) {
 
     noResults.style.display = 'none';
 
-    filteredCareers.forEach(career => {
+    filteredCareers.forEach((career, index) => {
         const matchingLevels = careerMatchingLevels ? careerMatchingLevels.get(career.name) : null;
         const card = createCareerCard(career, matchingLevels);
+
+        // Add staggered animation delay (max 50ms per card, capped at 800ms)
+        const delay = Math.min(index * 50, 800);
+        card.style.animationDelay = `${delay}ms`;
 
         // Restore selected state if career is in comparison
         const isInComparison = comparisonCareers.find(c => c.name === career.name);
