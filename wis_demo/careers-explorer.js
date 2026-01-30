@@ -277,6 +277,12 @@ function createFloatingCareerItem(career, index, total) {
     const item = document.createElement('div');
     item.className = 'career-item';
 
+    // Highlight if this career is a quiz match
+    const isQuizMatch = quizResults && quizResults.scores && quizResults.scores[career.name];
+    if (isQuizMatch) {
+        item.classList.add('quiz-match');
+    }
+
     const dot = document.createElement('div');
     const color = getCareerColor(career.name);
     dot.className = `career-dot ${color}`;
@@ -287,6 +293,15 @@ function createFloatingCareerItem(career, index, total) {
 
     item.appendChild(dot);
     item.appendChild(name);
+
+    // Add quiz match badge for floating view
+    if (isQuizMatch) {
+        const matchBadge = document.createElement('div');
+        matchBadge.className = 'floating-quiz-badge';
+        const percentage = Math.round(quizResults.scores[career.name]);
+        matchBadge.textContent = `${percentage}%`;
+        item.appendChild(matchBadge);
+    }
 
     // Add play icon if career has video
     if (career.video_url) {
@@ -404,7 +419,7 @@ function createCareerCard(career, matchingLevels = null) {
     // Quiz match badge (if quiz results exist)
     if (quizResults && quizResults.scores && quizResults.scores[career.name]) {
         const score = quizResults.scores[career.name];
-        const percentage = Math.round((score / 3) * 100);
+        const percentage = Math.round(score); // Score is already 0-100%
         const matchBadge = document.createElement('div');
         matchBadge.className = 'quiz-match-badge';
         matchBadge.textContent = `${percentage}% Match`;
