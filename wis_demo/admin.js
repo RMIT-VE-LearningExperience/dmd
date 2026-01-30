@@ -182,7 +182,12 @@ async function loadCareerData() {
 
 async function saveCareerData(commitMessage) {
     const url = `${GITHUB_API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-    const content = btoa(JSON.stringify(careerData, null, 2));
+
+    // UTF-8 safe Base64 encoding (handles Unicode characters like en-dashes, curly quotes)
+    const jsonString = JSON.stringify(careerData, null, 2);
+    const utf8Bytes = new TextEncoder().encode(jsonString);
+    const binaryString = Array.from(utf8Bytes, byte => String.fromCharCode(byte)).join('');
+    const content = btoa(binaryString);
 
     const response = await fetch(url, {
         method: 'PUT',
@@ -232,6 +237,9 @@ async function loadDashboard() {
         displayCareerList(allCareers);
         updateCareerCount();
 
+        // Populate autocomplete suggestions
+        populateDatalistSuggestions();
+
         hideLoading();
 
     } catch (error) {
@@ -239,6 +247,57 @@ async function loadDashboard() {
         showToast('Error loading dashboard: ' + error.message, 'error');
         console.error('❌ Dashboard load error:', error);
     }
+}
+
+// Extract all unique skills from loaded data
+function getAllSkills() {
+    const skills = new Set();
+    careerData.roles.forEach(career => {
+        (career.core_skills || []).forEach(skill => skills.add(skill));
+    });
+    return Array.from(skills).sort();
+}
+
+// Extract all unique education requirements
+function getAllEducation() {
+    const education = new Set();
+    careerData.roles.forEach(career => {
+        (career.core_education || []).forEach(edu => education.add(edu));
+    });
+    return Array.from(education).sort();
+}
+
+// Populate datalist suggestions for autocomplete
+function populateDatalistSuggestions() {
+    // Skills datalist
+    const skills = getAllSkills();
+    let skillDatalist = document.getElementById('skill-suggestions');
+    if (!skillDatalist) {
+        skillDatalist = document.createElement('datalist');
+        skillDatalist.id = 'skill-suggestions';
+        document.body.appendChild(skillDatalist);
+    }
+    skillDatalist.innerHTML = skills.map(skill =>
+        `<option value="${skill}">`
+    ).join('');
+
+    // Education datalist
+    const education = getAllEducation();
+    let eduDatalist = document.getElementById('education-suggestions');
+    if (!eduDatalist) {
+        eduDatalist = document.createElement('datalist');
+        eduDatalist.id = 'education-suggestions';
+        document.body.appendChild(eduDatalist);
+    }
+    eduDatalist.innerHTML = education.map(edu =>
+        `<option value="${edu}">`
+    ).join('');
+
+    // Link inputs to datalists
+    document.getElementById('skill-input').setAttribute('list', 'skill-suggestions');
+    document.getElementById('education-input').setAttribute('list', 'education-suggestions');
+
+    console.log(`✅ Autocomplete populated: ${skills.length} skills, ${education.length} education options`);
 }
 
 function displayCareerList(careers) {
