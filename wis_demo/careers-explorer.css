@@ -200,6 +200,36 @@ body {
     margin-left: 2px;
 }
 
+/* Quiz Match Highlighting for Floating View */
+.career-item.quiz-match {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    border: 2px solid rgba(102, 126, 234, 0.6);
+}
+
+.career-item.quiz-match .career-name {
+    color: white;
+    font-weight: 500;
+}
+
+.career-item.quiz-match .career-dot {
+    border: 2px solid white;
+}
+
+.floating-quiz-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #10b981;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    z-index: 100;
+}
+
 /* Video Legend */
 .video-legend {
     position: fixed;
