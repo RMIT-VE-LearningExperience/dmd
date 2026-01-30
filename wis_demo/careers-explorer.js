@@ -150,6 +150,15 @@ function updateRangeSlider() {
     filterCareers();
 }
 
+// Search input event listener
+const careerSearchInput = document.getElementById('careerSearch');
+if (careerSearchInput) {
+    careerSearchInput.addEventListener('input', () => {
+        console.log('🔍 Search input changed:', careerSearchInput.value);
+        filterCareers();
+    });
+}
+
 if (salaryMinSlider && salaryMaxSlider) {
     salaryMinSlider.addEventListener('input', updateRangeSlider);
     salaryMaxSlider.addEventListener('input', updateRangeSlider);
@@ -969,16 +978,28 @@ function filterCareers() {
         return;
     }
 
+    // Get search query
+    const searchInput = document.getElementById('careerSearch');
+    const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
     const filterMin = parseInt(salaryMinSlider.value) * 1000;
     const filterMax = parseInt(salaryMaxSlider.value) * 1000;
 
     console.log('🔍 FILTERING with range: $' + (filterMin/1000) + 'k - $' + (filterMax/1000) + 'k');
+    if (searchQuery) {
+        console.log('   Search query:', searchQuery);
+    }
     console.log('   Filter range:', filterMin, '-', filterMax);
 
     // Store matching levels for each career
     const careerMatchingLevels = new Map();
 
     filteredCareers = careersData.roles.filter(career => {
+        // Search filter (by career name)
+        if (searchQuery && !career.name.toLowerCase().includes(searchQuery)) {
+            return false;
+        }
+
         // Salary filter
         const careerSalary = parseSalaryRange(career.salary_range);
 
@@ -1037,6 +1058,12 @@ function toggleCategoryFilter(category, element) {
 }
 
 clearFiltersBtn.addEventListener('click', () => {
+    // Clear search input
+    const searchInput = document.getElementById('careerSearch');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+
     salaryMinSlider.value = 40;
     salaryMaxSlider.value = 200;
     updateRangeSlider();
