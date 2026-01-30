@@ -166,6 +166,10 @@ function calculateScores() {
     console.log('🧮 Calculating skill-based scores...');
     console.log('📝 Selected skills:', selectedSkills);
 
+    // Deduplicate selected skills to avoid counting duplicates
+    const uniqueSelectedSkills = [...new Set(selectedSkills)];
+    console.log('📝 Unique skills:', uniqueSelectedSkills);
+
     careerScores = {};
 
     if (!careersData || !careersData.roles) {
@@ -179,12 +183,13 @@ function calculateScores() {
 
         // Find matching skills between user selections and career requirements
         const matchingSkills = careerSkills.filter(skill =>
-            selectedSkills.includes(skill)
+            uniqueSelectedSkills.includes(skill)
         );
 
-        // Calculate score as percentage of selected skills that match this career
-        const score = selectedSkills.length > 0
-            ? (matchingSkills.length / selectedSkills.length) * 100
+        // Calculate score as percentage of career's required skills that the user has
+        // This ensures scores are always 0-100% (bounded correctly)
+        const score = careerSkills.length > 0
+            ? (matchingSkills.length / careerSkills.length) * 100
             : 0;
 
         careerScores[career.name] = {
@@ -194,7 +199,7 @@ function calculateScores() {
             matchCount: matchingSkills.length
         };
 
-        console.log(`   ${career.name}: ${Math.round(score)}% (${matchingSkills.length}/${selectedSkills.length} skills match)`);
+        console.log(`   ${career.name}: ${Math.round(score)}% (${matchingSkills.length}/${careerSkills.length} career skills matched)`);
     });
 
     console.log('📊 Final career scores:', careerScores);
@@ -344,7 +349,27 @@ function saveToLocalStorage(results) {
 // Navigate to career explorer with quiz results
 function navigateToExplorer() {
     console.log('🚀 Navigating to career explorer...');
-    window.location.href = 'careers-explorer.html';
+
+    // Get top 3 career names and scores from careerScores
+    const topCareers = Object.entries(careerScores)
+        .sort((a, b) => b[1].score - a[1].score)
+        .slice(0, 3)
+        .map(([name, data]) => ({
+            name: encodeURIComponent(name),
+            score: data.score
+        }));
+
+    // Build URL with parameters
+    const params = new URLSearchParams();
+    topCareers.forEach((career, index) => {
+        params.append(`match${index + 1}`, career.name);
+        params.append(`score${index + 1}`, career.score);
+    });
+
+    // Navigate to explorer with results in URL
+    const url = `careers-explorer.html?${params.toString()}`;
+    console.log('🔗 Navigating to:', url);
+    window.location.href = url;
 }
 
 // Retake the quiz
