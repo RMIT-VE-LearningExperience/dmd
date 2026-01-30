@@ -365,6 +365,7 @@ window.editCareer = function(index) {
     document.getElementById('salary-range').value = career.salary_range || '';
     document.getElementById('overview').value = career.overview || '';
     document.getElementById('work-style').value = career.work_style || '';
+    document.getElementById('video-url').value = career.video_url || '';
 
     // Populate tags
     populateTags('skills-container', career.core_skills || []);
@@ -403,6 +404,7 @@ async function handleSaveCareer() {
         salary_range: document.getElementById('salary-range').value.trim(),
         overview: document.getElementById('overview').value.trim(),
         work_style: document.getElementById('work-style').value,
+        video_url: document.getElementById('video-url').value.trim(),
         core_skills: getTagValues('skills-container'),
         core_education: getTagValues('education-container'),
         related_roles: getTagValues('related-roles-container'),
@@ -456,6 +458,7 @@ function clearForm() {
     document.getElementById('salary-range').value = '';
     document.getElementById('overview').value = '';
     document.getElementById('work-style').value = '';
+    document.getElementById('video-url').value = '';
 
     clearTags('skills-container');
     clearTags('education-container');
@@ -655,6 +658,11 @@ function validateCareer(career) {
         errors.push('Salary must be in format: $XX,XXX - $XX,XXX');
     }
 
+    // Video URL format validation (optional field)
+    if (career.video_url && !isValidYouTubeURL(career.video_url)) {
+        errors.push('Video URL must be a valid YouTube link (e.g., https://www.youtube.com/watch?v=...)');
+    }
+
     // Array minimums
     if (career.core_skills.length === 0) {
         errors.push('At least one core skill is required');
@@ -685,6 +693,15 @@ function validateCareer(career) {
 
 function isValidSalaryFormat(salary) {
     return /^\$[\d,]+ - \$[\d,]+$/.test(salary);
+}
+
+function isValidYouTubeURL(url) {
+    // Match YouTube URLs in various formats:
+    // - https://www.youtube.com/watch?v=VIDEO_ID
+    // - https://youtu.be/VIDEO_ID
+    // - https://www.youtube.com/embed/VIDEO_ID
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)[\w-]+/;
+    return youtubeRegex.test(url);
 }
 
 function showValidationErrors(errors) {
