@@ -1080,6 +1080,48 @@ if (exploreCenter) {
     });
 }
 
+// Load quiz results from URL parameters (preferred) or localStorage (fallback)
+function loadQuizResultsFromURL() {
+    const params = new URLSearchParams(window.location.search);
+
+    // Check if URL has quiz results
+    if (params.has('match1')) {
+        console.log('📋 Loading quiz results from URL parameters...');
+
+        // Build quiz results from URL params
+        const urlResults = {
+            timestamp: Date.now(),
+            scores: {},
+            topMatches: [],
+            colors: careerColorMap
+        };
+
+        for (let i = 1; i <= 3; i++) {
+            const matchName = params.get(`match${i}`);
+            const score = params.get(`score${i}`);
+
+            if (matchName && score) {
+                const decodedName = decodeURIComponent(matchName);
+                urlResults.scores[decodedName] = parseInt(score);
+                urlResults.topMatches.push(decodedName);
+            }
+        }
+
+        // Save to localStorage for persistence and use it
+        try {
+            localStorage.setItem('quizResults', JSON.stringify(urlResults));
+            quizResults = urlResults;
+            console.log('✅ Quiz results loaded from URL:', quizResults);
+        } catch (error) {
+            console.error('❌ Error saving URL results to localStorage:', error);
+            quizResults = urlResults; // Still use the results even if localStorage fails
+        }
+    } else {
+        // Fall back to localStorage if no URL params
+        loadQuizResults();
+    }
+}
+
 // Load quiz results from localStorage
 function loadQuizResults() {
     try {
@@ -1107,7 +1149,7 @@ async function initialize() {
     }
 
     console.log('🎯 Rendering', careersData.roles.length, 'careers');
-    loadQuizResults();
+    loadQuizResultsFromURL(); // Now checks URL params first, then localStorage
     filteredCareers = careersData.roles;
     renderCareerCards();
     console.log('✅ INITIALIZATION COMPLETE');
