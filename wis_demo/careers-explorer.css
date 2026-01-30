@@ -635,14 +635,14 @@ body {
     position: absolute;
     top: 12px;
     right: 12px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     padding: 4px 10px;
     border-radius: 12px;
     font-size: 11px;
     font-weight: 700;
     z-index: 2;
-    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
     animation: fadeIn 0.6s ease;
 }
 
