@@ -2013,10 +2013,13 @@
                     }
 
                     // Check if there are enough slots for carpenter after setting day
-                    const carpenterSlotsAvailable = countCarpenterSlotsAfterDay(day + 1);
-                    if (carpenterSlotsAvailable < 3) {
-                        showFeedback(workerType, `If I pour concrete on Day ${day}, there won't be enough slots left for the Carpenter after it sets on Day ${day + 1}! Choose an earlier day.`, "🔄 Work Order: Crane → Concreter (full day + setting) → Carpenter (needs 3 slots)");
-                        return;
+                    // BUT: If carpenter is already placed, this requirement is satisfied
+                    if (gameState.carpenterSlotsUsed < 3) {
+                        const carpenterSlotsAvailable = countCarpenterSlotsAfterDay(day + 1);
+                        if (carpenterSlotsAvailable < 3) {
+                            showFeedback(workerType, `If I pour concrete on Day ${day}, there won't be enough slots left for the Carpenter after it sets on Day ${day + 1}! Choose an earlier day.`, "🔄 Work Order: Crane → Concreter (full day + setting) → Carpenter (needs 3 slots)");
+                            return;
+                        }
                     }
 
                     // Place all 3 slots at once

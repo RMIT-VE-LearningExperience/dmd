@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crane Operator - WIS Career Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            overflow: hidden;
+            color: white;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* HUD Overlay */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 280px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #hud h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #4fc3f7;
+            border-bottom: 2px solid rgba(79, 195, 247, 0.3);
+            padding-bottom: 8px;
+        }
+
+        .hud-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .hud-label {
+            color: #b0bec5;
+        }
+
+        .hud-value {
+            font-weight: 600;
+            color: white;
+        }
+
+        .hud-value.success {
+            color: #66bb6a;
+        }
+
+        .hud-value.warning {
+            color: #ffa726;
+        }
+
+        .hud-value.danger {
+            color: #ef5350;
+        }
+
+        /* Controls Panel */
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #controls h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #4fc3f7;
+        }
+
+        .control-group {
+            margin: 12px 0;
+        }
+
+        .control-group strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+            color: #81c784;
+        }
+
+        .control-item {
+            font-size: 12px;
+            margin: 4px 0;
+            padding-left: 8px;
+            color: #cfd8dc;
+        }
+
+        .key {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #4fc3f7;
+            margin-right: 6px;
+        }
+
+        /* Messages */
+        #message {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            border: 2px solid #4fc3f7;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        #message.show {
+            opacity: 1;
+        }
+
+        #message.success {
+            border-color: #66bb6a;
+            color: #66bb6a;
+        }
+
+        #message.warning {
+            border-color: #ffa726;
+            color: #ffa726;
+        }
+
+        #message.danger {
+            border-color: #ef5350;
+            color: #ef5350;
+        }
+
+        /* Loading Screen */
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #4fc3f7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            color: white;
+            margin-top: 10px;
+        }
+
+        /* Home Button */
+        .home-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #hud, #controls {
+                font-size: 12px;
+                padding: 12px;
+                min-width: 200px;
+                max-width: 200px;
+            }
+
+            #hud h2, #controls h3 {
+                font-size: 14px;
+            }
+
+            .control-item {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Crane Operator...</div>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud">
+        <h2>🏗️ Crane Operator</h2>
+        <div class="hud-item">
+            <span class="hud-label">Current Load:</span>
+            <span class="hud-value" id="current-load">None</span>
+        </div>
+        <div class="hud-item">
+            <span class="hud-label">Status:</span>
+            <span class="hud-value" id="attach-status">Detached</span>
+        </div>
+        <div class="hud-item">
+            <span class="hud-label">Wind:</span>
+            <span class="hud-value" id="wind-state">Off</span>
+        </div>
+        <div class="hud-item">
+            <span class="hud-label">Time:</span>
+            <span class="hud-value" id="timer">0:00</span>
+        </div>
+        <div class="hud-item">
+            <span class="hud-label">Completed:</span>
+            <span class="hud-value success" id="completed">0/3</span>
+        </div>
+    </div>
+
+    <!-- Controls Panel -->
+    <div id="controls">
+        <h3>⌨️ Controls</h3>
+        <div class="control-group">
+            <strong>Crane Movement:</strong>
+            <div class="control-item"><span class="key">←</span><span class="key">→</span> Slew (rotate)</div>
+            <div class="control-item"><span class="key">↑</span><span class="key">↓</span> Trolley in/out</div>
+            <div class="control-item"><span class="key">R</span><span class="key">F</span> Hoist up/down</div>
+        </div>
+        <div class="control-group">
+            <strong>Load Control:</strong>
+            <div class="control-item"><span class="key">Space</span> Attach/Detach</div>
+            <div class="control-item"><span class="key">C</span> Reset load</div>
+        </div>
+        <div class="control-group">
+            <strong>Other:</strong>
+            <div class="control-item"><span class="key">W</span> Toggle wind</div>
+            <div class="control-item"><span class="key">V</span> Change view</div>
+            <div class="control-item"><span class="key">Shift</span> Precision mode</div>
+        </div>
+    </div>
+
+    <!-- Message Display -->
+    <div id="message"></div>
+
+    <!-- Home Button -->
+    <a href="../../index.html" class="home-button">
+        <span>🏠</span>
+        <span>Home</span>
+    </a>
+
+    <!-- Main Application -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+            "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
+        }
+    }
+    </script>
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

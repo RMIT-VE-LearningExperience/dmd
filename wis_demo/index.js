@@ -17,7 +17,13 @@ function navigateToCareersExplorer() {
 function navigateToGame(gameName) {
     if (gameName === 'construction-planner') {
         console.log('🎮 Starting Construction Planner game...');
-        window.location.href = 'construction-planner-game.html';
+        window.location.href = 'games/construction-planner/';
+    } else if (gameName === 'crane-operator') {
+        console.log('🏗️ Starting Crane Operator game...');
+        window.location.href = 'games/crane-operator/';
+    } else if (gameName === 'carpenter-defects') {
+        console.log('🔨 Starting Carpenter Defects game...');
+        window.location.href = 'games/carpenter-defects/';
     } else {
         console.log('🔒 Game not available yet:', gameName);
         showComingSoonMessage(gameName);
