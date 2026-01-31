@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WIS Career Explorer - Welcome</title>
+
+    <!-- Prevent caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Discover exciting construction careers! Take our quiz, explore different jobs, and play fun games.">
+    <meta name="keywords" content="construction careers, career explorer, construction games, career quiz">
+
+    <link rel="stylesheet" href="index.css?v=1.0.0">
+</head>
+<body>
+    <!-- Hero / Welcome Section -->
+    <section class="hero-section">
+        <div class="container">
+            <h1 class="main-title">Welcome to WIS Career Explorer! 🏗️</h1>
+            <p class="intro-text">
+                Discover exciting careers in construction! Take our quiz to find jobs that match your interests,
+                explore different career pathways, and play fun games to learn what you can do in the building industry.
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Actions Section -->
+    <section class="main-actions">
+        <div class="container">
+            <div class="action-cards">
+                <!-- Quiz Card -->
+                <div class="action-card quiz-card" tabindex="0" role="button" aria-label="Start Career Quiz">
+                    <div class="card-icon" aria-hidden="true">📝</div>
+                    <h2>Take the Quiz</h2>
+                    <p>Answer 3 quick questions to find construction careers that match your skills and interests!</p>
+                    <button class="btn btn-primary pulse" aria-label="Start the career quiz">Start Quiz</button>
+                </div>
+
+                <!-- Explore Careers Card -->
+                <div class="action-card explore-card" tabindex="0" role="button" aria-label="Explore All Careers">
+                    <div class="card-icon" aria-hidden="true">🔍</div>
+                    <h2>Explore Careers</h2>
+                    <p>Browse all construction careers, learn about different jobs, and discover what each role does!</p>
+                    <button class="btn btn-success" aria-label="View all career pathways">View All Careers</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Games Section -->
+    <section class="games-section">
+        <div class="container">
+            <h2 class="section-title">Construction Games 🎮</h2>
+            <p class="section-subtitle">Play games to learn construction skills hands-on!</p>
+
+            <div class="games-grid">
+                <!-- Construction Planner Game (UNLOCKED) -->
+                <div class="game-card unlocked"
+                     data-game="construction-planner"
+                     tabindex="0"
+                     role="button"
+                     aria-label="Play Construction Planner Game - Available Now">
+                    <div class="game-icon" aria-hidden="true">🏗️</div>
+                    <h3>Construction Planner</h3>
+                    <p>Schedule workers and manage a construction project. Learn about planning and coordination!</p>
+                    <div class="game-status unlocked-badge" aria-label="Game available">
+                        <span class="status-icon" aria-hidden="true">✓</span>
+                        <span class="status-text">Available</span>
+                    </div>
+                    <button class="btn btn-game" aria-label="Start Construction Planner Game">Play Now</button>
+                </div>
+
+                <!-- Crane Operator Game (LOCKED) -->
+                <div class="game-card locked"
+                     data-game="crane-operator"
+                     tabindex="0"
+                     role="button"
+                     aria-label="Crane Operator Game - Coming Soon">
+                    <div class="game-overlay" aria-hidden="true"></div>
+                    <div class="lock-icon" aria-hidden="true" aria-label="Locked">🔒</div>
+                    <div class="game-icon greyscale" aria-hidden="true">🏗️</div>
+                    <h3>Crane Operator</h3>
+                    <p>Operate a tower crane and move heavy materials safely around a construction site!</p>
+                    <div class="game-status locked-badge" aria-label="Game not yet available">
+                        <span class="status-text">Coming Soon</span>
+                    </div>
+                </div>
+
+                <!-- Electrician Game (LOCKED) -->
+                <div class="game-card locked"
+                     data-game="electrician"
+                     tabindex="0"
+                     role="button"
+                     aria-label="Electrician Game - Coming Soon">
+                    <div class="game-overlay" aria-hidden="true"></div>
+                    <div class="lock-icon" aria-hidden="true" aria-label="Locked">🔒</div>
+                    <div class="game-icon greyscale" aria-hidden="true">⚡</div>
+                    <h3>Electrician</h3>
+                    <p>Wire electrical circuits and safely power up a building. Learn about electrical systems!</p>
+                    <div class="game-status locked-badge" aria-label="Game not yet available">
+                        <span class="status-text">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="index.js?v=1.0.0"></script>
+</body>
+</html>
