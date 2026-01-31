@@ -18,6 +18,9 @@ function navigateToGame(gameName) {
     if (gameName === 'construction-planner') {
         console.log('🎮 Starting Construction Planner game...');
         window.location.href = 'construction-planner-game.html';
+    } else if (gameName === 'crane-operator') {
+        console.log('🏗️ Starting Crane Operator game...');
+        window.location.href = 'crane-operator-game.html';
     } else {
         console.log('🔒 Game not available yet:', gameName);
         showComingSoonMessage(gameName);
