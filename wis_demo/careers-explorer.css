@@ -1512,6 +1512,44 @@ body {
     transform: translateY(-2px);
 }
 
+/* Home Button */
+.home-button {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 24px;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1500;
+}
+
+.home-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.home-button:active {
+    transform: translateY(0);
+}
+
+.home-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.home-text {
+    line-height: 1;
+}
+
 @media (max-width: 768px) {
     .comparison-content {
         grid-template-columns: 1fr;
@@ -1629,5 +1667,17 @@ body {
         font-size: 14px;
         top: 8px;
         right: 8px;
+    }
+
+    /* Mobile: smaller home button */
+    .home-button {
+        bottom: 16px;
+        right: 16px;
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+
+    .home-icon {
+        font-size: 16px;
     }
 }
