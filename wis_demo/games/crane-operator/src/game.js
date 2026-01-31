@@ -6,10 +6,11 @@ import * as THREE from 'three';
 import { distance3D, isPointInBounds, isBodySettled } from './utils.js';
 
 export class GameManager {
-    constructor(scene, physics, ui) {
+    constructor(scene, physics, ui, cameraController = null) {
         this.scene = scene;
         this.physics = physics;
         this.ui = ui;
+        this.cameraController = cameraController;
 
         // Game state
         this.loads = [];
@@ -72,14 +73,22 @@ export class GameManager {
             mesh.position.set(position.x, position.y, position.z);
             mesh.castShadow = true;
             mesh.receiveShadow = true;
+
+            // Scale mesh 2.5x for better visibility (physics body unchanged)
+            mesh.scale.set(2.5, 2.5, 2.5);
+
             this.scene.scene.add(mesh);
 
-            // Create physics body
+            // Create physics body (original size)
             const body = this.physics.createLoadBody(config.name, position, config.size, config.mass);
 
             // Add label
             const label = this.createLabel(config.name);
             label.position.y = config.size.y / 2 + 0.5;
+
+            // Compensate label scaling (inverse of mesh scale)
+            label.scale.set(1/2.5, 1/2.5, 1);
+
             mesh.add(label);
 
             this.loads.push({
@@ -98,9 +107,9 @@ export class GameManager {
 
     setupDropZones() {
         const zones = [
-            { name: 'A', label: 'Slab', position: { x: 8, z: -8 }, size: { x: 3, z: 3 }, color: 0xffeb3b },
-            { name: 'B', label: 'Steel Laydown', position: { x: -10, z: -10 }, size: { x: 4, z: 3 }, color: 0x2196f3 },
-            { name: 'C', label: 'Rooftop Plant', position: { x: 0, z: -15 }, size: { x: 3, z: 3 }, color: 0xf44336 }
+            { name: 'A', label: 'Slab', position: { x: 8, z: -8 }, size: { x: 4.5, z: 4.5 }, color: 0xffeb3b },
+            { name: 'B', label: 'Steel Laydown', position: { x: -10, z: -10 }, size: { x: 6, z: 4.5 }, color: 0x2196f3 },
+            { name: 'C', label: 'Rooftop Plant', position: { x: 0, z: -15 }, size: { x: 4.5, z: 4.5 }, color: 0xf44336 }
         ];
 
         zones.forEach(zone => {
@@ -126,16 +135,51 @@ export class GameManager {
     }
 
     createZoneMarker(x, z, width, depth, color, labelText) {
-        // Outline
+        // Thick outline
         const outlineGeom = new THREE.EdgesGeometry(new THREE.BoxGeometry(width, 0.1, depth));
-        const outlineMat = new THREE.LineBasicMaterial({ color: color, linewidth: 3 });
+        const outlineMat = new THREE.LineBasicMaterial({ color: color, linewidth: 5 });
         const outline = new THREE.LineSegments(outlineGeom, outlineMat);
         outline.position.set(x, 0.05, z);
         this.scene.scene.add(outline);
 
-        // Label
+        // Semi-transparent fill
+        const fillGeom = new THREE.PlaneGeometry(width, depth);
+        const fillMat = new THREE.MeshBasicMaterial({
+            color: color,
+            transparent: true,
+            opacity: 0.2,
+            side: THREE.DoubleSide
+        });
+        const fill = new THREE.Mesh(fillGeom, fillMat);
+        fill.rotation.x = -Math.PI / 2;
+        fill.position.set(x, 0.06, z);
+        this.scene.scene.add(fill);
+
+        // Beacon poles at corners
+        const beaconGeom = new THREE.CylinderGeometry(0.15, 0.15, 5, 8);
+        const beaconMat = new THREE.MeshStandardMaterial({
+            color: color,
+            emissive: color,
+            emissiveIntensity: 0.6
+        });
+
+        const corners = [
+            [x - width/2, z - depth/2],
+            [x + width/2, z - depth/2],
+            [x - width/2, z + depth/2],
+            [x + width/2, z + depth/2]
+        ];
+
+        corners.forEach(([cx, cz]) => {
+            const beacon = new THREE.Mesh(beaconGeom, beaconMat.clone());
+            beacon.position.set(cx, 2.5, cz);
+            beacon.castShadow = true;
+            this.scene.scene.add(beacon);
+        });
+
+        // Elevated label
         const label = this.createLabel(labelText);
-        label.position.set(x, 0.5, z);
+        label.position.set(x, 5.5, z);
         this.scene.scene.add(label);
     }
 
@@ -183,6 +227,11 @@ export class GameManager {
             this.attachConstraint = this.physics.attachLoad(currentLoad.body, hookPosition);
             this.ui.updateAttachStatus(true);
             this.ui.showMessage(`Attached ${currentLoad.name}`, 'success');
+
+            // Trigger camera event
+            if (this.cameraController) {
+                this.cameraController.onLoadAttached();
+            }
         } else {
             this.ui.showMessage('Hook too far from load', 'warning');
         }
@@ -205,6 +254,11 @@ export class GameManager {
         this.attachedLoad = null;
         this.attachConstraint = null;
         this.ui.updateAttachStatus(false);
+
+        // Trigger camera event
+        if (this.cameraController) {
+            this.cameraController.onLoadDetached();
+        }
 
         // Check if placed in correct zone
         if (settled) {
