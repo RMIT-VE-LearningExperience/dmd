@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carpenter Defects Game - Fix Out Defects</title>
+
+    <!-- Prevent caching during development -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Learn to identify and fix common construction defects in timber wall frames. Interactive carpenter training game.">
+    <meta name="keywords" content="carpenter, construction, defects, training, timber framing, building">
+
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+    <!-- Loading Indicator -->
+    <div id="loading">Loading game...</div>
+
+    <!-- Game Header -->
+    <header class="game-header">
+        <h1 class="game-title">Carpenter: Fix Out Defects</h1>
+        <div class="game-info">
+            <div id="round-display" class="round-display">Round 0 of 5</div>
+            <div id="score-display" class="score-display">Score: 0</div>
+        </div>
+        <button id="home-btn" class="home-btn">Home</button>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar-outer">
+            <div id="progress-bar" class="progress-bar-inner"></div>
+        </div>
+        <div id="progress-text" class="progress-text">0/5 rounds</div>
+    </div>
+
+    <!-- Main Game Container -->
+    <main class="game-container">
+        <!-- Frame Display Section -->
+        <section class="frame-section">
+            <div id="frame-container" class="frame-container"></div>
+        </section>
+
+        <!-- Briefing Section -->
+        <section class="briefing-section">
+            <div id="defect-briefing">
+                <h3>Welcome!</h3>
+                <p>Get ready to inspect timber wall frames and fix defects.</p>
+            </div>
+        </section>
+
+        <!-- Controls Section -->
+        <section class="controls-section">
+            <div id="fix-options" class="fix-options">
+                <!-- Fix option buttons will be inserted here -->
+            </div>
+
+            <div id="feedback" class="feedback">
+                <!-- Feedback messages appear here -->
+            </div>
+
+            <div class="hint-section">
+                <button id="hint-btn" class="hint-btn" style="display: none;">Need a Hint?</button>
+                <div id="hint-display" class="hint-display"></div>
+            </div>
+
+            <div id="attempts-display" class="attempts-display">Attempts: 3 left</div>
+        </section>
+    </main>
+
+    <!-- Start Screen Overlay -->
+    <div id="start-screen" class="overlay" style="display: none;">
+        <div class="overlay-content">
+            <h2>Carpenter: Fix Out Defects</h2>
+            <p>Welcome to the construction site! Your job is to inspect timber wall frames and identify defects before the wall lining goes on.</p>
+
+            <div class="start-instructions">
+                <h3>How to Play:</h3>
+                <ul>
+                    <li>Each round shows a wall frame with one defect</li>
+                    <li>Read the briefing to understand what to check</li>
+                    <li>Choose the correct fix from the options</li>
+                    <li>You have 3 attempts per round</li>
+                    <li>Use hints if you get stuck (costs 10 points)</li>
+                    <li>Complete all 5 rounds to get your grade</li>
+                </ul>
+            </div>
+
+            <p><strong>Ready to start your inspection?</strong></p>
+            <button id="start-btn" class="btn">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Round Complete Overlay -->
+    <div id="round-complete-overlay" class="overlay" style="display: none;">
+        <div class="overlay-content">
+            <h2>Round Complete!</h2>
+            <div class="round-score">+0 points</div>
+            <div class="total-score">Total Score: 0</div>
+            <button class="continue-btn btn">Continue</button>
+        </div>
+    </div>
+
+    <!-- Game Complete Overlay -->
+    <div id="game-complete-overlay" class="overlay" style="display: none;">
+        <div class="overlay-content">
+            <h2>Inspection Complete!</h2>
+            <div class="grade">A+</div>
+            <div class="grade-message">Outstanding work!</div>
+            <div class="final-score">Final Score: 0 / 500</div>
+            <button class="play-again-btn btn">Play Again</button>
+            <button class="exit-btn btn btn-secondary">Exit to Menu</button>
+        </div>
+    </div>
+
+    <!-- Load game as ES6 module -->
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>
