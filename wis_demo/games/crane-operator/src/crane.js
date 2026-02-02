@@ -17,6 +17,10 @@ export class TowerCrane {
         this.maxHoistHeight = 20;
         this.jibLength = 15;
         this.mastHeight = 18;
+
+        // IK target position (world space X, Z)
+        this.targetHookX = 0;
+        this.targetHookZ = 0;
         
         // Movement speeds
         this.slewSpeed = 0.5;    // Radians per second
@@ -149,40 +153,52 @@ export class TowerCrane {
     }
 
     /**
-     * Update crane controls
+     * Update crane controls with inverse kinematics
      */
     update(controls, deltaTime, precisionMode) {
-        const speedMult = precisionMode ? this.precisionMultiplier : 1.0;
+        if (deltaTime === 0) return;
 
-        // Slew (rotate jib)
+        const speedMult = precisionMode ? this.precisionMultiplier : 1.0;
+        const moveSpeed = (precisionMode ? 1.5 : 3.0) * speedMult; // m/s in world space
+        const hoistSpeed = (precisionMode ? 1.0 : 2.0) * speedMult;
+
+        // Update target hook position based on controls (world space)
         if (controls.slewLeft) {
-            this.jibRotation += this.slewSpeed * deltaTime * speedMult;
+            this.targetHookX -= moveSpeed * deltaTime;
         }
         if (controls.slewRight) {
-            this.jibRotation -= this.slewSpeed * deltaTime * speedMult;
+            this.targetHookX += moveSpeed * deltaTime;
         }
-
-        // Trolley in/out
         if (controls.trolleyIn) {
-            this.trolleyPosition -= this.trolleySpeed * deltaTime * speedMult;
+            this.targetHookZ -= moveSpeed * deltaTime;
         }
         if (controls.trolleyOut) {
-            this.trolleyPosition += this.trolleySpeed * deltaTime * speedMult;
+            this.targetHookZ += moveSpeed * deltaTime;
         }
+
+        // Calculate IK solution
+        const ik = this.calculateIK(this.targetHookX, this.targetHookZ);
+
+        // Smooth transition to target with damping
+        const smoothing = 0.15; // Lerp factor
+        this.jibRotation += this.angleDelta(ik.jibRotation, this.jibRotation) * smoothing;
+        this.trolleyPosition += (ik.trolleyPosition - this.trolleyPosition) * smoothing;
+
+        // Clamp trolley position
         this.trolleyPosition = clamp(this.trolleyPosition, 0, 1);
 
-        // Hoist up/down
+        // Hoist up/down (unchanged)
         if (controls.hoistUp) {
-            this.hoistHeight += this.hoistSpeed * deltaTime * speedMult;
+            this.hoistHeight += hoistSpeed * deltaTime;
         }
         if (controls.hoistDown) {
-            this.hoistHeight -= this.hoistSpeed * deltaTime * speedMult;
+            this.hoistHeight -= hoistSpeed * deltaTime;
         }
         this.hoistHeight = clamp(this.hoistHeight, 0, this.maxHoistHeight);
 
         // Apply transformations
         this.jibAssembly.rotation.y = this.jibRotation;
-        
+
         // Move trolley along jib
         const trolleyX = this.trolleyPosition * this.jibLength;
         this.trolley.position.x = trolleyX;
@@ -192,6 +208,68 @@ export class TowerCrane {
         this.hookCable.scale.y = cableLength;
         this.hookCable.position.y = -cableLength / 2 - 0.3;
         this.hook.position.y = -cableLength - 0.5;
+    }
+
+    /**
+     * Calculate jib rotation and trolley position from desired hook position
+     * @param {number} targetX - Desired hook X position (world space)
+     * @param {number} targetZ - Desired hook Z position (world space)
+     * @returns {object} { jibRotation, trolleyPosition, clamped }
+     */
+    calculateIK(targetX, targetZ) {
+        const distance = Math.sqrt(targetX * targetX + targetZ * targetZ);
+        const maxReach = this.jibLength;
+
+        let finalX = targetX;
+        let finalZ = targetZ;
+        let clamped = false;
+
+        // Clamp to maximum reach
+        if (distance > maxReach) {
+            const scale = maxReach / distance;
+            finalX = targetX * scale;
+            finalZ = targetZ * scale;
+            clamped = true;
+        }
+
+        // Handle near-zero case (hook at crane center)
+        if (Math.abs(finalX) < 0.01 && Math.abs(finalZ) < 0.01) {
+            return {
+                jibRotation: this.jibRotation, // Keep current rotation
+                trolleyPosition: 0,
+                clamped: false
+            };
+        }
+
+        const finalDistance = Math.sqrt(finalX * finalX + finalZ * finalZ);
+        const jibRotation = Math.atan2(finalZ, finalX);
+        const trolleyPosition = Math.min(finalDistance / this.jibLength, 1.0);
+
+        return { jibRotation, trolleyPosition, clamped };
+    }
+
+    /**
+     * Calculate shortest angular distance between two angles
+     * Handles wraparound (-π to π)
+     */
+    angleDelta(target, current) {
+        let delta = target - current;
+
+        // Normalize to [-π, π]
+        while (delta > Math.PI) delta -= 2 * Math.PI;
+        while (delta < -Math.PI) delta += 2 * Math.PI;
+
+        return delta;
+    }
+
+    /**
+     * Initialize target position from current hook position
+     * Call this once at startup
+     */
+    initializeIKTarget() {
+        const hookPos = this.getHookPosition();
+        this.targetHookX = hookPos.x;
+        this.targetHookZ = hookPos.z;
     }
 
     /**

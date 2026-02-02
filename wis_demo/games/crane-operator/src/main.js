@@ -58,6 +58,9 @@ class CraneOperatorGame {
         this.setupResize();
         this.game.init();
 
+        // Initialize IK target position
+        this.crane.initializeIKTarget();
+
         // Hide loading and start
         this.ui.hideLoading();
         this.animate();
@@ -70,19 +73,19 @@ class CraneOperatorGame {
 
     handleKeyDown(e) {
         switch (e.key) {
-            case 'ArrowLeft':
+            case 'ArrowLeft': // Move hook left (world space)
                 this.controls.slewLeft = true;
                 e.preventDefault();
                 break;
-            case 'ArrowRight':
+            case 'ArrowRight': // Move hook right (world space)
                 this.controls.slewRight = true;
                 e.preventDefault();
                 break;
-            case 'ArrowUp':
+            case 'ArrowUp': // Move hook forward (world space)
                 this.controls.trolleyIn = true;
                 e.preventDefault();
                 break;
-            case 'ArrowDown':
+            case 'ArrowDown': // Move hook backward (world space)
                 this.controls.trolleyOut = true;
                 e.preventDefault();
                 break;
