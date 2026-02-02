@@ -837,6 +837,28 @@ body {
     border: none;
 }
 
+.person-info {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border-left: 3px solid #4fc3f7;
+}
+
+.person-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #4fc3f7;
+    margin: 0 0 8px 0;
+}
+
+.person-bio {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
 .section {
     margin-bottom: 24px;
 }
