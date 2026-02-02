@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: #b8b8b8;
             min-height: 100vh;
             padding: 20px;
         }
@@ -21,13 +21,11 @@
         .game-container {
             max-width: 1400px;
             margin: 0 auto;
-            background: white;
+            background: #e8e8e8;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             overflow: hidden;
         }
-
-
 
         .game-board {
             display: flex;
@@ -36,47 +34,72 @@
             gap: 30px;
         }
 
+        @media (max-width: 1024px) {
+            .game-board {
+                flex-direction: column;
+            }
+        }
+
         .calendar-section {
             flex: 1;
         }
 
         .calendar-header {
             display: grid;
-            grid-template-columns: 80px repeat(5, 1fr);
-            gap: 10px;
-            margin-bottom: 10px;
+            grid-template-columns: 100px repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
         .day-header {
-            background: #f0f0f0;
+            background: #2c4d7c;
             padding: 15px 10px;
             text-align: center;
             border-radius: 10px;
             font-weight: bold;
-            color: #333;
+            font-size: 16px;
+            color: white;
         }
 
         .calendar-grid {
             display: grid;
-            grid-template-columns: 80px repeat(5, 1fr);
-            gap: 10px;
+            grid-template-columns: 100px repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-header,
+            .calendar-grid {
+                grid-template-columns: 80px repeat(5, 1fr);
+                gap: 5px;
+            }
         }
 
         .time-label {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #e8e8e8;
+            background: #2c4d7c;
             border-radius: 10px;
             font-weight: bold;
-            color: #555;
-            padding: 10px;
+            font-size: 14px;
+            color: white;
+            padding: 10px 5px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .time-label {
+                font-size: 11px;
+                padding: 8px 3px;
+            }
         }
 
         .time-slot {
-            background: #f9f9f9;
+            background: white;
             border: 3px dashed #ddd;
-            border-radius: 15px;
+            border-radius: 12px;
             min-height: 100px;
             display: flex;
             flex-direction: column;
@@ -85,6 +108,12 @@
             transition: all 0.3s ease;
             position: relative;
             cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .time-slot {
+                min-height: 80px;
+            }
         }
 
         .time-slot:hover {
@@ -186,22 +215,37 @@
         }
 
         .weather-icon {
-            font-size: 1.5em;
-            margin-bottom: 5px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #2c4d7c;
+            border-radius: 8px 0 8px 0;
+            padding: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .weather-icon {
+                width: 32px;
+                height: 32px;
+                padding: 6px;
+            }
         }
 
         .weather-svg-icon {
-            width: 2em;
-            height: 2em;
-            display: inline-block;
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
         .slot-tooltip-weather .weather-svg-icon {
             width: 1.5em;
             height: 1.5em;
+            display: inline-block;
         }
 
         .placed-worker {
@@ -238,10 +282,10 @@
         }
 
         .staff-panel {
-            width: 240px;
-            background: #f8f9fa;
+            width: 280px;
+            background: #2c4d7c;
             border-radius: 15px;
-            padding: 15px;
+            padding: 20px;
             transition: all 0.3s ease;
             border: 3px solid transparent;
             flex-shrink: 0;
@@ -282,30 +326,33 @@
         }
 
         .staff-header {
-            font-size: 1.1em;
+            font-size: 18px;
             font-weight: bold;
-            color: #333;
-            margin-bottom: 12px;
+            color: white;
+            margin-bottom: 20px;
             text-align: center;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #ddd;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .worker-card {
             background: white;
-            border-radius: 12px;
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             cursor: grab;
             transition: all 0.3s ease;
             border: 2px solid transparent;
             user-select: none;
             -webkit-user-drag: element;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
             position: relative;
+            text-align: center;
         }
 
         .worker-card:hover {
@@ -345,33 +392,64 @@
         }
 
         .worker-avatar {
-            width: 40px;
-            height: 40px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
+            margin-bottom: 10px;
+            border: 4px solid #2c4d7c;
+            background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4em;
-            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .worker-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .crane-avatar {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
+            border-color: #2c4d7c;
         }
 
         .concrete-avatar {
-            background: linear-gradient(135deg, #2196f3, #1976d2);
+            border-color: #2c4d7c;
         }
 
         .carpenter-avatar {
-            background: linear-gradient(135deg, #4caf50, #388e3c);
+            border-color: #2c4d7c;
         }
 
         .worker-name {
             font-weight: bold;
-            color: #333;
-            font-size: 0.9em;
-            flex: 1;
+            color: #2c4d7c;
+            font-size: 14px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .worker-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .worker-card[data-worker="crane"]::after {
+            background: #da975f;
+        }
+
+        .worker-card[data-worker="concrete"]::after {
+            background: #df7861;
+        }
+
+        .worker-card[data-worker="carpenter"]::after {
+            background: #dab560;
         }
 
         .info-icon {
@@ -1108,53 +1186,53 @@
             <div class="calendar-section">
                 <div class="calendar-header">
                     <div></div>
-                    <div class="day-header">Day 1</div>
-                    <div class="day-header">Day 2</div>
-                    <div class="day-header">Day 3</div>
-                    <div class="day-header">Day 4</div>
-                    <div class="day-header">Day 5</div>
+                    <div class="day-header">Mon</div>
+                    <div class="day-header">Tue</div>
+                    <div class="day-header">Wed</div>
+                    <div class="day-header">Thu</div>
+                    <div class="day-header">Fri</div>
                 </div>
 
                 <div class="calendar-grid">
                     <!-- Morning Row -->
-                    <div class="time-label">AM</div>
+                    <div class="time-label">7am-11am</div>
                     <div class="time-slot" data-day="1" data-slot="0">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Clear Skies</div>
                             <div class="slot-tooltip-desc">Perfect working conditions</div>
                         </div>
                     </div>
                     <div class="time-slot" data-day="2" data-slot="0">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">High Winds</div>
                             <div class="slot-tooltip-desc">Strong gusts expected</div>
                             
                         </div>
                     </div>
                     <div class="time-slot" data-day="3" data-slot="0">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Clear Skies</div>
                             <div class="slot-tooltip-desc">Perfect working conditions</div>
                         </div>
                     </div>
                     <div class="time-slot" data-day="4" data-slot="0">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Clear Skies</div>
                             <div class="slot-tooltip-desc">Perfect working conditions</div>
                         </div>
                     </div>
                     <div class="time-slot" data-day="5" data-slot="0">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Rain</div>
                             <div class="slot-tooltip-desc">Wet conditions throughout</div>
                             
@@ -1162,88 +1240,88 @@
                     </div>
 
                     <!-- Midday Row -->
-                    <div class="time-label">Midday</div>
+                    <div class="time-label">11am-14pm</div>
                     <div class="time-slot" data-day="1" data-slot="1">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Clear Skies</div>
                             <div class="slot-tooltip-desc">Perfect working conditions</div>
                         </div>
                     </div>
                     <div class="time-slot" data-day="2" data-slot="1">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Clear Skies</div>
                             <div class="slot-tooltip-desc">Perfect working conditions</div>
                         </div>
                     </div>
                     <div class="time-slot" data-day="3" data-slot="1">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Clear Skies</div>
                             <div class="slot-tooltip-desc">Perfect working conditions</div>
                         </div>
                     </div>
                     <div class="time-slot" data-day="4" data-slot="1">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Thunder.svg" alt="Thunder" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/thunder.svg" alt="Thunder" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Thunder.svg" alt="Thunder" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/thunder.svg" alt="Thunder" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Thunderstorm</div>
                             <div class="slot-tooltip-desc">Lightning and heavy rain</div>
                             
                         </div>
                     </div>
                     <div class="time-slot" data-day="5" data-slot="1">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Clear Skies</div>
                             <div class="slot-tooltip-desc">Perfect working conditions</div>
                         </div>
                     </div>
 
                     <!-- Afternoon Row -->
-                    <div class="time-label">PM</div>
+                    <div class="time-label">14pm-18pm</div>
                     <div class="time-slot" data-day="1" data-slot="2">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Rain</div>
                             <div class="slot-tooltip-desc">Wet conditions throughout</div>
                             
                         </div>
                     </div>
                     <div class="time-slot" data-day="2" data-slot="2">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Clear Skies</div>
                             <div class="slot-tooltip-desc">Perfect working conditions</div>
                         </div>
                     </div>
                     <div class="time-slot" data-day="3" data-slot="2">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Clear Skies</div>
                             <div class="slot-tooltip-desc">Perfect working conditions</div>
                         </div>
                     </div>
                     <div class="time-slot" data-day="4" data-slot="2">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Clear Skies</div>
                             <div class="slot-tooltip-desc">Perfect working conditions</div>
                         </div>
                     </div>
                     <div class="time-slot" data-day="5" data-slot="2">
-                        <div class="weather-icon"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                        <div class="weather-icon"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                         <div class="slot-tooltip">
-                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
+                            <div class="slot-tooltip-weather"><img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon"></div>
                             <div class="slot-tooltip-name">Clear Skies</div>
                             <div class="slot-tooltip-desc">Perfect working conditions</div>
                         </div>
@@ -1252,12 +1330,14 @@
             </div>
 
             <div class="staff-panel">
-                <div class="staff-header">👷 STAFF</div>
+                <div class="staff-header">STAFF</div>
                 <button class="help-btn" onclick="showRules()">📋 View Rules</button>
                 <div class="staff-panel-hint">💡 Drag workers here to remove from calendar</div>
 
                 <div class="worker-card" draggable="true" data-worker="crane">
-                    <div class="worker-avatar crane-avatar">🏗️</div>
+                    <div class="worker-avatar crane-avatar">
+                        <img src="../../images/character_coins/craneoperatorcoin.svg" alt="Crane Operator">
+                    </div>
                     <div class="worker-name">CRANE OPERATOR</div>
                     <div class="info-wrapper">
                         <div class="info-icon">ℹ️</div>
@@ -1265,7 +1345,7 @@
                             <div class="tooltip-title">Crane Operator</div>
                             <div class="tooltip-description">I operate cranes to lift and position heavy materials. I need clear skies to work safely!</div>
                             <div class="tooltip-blockers">
-                                <span>❌ Can't work in:</span> <img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon"> <img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon"> <img src="../../images/weather_icons/Thunder.svg" alt="Thunder" class="weather-svg-icon">
+                                <span>❌ Can't work in:</span> <img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon"> <img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon"> <img src="../../images/weather_icons/thunder.svg" alt="Thunder" class="weather-svg-icon">
                             </div>
                         </div>
                     </div>
@@ -1276,7 +1356,9 @@
                 </div>
 
                 <div class="worker-card" draggable="true" data-worker="concrete">
-                    <div class="worker-avatar concrete-avatar">🧱</div>
+                    <div class="worker-avatar concrete-avatar">
+                        <img src="../../images/character_coins/concretercoin.svg" alt="Concreter">
+                    </div>
                     <div class="worker-name">CONCRETER</div>
                     <div class="info-wrapper">
                         <div class="info-icon">ℹ️</div>
@@ -1284,7 +1366,7 @@
                             <div class="tooltip-title">Concreter</div>
                             <div class="tooltip-description">I pour and finish concrete foundations. I need a full day to pour, plus another day for it to set!</div>
                             <div class="tooltip-blockers">
-                                <span>❌ Can't work in:</span> <img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon"> <img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon">
+                                <span>❌ Can't work in:</span> <img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon"> <img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon">
                             </div>
                         </div>
                     </div>
@@ -1295,7 +1377,9 @@
                 </div>
 
                 <div class="worker-card" draggable="true" data-worker="carpenter">
-                    <div class="worker-avatar carpenter-avatar">🪚</div>
+                    <div class="worker-avatar carpenter-avatar">
+                        <img src="../../images/character_coins/carpentercoin.svg" alt="Carpenter">
+                    </div>
                     <div class="worker-name">CARPENTER</div>
                     <div class="info-wrapper">
                         <div class="info-icon">ℹ️</div>
@@ -1361,9 +1445,9 @@
 
                 <!-- Slide 4: Weather -->
                 <div class="carousel-slide" data-slide="4">
-                    <div class="slide-icon"><img src="../../images/weather_icons/Partly Cloudy.svg" alt="Partly Cloudy" class="weather-svg-icon"></div>
+                    <div class="slide-icon"><img src="../../images/weather_icons/partlycloudy.svg" alt="Partly Cloudy" class="weather-svg-icon"></div>
                     <div class="slide-title">Weather Conditions</div>
-                    <div class="slide-description">Check the weather! <strong>Crane</strong> can't work in <img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon"><img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon"><img src="../../images/weather_icons/Thunder.svg" alt="Thunder" class="weather-svg-icon"><br><strong>Concreter</strong> can't work in <img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon"><img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon"><br><strong>Carpenter</strong> works in any weather.</div>
+                    <div class="slide-description">Check the weather! <strong>Crane</strong> can't work in <img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon"><img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon"><img src="../../images/weather_icons/thunder.svg" alt="Thunder" class="weather-svg-icon"><br><strong>Concreter</strong> can't work in <img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon"><img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon"><br><strong>Carpenter</strong> works in any weather.</div>
                 </div>
             </div>
 
@@ -1515,14 +1599,14 @@
                 name: 'Crane Operator',
                 avatar: '🏗️',
                 color: '#ff9800',
-                blockedWeather: ['<img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon">', '<img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon">', '<img src="../../images/weather_icons/Thunder.svg" alt="Thunder" class="weather-svg-icon">'],
+                blockedWeather: ['<img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon">', '<img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon">', '<img src="../../images/weather_icons/thunder.svg" alt="Thunder" class="weather-svg-icon">'],
                 slotsNeeded: 3
             },
             concrete: {
                 name: 'Concreter',
                 avatar: '🧱',
                 color: '#2196f3',
-                blockedWeather: ['<img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon">', '<img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon">'],
+                blockedWeather: ['<img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon">', '<img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon">'],
                 slotsNeeded: 3,
                 needsFullDay: true
             },
@@ -1537,11 +1621,11 @@
 
         // Weather data for each slot
         const weatherData = {
-            '1-0': '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">', '1-1': '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">', '1-2': '<img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon">',
-            '2-0': '<img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon">', '2-1': '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">', '2-2': '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">',
-            '3-0': '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">', '3-1': '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">', '3-2': '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">',
-            '4-0': '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">', '4-1': '<img src="../../images/weather_icons/Thunder.svg" alt="Thunder" class="weather-svg-icon">', '4-2': '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">',
-            '5-0': '<img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon">', '5-1': '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">', '5-2': '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">'
+            '1-0': '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">', '1-1': '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">', '1-2': '<img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon">',
+            '2-0': '<img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon">', '2-1': '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">', '2-2': '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">',
+            '3-0': '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">', '3-1': '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">', '3-2': '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">',
+            '4-0': '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">', '4-1': '<img src="../../images/weather_icons/thunder.svg" alt="Thunder" class="weather-svg-icon">', '4-2': '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">',
+            '5-0': '<img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon">', '5-1': '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">', '5-2': '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">'
         };
 
         let draggedWorker = null;
@@ -1727,10 +1811,10 @@
 
         // Weather tooltip info
         const weatherInfo = {
-            '<img src="../../images/weather_icons/Sunny.svg" alt="Sunny" class="weather-svg-icon">': { name: 'Clear Skies', desc: 'Perfect working conditions' },
-            '<img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon">': { name: 'High Winds', desc: 'Strong gusts expected' },
-            '<img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon">': { name: 'Rain', desc: 'Wet conditions throughout' },
-            '<img src="../../images/weather_icons/Thunder.svg" alt="Thunder" class="weather-svg-icon">': { name: 'Thunderstorm', desc: 'Lightning and heavy rain' }
+            '<img src="../../images/weather_icons/sunny.svg" alt="Sunny" class="weather-svg-icon">': { name: 'Clear Skies', desc: 'Perfect working conditions' },
+            '<img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon">': { name: 'High Winds', desc: 'Strong gusts expected' },
+            '<img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon">': { name: 'Rain', desc: 'Wet conditions throughout' },
+            '<img src="../../images/weather_icons/thunder.svg" alt="Thunder" class="weather-svg-icon">': { name: 'Thunderstorm', desc: 'Lightning and heavy rain' }
         };
 
         function resetSlotAppearance(slot) {
@@ -1843,11 +1927,11 @@
             // Check weather
             if (worker.blockedWeather.includes(weather)) {
                 const weatherNames = {
-                    '<img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon">': 'high winds',
-                    '<img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon">': 'rain',
-                    '<img src="../../images/weather_icons/Thunder.svg" alt="Thunder" class="weather-svg-icon">': 'storms'
+                    '<img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon">': 'high winds',
+                    '<img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon">': 'rain',
+                    '<img src="../../images/weather_icons/thunder.svg" alt="Thunder" class="weather-svg-icon">': 'storms'
                 };
-                showFeedback(workerType, `I can't work in ${weatherNames[weather]}! It's too dangerous. Please find me a slot with better weather.`, `<img src='../../images/weather_icons/Partly Cloudy.svg' alt='Partly Cloudy' class='weather-svg-icon'> Weather blockers: Crane can't work in <img src='../../images/weather_icons/Wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/Rain.svg' alt='Rain' class='weather-svg-icon'><img src='../../images/weather_icons/Thunder.svg' alt='Thunder' class='weather-svg-icon'> | Concreter can't work in <img src='../../images/weather_icons/Wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/Rain.svg' alt='Rain' class='weather-svg-icon'>`);
+                showFeedback(workerType, `I can't work in ${weatherNames[weather]}! It's too dangerous. Please find me a slot with better weather.`, `<img src='../../images/weather_icons/partlycloudy.svg' alt='Partly Cloudy' class='weather-svg-icon'> Weather blockers: Crane can't work in <img src='../../images/weather_icons/wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/rain.svg' alt='Rain' class='weather-svg-icon'><img src='../../images/weather_icons/thunder.svg' alt='Thunder' class='weather-svg-icon'> | Concreter can't work in <img src='../../images/weather_icons/wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/rain.svg' alt='Rain' class='weather-svg-icon'>`);
                 return false;
             }
 
@@ -1966,11 +2050,11 @@
             // Check weather for crane and concrete
             if (worker.blockedWeather.includes(weather)) {
                 const weatherNames = {
-                    '<img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon">': 'high winds',
-                    '<img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon">': 'rain',
-                    '<img src="../../images/weather_icons/Thunder.svg" alt="Thunder" class="weather-svg-icon">': 'storms'
+                    '<img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon">': 'high winds',
+                    '<img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon">': 'rain',
+                    '<img src="../../images/weather_icons/thunder.svg" alt="Thunder" class="weather-svg-icon">': 'storms'
                 };
-                showFeedback(workerType, `I can't work in ${weatherNames[weather]}! It's too dangerous. Please find me a slot with better weather.`, `<img src='../../images/weather_icons/Partly Cloudy.svg' alt='Partly Cloudy' class='weather-svg-icon'> Weather blockers: Crane can't work in <img src='../../images/weather_icons/Wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/Rain.svg' alt='Rain' class='weather-svg-icon'><img src='../../images/weather_icons/Thunder.svg' alt='Thunder' class='weather-svg-icon'> | Concreter can't work in <img src='../../images/weather_icons/Wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/Rain.svg' alt='Rain' class='weather-svg-icon'>`);
+                showFeedback(workerType, `I can't work in ${weatherNames[weather]}! It's too dangerous. Please find me a slot with better weather.`, `<img src='../../images/weather_icons/partlycloudy.svg' alt='Partly Cloudy' class='weather-svg-icon'> Weather blockers: Crane can't work in <img src='../../images/weather_icons/wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/rain.svg' alt='Rain' class='weather-svg-icon'><img src='../../images/weather_icons/thunder.svg' alt='Thunder' class='weather-svg-icon'> | Concreter can't work in <img src='../../images/weather_icons/wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/rain.svg' alt='Rain' class='weather-svg-icon'>`);
                 return;
             }
 
@@ -2003,9 +2087,9 @@
                     
                     for (let i = 0; i < dayWeather.length; i++) {
                         if (worker.blockedWeather.includes(dayWeather[i])) {
-                            const weatherNames = { '<img src="../../images/weather_icons/Wind.svg" alt="Wind" class="weather-svg-icon">': 'high winds', '<img src="../../images/weather_icons/Rain.svg" alt="Rain" class="weather-svg-icon">': 'rain' };
+                            const weatherNames = { '<img src="../../images/weather_icons/wind.svg" alt="Wind" class="weather-svg-icon">': 'high winds', '<img src="../../images/weather_icons/rain.svg" alt="Rain" class="weather-svg-icon">': 'rain' };
                             const slotNames = ['morning', 'midday', 'afternoon'];
-                            showFeedback(workerType, `I can't work on Day ${day} - there's ${weatherNames[dayWeather[i]]} in the ${slotNames[i]}! I need a full day with good weather.`, `<img src='../../images/weather_icons/Partly Cloudy.svg' alt='Partly Cloudy' class='weather-svg-icon'> Weather blockers: Crane can't work in <img src='../../images/weather_icons/Wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/Rain.svg' alt='Rain' class='weather-svg-icon'><img src='../../images/weather_icons/Thunder.svg' alt='Thunder' class='weather-svg-icon'> | Concreter can't work in <img src='../../images/weather_icons/Wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/Rain.svg' alt='Rain' class='weather-svg-icon'>`);
+                            showFeedback(workerType, `I can't work on Day ${day} - there's ${weatherNames[dayWeather[i]]} in the ${slotNames[i]}! I need a full day with good weather.`, `<img src='../../images/weather_icons/partlycloudy.svg' alt='Partly Cloudy' class='weather-svg-icon'> Weather blockers: Crane can't work in <img src='../../images/weather_icons/wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/rain.svg' alt='Rain' class='weather-svg-icon'><img src='../../images/weather_icons/thunder.svg' alt='Thunder' class='weather-svg-icon'> | Concreter can't work in <img src='../../images/weather_icons/wind.svg' alt='Wind' class='weather-svg-icon'><img src='../../images/weather_icons/rain.svg' alt='Rain' class='weather-svg-icon'>`);
                             return;
                         }
                     }
