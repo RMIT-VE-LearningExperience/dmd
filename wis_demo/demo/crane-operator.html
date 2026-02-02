@@ -1,0 +1,768 @@
+
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crane Operator, 3 Stage Pickup and Drop</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #0b0f14;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    #app {
+      position: fixed;
+      inset: 0;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* UI */
+    #hud {
+      position: fixed;
+      left: 16px;
+      top: 16px;
+      right: 16px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      pointer-events: none;
+      color: #e6edf3;
+    }
+
+    .panel {
+      pointer-events: auto;
+      width: min(520px, calc(100vw - 32px));
+      background: rgba(10, 14, 20, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 12px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      font-weight: 650;
+      letter-spacing: 0.2px;
+    }
+
+    .meta {
+      opacity: 0.9;
+      font-size: 13px;
+      line-height: 1.3;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .pill b {
+      font-weight: 700;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.10);
+      color: #e6edf3;
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: transform 120ms ease, background 120ms ease;
+    }
+
+    .btn:hover { background: rgba(255, 255, 255, 0.16); }
+    .btn:active { transform: translateY(1px); }
+
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      pointer-events: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(10, 14, 20, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #e6edf3;
+      font-size: 13px;
+      opacity: 0;
+      transition: opacity 180ms ease;
+      backdrop-filter: blur(8px);
+    }
+
+    #toast.show { opacity: 1; }
+
+    /* On screen controls, optional */
+    #controls {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+      pointer-events: none;
+    }
+
+    .controls-wrap {
+      pointer-events: auto;
+      width: min(720px, calc(100vw - 32px));
+      margin: 0 auto;
+      background: rgba(10, 14, 20, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      backdrop-filter: blur(8px);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .grid .btn { width: 100%; padding: 10px 8px; }
+
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      padding: 1px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    @media (min-width: 840px) {
+      #hud {
+        grid-template-columns: 1fr;
+      }
+      .controls-wrap {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <div id="hud">
+    <div class="panel">
+      <div class="row">
+        <div>
+          <div class="title">Crane Operator, 3 Stage Pickup and Drop</div>
+          <div class="meta" id="objectiveText">Rotate the crane with A and D, pick up the load in the pickup zone, then drop it in the drop zone.</div>
+        </div>
+        <div class="row" style="gap: 8px;">
+          <span class="pill"><b>Stage</b> <span id="stageText">1</span> of 3</span>
+          <span class="pill"><b>Status</b> <span id="statusText">Move to pickup</span></span>
+          <button class="btn" id="resetBtn" title="Reset the current stage">Reset</button>
+        </div>
+      </div>
+
+      <div class="meta" style="margin-top: 10px;">
+        Controls, rotate crane <span class="kbd">A</span> <span class="kbd">D</span>, trolley <span class="kbd">W</span> <span class="kbd">S</span>, hook up and down <span class="kbd">R</span> <span class="kbd">F</span>, grab or release <span class="kbd">Space</span>.
+      </div>
+    </div>
+  </div>
+
+  <div id="controls">
+    <div class="controls-wrap">
+      <div>
+        <div class="meta" style="margin-bottom: 6px;">Rotate</div>
+        <div class="grid">
+          <button class="btn" data-hold="rotLeft">Left</button>
+          <button class="btn" data-press="grab">Grab</button>
+          <button class="btn" data-hold="rotRight">Right</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="meta" style="margin-bottom: 6px;">Trolley</div>
+        <div class="grid">
+          <button class="btn" data-hold="trolleyOut">Out</button>
+          <button class="btn" data-press="reset">Reset</button>
+          <button class="btn" data-hold="trolleyIn">In</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="meta" style="margin-bottom: 6px;">Hook</div>
+        <div class="grid">
+          <button class="btn" data-hold="hookUp">Up</button>
+          <button class="btn" data-press="release">Release</button>
+          <button class="btn" data-hold="hookDown">Down</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+    // Basic settings
+    const app = document.getElementById('app');
+    const stageText = document.getElementById('stageText');
+    const statusText = document.getElementById('statusText');
+    const objectiveText = document.getElementById('objectiveText');
+    const toastEl = document.getElementById('toast');
+
+    function toast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastEl._t);
+      toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 1600);
+    }
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    app.appendChild(renderer.domElement);
+
+    // Scene
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x0b0f14, 16, 80);
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
+    camera.position.set(16, 14, 18);
+
+    // Lights
+    const hemi = new THREE.HemisphereLight(0x9fd2ff, 0x1b2b3a, 0.85);
+    scene.add(hemi);
+
+    const sun = new THREE.DirectionalLight(0xffffff, 1.15);
+    sun.position.set(18, 26, 10);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.left = -35;
+    sun.shadow.camera.right = 35;
+    sun.shadow.camera.top = 35;
+    sun.shadow.camera.bottom = -35;
+    scene.add(sun);
+
+    // Ground
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(120, 120),
+      new THREE.MeshStandardMaterial({ color: 0x111824, roughness: 1.0, metalness: 0.0 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Simple grid lines
+    const grid = new THREE.GridHelper(120, 60, 0x1e2a3a, 0x1e2a3a);
+    grid.material.opacity = 0.35;
+    grid.material.transparent = true;
+    scene.add(grid);
+
+    // Zones
+    const pickupZone = {
+      center: new THREE.Vector3(-10, 0, -6),
+      size: 6
+    };
+
+    const dropZone = {
+      center: new THREE.Vector3(12, 0, 8),
+      size: 6
+    };
+
+    function makeZoneMesh(color, center, size, label) {
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(size, size),
+        new THREE.MeshStandardMaterial({
+          color,
+          roughness: 0.9,
+          metalness: 0.0,
+          transparent: true,
+          opacity: 0.35
+        })
+      );
+      plane.rotation.x = -Math.PI / 2;
+      plane.position.set(center.x, 0.01, center.z);
+      plane.receiveShadow = true;
+
+      const border = new THREE.LineSegments(
+        new THREE.EdgesGeometry(new THREE.PlaneGeometry(size, size)),
+        new THREE.LineBasicMaterial({ color })
+      );
+      border.rotation.x = -Math.PI / 2;
+      border.position.set(center.x, 0.03, center.z);
+
+      const group = new THREE.Group();
+      group.add(plane);
+      group.add(border);
+      group.userData.label = label;
+      return group;
+    }
+
+    const pickupMesh = makeZoneMesh(0x2ea043, pickupZone.center, pickupZone.size, 'Pickup');
+    const dropMesh = makeZoneMesh(0x1f6feb, dropZone.center, dropZone.size, 'Drop');
+    scene.add(pickupMesh, dropMesh);
+
+    // Simple crane
+    const crane = new THREE.Group();
+    scene.add(crane);
+
+    const craneBase = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.4, 1.6, 1.0, 24),
+      new THREE.MeshStandardMaterial({ color: 0x2b3545, roughness: 0.7, metalness: 0.25 })
+    );
+    craneBase.castShadow = true;
+    craneBase.receiveShadow = true;
+    craneBase.position.set(0, 0.5, 0);
+    crane.add(craneBase);
+
+    const tower = new THREE.Mesh(
+      new THREE.BoxGeometry(1.2, 8.5, 1.2),
+      new THREE.MeshStandardMaterial({ color: 0x3b475b, roughness: 0.65, metalness: 0.25 })
+    );
+    tower.position.set(0, 4.75, 0);
+    tower.castShadow = true;
+    crane.add(tower);
+
+    // Rotating top
+    const top = new THREE.Group();
+    top.position.set(0, 9.0, 0);
+    crane.add(top);
+
+    const cab = new THREE.Mesh(
+      new THREE.BoxGeometry(2.2, 1.1, 1.6),
+      new THREE.MeshStandardMaterial({ color: 0x2f81f7, roughness: 0.5, metalness: 0.15 })
+    );
+    cab.position.set(-1.2, 0.2, -0.6);
+    cab.castShadow = true;
+    top.add(cab);
+
+    const boom = new THREE.Mesh(
+      new THREE.BoxGeometry(18, 0.35, 0.55),
+      new THREE.MeshStandardMaterial({ color: 0xf0b429, roughness: 0.55, metalness: 0.25 })
+    );
+    boom.position.set(9.2, 0.4, 0);
+    boom.castShadow = true;
+    top.add(boom);
+
+    const counter = new THREE.Mesh(
+      new THREE.BoxGeometry(4.2, 0.35, 0.55),
+      new THREE.MeshStandardMaterial({ color: 0xf0b429, roughness: 0.55, metalness: 0.25 })
+    );
+    counter.position.set(-3.0, 0.4, 0);
+    counter.castShadow = true;
+    top.add(counter);
+
+    // Trolley and hook
+    const trolley = new THREE.Group();
+    top.add(trolley);
+
+    const trolleyBody = new THREE.Mesh(
+      new THREE.BoxGeometry(0.8, 0.55, 0.8),
+      new THREE.MeshStandardMaterial({ color: 0x8b949e, roughness: 0.7, metalness: 0.2 })
+    );
+    trolleyBody.castShadow = true;
+    trolleyBody.position.set(0, 0.45, 0);
+    trolley.add(trolleyBody);
+
+    const rope = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.04, 0.04, 1, 10),
+      new THREE.MeshStandardMaterial({ color: 0x8b949e, roughness: 0.9, metalness: 0.0 })
+    );
+    rope.castShadow = true;
+    rope.position.set(0, -0.6, 0);
+    trolley.add(rope);
+
+    const hook = new THREE.Mesh(
+      new THREE.SphereGeometry(0.18, 16, 16),
+      new THREE.MeshStandardMaterial({ color: 0xff7b72, roughness: 0.45, metalness: 0.25 })
+    );
+    hook.castShadow = true;
+    hook.position.set(0, -1.1, 0);
+    trolley.add(hook);
+
+    // State
+    const limits = {
+      trolleyMin: 2.0,
+      trolleyMax: 17.5,
+      hookMinY: 1.2,
+      hookMaxY: 10.0
+    };
+
+    const state = {
+      stage: 0,
+      holding: false,
+      load: null,
+      loadRestingY: 0.55,
+      rotSpeed: 0.85,
+      trolleySpeed: 6.5,
+      hookSpeed: 6.0,
+      craneRot: 0,
+      trolleyX: 7.5,
+      hookY: 6.0,
+      velocityDrop: 0,
+      isDropping: false,
+      phase: 'toPickup' // toPickup -> toDrop -> done
+    };
+
+    // Stage loads
+    const stages = [
+      { type: 'box', color: 0xffc107, label: 'Crate' },
+      { type: 'cylinder', color: 0xa371f7, label: 'Drum' },
+      { type: 'cone', color: 0x3fb950, label: 'Cone' }
+    ];
+
+    function makeLoad(stageDef) {
+      let geom;
+      let restY;
+      if (stageDef.type === 'box') {
+        geom = new THREE.BoxGeometry(1.0, 1.0, 1.0);
+        restY = 0.5;
+      } else if (stageDef.type === 'cylinder') {
+        geom = new THREE.CylinderGeometry(0.55, 0.55, 1.1, 18);
+        restY = 0.55;
+      } else {
+        geom = new THREE.ConeGeometry(0.6, 1.2, 18);
+        restY = 0.6;
+      }
+
+      const mesh = new THREE.Mesh(
+        geom,
+        new THREE.MeshStandardMaterial({ color: stageDef.color, roughness: 0.55, metalness: 0.2 })
+      );
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.userData.label = stageDef.label;
+      return { mesh, restY };
+    }
+
+    function randomPointInZone(zone) {
+      const half = zone.size * 0.45;
+      const x = zone.center.x + (Math.random() * 2 - 1) * half;
+      const z = zone.center.z + (Math.random() * 2 - 1) * half;
+      return new THREE.Vector3(x, 0, z);
+    }
+
+    function resetStage() {
+      // remove previous load
+      if (state.load) {
+        scene.remove(state.load);
+        state.load = null;
+      }
+
+      state.holding = false;
+      state.isDropping = false;
+      state.velocityDrop = 0;
+      state.phase = 'toPickup';
+
+      // reset crane positions
+      state.craneRot = -0.4;
+      state.trolleyX = 7.5;
+      state.hookY = 6.2;
+
+      // create new load in pickup zone
+      const def = stages[state.stage];
+      const { mesh, restY } = makeLoad(def);
+      state.loadRestingY = restY;
+      const p = randomPointInZone(pickupZone);
+      mesh.position.set(p.x, restY, p.z);
+      state.load = mesh;
+      scene.add(mesh);
+
+      stageText.textContent = String(state.stage + 1);
+      statusText.textContent = 'Move to pickup';
+      objectiveText.textContent = `Stage ${state.stage + 1}, pick up the ${def.label}, then drop it in the blue zone.`;
+      toast(`Stage ${state.stage + 1}, ${def.label}`);
+    }
+
+    function advanceStage() {
+      if (state.stage < stages.length - 1) {
+        state.stage += 1;
+        resetStage();
+      } else {
+        state.phase = 'done';
+        statusText.textContent = 'All done';
+        objectiveText.textContent = 'Nice work, all 3 loads delivered. Press Reset to play again.';
+        toast('All stages complete');
+      }
+    }
+
+    // Helpers
+    function hookWorldPos(target = new THREE.Vector3()) {
+      hook.getWorldPosition(target);
+      return target;
+    }
+
+    function withinZone(x, z, zone) {
+      const half = zone.size / 2;
+      return (
+        x >= zone.center.x - half &&
+        x <= zone.center.x + half &&
+        z >= zone.center.z - half &&
+        z <= zone.center.z + half
+      );
+    }
+
+    function tryGrabOrRelease() {
+      if (!state.load || state.phase === 'done') return;
+
+      if (!state.holding) {
+        // Try grab
+        const hookPos = hookWorldPos();
+        const loadPos = state.load.position;
+        const dx = hookPos.x - loadPos.x;
+        const dz = hookPos.z - loadPos.z;
+        const dist = Math.hypot(dx, dz);
+        const heightOk = hookPos.y <= (state.loadRestingY + 1.7);
+
+        if (dist < 0.75 && heightOk && withinZone(loadPos.x, loadPos.z, pickupZone)) {
+          state.holding = true;
+          state.isDropping = false;
+          state.velocityDrop = 0;
+          statusText.textContent = 'Carry to drop';
+          state.phase = 'toDrop';
+          toast('Grabbed');
+        } else {
+          toast('Lower hook over the load in the green zone');
+        }
+      } else {
+        // Release
+        const hookPos = hookWorldPos();
+        const x = hookPos.x;
+        const z = hookPos.z;
+
+        state.holding = false;
+        state.isDropping = true;
+        state.velocityDrop = 0;
+        toast('Released');
+
+        // Immediate check if low enough and in drop zone
+        if (withinZone(x, z, dropZone)) {
+          statusText.textContent = 'Drop in zone';
+        } else {
+          statusText.textContent = 'Drop in zone';
+        }
+      }
+    }
+
+    // Inputs
+    const keys = new Set();
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        tryGrabOrRelease();
+        return;
+      }
+      keys.add(e.code);
+
+      if (e.code === 'KeyX') {
+        e.preventDefault();
+        resetStage();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => keys.delete(e.code));
+
+    // On-screen controls
+    const holdState = {
+      rotLeft: false,
+      rotRight: false,
+      trolleyOut: false,
+      trolleyIn: false,
+      hookUp: false,
+      hookDown: false
+    };
+
+    function setHold(name, val) {
+      if (name in holdState) holdState[name] = val;
+    }
+
+    function pressAction(name) {
+      if (name === 'grab' || name === 'release') tryGrabOrRelease();
+      if (name === 'reset') resetStage();
+    }
+
+    document.querySelectorAll('[data-hold]').forEach((btn) => {
+      const k = btn.getAttribute('data-hold');
+      const on = (ev) => { ev.preventDefault(); setHold(k, true); };
+      const off = (ev) => { ev.preventDefault(); setHold(k, false); };
+      btn.addEventListener('pointerdown', on);
+      btn.addEventListener('pointerup', off);
+      btn.addEventListener('pointercancel', off);
+      btn.addEventListener('pointerleave', off);
+    });
+
+    document.querySelectorAll('[data-press]').forEach((btn) => {
+      const k = btn.getAttribute('data-press');
+      btn.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        pressAction(k);
+      });
+    });
+
+    // Reset button
+    document.getElementById('resetBtn').addEventListener('click', (ev) => {
+      ev.preventDefault();
+      if (state.phase === 'done') {
+        state.stage = 0;
+      }
+      resetStage();
+    });
+
+    // Animate
+    const clock = new THREE.Clock();
+
+    function updateControls(dt) {
+      // Keyboard
+      const rotLeft = keys.has('KeyA') || keys.has('ArrowLeft') || holdState.rotLeft;
+      const rotRight = keys.has('KeyD') || keys.has('ArrowRight') || holdState.rotRight;
+      const trolleyOut = keys.has('KeyW') || keys.has('ArrowUp') || holdState.trolleyOut;
+      const trolleyIn = keys.has('KeyS') || keys.has('ArrowDown') || holdState.trolleyIn;
+      const hookUp = keys.has('KeyR') || holdState.hookUp;
+      const hookDown = keys.has('KeyF') || holdState.hookDown;
+
+      const rotDir = (rotLeft ? 1 : 0) + (rotRight ? -1 : 0);
+      state.craneRot += rotDir * state.rotSpeed * dt;
+
+      const trolleyDir = (trolleyOut ? 1 : 0) + (trolleyIn ? -1 : 0);
+      state.trolleyX += trolleyDir * state.trolleySpeed * dt;
+      state.trolleyX = THREE.MathUtils.clamp(state.trolleyX, limits.trolleyMin, limits.trolleyMax);
+
+      const hookDir = (hookUp ? 1 : 0) + (hookDown ? -1 : 0);
+      state.hookY += hookDir * state.hookSpeed * dt;
+      state.hookY = THREE.MathUtils.clamp(state.hookY, limits.hookMinY, limits.hookMaxY);
+    }
+
+    function updateCrane() {
+      top.rotation.y = state.craneRot;
+      trolley.position.set(state.trolleyX, 0, 0);
+
+      // Rope and hook length based on hookY
+      const hookLocalY = -(state.hookY - top.position.y);
+      hook.position.y = hookLocalY;
+
+      const ropeLen = Math.max(0.6, Math.abs(hookLocalY) - 0.35);
+      rope.scale.set(1, ropeLen, 1);
+      rope.position.y = -0.35 - ropeLen * 0.5;
+    }
+
+    function updateLoad(dt) {
+      if (!state.load) return;
+
+      if (state.holding) {
+        const hookPos = hookWorldPos();
+        state.load.position.set(hookPos.x, hookPos.y - 0.65, hookPos.z);
+        state.load.rotation.y += dt * 1.2;
+      } else if (state.isDropping) {
+        // Simple gravity drop to ground
+        state.velocityDrop += 18.0 * dt;
+        state.load.position.y -= state.velocityDrop * dt;
+
+        if (state.load.position.y <= state.loadRestingY) {
+          state.load.position.y = state.loadRestingY;
+          state.isDropping = false;
+          state.velocityDrop = 0;
+
+          const x = state.load.position.x;
+          const z = state.load.position.z;
+
+          if (withinZone(x, z, dropZone)) {
+            statusText.textContent = 'Delivered';
+            toast('Delivered');
+            // small pause then next stage
+            setTimeout(() => {
+              if (state.load) {
+                scene.remove(state.load);
+                state.load = null;
+              }
+              advanceStage();
+            }, 450);
+          } else {
+            statusText.textContent = 'Try again';
+            toast('Missed the zone, try again');
+            // put back to pickup zone
+            setTimeout(() => {
+              if (!state.load) return;
+              const p = randomPointInZone(pickupZone);
+              state.load.position.set(p.x, state.loadRestingY, p.z);
+              state.phase = 'toPickup';
+              statusText.textContent = 'Move to pickup';
+            }, 450);
+          }
+        }
+      }
+
+      // subtle idle bob when waiting
+      if (!state.holding && !state.isDropping && state.phase !== 'done') {
+        state.load.rotation.y += dt * 0.35;
+      }
+    }
+
+    function updateCamera(dt) {
+      // Fixed, stable camera so rotating the crane does not feel like rotating the whole world.
+      // This makes A/D clearly rotate the crane, not the view.
+      const target = new THREE.Vector3(0, 7.5, 0);
+      const desired = new THREE.Vector3(22, 16, 26);
+
+      camera.position.lerp(desired, 1 - Math.pow(0.001, dt));
+      camera.lookAt(target);
+    }
+
+    function animate() {
+      const dt = Math.min(clock.getDelta(), 0.04);
+      updateControls(dt);
+      updateCrane();
+      updateLoad(dt);
+      updateCamera(dt);
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    window.addEventListener('resize', onResize);
+
+    // Start
+    resetStage();
+    animate();
+
+    // Helpful first toast
+    setTimeout(() => toast('Use A and D, W and S, R and F, Space to grab'), 400);
+  </script>
+</body>
+</html>
