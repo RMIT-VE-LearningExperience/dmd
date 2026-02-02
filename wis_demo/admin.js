@@ -366,6 +366,8 @@ window.editCareer = function(index) {
     document.getElementById('overview').value = career.overview || '';
     document.getElementById('work-style').value = career.work_style || '';
     document.getElementById('video-url').value = career.video_url || '';
+    document.getElementById('person-name').value = career.person_name || '';
+    document.getElementById('person-bio').value = career.person_bio || '';
 
     // Populate tags
     populateTags('skills-container', career.core_skills || []);
@@ -405,6 +407,8 @@ async function handleSaveCareer() {
         overview: document.getElementById('overview').value.trim(),
         work_style: document.getElementById('work-style').value,
         video_url: document.getElementById('video-url').value.trim(),
+        person_name: document.getElementById('person-name').value.trim(),
+        person_bio: document.getElementById('person-bio').value.trim(),
         core_skills: getTagValues('skills-container'),
         core_education: getTagValues('education-container'),
         related_roles: getTagValues('related-roles-container'),
@@ -459,6 +463,8 @@ function clearForm() {
     document.getElementById('overview').value = '';
     document.getElementById('work-style').value = '';
     document.getElementById('video-url').value = '';
+    document.getElementById('person-name').value = '';
+    document.getElementById('person-bio').value = '';
 
     clearTags('skills-container');
     clearTags('education-container');

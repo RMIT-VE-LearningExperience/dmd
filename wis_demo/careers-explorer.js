@@ -825,16 +825,55 @@ function clearComparison() {
     });
 }
 
+// Convert YouTube URL to embed format
+function getYouTubeEmbedUrl(url) {
+    if (!url) return null;
+
+    // Match various YouTube URL formats
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+
+    if (match && match[2].length === 11) {
+        return `https://www.youtube.com/embed/${match[2]}`;
+    }
+
+    // If already an embed URL, return as is
+    if (url.includes('/embed/')) {
+        return url;
+    }
+
+    return null;
+}
+
 // Show Career Info
 function showCareerInfo(career) {
     document.getElementById('careerTitle').textContent = career.name;
     document.getElementById('careerSalary').textContent = career.salary_range || 'Salary varies';
 
-    // Video iframe
+    // Video iframe with person info
     const videoContainer = document.getElementById('videoContainer');
     if (career.video_url) {
-        videoContainer.innerHTML = `<iframe src="${career.video_url}" allowfullscreen></iframe>`;
-        videoContainer.style.display = 'block';
+        const embedUrl = getYouTubeEmbedUrl(career.video_url);
+        if (embedUrl) {
+            let videoHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+
+            // Add "Meet [Name]" and bio if available
+            if (career.person_name || career.person_bio) {
+                videoHTML += '<div class="person-info">';
+                if (career.person_name) {
+                    videoHTML += `<h3 class="person-name">Meet ${career.person_name}</h3>`;
+                }
+                if (career.person_bio) {
+                    videoHTML += `<p class="person-bio">${career.person_bio}</p>`;
+                }
+                videoHTML += '</div>';
+            }
+
+            videoContainer.innerHTML = videoHTML;
+            videoContainer.style.display = 'block';
+        } else {
+            videoContainer.style.display = 'none';
+        }
     } else {
         videoContainer.style.display = 'none';
     }
