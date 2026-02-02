@@ -2143,38 +2143,10 @@
             </div>
         </div>
     </div>
+ 
 
     <!-- Firebase SDK -->
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBxux22xvJ-aSosjsKRq3ULLFpNhAJ18uA",
-            authDomain: "feedback-form-6714d.firebaseapp.com",
-            projectId: "feedback-form-6714d",
-            storageBucket: "feedback-form-6714d.firebasestorage.app",
-            messagingSenderId: "590459135038",
-            appId: "1:590459135038:web:4b4ab8d6ef2b85ab335d6f",
-            measurementId: "G-ZHQ9K3DGR0"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Make Firebase functions available globally
-        window.firebaseDB = db;
-        window.firebaseCollection = collection;
-        window.firebaseAddDoc = addDoc;
-        window.firebaseGetDocs = getDocs;
-        window.firebaseQuery = query;
-        window.firebaseOrderBy = orderBy;
-
-        console.log('Firebase initialized successfully!');
-    </script>
+   <script>
 
     <script>
         // Game state
