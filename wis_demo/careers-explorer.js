@@ -84,12 +84,16 @@ let filteredCareers = []; // Will be populated after data loads
 let selectedCategories = new Set();
 let comparisonCareers = [];
 let videoFilterActive = false;
+let stackIndex = 0;
 
 // DOM Elements
 const floatingView = document.getElementById('floatingView');
 const cardView = document.getElementById('cardView');
 const floatingContainer = document.getElementById('floatingCareersContainer');
 const careersGrid = document.getElementById('careersGrid');
+const stackView = document.getElementById('stackView');
+const stackContainer = document.getElementById('stackContainer');
+const stackProgress = document.getElementById('stackProgress');
 const infoPanel = document.getElementById('infoPanel');
 const closeBtn = document.getElementById('closeBtn');
 const pauseBtn = document.getElementById('pauseBtn');
@@ -191,6 +195,12 @@ function switchView(view) {
     if (view === 'floating') {
         // First remove active from card view to trigger fade-out
         cardView.classList.remove('active');
+        if (stackView) {
+            stackView.classList.remove('active');
+        }
+        if (careersGrid) {
+            careersGrid.style.display = 'grid';
+        }
 
         // Wait for fade-out, then show floating view
         setTimeout(() => {
@@ -229,8 +239,25 @@ function switchView(view) {
             videoLegend.classList.remove('visible');
 
             document.querySelectorAll('.toggle-btn').forEach(b => {
-                b.classList.toggle('active', b.dataset.view === 'cards');
+                b.classList.toggle('active', b.dataset.view === view);
             });
+
+            if (view === 'stack') {
+                if (careersGrid) {
+                    careersGrid.style.display = 'none';
+                }
+                if (stackView) {
+                    stackView.classList.add('active');
+                }
+                renderStackCards();
+            } else {
+                if (stackView) {
+                    stackView.classList.remove('active');
+                }
+                if (careersGrid) {
+                    careersGrid.style.display = 'grid';
+                }
+            }
 
             // Hide floating view after transition
             setTimeout(() => {
@@ -461,6 +488,98 @@ function createCareerCard(career, matchingLevels = null) {
     });
 
     return card;
+}
+
+// Stack View Functions
+function renderStackCards() {
+    if (!stackContainer) return;
+
+    stackContainer.innerHTML = '';
+    if (filteredCareers.length === 0) {
+        if (stackProgress) {
+            stackProgress.textContent = 'No careers match your filters.';
+        }
+        return;
+    }
+
+    if (stackIndex >= filteredCareers.length) {
+        stackIndex = 0;
+    }
+
+    const visibleCards = filteredCareers.slice(stackIndex, stackIndex + 3);
+    visibleCards.forEach((career, idx) => {
+        const card = createCareerCard(career);
+        card.classList.add('stack-card');
+        card.style.setProperty('--stack-y', `${idx * 14}px`);
+        card.style.setProperty('--stack-scale', `${1 - idx * 0.04}`);
+        card.style.zIndex = `${10 - idx}`;
+        if (idx === 0) {
+            card.classList.add('is-top');
+        }
+        stackContainer.appendChild(card);
+    });
+
+    if (stackProgress) {
+        stackProgress.textContent = `${Math.min(stackIndex + 1, filteredCareers.length)} of ${filteredCareers.length}`;
+    }
+
+    attachSwipeHandlers();
+}
+
+function attachSwipeHandlers() {
+    const topCard = stackContainer ? stackContainer.querySelector('.stack-card.is-top') : null;
+    if (!topCard) return;
+
+    let startX = 0;
+    let startY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let isDragging = false;
+
+    const onPointerMove = (e) => {
+        if (!isDragging) return;
+        currentX = e.clientX - startX;
+        currentY = e.clientY - startY;
+        const rotate = currentX / 18;
+        topCard.style.transition = 'none';
+        topCard.style.transform = `translate(calc(-50% + ${currentX}px), ${currentY}px) rotate(${rotate}deg)`;
+    };
+
+    const resetCard = () => {
+        topCard.style.transition = 'transform 0.2s ease';
+        topCard.style.transform = `translate(-50%, var(--stack-y, 0px)) scale(var(--stack-scale, 1))`;
+    };
+
+    const onPointerUp = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        const threshold = 90;
+        if (Math.abs(currentX) > threshold) {
+            const direction = currentX > 0 ? 1 : -1;
+            topCard.style.transition = 'transform 0.25s ease';
+            topCard.style.transform = `translate(calc(-50% + ${direction * 800}px), ${currentY}px) rotate(${direction * 12}deg)`;
+            topCard.addEventListener('transitionend', () => {
+                stackIndex += 1;
+                renderStackCards();
+            }, { once: true });
+        } else {
+            resetCard();
+        }
+
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+    };
+
+    topCard.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        currentX = 0;
+        currentY = 0;
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+    }, { once: true });
 }
 
 function renderCareerCards(careerMatchingLevels = null, isFiltering = false) {
@@ -1075,8 +1194,14 @@ function filterCareers() {
     console.log('✅ RESULT: ' + filteredCareers.length + ' out of ' + careersData.roles.length + ' careers match');
     console.log('---');
 
+    stackIndex = 0;
+
     // Pass isFiltering=true to trigger animation
     renderCareerCards(careerMatchingLevels, true);
+
+    if (currentView === 'stack') {
+        renderStackCards();
+    }
 
     // Update floating view if active
     if (currentView === 'floating') {

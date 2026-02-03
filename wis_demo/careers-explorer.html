@@ -17,6 +17,7 @@
     <div class="view-toggle">
         <button class="toggle-btn active" data-view="floating">Floating View</button>
         <button class="toggle-btn" data-view="cards">Card View</button>
+        <button class="toggle-btn" data-view="stack">Stack View</button>
     </div>
 
     <!-- Pause Button (Floating View Only) -->
@@ -73,6 +74,12 @@
                     <div class="skills-filter" id="skillsFilterContainer"></div>
                 </div>
             </div>
+        </div>
+
+        <div class="stack-view" id="stackView">
+            <div class="stack-hint">Swipe left or right to see the next career</div>
+            <div class="stack-container" id="stackContainer"></div>
+            <div class="stack-progress" id="stackProgress"></div>
         </div>
 
         <div class="careers-grid" id="careersGrid"></div>
