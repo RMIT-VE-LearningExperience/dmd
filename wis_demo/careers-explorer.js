@@ -510,8 +510,9 @@ function renderStackCards() {
     visibleCards.forEach((career, idx) => {
         const card = createCareerCard(career);
         card.classList.add('stack-card');
-        card.style.setProperty('--stack-y', `${idx * 14}px`);
-        card.style.setProperty('--stack-scale', `${1 - idx * 0.04}`);
+        card.style.setProperty('--stack-x', `${idx * 10}px`);
+        card.style.setProperty('--stack-y', `${idx * -10}px`);
+        card.style.setProperty('--stack-scale', `1`);
         card.style.zIndex = `${10 - idx}`;
         if (idx === 0) {
             card.classList.add('is-top');
@@ -547,7 +548,7 @@ function attachSwipeHandlers() {
 
     const resetCard = () => {
         topCard.style.transition = 'transform 0.2s ease';
-        topCard.style.transform = `translate(-50%, var(--stack-y, 0px)) scale(var(--stack-scale, 1))`;
+        topCard.style.transform = `translate(calc(-50% + var(--stack-x, 0px)), var(--stack-y, 0px)) scale(var(--stack-scale, 1))`;
     };
 
     const onPointerUp = () => {

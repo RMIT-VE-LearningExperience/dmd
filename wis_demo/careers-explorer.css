@@ -402,7 +402,7 @@ body {
 .stack-container {
     position: relative;
     width: 100%;
-    min-height: 520px;
+    min-height: 620px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -417,9 +417,11 @@ body {
 
 .stack-card {
     position: absolute;
-    width: min(92%, 380px);
+    width: min(86%, 360px);
+    height: 520px;
     left: 50%;
-    transform: translate(-50%, var(--stack-y, 0px)) scale(var(--stack-scale, 1));
+    transform: translate(calc(-50% + var(--stack-x, 0px)), var(--stack-y, 0px))
+        scale(var(--stack-scale, 1));
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
     cursor: grab;
     opacity: 1;
