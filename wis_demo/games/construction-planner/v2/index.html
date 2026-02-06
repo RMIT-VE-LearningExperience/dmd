@@ -7,7 +7,8 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
 
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; }
+  img { -webkit-user-drag: none; }
 
   body {
     font-family: 'Nunito', sans-serif;
@@ -587,7 +588,7 @@ padding-bottom: 60px;
   }
 
   .worker-avatar svg { width: 100%; height: 100%; }
-  .worker-avatar img { width: 100%; height: 100%; border-radius: 50%; display: block; }
+  .worker-avatar img { width: 100%; height: 100%; border-radius: 50%; display: block; -webkit-user-drag: none; user-drag: none; }
 
   .worker-label {
     font-size: 9px;
@@ -767,7 +768,7 @@ max-height: 130px;
 
   /* Avatar pop-out when dragging */
   .worker-source.dragging .worker-avatar {
-    opacity: 0.3;
+    opacity: 0;
     transform: none;
     transition: opacity 0.15s;
     bottom: -20px;
@@ -1342,12 +1343,12 @@ const gameState = {
 // ============================================================
 function weatherSVG(type) {
   const icons = {
-    'sunny': `<img class="weather-icon" src="images/weather_icons/sunny01.svg" alt="Sunny">`,
-    'partly-cloudy': `<img class="weather-icon" src="images/weather_icons/partlycloudy01.svg" alt="Partly cloudy">`,
+    'sunny': `<img class="weather-icon" src="images/weather_icons/sunny02.svg" alt="Sunny">`,
+    'partly-cloudy': `<img class="weather-icon" src="images/weather_icons/partlycloudy02.svg" alt="Partly cloudy">`,
     'cloudy': `<img class="weather-icon" src="images/weather_icons/cloudy01.svg" alt="Cloudy">`,
-    'thunder': `<img class="weather-icon" src="images/weather_icons/thunder01.svg" alt="Storms">`,
+    'thunder': `<img class="weather-icon" src="images/weather_icons/thunder02.svg" alt="Storms">`,
     'windy': `<img class="weather-icon" src="images/weather_icons/wind01.svg" alt="Windy">`,
-    'night': `<img class="weather-icon" src="images/weather_icons/night01.svg" alt="Night">`
+    'night': `<img class="weather-icon" src="images/weather_icons/moon.svg" alt="Night">`
   };
   return icons[type] || '';
 }
@@ -1899,6 +1900,7 @@ function addWorkerToCell(cell, role) {
   img.className = 'worker-in-cell';
   img.dataset.role = role;
   img.innerHTML = workerSVG(role);
+  img.setAttribute('draggable', 'false');
   img.style.background = roleColors[role];
   img.style.borderColor = '#1a2744';
 
@@ -2111,7 +2113,7 @@ function updateBand(tx, ty) {
 
   const ax = bandAnchor.x;
   const ay = bandAnchor.y;
-  const hw = bandAnchor.width * 0.48; // half-width at base
+  const hw = bandAnchor.width * 0.5; // half-width at base
   const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
 
   const dx = tx - ax;
@@ -2308,29 +2310,82 @@ function canDragRole(role) {
   return used < 3;
 }
 
-// --- Mouse: drag from source ---
+// --- Prevent ALL native HTML5 drag (eliminates browser ghost) ---
 document.querySelectorAll('.worker-source').forEach(src => {
-  src.addEventListener('dragstart', e => {
-    stopIdleAnimation();
+  src.setAttribute('draggable', 'false');
+  src.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+  src.addEventListener('dragstart', e => e.preventDefault());
+});
+
+// --- Mouse: drag from source (pure mousedown/move/up, no native ghost) ---
+let mouseDragging = false;
+let mouseRole = null;
+
+document.querySelectorAll('.worker-source').forEach(src => {
+  src.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
     const role = src.dataset.role;
-    if (!canDragRole(role)) { e.preventDefault(); return; }
-    dragRole = role;
-    dragSource = null;
-    e.dataTransfer.setData('text/plain', role);
-    e.dataTransfer.effectAllowed = 'copy';
-    const avatarEl = src.querySelector('.worker-avatar');
-    if (avatarEl) {
-      const rect = avatarEl.getBoundingClientRect();
-      dragOffset = {
-        x: rect.left + rect.width / 2 - e.clientX,
-        y: rect.top + rect.height / 2 - e.clientY
-      };
-    } else {
-      dragOffset = { x: 0, y: 0 };
-    }
-    // Show band for mouse drag too
-    showBand(role, src);
+    if (!canDragRole(role)) return;
+    stopIdleAnimation();
+    e.preventDefault();
+    mouseDragging = true;
+    mouseRole = role;
+    createGhost(role, e.clientX, e.clientY, src);
   });
+});
+
+// --- Mouse: drag from placed cell (no band) ---
+document.addEventListener('mousedown', e => {
+  if (mouseDragging) return;
+  const wcell = e.target.closest('.worker-in-cell');
+  if (!wcell) return;
+  if (e.button !== 0) return;
+  stopIdleAnimation();
+  e.preventDefault();
+  const cell = wcell.closest('.cell');
+  const role = wcell.dataset.role;
+  mouseDragging = true;
+  mouseRole = role;
+  removeWorker(role, cell);
+  createGhost(role, e.clientX, e.clientY, null, wcell);
+});
+
+// --- Mouse move ---
+document.addEventListener('mousemove', e => {
+  if (!mouseDragging) return;
+  e.preventDefault();
+  moveGhost(e.clientX, e.clientY);
+  document.querySelectorAll('.cell').forEach(c => {
+    c.classList.remove('drag-over');
+    c.classList.remove('drag-over-invalid');
+  });
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const cell = el?.closest?.('.cell');
+  if (cell) {
+    const key = `${cell.dataset.day}-${cell.dataset.slot}`;
+    if (gameState.schedule[key]) {
+      cell.classList.add('drag-over-invalid');
+    } else {
+      cell.classList.add('drag-over');
+    }
+  }
+});
+
+// --- Mouse up ---
+document.addEventListener('mouseup', e => {
+  if (!mouseDragging) return;
+  mouseDragging = false;
+  hideGhost(true);
+  document.querySelectorAll('.cell').forEach(c => {
+    c.classList.remove('drag-over');
+    c.classList.remove('drag-over-invalid');
+  });
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const cell = el?.closest?.('.cell');
+  if (cell && mouseRole) {
+    attemptPlacement(mouseRole, cell.dataset.day, parseInt(cell.dataset.slot), cell);
+  }
+  mouseRole = null;
 });
 
 // --- Touch: drag from source ---
@@ -2403,68 +2458,6 @@ document.addEventListener('touchend', e => {
   }
   touchRole = null;
   touchSourceCell = null;
-});
-
-// --- Mouse: drag over ---
-document.addEventListener('dragover', e => {
-  const cell = e.target.closest?.('.cell');
-  if (cell) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-    cell.classList.add('drag-over');
-  }
-  // Update band during mouse drag
-  if (bandAnchor) {
-    moveGhost(e.clientX, e.clientY);
-  }
-});
-
-document.addEventListener('dragleave', e => {
-  const cell = e.target.closest?.('.cell');
-  if (cell) cell.classList.remove('drag-over');
-});
-
-// --- Mouse: drop ---
-document.addEventListener('drop', e => {
-  e.preventDefault();
-  document.querySelectorAll('.cell').forEach(c => c.classList.remove('drag-over'));
-  const cell = e.target.closest?.('.cell');
-  lastGhostX = e.clientX;
-  lastGhostY = e.clientY;
-  hideGhost(true);
-  if (!cell) { dragRole = null; dragSource = null; return; }
-  const role = e.dataTransfer.getData('text/plain') || dragRole;
-  if (role) {
-    attemptPlacement(role, cell.dataset.day, parseInt(cell.dataset.slot), cell);
-  }
-  dragRole = null;
-  dragSource = null;
-});
-
-// --- Mouse: dragend (if dropped outside) ---
-document.addEventListener('dragend', e => {
-  lastGhostX = e.clientX;
-  lastGhostY = e.clientY;
-  hideGhost(true);
-  document.querySelectorAll('.cell').forEach(c => c.classList.remove('drag-over'));
-  dragOffset = { x: 0, y: 0 };
-});
-
-// --- Mouse: drag from placed cell (no band) ---
-document.addEventListener('mousedown', e => {
-  const wcell = e.target.closest('.worker-in-cell');
-  if (!wcell) return;
-  stopIdleAnimation();
-  const cell = wcell.closest('.cell');
-  const role = wcell.dataset.role;
-  wcell.setAttribute('draggable', 'true');
-  wcell.addEventListener('dragstart', ev => {
-    dragRole = role;
-    dragSource = { day: cell.dataset.day, slot: cell.dataset.slot };
-    ev.dataTransfer.setData('text/plain', role);
-    ev.dataTransfer.effectAllowed = 'move';
-    setTimeout(() => removeWorker(role, cell), 0);
-  }, { once: true });
 });
 
 // ============================================================
