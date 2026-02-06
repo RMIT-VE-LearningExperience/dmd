@@ -437,8 +437,9 @@
     background: white;
     border-radius: 16px;
     padding: 28px 24px 140px;
-    max-width: 320px;
-    width: 100%;
+    width: 80vw;
+    max-width: 400px;
+    height: 80vh;
     text-align: left;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     position: relative;
@@ -710,8 +711,9 @@
   .welcome-card {
     background: white;
     border-radius: 16px;
+    height: 80%;
     width: 100%;
-    max-width: 340px;
+    max-width: 400px;
     padding: 28px 24px 90px;
     position: relative;
     box-shadow: 0 18px 50px rgba(0,0,0,0.25);
@@ -897,10 +899,10 @@
   <defs>
     <linearGradient id="bandGrad" x1="0" y1="0" x2="0" y2="1" gradientUnits="userSpaceOnUse">
       <stop offset="0%" id="bandStop0" stop-color="#e8845a" stop-opacity="1"/>
-      <stop offset="25%" id="bandStop1" stop-color="#e8845a" stop-opacity="0.25"/>
+      <stop offset="25%" id="bandStop1" stop-color="#e8845a" stop-opacity="0.75"/>
       <stop offset="50%" id="bandStop2" stop-color="#f3b07f" stop-opacity="0.5"/>
-      <stop offset="75%" id="bandStop3" stop-color="#f7c9a4" stop-opacity="1"/>
-      <stop offset="100%" id="bandStop4" stop-color="#f7c9a4" stop-opacity="0.25"/>
+      <stop offset="75%" id="bandStop3" stop-color="#f7c9a4" stop-opacity="0"/>
+      <stop offset="100%" id="bandStop4" stop-color="#f7c9a4" stop-opacity="0.0"/>
     </linearGradient>
   </defs>
   <path id="bandPath" d="" fill="url(#bandGrad)"/>
@@ -1329,6 +1331,33 @@ function attemptPlacement(role, day, slotNum, cellEl) {
       return false;
     }
 
+    // Ensure no crane slots are scheduled on/after the concrete day
+    for (const [key, val] of Object.entries(gameState.schedule)) {
+      if (val !== 'crane') continue;
+      const [d] = key.split('-');
+      if (dayIndex[d] >= di) {
+        showFeedback(role,
+          `The Crane Operator must finish before ${day}. Move any crane slots after that day.`,
+          "Work Order: Crane Operator → Concreter → Carpenter"
+        );
+        return false;
+      }
+    }
+
+    // Ensure no carpenter slots are scheduled on/before the setting day
+    const settingIdx = di + 1;
+    for (const [key, val] of Object.entries(gameState.schedule)) {
+      if (val !== 'carpenter') continue;
+      const [d] = key.split('-');
+      if (dayIndex[d] <= settingIdx) {
+        showFeedback(role,
+          `The Carpenter must start after the concrete sets on ${dayFromIndex[settingIdx]}.`,
+          "Carpenter starts after the concrete has set."
+        );
+        return false;
+      }
+    }
+
     // Check enough carpenter slots after setting day
     if (gameState.carpenterSlotsUsed < 3) {
       const carpSlots = countCarpenterSlotsAfterDay(di + 1);
@@ -1642,7 +1671,7 @@ function showBand(role, sourceEl) {
   document.getElementById('bandStop1').setAttribute('stop-opacity', '1');
   document.getElementById('bandStop2').setAttribute('stop-opacity', '0.5');
   document.getElementById('bandStop3').setAttribute('stop-opacity', '0.5');
-  document.getElementById('bandStop4').setAttribute('stop-opacity', '0.25');
+  document.getElementById('bandStop4').setAttribute('stop-opacity', '0');
 
   const grad = document.getElementById('bandGrad');
   grad.setAttribute('x1', bandAnchor.x);
