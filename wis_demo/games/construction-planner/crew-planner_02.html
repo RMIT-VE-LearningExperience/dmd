@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Crew Planner</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #d9dde1;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 420px;
+    min-height: 100vh;
+    background: #d9dde1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 24px 20px 12px;
+  }
+
+  .header h1 {
+    font-size: 32px;
+    font-weight: 900;
+    color: #1a2744;
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+  }
+
+  .header-icons {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .header-icon {
+    width: 38px;
+    height: 38px;
+    background: #1a2744;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .header-icon:active { transform: scale(0.92); }
+  .header-icon svg { width: 20px; height: 20px; fill: white; }
+
+  /* Grid */
+  .grid-wrapper {
+    padding: 0 12px;
+    flex: 1;
+  }
+
+  .time-header {
+    display: grid;
+    grid-template-columns: 68px 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 6px;
+    padding: 0 2px;
+  }
+
+  .time-header span:first-child { display: block; }
+
+  .time-label {
+    background: #1a2744;
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .schedule-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .day-row {
+    display: grid;
+    grid-template-columns: 68px 1fr 1fr 1fr;
+    gap: 6px;
+    align-items: stretch;
+  }
+
+  .day-label {
+    background: #1a2744;
+    color: white;
+    font-size: 15px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    min-height: 80px;
+    letter-spacing: 0.3px;
+  }
+
+  .cell {
+    background: #ebeef2;
+    border-radius: 12px;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border: 2.5px dashed #c0c6ce;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    gap: 2px;
+    padding: 4px;
+  }
+
+  .cell.drag-over {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+  }
+
+  .cell.drag-over-invalid {
+    border-color: #ef4444;
+    background: #fee2e2;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.2);
+  }
+
+  .cell.setting-cell {
+    background: #fef3c7;
+    border: 2.5px solid #f59e0b;
+  }
+
+  .cell.setting-cell .setting-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: #92400e;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .cell.setting-cell .setting-icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .cell .weather-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  .cell .worker-in-cell {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2.5px solid #1a2744;
+    cursor: grab;
+    transition: transform 0.15s;
+    position: relative;
+    z-index: 2;
+  }
+
+  .cell .worker-in-cell:active { cursor: grabbing; transform: scale(1.08); }
+
+  .cell .remove-btn {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 18px;
+    height: 18px;
+    background: #ef4444;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .cell:hover .remove-btn,
+  .cell .remove-btn:focus { opacity: 1; }
+
+  /* Bottom bar */
+  .bottom-bar {
+    background: #1a2744;
+    padding: 16px 16px 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    margin-top: 10px;
+    min-height: 140px;
+  }
+
+  .help-btn {
+    position: absolute;
+    left: 18px;
+    bottom: 18px;
+    width: 56px;
+    height: 56px;
+    background: #f5c542;
+    border: none;
+    border-radius: 50%;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    color: #1a2744;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    transition: transform 0.15s;
+    z-index: 10;
+  }
+
+  .help-btn:active { transform: scale(0.92); }
+
+  /* Worker sources */
+  .worker-source {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: grab;
+    transition: transform 0.15s, opacity 0.2s;
+    position: relative;
+  }
+
+  .worker-source:active { cursor: grabbing; }
+  .worker-source.completed { opacity: 0.45; cursor: default; }
+
+  .worker-tube {
+    width: 72px;
+    height: 100px;
+    border-radius: 14px 14px 0 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 6px;
+    overflow: hidden;
+  }
+
+  .worker-tube::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30%;
+    background: linear-gradient(to top, rgba(0,0,0,0.12), transparent);
+  }
+
+  .worker-source:nth-child(1) .worker-tube { background: linear-gradient(180deg, #e8845a 0%, #d4714a 100%); }
+  .worker-source:nth-child(2) .worker-tube { background: linear-gradient(180deg, #e89a8a 0%, #d4836f 100%); }
+  .worker-source:nth-child(3) .worker-tube { background: linear-gradient(180deg, #7ab0d4 0%, #6499bd 100%); }
+
+  .worker-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid #1a2744;
+    background: white;
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+  }
+
+  .worker-avatar svg { width: 100%; height: 100%; }
+
+  .worker-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: white;
+    text-align: center;
+    margin-top: 4px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    opacity: 0.85;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Progress bar on worker tube */
+  .progress-track {
+    width: 52px;
+    height: 6px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px;
+    margin-top: 6px;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: white;
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.35s ease;
+  }
+
+  .slots-count {
+    font-size: 8px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.7);
+    margin-top: 2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Drag ghost */
+  .drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 3px solid #1a2744;
+    opacity: 0.92;
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    display: none;
+  }
+
+  /* Feedback modal */
+  .feedback-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 150;
+    padding: 20px;
+  }
+
+  .feedback-overlay.active { display: flex; }
+
+  .feedback-popup {
+    background: white;
+    border-radius: 20px;
+    padding: 24px 20px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    position: relative;
+    border-top: 5px solid var(--role-color, #1a2744);
+  }
+
+  .feedback-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 3px solid #1a2744;
+    background: white;
+    margin: -48px auto 12px;
+    overflow: hidden;
+  }
+
+  .feedback-avatar svg { width: 100%; height: 100%; }
+
+  .feedback-name {
+    font-size: 14px;
+    font-weight: 900;
+    color: #1a2744;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .feedback-msg {
+    font-size: 13px;
+    color: #4a5568;
+    line-height: 1.55;
+    margin-bottom: 6px;
+  }
+
+  .feedback-hint {
+    font-size: 11px;
+    color: #9ca3af;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .feedback-close {
+    background: #1a2744;
+    color: white;
+    border: none;
+    padding: 10px 32px;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .feedback-close:active { transform: scale(0.95); }
+
+  /* Help Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 24px;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 20px;
+    padding: 28px 22px;
+    max-width: 360px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  .modal h2 {
+    color: #1a2744;
+    font-size: 22px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .rule-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+  }
+
+  .rule-num {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    background: #1a2744;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    margin-top: 1px;
+  }
+
+  .rule-text {
+    font-size: 13px;
+    color: #4a5568;
+    line-height: 1.5;
+  }
+
+  .rule-text strong { color: #1a2744; }
+
+  .weather-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #6b7280;
+    font-weight: 700;
+    background: #f3f4f6;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .legend-item svg { width: 18px; height: 18px; }
+  .legend-block { color: #ef4444; font-weight: 800; font-size: 9px; }
+
+  .modal .close-modal {
+    margin-top: 16px;
+    background: #1a2744;
+    color: white;
+    border: none;
+    padding: 12px 36px;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s;
+    display: block;
+    width: 100%;
+  }
+
+  .modal .close-modal:active { transform: scale(0.95); }
+
+  /* Success overlay */
+  .success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,39,68,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 24px;
+  }
+
+  .success-overlay.active { display: flex; }
+
+  .success-card {
+    background: white;
+    border-radius: 24px;
+    padding: 36px 28px;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+  }
+
+  .success-icon {
+    font-size: 56px;
+    margin-bottom: 8px;
+    line-height: 1;
+  }
+
+  .success-card h2 {
+    color: #1a2744;
+    font-size: 26px;
+    margin-bottom: 8px;
+  }
+
+  .success-card p {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .success-card button {
+    background: #f5c542;
+    color: #1a2744;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .success-card button:active { transform: scale(0.95); }
+
+  /* Reset button */
+  .reset-btn {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    width: 42px;
+    height: 42px;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s, background 0.15s;
+  }
+
+  .reset-btn:hover { background: rgba(255,255,255,0.2); }
+  .reset-btn:active { transform: scale(0.9); }
+  .reset-btn svg { width: 20px; height: 20px; fill: white; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: #1a2744;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    z-index: 300;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    max-width: 90vw;
+    text-align: center;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(80px) rotate(360deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <h1>CREW<br>PLANNER</h1>
+    <div class="header-icons">
+      <div class="header-icon" onclick="resetGame()" title="Reset">
+        <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05 1.04-6.83 2.73L3 8v8h8l-2.81-2.81C9.46 11.91 10.9 11.29 12.5 11.29c3.01 0 5.56 1.95 6.46 4.65l2.33-.78C20.04 11.16 16.56 8 12.5 8z"/></svg>
+      </div>
+      <div class="header-icon" onclick="showHelp()" title="Rules">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid-wrapper">
+    <div class="time-header">
+      <span></span>
+      <div class="time-label">7AM-11AM</div>
+      <div class="time-label">11AM-2PM</div>
+      <div class="time-label">2PM-6PM</div>
+    </div>
+    <div class="schedule-grid" id="scheduleGrid"></div>
+  </div>
+
+  <!-- Bottom Worker Bar -->
+  <div class="bottom-bar">
+    <button class="help-btn" onclick="showHelp()">HELP!</button>
+
+    <div class="worker-source" draggable="true" data-role="crane" id="src-crane">
+      <div class="worker-avatar" id="avatar-crane"></div>
+      <div class="worker-tube">
+        <div class="worker-label">Crane<br>Operator</div>
+        <div class="progress-track"><div class="progress-fill" id="progress-crane"></div></div>
+        <div class="slots-count" id="count-crane">0 / 3</div>
+      </div>
+    </div>
+
+    <div class="worker-source" draggable="true" data-role="concreter" id="src-concreter">
+      <div class="worker-avatar" id="avatar-concreter"></div>
+      <div class="worker-tube">
+        <div class="worker-label">Concreter</div>
+        <div class="progress-track"><div class="progress-fill" id="progress-concreter"></div></div>
+        <div class="slots-count" id="count-concreter">0 / 3</div>
+      </div>
+    </div>
+
+    <div class="worker-source" draggable="true" data-role="carpenter" id="src-carpenter">
+      <div class="worker-avatar" id="avatar-carpenter"></div>
+      <div class="worker-tube">
+        <div class="worker-label">Carpenter</div>
+        <div class="progress-track"><div class="progress-fill" id="progress-carpenter"></div></div>
+        <div class="slots-count" id="count-carpenter">0 / 3</div>
+      </div>
+    </div>
+
+    <div class="reset-btn" onclick="resetGame()" title="Reset all">
+      <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal">
+    <h2>Game Rules</h2>
+    <div class="rule-item">
+      <div class="rule-num">1</div>
+      <div class="rule-text">Each worker needs <strong>3 time slots</strong> scheduled.</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-num">2</div>
+      <div class="rule-text"><strong>Work order matters!</strong> Crane Operator first, then Concreter, then Carpenter.</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-num">3</div>
+      <div class="rule-text">The <strong>Concreter needs a full day</strong> (all 3 slots). Drop them in the morning slot to book the day.</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-num">4</div>
+      <div class="rule-text">Concrete takes <strong>one day to set</strong>. Nobody can work the day after pouring.</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-num">5</div>
+      <div class="rule-text">Check the <strong>weather!</strong> Some workers can't work in bad conditions.</div>
+    </div>
+    <div class="weather-legend" id="weatherLegend"></div>
+    <button class="close-modal" onclick="closeHelp()">GOT IT!</button>
+  </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-popup" id="feedbackPopup">
+    <div class="feedback-avatar" id="feedbackAvatar"></div>
+    <div class="feedback-name" id="feedbackName"></div>
+    <div class="feedback-msg" id="feedbackMsg"></div>
+    <div class="feedback-hint" id="feedbackHint"></div>
+    <button class="feedback-close" onclick="closeFeedback()">OK</button>
+  </div>
+</div>
+
+<!-- Success Overlay -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon">🎉</div>
+    <h2>Great Job!</h2>
+    <p>You've successfully planned the crew schedule! All workers are assigned, the work order is correct, and the weather is safe.</p>
+    <button onclick="resetGame(); document.getElementById('successOverlay').classList.remove('active');">Play Again</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Drag ghost -->
+<div class="drag-ghost" id="dragGhost"></div>
+
+<script>
+// ============================================================
+//  DATA
+// ============================================================
+const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const dayIndex = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4 };
+const dayFromIndex = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const slotLabels = ['7AM-11AM', '11AM-2PM', '2PM-6PM'];
+const slotNames = ['morning', 'midday', 'afternoon'];
+
+// Weather per cell
+const weatherData = {
+  'Mon-0': 'partly-cloudy', 'Mon-1': 'partly-cloudy', 'Mon-2': 'windy',
+  'Tue-0': 'cloudy',        'Tue-1': 'thunder',       'Tue-2': 'thunder',
+  'Wed-0': 'sunny',         'Wed-1': 'cloudy',        'Wed-2': 'cloudy',
+  'Thu-0': 'partly-cloudy', 'Thu-1': 'sunny',         'Thu-2': 'night',
+  'Fri-0': 'sunny',         'Fri-1': 'partly-cloudy', 'Fri-2': 'night'
+};
+
+// Worker definitions (matching the reference game logic)
+const workers = {
+  crane: {
+    name: 'Crane Operator',
+    blockedWeather: ['windy', 'thunder', 'night'],
+    slotsNeeded: 3
+  },
+  concreter: {
+    name: 'Concreter',
+    blockedWeather: ['windy', 'thunder', 'night'],
+    slotsNeeded: 3,
+    needsFullDay: true
+  },
+  carpenter: {
+    name: 'Carpenter',
+    blockedWeather: [],
+    slotsNeeded: 3
+  }
+};
+
+const weatherNames = {
+  'windy': 'high winds',
+  'thunder': 'storms',
+  'night': 'nighttime'
+};
+
+const roleColors = {
+  crane: '#e8845a',
+  concreter: '#e89a8a',
+  carpenter: '#7ab0d4'
+};
+
+// ============================================================
+//  GAME STATE
+// ============================================================
+const gameState = {
+  schedule: {},        // 'Day-Slot' -> workerType
+  craneSlotsUsed: 0,
+  concreterSlotsUsed: 0,
+  carpenterSlotsUsed: 0,
+  concreteDay: null,   // day name where concrete is poured
+  settingDay: null     // day name where concrete sets (day after pour)
+};
+
+// ============================================================
+//  SVG ICONS (same as before)
+// ============================================================
+function weatherSVG(type) {
+  const icons = {
+    'sunny': `<svg class="weather-icon" viewBox="0 0 64 64"><circle cx="32" cy="32" r="14" fill="#f5c542"/><g stroke="#f5c542" stroke-width="3.5" stroke-linecap="round"><line x1="32" y1="6" x2="32" y2="14"/><line x1="32" y1="50" x2="32" y2="58"/><line x1="6" y1="32" x2="14" y2="32"/><line x1="50" y1="32" x2="58" y2="32"/><line x1="13.6" y1="13.6" x2="19.3" y2="19.3"/><line x1="44.7" y1="44.7" x2="50.4" y2="50.4"/><line x1="50.4" y1="13.6" x2="44.7" y2="19.3"/><line x1="19.3" y1="44.7" x2="13.6" y2="50.4"/></g></svg>`,
+    'partly-cloudy': `<svg class="weather-icon" viewBox="0 0 64 64"><circle cx="24" cy="24" r="11" fill="#f5c542"/><g stroke="#f5c542" stroke-width="2.5" stroke-linecap="round"><line x1="24" y1="6" x2="24" y2="11"/><line x1="24" y1="37" x2="24" y2="42"/><line x1="6" y1="24" x2="11" y2="24"/><line x1="37" y1="24" x2="42" y2="24"/><line x1="11.3" y1="11.3" x2="14.8" y2="14.8"/><line x1="33.2" y1="33.2" x2="36.7" y2="36.7"/><line x1="36.7" y1="11.3" x2="33.2" y2="14.8"/><line x1="14.8" y1="33.2" x2="11.3" y2="36.7"/></g><path d="M22 44c0-7.2 5.8-13 13-13 5.5 0 10.2 3.4 12.1 8.2 4.1.6 7.2 4.1 7.2 8.3 0 4.6-3.8 8.4-8.4 8.4H24.4c-4 0-7.3-3.3-7.3-7.3 0-3.2 2.1-6 5-7z" fill="#6b92b8"/><path d="M22 44c0-7.2 5.8-13 13-13 5.5 0 10.2 3.4 12.1 8.2 4.1.6 7.2 4.1 7.2 8.3 0 4.6-3.8 8.4-8.4 8.4H24.4c-4 0-7.3-3.3-7.3-7.3 0-3.2 2.1-6 5-7z" fill="white" opacity="0.35"/></svg>`,
+    'cloudy': `<svg class="weather-icon" viewBox="0 0 64 64"><path d="M16 46c-4.4 0-8-3.6-8-8 0-3.7 2.5-6.8 5.9-7.7C14.6 23.3 20.7 18 28 18c6 0 11.2 3.6 13.5 8.8C42.3 26.3 43.1 26 44 26c4.4 0 8 3.6 8 8s-3.6 8-8 8H16z" fill="#6b92b8"/><path d="M16 46c-4.4 0-8-3.6-8-8 0-3.7 2.5-6.8 5.9-7.7C14.6 23.3 20.7 18 28 18c6 0 11.2 3.6 13.5 8.8C42.3 26.3 43.1 26 44 26c4.4 0 8 3.6 8 8s-3.6 8-8 8H16z" fill="white" opacity="0.25"/></svg>`,
+    'thunder': `<svg class="weather-icon" viewBox="0 0 64 64"><path d="M14 38c-4 0-7.2-3.2-7.2-7.2 0-3.3 2.3-6.1 5.3-6.9C12.7 18 18.2 13 25 13c5.4 0 10.1 3.2 12.2 7.9.7-.2 1.5-.4 2.3-.4 4 0 7.2 3.2 7.2 7.2s-3.2 7.2-7.2 7.2H14z" fill="#4a6fa5"/><polygon points="28,30 22,42 28,42 25,54 38,38 31,38 36,28" fill="#f5c542"/></svg>`,
+    'windy': `<svg class="weather-icon" viewBox="0 0 64 64"><g stroke="#5b86a8" stroke-width="3.5" stroke-linecap="round" fill="none"><path d="M8 24h30c4 0 7-3 7-7s-3-7-7-7c-2 0-3.7.8-5 2.2"/><path d="M8 36h36c3.3 0 6 2.7 6 6s-2.7 6-6 6c-1.7 0-3.2-.7-4.3-1.8"/><path d="M14 48h18c2.8 0 5-2.2 5-5s-2.2-5-5-5"/></g></svg>`,
+    'night': `<svg class="weather-icon" viewBox="0 0 64 64"><path d="M36 12c-1.5 0-2.9.2-4.3.5C36.5 16 40 22.3 40 29.5c0 10.8-8.7 19.5-19.5 19.5-2.8 0-5.5-.6-7.9-1.7C15.5 53.3 22.3 57 30 57c13.3 0 22-10.7 22-22S47.3 12 36 12z" fill="#f5c542"/><circle cx="44" cy="16" r="1.5" fill="#f5c542" opacity="0.7"/><circle cx="50" cy="26" r="1" fill="#f5c542" opacity="0.5"/><circle cx="18" cy="14" r="1" fill="#f5c542" opacity="0.5"/></svg>`
+  };
+  return icons[type] || '';
+}
+
+function workerSVG(role) {
+  const avatars = {
+    'crane': `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#e8a87c"/><circle cx="50" cy="55" r="28" fill="#d4885a"/><circle cx="50" cy="48" r="22" fill="#c47a4a"/><ellipse cx="50" cy="58" rx="16" ry="14" fill="#e8a87c"/><circle cx="42" cy="52" r="3" fill="#2d2d2d"/><circle cx="58" cy="52" r="3" fill="#2d2d2d"/><ellipse cx="50" cy="62" rx="5" ry="2.5" fill="#c47a4a"/><path d="M50 67c3 0 5-1 5-2s-2-1-5-1-5 0-5 1 2 2 5 2z" fill="white"/><rect x="22" y="72" width="56" height="28" rx="4" fill="#e8845a"/><path d="M26 38c0 0 2-18 24-18s24 18 24 18" fill="#f5c542"/><rect x="24" y="34" width="52" height="10" rx="3" fill="#f5c542"/><path d="M30 34l4-16h32l4 16" fill="#f5c542"/><rect x="34" y="14" width="32" height="6" rx="2" fill="#f5c542"/><path d="M50 4v10" stroke="#1a2744" stroke-width="2"/><path d="M46 4h8" stroke="#1a2744" stroke-width="2" stroke-linecap="round"/><rect x="66" y="24" width="18" height="2" rx="1" fill="#1a2744" opacity="0.3"/><path d="M80 16v10" stroke="#1a2744" stroke-width="1.5" opacity="0.3"/></svg>`,
+    'concreter': `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#f0d5c4"/><circle cx="50" cy="55" r="28" fill="#c4956e"/><circle cx="50" cy="48" r="22" fill="#b88560"/><ellipse cx="50" cy="58" rx="16" ry="14" fill="#ddb896"/><circle cx="42" cy="52" r="3" fill="#2d2d2d"/><circle cx="58" cy="52" r="3" fill="#2d2d2d"/><path d="M44 63c3 3 9 3 12 0" stroke="#2d2d2d" stroke-width="2" fill="none" stroke-linecap="round"/><rect x="36" y="64" width="28" height="4" rx="2" fill="#5c3d2e"/><rect x="22" y="72" width="56" height="28" rx="4" fill="#e89a8a"/><path d="M26 38c0 0 2-18 24-18s24 18 24 18" fill="#f5c542"/><rect x="24" y="34" width="52" height="10" rx="3" fill="#f5c542"/><path d="M30 34l4-16h32l4 16" fill="#f5c542"/><rect x="34" y="14" width="32" height="6" rx="2" fill="#f5c542"/><rect x="70" y="28" width="14" height="3" rx="1.5" fill="#888"/><rect x="82" y="20" width="3" height="16" rx="1" fill="#888"/><rect x="78" y="18" width="12" height="6" rx="2" fill="#aaa"/></svg>`,
+    'carpenter': `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#e8c4a8"/><circle cx="50" cy="55" r="28" fill="#c49070"/><circle cx="50" cy="48" r="22" fill="#b08060"/><ellipse cx="50" cy="58" rx="16" ry="14" fill="#ddb090"/><circle cx="42" cy="52" r="3" fill="#2d2d2d"/><circle cx="58" cy="52" r="3" fill="#2d2d2d"/><ellipse cx="50" cy="62" rx="5" ry="2.5" fill="#b08060"/><path d="M50 67c3 0 5-1 5-2s-2-1-5-1-5 0-5 1 2 2 5 2z" fill="white"/><rect x="22" y="72" width="56" height="28" rx="4" fill="#7ab0d4"/><path d="M26 38c0 0 2-18 24-18s24 18 24 18" fill="#f5c542"/><rect x="24" y="34" width="52" height="10" rx="3" fill="#f5c542"/><path d="M30 34l4-16h32l4 16" fill="#f5c542"/><rect x="34" y="14" width="32" height="6" rx="2" fill="#f5c542"/><rect x="70" y="22" width="4" height="20" rx="1" fill="#8B4513" transform="rotate(-30 72 32)"/><path d="M68 14l10-4 3 8-10 4z" fill="#aaa" transform="rotate(-30 73 14)"/></svg>`
+  };
+  return avatars[role] || '';
+}
+
+// ============================================================
+//  BUILD GRID
+// ============================================================
+function buildGrid() {
+  const grid = document.getElementById('scheduleGrid');
+  grid.innerHTML = '';
+  days.forEach(day => {
+    const row = document.createElement('div');
+    row.className = 'day-row';
+    row.innerHTML = `<div class="day-label">${day}</div>`;
+    for (let si = 0; si < 3; si++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.day = day;
+      cell.dataset.slot = si;
+      const key = `${day}-${si}`;
+      cell.innerHTML = weatherSVG(weatherData[key]);
+      row.appendChild(cell);
+    }
+    grid.appendChild(row);
+  });
+}
+
+function buildWeatherLegend() {
+  const legend = document.getElementById('weatherLegend');
+  const items = [
+    { type: 'sunny', label: 'Sunny', block: '' },
+    { type: 'partly-cloudy', label: 'Partly Cloudy', block: '' },
+    { type: 'cloudy', label: 'Cloudy', block: '' },
+    { type: 'windy', label: 'Windy', block: 'Blocks Crane & Concreter' },
+    { type: 'thunder', label: 'Storms', block: 'Blocks Crane & Concreter' },
+    { type: 'night', label: 'Night', block: 'Blocks Crane & Concreter' }
+  ];
+  legend.innerHTML = items.map(i => `
+    <div class="legend-item">
+      ${weatherSVG(i.type)}
+      <span>${i.label}</span>
+      ${i.block ? `<span class="legend-block">(${i.block})</span>` : ''}
+    </div>
+  `).join('');
+}
+
+function setAvatars() {
+  document.getElementById('avatar-crane').innerHTML = workerSVG('crane');
+  document.getElementById('avatar-concreter').innerHTML = workerSVG('concreter');
+  document.getElementById('avatar-carpenter').innerHTML = workerSVG('carpenter');
+}
+
+// ============================================================
+//  PROGRESS & UI UPDATES
+// ============================================================
+function updateProgress(role) {
+  const used = gameState[role + (role === 'concreter' ? 'SlotsUsed' : role === 'crane' ? 'SlotsUsed' : 'SlotsUsed')];
+  const count = role === 'crane' ? gameState.craneSlotsUsed :
+                role === 'concreter' ? gameState.concreterSlotsUsed :
+                gameState.carpenterSlotsUsed;
+  const pct = (count / 3) * 100;
+
+  document.getElementById(`progress-${role}`).style.width = pct + '%';
+  document.getElementById(`count-${role}`).textContent = `${count} / 3`;
+
+  const src = document.getElementById(`src-${role}`);
+  if (count >= 3) {
+    src.classList.add('completed');
+    src.setAttribute('draggable', 'false');
+  } else {
+    src.classList.remove('completed');
+    src.setAttribute('draggable', 'true');
+  }
+}
+
+function updateAllProgress() {
+  updateProgress('crane');
+  updateProgress('concreter');
+  updateProgress('carpenter');
+}
+
+// ============================================================
+//  FEEDBACK SYSTEM
+// ============================================================
+function showFeedback(role, message, hint) {
+  const w = workers[role];
+  const popup = document.getElementById('feedbackPopup');
+  popup.style.setProperty('--role-color', roleColors[role]);
+  document.getElementById('feedbackAvatar').innerHTML = workerSVG(role);
+  document.getElementById('feedbackName').textContent = w.name;
+  document.getElementById('feedbackMsg').textContent = message;
+  document.getElementById('feedbackHint').textContent = hint || '';
+  document.getElementById('feedbackOverlay').classList.add('active');
+}
+
+function closeFeedback() {
+  document.getElementById('feedbackOverlay').classList.remove('active');
+}
+
+document.getElementById('feedbackOverlay').addEventListener('click', e => {
+  if (e.target.id === 'feedbackOverlay') closeFeedback();
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ============================================================
+//  HELPER FUNCTIONS (from reference game logic)
+// ============================================================
+
+// Find days where concreter can work a full day (all 3 slots: good weather + empty)
+function findValidConcreteDays(extraOccupied = {}) {
+  const validDays = [];
+  const blockers = workers.concreter.blockedWeather;
+
+  for (let di = 0; di < 4; di++) { // Max day index 3 (Thu) because need next day for setting
+    const day = dayFromIndex[di];
+    const nextDay = dayFromIndex[di + 1];
+    let valid = true;
+
+    // Check all 3 slots have good weather and are free
+    for (let s = 0; s < 3; s++) {
+      const key = `${day}-${s}`;
+      const w = weatherData[key];
+      if (blockers.includes(w) || gameState.schedule[key] || extraOccupied[key]) {
+        valid = false;
+        break;
+      }
+    }
+
+    // Check next day is free for setting
+    if (valid) {
+      for (let s = 0; s < 3; s++) {
+        const key = `${nextDay}-${s}`;
+        if (gameState.schedule[key] || extraOccupied[key]) {
+          valid = false;
+          break;
+        }
+      }
+    }
+
+    if (valid) validDays.push(di);
+  }
+  return validDays;
+}
+
+// Count available crane slots before a given day index
+function countAvailableCraneSlotsBeforeDay(beforeDayIdx) {
+  let count = 0;
+  const blockers = workers.crane.blockedWeather;
+  for (let di = 0; di < beforeDayIdx; di++) {
+    const day = dayFromIndex[di];
+    for (let s = 0; s < 3; s++) {
+      const key = `${day}-${s}`;
+      if (!gameState.schedule[key] && !blockers.includes(weatherData[key])) {
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
+// Count placed crane slots before a given day index
+function countPlacedCraneSlotsBeforeDay(beforeDayIdx) {
+  let count = 0;
+  for (let di = 0; di < beforeDayIdx; di++) {
+    const day = dayFromIndex[di];
+    for (let s = 0; s < 3; s++) {
+      if (gameState.schedule[`${day}-${s}`] === 'crane') count++;
+    }
+  }
+  return count;
+}
+
+// Find valid concrete days that finish before carpenter starts
+function findValidConcreteDaysBeforeDay(beforeDayIdx) {
+  const validDays = [];
+  const blockers = workers.concreter.blockedWeather;
+  const maxConcreteDayIdx = beforeDayIdx - 2; // Need pour day + setting day before carpenter
+
+  for (let di = 0; di <= Math.min(maxConcreteDayIdx, 3); di++) {
+    const day = dayFromIndex[di];
+    const nextDay = dayFromIndex[di + 1];
+    let valid = true;
+
+    for (let s = 0; s < 3; s++) {
+      const key = `${day}-${s}`;
+      if (blockers.includes(weatherData[key]) || gameState.schedule[key]) {
+        valid = false;
+        break;
+      }
+    }
+
+    if (valid) {
+      for (let s = 0; s < 3; s++) {
+        if (gameState.schedule[`${nextDay}-${s}`]) { valid = false; break; }
+      }
+    }
+
+    if (valid) {
+      const craneAvail = countAvailableCraneSlotsBeforeDay(di) + countPlacedCraneSlotsBeforeDay(di);
+      if (craneAvail < 3) valid = false;
+    }
+
+    if (valid) validDays.push(di);
+  }
+  return validDays;
+}
+
+// Count available carpenter slots after a given day index
+function countCarpenterSlotsAfterDay(afterDayIdx, extraOccupied = {}) {
+  let count = 0;
+  for (let di = afterDayIdx + 1; di < 5; di++) {
+    const day = dayFromIndex[di];
+    for (let s = 0; s < 3; s++) {
+      const key = `${day}-${s}`;
+      if (!gameState.schedule[key] && !extraOccupied[key]) count++;
+    }
+  }
+  return count;
+}
+
+// ============================================================
+//  PLACEMENT LOGIC
+// ============================================================
+function attemptPlacement(role, day, slotNum, cellEl) {
+  const worker = workers[role];
+  const di = dayIndex[day];
+  const slotKey = `${day}-${slotNum}`;
+  const weather = weatherData[slotKey];
+
+  // --- Already occupied? ---
+  if (gameState.schedule[slotKey]) {
+    showFeedback(role, "This slot is already taken! Choose an empty slot.");
+    return false;
+  }
+
+  // --- Worker already done? ---
+  const used = role === 'crane' ? gameState.craneSlotsUsed :
+               role === 'concreter' ? gameState.concreterSlotsUsed :
+               gameState.carpenterSlotsUsed;
+  if (used >= 3) {
+    showFeedback(role, "I've already completed my 3 shifts!");
+    return false;
+  }
+
+  // --- Weather check ---
+  if (worker.blockedWeather.includes(weather)) {
+    showFeedback(role,
+      `I can't work in ${weatherNames[weather]}! It's too dangerous. Find me a slot with better weather.`,
+      `Weather blockers: Crane & Concreter can't work in wind, storms, or at night.`
+    );
+    return false;
+  }
+
+  // ============================
+  //  CONCRETER SPECIAL RULES
+  // ============================
+  if (role === 'concreter') {
+    // Must start in morning slot
+    if (slotNum !== 0) {
+      showFeedback(role,
+        "I need to start in the morning! Concrete work takes a full day — I need all 3 slots on the same day.",
+        "Drop me on a morning (7AM-11AM) slot to book the whole day."
+      );
+      return false;
+    }
+
+    // Check all 3 slots on this day are free
+    for (let s = 0; s < 3; s++) {
+      const key = `${day}-${s}`;
+      if (gameState.schedule[key]) {
+        showFeedback(role,
+          `I can't work on ${day} — the ${slotNames[s]} slot is already taken! I need all 3 slots free.`,
+          "Concreter needs a full day to pour."
+        );
+        return false;
+      }
+    }
+
+    // Check all 3 slots have good weather
+    for (let s = 0; s < 3; s++) {
+      const key = `${day}-${s}`;
+      const w = weatherData[key];
+      if (worker.blockedWeather.includes(w)) {
+        showFeedback(role,
+          `I can't work on ${day} — there's ${weatherNames[w]} in the ${slotNames[s]}! I need good weather all day.`,
+          "Concreter can't work in wind, storms, or at night."
+        );
+        return false;
+      }
+    }
+
+    // Need next day for setting
+    if (di >= 4) {
+      showFeedback(role,
+        "I can't pour on Friday — there's no day after for the concrete to set!",
+        "Concrete needs one full day to set after pouring."
+      );
+      return false;
+    }
+
+    const nextDay = dayFromIndex[di + 1];
+
+    // Check setting day is free
+    for (let s = 0; s < 3; s++) {
+      const key = `${nextDay}-${s}`;
+      if (gameState.schedule[key]) {
+        showFeedback(role,
+          `I can't pour on ${day} — the concrete needs ${nextDay} to set, but the ${slotNames[s]} slot is already taken!`,
+          "No one can work the day after concrete is poured."
+        );
+        return false;
+      }
+    }
+
+    // Check enough crane slots exist before this day
+    const craneAvail = countAvailableCraneSlotsBeforeDay(di) + countPlacedCraneSlotsBeforeDay(di);
+    if (craneAvail < 3) {
+      showFeedback(role,
+        `There aren't enough slots before ${day} for the Crane Operator to finish!`,
+        "Work Order: Crane Operator → Concreter → Carpenter"
+      );
+      return false;
+    }
+
+    // Check enough carpenter slots after setting day
+    if (gameState.carpenterSlotsUsed < 3) {
+      const carpSlots = countCarpenterSlotsAfterDay(di + 1);
+      if (carpSlots < 3) {
+        showFeedback(role,
+          `If I pour on ${day}, there won't be enough slots left for the Carpenter after it sets on ${nextDay}!`,
+          "Work Order: Crane → Concreter (full day + setting) → Carpenter (3 slots)"
+        );
+        return false;
+      }
+    }
+
+    // --- PLACE FULL DAY ---
+    gameState.concreteDay = day;
+    gameState.settingDay = nextDay;
+
+    for (let s = 0; s < 3; s++) {
+      gameState.schedule[`${day}-${s}`] = 'concreter';
+      const target = document.querySelector(`.cell[data-day="${day}"][data-slot="${s}"]`);
+      addWorkerToCell(target, 'concreter');
+    }
+
+    // Mark setting day
+    for (let s = 0; s < 3; s++) {
+      gameState.schedule[`${nextDay}-${s}`] = 'setting';
+      const target = document.querySelector(`.cell[data-day="${nextDay}"][data-slot="${s}"]`);
+      markAsSettingCell(target);
+    }
+
+    gameState.concreterSlotsUsed = 3;
+    updateAllProgress();
+    showToast(`${workers.concreter.name} booked for ${day}!`);
+    checkCompletion();
+    return true;
+  }
+
+  // ============================
+  //  CRANE RULES
+  // ============================
+  if (role === 'crane') {
+    // If concrete is placed, crane must be before concrete day
+    if (gameState.concreteDay !== null) {
+      if (di >= dayIndex[gameState.concreteDay]) {
+        showFeedback(role,
+          `I need to finish before ${gameState.concreteDay} when the Concreter starts!`,
+          "Work Order: Crane Operator → Concreter → Carpenter"
+        );
+        return false;
+      }
+    }
+
+    // If concrete not placed, check this doesn't block concrete + carpenter
+    if (gameState.concreteDay === null) {
+      const simulated = { [slotKey]: 'crane' };
+      const validCDays = findValidConcreteDays(simulated);
+      if (validCDays.length === 0) {
+        showFeedback(role,
+          "If I work here, there won't be a full day left for the Concreter!",
+          "Concreter needs a full day with good weather + the next day for setting."
+        );
+        return false;
+      }
+
+      const earliest = Math.min(...validCDays);
+      const carpSlots = countCarpenterSlotsAfterDay(earliest + 1, simulated);
+      if (carpSlots < 3) {
+        showFeedback(role,
+          "If I work here, there won't be enough slots for the Carpenter!",
+          "Work Order: Crane → Concreter (full day + setting) → Carpenter (3 slots)"
+        );
+        return false;
+      }
+    }
+  }
+
+  // ============================
+  //  CARPENTER RULES
+  // ============================
+  if (role === 'carpenter') {
+    if (gameState.settingDay !== null) {
+      if (di <= dayIndex[gameState.settingDay]) {
+        showFeedback(role,
+          `I can't work on ${day} — the concrete is still setting! I need to work after ${gameState.settingDay}.`,
+          "Concrete needs a full day to set before Carpenter can start."
+        );
+        return false;
+      }
+    } else {
+      // Concrete not placed yet — check room for it
+      const validDays = findValidConcreteDaysBeforeDay(di);
+      if (validDays.length === 0) {
+        showFeedback(role,
+          `If I work on ${day}, there won't be room for the Concreter to pour and let concrete set before I start!`,
+          "Work Order: Crane → Concreter (full day + setting) → Carpenter"
+        );
+        return false;
+      }
+    }
+  }
+
+  // ============================
+  //  NORMAL PLACEMENT (crane / carpenter)
+  // ============================
+  gameState.schedule[slotKey] = role;
+  addWorkerToCell(cellEl, role);
+
+  if (role === 'crane') gameState.craneSlotsUsed++;
+  else if (role === 'carpenter') gameState.carpenterSlotsUsed++;
+
+  updateAllProgress();
+  showToast(`${workers[role].name} assigned to ${day} ${slotLabels[slotNum]}!`);
+  checkCompletion();
+  return true;
+}
+
+// ============================================================
+//  CELL RENDERING
+// ============================================================
+function addWorkerToCell(cell, role) {
+  // Clear existing weather
+  cell.innerHTML = '';
+
+  const img = document.createElement('div');
+  img.className = 'worker-in-cell';
+  img.dataset.role = role;
+  img.innerHTML = workerSVG(role);
+  img.querySelector('svg').style.cssText = 'width:100%;height:100%;border-radius:50%;';
+  img.style.background = roleColors[role];
+  img.style.borderColor = '#1a2744';
+
+  // Weather icon (small, below worker)
+  const day = cell.dataset.day;
+  const slot = cell.dataset.slot;
+  const wKey = `${day}-${slot}`;
+  const weatherSmall = document.createElement('div');
+  weatherSmall.innerHTML = weatherSVG(weatherData[wKey]);
+  const svgEl = weatherSmall.querySelector('svg');
+  if (svgEl) {
+    svgEl.style.cssText = 'width:20px;height:20px;opacity:0.5;';
+  }
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'remove-btn';
+  removeBtn.innerHTML = '✕';
+  removeBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    removeWorker(role, cell);
+  });
+
+  cell.appendChild(removeBtn);
+  cell.appendChild(img);
+  cell.appendChild(weatherSmall);
+  cell.style.borderStyle = 'solid';
+  cell.style.borderColor = roleColors[role];
+  cell.style.background = roleColors[role] + '18';
+}
+
+function markAsSettingCell(cell) {
+  cell.innerHTML = `
+    <div class="setting-icon">⏳</div>
+    <div class="setting-label">Concrete<br>Setting</div>
+  `;
+  cell.classList.add('setting-cell');
+  cell.style.borderStyle = 'solid';
+}
+
+function resetCellAppearance(cell) {
+  const day = cell.dataset.day;
+  const slot = cell.dataset.slot;
+  cell.innerHTML = weatherSVG(weatherData[`${day}-${slot}`]);
+  cell.className = 'cell';
+  cell.style.borderStyle = '';
+  cell.style.borderColor = '';
+  cell.style.background = '';
+  cell.dataset.day = day;
+  cell.dataset.slot = slot;
+}
+
+// ============================================================
+//  REMOVE WORKER
+// ============================================================
+function removeWorker(role, cell) {
+  // Concreter: remove full day + setting day
+  if (role === 'concreter') {
+    const pourDay = gameState.concreteDay;
+    const setDay = gameState.settingDay;
+
+    if (pourDay) {
+      for (let s = 0; s < 3; s++) {
+        delete gameState.schedule[`${pourDay}-${s}`];
+        const c = document.querySelector(`.cell[data-day="${pourDay}"][data-slot="${s}"]`);
+        if (c) resetCellAppearance(c);
+      }
+    }
+
+    if (setDay) {
+      for (let s = 0; s < 3; s++) {
+        delete gameState.schedule[`${setDay}-${s}`];
+        const c = document.querySelector(`.cell[data-day="${setDay}"][data-slot="${s}"]`);
+        if (c) resetCellAppearance(c);
+      }
+    }
+
+    gameState.concreterSlotsUsed = 0;
+    gameState.concreteDay = null;
+    gameState.settingDay = null;
+    updateAllProgress();
+    showToast('Concreter removed — full day cleared.');
+    return;
+  }
+
+  // Crane or Carpenter: remove single slot
+  const day = cell.dataset.day;
+  const slot = cell.dataset.slot;
+  const key = `${day}-${slot}`;
+  delete gameState.schedule[key];
+  resetCellAppearance(cell);
+
+  if (role === 'crane') gameState.craneSlotsUsed--;
+  else if (role === 'carpenter') gameState.carpenterSlotsUsed--;
+
+  updateAllProgress();
+  showToast(`${workers[role].name} removed from ${day}.`);
+}
+
+// ============================================================
+//  WIN CONDITION
+// ============================================================
+function checkCompletion() {
+  if (gameState.craneSlotsUsed >= 3 &&
+      gameState.concreterSlotsUsed >= 3 &&
+      gameState.carpenterSlotsUsed >= 3) {
+
+    // Verify: all crane before concrete, all carpenter after setting
+    const cdi = dayIndex[gameState.concreteDay];
+    const sdi = dayIndex[gameState.settingDay];
+    let valid = true;
+
+    for (const [key, val] of Object.entries(gameState.schedule)) {
+      const [d] = key.split('-');
+      const di = dayIndex[d];
+      if (val === 'crane' && di >= cdi) valid = false;
+      if (val === 'carpenter' && di <= sdi) valid = false;
+    }
+
+    if (valid) {
+      setTimeout(() => {
+        document.getElementById('successOverlay').classList.add('active');
+      }, 600);
+    }
+  }
+}
+
+// ============================================================
+//  DRAG & DROP (touch + mouse)
+// ============================================================
+let dragRole = null;
+let dragSource = null;
+let ghostEl = null;
+let touchDragging = false;
+let touchRole = null;
+let touchSourceCell = null;
+
+function createGhost(role, x, y) {
+  ghostEl = document.getElementById('dragGhost');
+  ghostEl.style.background = roleColors[role];
+  ghostEl.innerHTML = workerSVG(role);
+  ghostEl.querySelector('svg').style.cssText = 'width:100%;height:100%;border-radius:50%;';
+  ghostEl.style.display = 'block';
+  moveGhost(x, y);
+}
+
+function moveGhost(x, y) {
+  if (ghostEl) {
+    ghostEl.style.left = x + 'px';
+    ghostEl.style.top = y + 'px';
+  }
+}
+
+function hideGhost() {
+  if (ghostEl) ghostEl.style.display = 'none';
+}
+
+function canDragRole(role) {
+  const used = role === 'crane' ? gameState.craneSlotsUsed :
+               role === 'concreter' ? gameState.concreterSlotsUsed :
+               gameState.carpenterSlotsUsed;
+  return used < 3;
+}
+
+// Mouse: drag from source
+document.querySelectorAll('.worker-source').forEach(src => {
+  src.addEventListener('dragstart', e => {
+    const role = src.dataset.role;
+    if (!canDragRole(role)) { e.preventDefault(); return; }
+    dragRole = role;
+    dragSource = null;
+    e.dataTransfer.setData('text/plain', role);
+    e.dataTransfer.effectAllowed = 'copy';
+  });
+});
+
+// Touch: drag from source
+document.querySelectorAll('.worker-source').forEach(src => {
+  src.addEventListener('touchstart', e => {
+    const role = src.dataset.role;
+    if (!canDragRole(role)) return;
+    e.preventDefault();
+    touchDragging = true;
+    touchRole = role;
+    touchSourceCell = null;
+    const t = e.touches[0];
+    createGhost(role, t.clientX, t.clientY);
+  }, { passive: false });
+});
+
+// Touch: drag from placed cell
+document.addEventListener('touchstart', e => {
+  const wcell = e.target.closest('.worker-in-cell');
+  if (!wcell) return;
+  e.preventDefault();
+  const cell = wcell.closest('.cell');
+  const role = wcell.dataset.role;
+  touchDragging = true;
+  touchRole = role;
+  touchSourceCell = { day: cell.dataset.day, slot: cell.dataset.slot };
+  removeWorker(role, cell);
+  const t = e.touches[0];
+  createGhost(role, t.clientX, t.clientY);
+}, { passive: false });
+
+// Touch move
+document.addEventListener('touchmove', e => {
+  if (!touchDragging) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  moveGhost(t.clientX, t.clientY);
+  document.querySelectorAll('.cell').forEach(c => {
+    c.classList.remove('drag-over');
+    c.classList.remove('drag-over-invalid');
+  });
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const cell = el?.closest?.('.cell');
+  if (cell) cell.classList.add('drag-over');
+}, { passive: false });
+
+// Touch end
+document.addEventListener('touchend', e => {
+  if (!touchDragging) return;
+  touchDragging = false;
+  hideGhost();
+  document.querySelectorAll('.cell').forEach(c => {
+    c.classList.remove('drag-over');
+    c.classList.remove('drag-over-invalid');
+  });
+  const t = e.changedTouches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const cell = el?.closest?.('.cell');
+  if (cell && touchRole) {
+    attemptPlacement(touchRole, cell.dataset.day, parseInt(cell.dataset.slot), cell);
+  }
+  touchRole = null;
+  touchSourceCell = null;
+});
+
+// Mouse: drag over
+document.addEventListener('dragover', e => {
+  const cell = e.target.closest?.('.cell');
+  if (cell) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    cell.classList.add('drag-over');
+  }
+});
+
+document.addEventListener('dragleave', e => {
+  const cell = e.target.closest?.('.cell');
+  if (cell) cell.classList.remove('drag-over');
+});
+
+// Mouse: drop
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  document.querySelectorAll('.cell').forEach(c => c.classList.remove('drag-over'));
+  const cell = e.target.closest?.('.cell');
+  if (!cell) return;
+  const role = e.dataTransfer.getData('text/plain') || dragRole;
+  if (role) {
+    attemptPlacement(role, cell.dataset.day, parseInt(cell.dataset.slot), cell);
+  }
+  dragRole = null;
+  dragSource = null;
+});
+
+// Mouse: drag from placed cell
+document.addEventListener('mousedown', e => {
+  const wcell = e.target.closest('.worker-in-cell');
+  if (!wcell) return;
+  const cell = wcell.closest('.cell');
+  const role = wcell.dataset.role;
+  wcell.setAttribute('draggable', 'true');
+  wcell.addEventListener('dragstart', ev => {
+    dragRole = role;
+    dragSource = { day: cell.dataset.day, slot: cell.dataset.slot };
+    ev.dataTransfer.setData('text/plain', role);
+    ev.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => removeWorker(role, cell), 0);
+  }, { once: true });
+});
+
+// ============================================================
+//  RESET
+// ============================================================
+function resetGame() {
+  gameState.schedule = {};
+  gameState.craneSlotsUsed = 0;
+  gameState.concreterSlotsUsed = 0;
+  gameState.carpenterSlotsUsed = 0;
+  gameState.concreteDay = null;
+  gameState.settingDay = null;
+
+  document.querySelectorAll('.cell').forEach(cell => resetCellAppearance(cell));
+  updateAllProgress();
+  document.getElementById('successOverlay').classList.remove('active');
+  showToast('Schedule cleared!');
+}
+
+// ============================================================
+//  HELP MODAL
+// ============================================================
+function showHelp() {
+  document.getElementById('helpModal').classList.add('active');
+}
+
+function closeHelp() {
+  document.getElementById('helpModal').classList.remove('active');
+}
+
+document.getElementById('helpModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeHelp();
+});
+
+// ============================================================
+//  INIT
+// ============================================================
+buildGrid();
+setAvatars();
+buildWeatherLegend();
+updateAllProgress();
+</script>
+</body>
+</html>
