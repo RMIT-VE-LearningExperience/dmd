@@ -98,12 +98,10 @@ html, body {
     position: relative;
     z-index: 5;
     padding-left: 8%;
-    max-width: 720px;
+    max-width: 920px;
 }
 
-/* Title — uses display:inline so background hugs each line individually.
-   box-decoration-break:clone ensures padding + border-radius
-   are applied independently to every line fragment. */
+/* Title — line spans control per-line border radius. */
 .hero-title {
     font-size: clamp(48px, 7vw, 90px);
     font-weight: 900;
@@ -112,15 +110,24 @@ html, body {
     text-transform: uppercase;
     letter-spacing: -1px;
     margin-bottom: 20px;
+}
 
-    /* The magic: inline display + box-decoration-break */
-    display: inline;
+.hero-line {
+    display: inline-block;
     background: #1a3a6b;
     padding: 6px 20px 10px;
-    border-radius: 8px;
+}
 
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
+.hero-line-top {
+    border-radius: 20px 20px 0 0;
+}
+
+.hero-line-middle {
+    border-radius: 0;
+}
+
+.hero-line-bottom {
+    border-radius: 0 20px 20px 20px;
 }
 
 /* Subtitle */
@@ -131,6 +138,7 @@ html, body {
     line-height: 1.7;
     margin-bottom: 36px;
     max-width: 480px;
+    padding-top: 30px;
 }
 
 /* ===================================
