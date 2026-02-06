@@ -195,7 +195,7 @@
   }
   .cell .worker-in-cell img { width: 100%; height: 100%; border-radius: 50%; display: block; }
 
-  .cell .worker-in-cell:active { cursor: grabbing; transform: scale(1.08); }
+  .cell .worker-in-cell:active { cursor: grabbing; transform: none; }
 
   .cell .remove-btn {
     position: absolute;
@@ -368,7 +368,7 @@
     border-radius: 50%;
     border: 3px solid #1a2744;
     opacity: 0.92;
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: translate(-50%, -50%);
     box-shadow: 0 6px 20px rgba(0,0,0,0.3);
     display: none;
   }
@@ -405,8 +405,8 @@
   /* Avatar pop-out when dragging */
   .worker-source.dragging .worker-avatar {
     opacity: 0.3;
-    transform: scale(0.85);
-    transition: opacity 0.15s, transform 0.15s;
+    transform: none;
+    transition: opacity 0.15s;
   }
 
   .worker-source .worker-avatar {
@@ -697,7 +697,7 @@
   .welcome-overlay {
     position: fixed;
     inset: 0;
-    background: #193E75;
+    background: #193e75de;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -710,7 +710,7 @@
     border-radius: 16px;
     width: 100%;
     max-width: 340px;
-    padding: 28px 24px 120px;
+    padding: 28px 24px 90px;
     position: relative;
     box-shadow: 0 18px 50px rgba(0,0,0,0.25);
   }
@@ -748,12 +748,14 @@
   }
 
   .welcome-manager {
-    position: absolute;
-    right: -10px;
-    bottom: -18px;
-    width: 180px;
+    position: fixed;
+    right: 0;
+    bottom: -50px;
+    width: 50vw;
+    max-width: 320px;
     height: auto;
     pointer-events: none;
+    z-index: 401;
   }
 
   @keyframes confetti-fall {
@@ -773,7 +775,7 @@
       Schedule the Crane Operator, Concreter, and Carpenter to complete the job on time while working around the weather.
     </p>
     <button class="welcome-ready" onclick="closeWelcome()">READY</button>
-    <img class="welcome-manager" src="../../../images/character_coins/manager.svg" alt="Manager">
+    <img class="welcome-manager" src="images/character_coins/manager.svg" alt="Manager">
   </div>
 </div>
 <div class="app">
@@ -961,21 +963,21 @@ const gameState = {
 // ============================================================
 function weatherSVG(type) {
   const icons = {
-    'sunny': `<img class="weather-icon" src="../../../images/weather_icons/sunny01.svg" alt="Sunny">`,
-    'partly-cloudy': `<img class="weather-icon" src="../../../images/weather_icons/partlycloudy01.svg" alt="Partly cloudy">`,
-    'cloudy': `<img class="weather-icon" src="../../../images/weather_icons/cloudy01.svg" alt="Cloudy">`,
-    'thunder': `<img class="weather-icon" src="../../../images/weather_icons/thunder01.svg" alt="Storms">`,
-    'windy': `<img class="weather-icon" src="../../../images/weather_icons/wind01.svg" alt="Windy">`,
-    'night': `<img class="weather-icon" src="../../../images/weather_icons/night01.svg" alt="Night">`
+    'sunny': `<img class="weather-icon" src="images/weather_icons/sunny01.svg" alt="Sunny">`,
+    'partly-cloudy': `<img class="weather-icon" src="images/weather_icons/partlycloudy01.svg" alt="Partly cloudy">`,
+    'cloudy': `<img class="weather-icon" src="images/weather_icons/cloudy01.svg" alt="Cloudy">`,
+    'thunder': `<img class="weather-icon" src="images/weather_icons/thunder01.svg" alt="Storms">`,
+    'windy': `<img class="weather-icon" src="images/weather_icons/wind01.svg" alt="Windy">`,
+    'night': `<img class="weather-icon" src="images/weather_icons/night01.svg" alt="Night">`
   };
   return icons[type] || '';
 }
 
 function workerSVG(role) {
   const avatars = {
-    'crane': `<img src="../../../images/character_coins/craneoperatorcoin01.svg" alt="Crane Operator">`,
-    'concreter': `<img src="../../../images/character_coins/concretercoin01.svg" alt="Concreter">`,
-    'carpenter': `<img src="../../../images/character_coins/carpentercoin01.svg" alt="Carpenter">`
+    'crane': `<img src="images/character_coins/craneoperator_coin.svg" alt="Crane Operator">`,
+    'concreter': `<img src="images/character_coins/concreter_coin.svg" alt="Concreter">`,
+    'carpenter': `<img src="images/character_coins/carpenter_coin.svg" alt="Carpenter">`
   };
   return avatars[role] || '';
 }
