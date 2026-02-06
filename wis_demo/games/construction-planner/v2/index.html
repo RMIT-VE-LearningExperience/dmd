@@ -37,7 +37,7 @@
   }
 
   .header h1 {
-    font-size: 32px;
+    font-size: 22px;
     font-weight: 900;
     color: #1a2744;
     line-height: 1.05;
@@ -132,6 +132,12 @@
     transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
     gap: 2px;
     padding: 4px;
+  }
+
+  .cell:hover {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
   }
 
   .cell.drag-over {
@@ -783,9 +789,9 @@
   <div class="header">
     <h1>CREW<br>PLANNER</h1>
     <div class="header-icons">
-      <div class="header-icon" onclick="showHelp()" title="Rules">
+      <a class="header-icon" href="https://rmit-ve-learningexperience.github.io/dmd/wis_demo/index.html" title="Home">
         <img src="images/home.svg" alt="Home">
-      </div>
+      </a>
     </div>
   </div>
 
@@ -892,7 +898,16 @@
 
 <!-- Stretchy band SVG overlay -->
 <svg class="band-svg" id="bandSvg" xmlns="http://www.w3.org/2000/svg">
-  <path id="bandPath" d="" fill="#e8845a"/>
+  <defs>
+    <linearGradient id="bandGrad" x1="0" y1="0" x2="0" y2="1" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" id="bandStop0" stop-color="#e8845a" stop-opacity="1"/>
+      <stop offset="25%" id="bandStop1" stop-color="#e8845a" stop-opacity="0.25"/>
+      <stop offset="50%" id="bandStop2" stop-color="#f3b07f" stop-opacity="0.5"/>
+      <stop offset="75%" id="bandStop3" stop-color="#f7c9a4" stop-opacity="1"/>
+      <stop offset="100%" id="bandStop4" stop-color="#f7c9a4" stop-opacity="0.25"/>
+    </linearGradient>
+  </defs>
+  <path id="bandPath" d="" fill="url(#bandGrad)"/>
 </svg>
 
 <script>
@@ -1242,19 +1257,28 @@ function attemptPlacement(role, day, slotNum, cellEl) {
   //  CONCRETER SPECIAL RULES
   // ============================
   if (role === 'concreter') {
-    // Must start in morning slot
-    if (slotNum !== 0) {
+    // First concreter placement must start in morning
+    if (gameState.concreteDay === null && slotNum !== 0) {
       showFeedback(role,
         "I need to start in the morning! Concrete work takes a full day — I need all 3 slots on the same day.",
-        "Drop me on a morning (7AM-11AM) slot to book the whole day."
+        "Drop me on a morning (7AM-11AM) slot to start the day."
       );
       return false;
     }
 
-    // Check all 3 slots on this day are free
+    // Must stay on the same day once started
+    if (gameState.concreteDay !== null && day !== gameState.concreteDay) {
+      showFeedback(role,
+        `I already started on ${gameState.concreteDay}. I need the other slots on that same day.`,
+        "Concreter needs all 3 slots on one day."
+      );
+      return false;
+    }
+
+    // Check all 3 slots on this day are free of other workers
     for (let s = 0; s < 3; s++) {
       const key = `${day}-${s}`;
-      if (gameState.schedule[key]) {
+      if (gameState.schedule[key] && gameState.schedule[key] !== 'concreter') {
         showFeedback(role,
           `I can't work on ${day} — the ${slotNames[s]} slot is already taken! I need all 3 slots free.`,
           "Concreter needs a full day to pour."
@@ -1321,26 +1345,26 @@ function attemptPlacement(role, day, slotNum, cellEl) {
       }
     }
 
-    // --- PLACE FULL DAY ---
-    gameState.concreteDay = day;
-    gameState.settingDay = nextDay;
+    // --- PLACE SINGLE SLOT ---
+    if (gameState.concreteDay === null) gameState.concreteDay = day;
+    gameState.schedule[slotKey] = 'concreter';
+    addWorkerToCell(cellEl, 'concreter');
+    gameState.concreterSlotsUsed++;
 
-    for (let s = 0; s < 3; s++) {
-      gameState.schedule[`${day}-${s}`] = 'concreter';
-      const target = document.querySelector(`.cell[data-day="${day}"][data-slot="${s}"]`);
-      addWorkerToCell(target, 'concreter');
+    // If all 3 concreter slots are placed, mark setting day
+    if (gameState.concreterSlotsUsed >= 3) {
+      gameState.settingDay = nextDay;
+      for (let s = 0; s < 3; s++) {
+        gameState.schedule[`${nextDay}-${s}`] = 'setting';
+        const target = document.querySelector(`.cell[data-day="${nextDay}"][data-slot="${s}"]`);
+        markAsSettingCell(target);
+      }
+      showToast(`${workers.concreter.name} booked for ${day}!`);
+    } else {
+      showToast(`${workers.concreter.name} assigned to ${day} ${slotLabels[slotNum]}!`);
     }
 
-    // Mark setting day
-    for (let s = 0; s < 3; s++) {
-      gameState.schedule[`${nextDay}-${s}`] = 'setting';
-      const target = document.querySelector(`.cell[data-day="${nextDay}"][data-slot="${s}"]`);
-      markAsSettingCell(target);
-    }
-
-    gameState.concreterSlotsUsed = 3;
     updateAllProgress();
-    showToast(`${workers.concreter.name} booked for ${day}!`);
     checkCompletion();
     return true;
   }
@@ -1393,6 +1417,15 @@ function attemptPlacement(role, day, slotNum, cellEl) {
         showFeedback(role,
           `I can't work on ${day} — the concrete is still setting! I need to work after ${gameState.settingDay}.`,
           "Concrete needs a full day to set before Carpenter can start."
+        );
+        return false;
+      }
+    } else if (gameState.concreteDay !== null) {
+      const pendingSetIdx = dayIndex[gameState.concreteDay] + 1;
+      if (di <= pendingSetIdx) {
+        showFeedback(role,
+          `I can't work on ${day} — the concrete day is ${gameState.concreteDay} and it needs the next day to set.`,
+          "Carpenter starts after the concrete has set."
         );
         return false;
       }
@@ -1576,6 +1609,15 @@ let bandSourceEl = null;  // the worker-source element being dragged from
 let bandAnimFrame = null;
 let lastGhostX = 0, lastGhostY = 0;
 
+function lightenHex(hex, amount) {
+  const clean = hex.replace('#', '');
+  const num = parseInt(clean, 16);
+  const r = Math.min(255, ((num >> 16) & 0xff) + amount);
+  const g = Math.min(255, ((num >> 8) & 0xff) + amount);
+  const b = Math.min(255, (num & 0xff) + amount);
+  return `#${[r, g, b].map(v => v.toString(16).padStart(2, '0')).join('')}`;
+}
+
 // --- Band rendering ---
 function showBand(role, sourceEl) {
   if (bandAnimFrame) { cancelAnimationFrame(bandAnimFrame); bandAnimFrame = null; }
@@ -1593,9 +1635,24 @@ function showBand(role, sourceEl) {
   };
   bandSourceEl = sourceEl;
 
-  // Set band color to match the role tube
+  // Set gradient colors to match role tube (lighter near the avatar)
   const color = roleColors[role];
-  document.getElementById('bandPath').setAttribute('fill', color);
+  document.getElementById('bandStop0').setAttribute('stop-color', color);
+  document.getElementById('bandStop1').setAttribute('stop-color', color);
+  document.getElementById('bandStop2').setAttribute('stop-color', lightenHex(color, 40));
+  document.getElementById('bandStop3').setAttribute('stop-color', lightenHex(color, 70));
+  document.getElementById('bandStop4').setAttribute('stop-color', lightenHex(color, 70));
+  document.getElementById('bandStop0').setAttribute('stop-opacity', '1');
+  document.getElementById('bandStop1').setAttribute('stop-opacity', '1');
+  document.getElementById('bandStop2').setAttribute('stop-opacity', '0.5');
+  document.getElementById('bandStop3').setAttribute('stop-opacity', '0.5');
+  document.getElementById('bandStop4').setAttribute('stop-opacity', '0.25');
+
+  const grad = document.getElementById('bandGrad');
+  grad.setAttribute('x1', bandAnchor.x);
+  grad.setAttribute('y1', bandAnchor.y);
+  grad.setAttribute('x2', bandAnchor.x);
+  grad.setAttribute('y2', bandAnchor.y - 200);
 
   sourceEl.classList.add('dragging');
   document.getElementById('bandSvg').style.display = 'block';
@@ -1670,6 +1727,13 @@ function updateBand(tx, ty) {
   ].join(' ');
 
   document.getElementById('bandPath').setAttribute('d', path);
+
+  // Update gradient direction to follow the band (lighter toward the cursor)
+  const grad = document.getElementById('bandGrad');
+  grad.setAttribute('x1', ax.toFixed(0));
+  grad.setAttribute('y1', ay.toFixed(0));
+  grad.setAttribute('x2', tx.toFixed(0));
+  grad.setAttribute('y2', ty.toFixed(0));
 
 }
 
