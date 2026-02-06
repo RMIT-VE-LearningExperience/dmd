@@ -423,7 +423,7 @@
   .feedback-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.55);
+    background: rgba(25,62,117,0.85);
     display: none;
     align-items: center;
     justify-content: center;
@@ -435,64 +435,61 @@
 
   .feedback-popup {
     background: white;
-    border-radius: 20px;
-    padding: 24px 20px;
+    border-radius: 16px;
+    padding: 28px 24px 140px;
     max-width: 320px;
     width: 100%;
-    text-align: center;
+    text-align: left;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     position: relative;
-    border-top: 5px solid var(--role-color, #1a2744);
   }
 
-  .feedback-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    border: 3px solid #1a2744;
-    background: white;
-    margin: -48px auto 12px;
-    overflow: hidden;
+  .feedback-avatar { position: relative; height: 0; }
+
+  .feedback-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #193E75;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
   }
 
-  .feedback-avatar svg { width: 100%; height: 100%; }
-
-  .feedback-name {
-    font-size: 14px;
+  .feedback-title {
+    font-size: 18px;
     font-weight: 900;
-    color: #1a2744;
-    text-transform: uppercase;
-    margin-bottom: 8px;
+    color: #e11d2e;
+    text-align: center;
+    margin-bottom: 14px;
   }
 
   .feedback-msg {
-    font-size: 13px;
-    color: #4a5568;
-    line-height: 1.55;
-    margin-bottom: 6px;
+    font-size: 14px;
+    color: #111827;
+    line-height: 1.45;
+    margin-bottom: 12px;
+    font-weight: 800;
   }
 
   .feedback-hint {
-    font-size: 11px;
-    color: #9ca3af;
-    line-height: 1.5;
-    margin-bottom: 12px;
-  }
-
-  .feedback-close {
-    background: #1a2744;
-    color: white;
-    border: none;
-    padding: 10px 32px;
-    border-radius: 10px;
-    font-family: 'Nunito', sans-serif;
     font-size: 14px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: transform 0.15s;
+    color: #1f2937;
+    line-height: 1.5;
   }
 
-  .feedback-close:active { transform: scale(0.95); }
+  .feedback-character {
+    position: fixed;
+    right: 60vh;
+    bottom: -50px;
+    width: 320px;
+    height: auto;
+    pointer-events: none;
+  }
 
   /* Help Modal */
   .modal-overlay {
@@ -872,11 +869,11 @@
 <!-- Feedback Modal -->
 <div class="feedback-overlay" id="feedbackOverlay">
   <div class="feedback-popup" id="feedbackPopup">
+    <button class="feedback-close" aria-label="Close" onclick="closeFeedback()">×</button>
+    <div class="feedback-title">ATTENTION!</div>
     <div class="feedback-avatar" id="feedbackAvatar"></div>
-    <div class="feedback-name" id="feedbackName"></div>
     <div class="feedback-msg" id="feedbackMsg"></div>
     <div class="feedback-hint" id="feedbackHint"></div>
-    <button class="feedback-close" onclick="closeFeedback()">OK</button>
   </div>
 </div>
 
@@ -1081,8 +1078,8 @@ function showFeedback(role, message, hint) {
   const w = workers[role];
   const popup = document.getElementById('feedbackPopup');
   popup.style.setProperty('--role-color', roleColors[role]);
-  document.getElementById('feedbackAvatar').innerHTML = workerSVG(role);
-  document.getElementById('feedbackName').textContent = w.name;
+  const roleImg = role === 'crane' ? 'craneoperator.svg' : `${role}.svg`;
+  document.getElementById('feedbackAvatar').innerHTML = `<img class="feedback-character" src="images/character_coins/${roleImg}" alt="${w.name}">`;
   document.getElementById('feedbackMsg').textContent = message;
   document.getElementById('feedbackHint').textContent = hint || '';
   document.getElementById('feedbackOverlay').classList.add('active');
