@@ -27,6 +27,11 @@
     flex-direction: column;
     position: relative;
   }
+  .main{
+  display:flex;
+  flex:1;
+  flex-direction:column;
+}
 
   /* Header */
   .header {
@@ -104,6 +109,174 @@
     grid-template-columns: 68px 1fr 1fr 1fr;
     gap: 6px;
     align-items: stretch;
+  }
+
+  @media (min-width: 1024px) {
+    body {
+      justify-content: flex-start;
+    }
+
+    .app {
+      width: 100%;
+      max-width: none;
+      padding-right: 0;
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 32px 32px 12px;
+    }
+
+    .main {
+      flex-direction: row;
+      align-items: stretch;
+      gap: 0;
+    }
+
+    .grid-wrapper {
+      flex: 1;
+      padding: 24px 32px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+
+    /* Keep the grid nicely centred on wide screens */
+    .time-header,
+    .schedule-grid {
+      width: 100%;
+      max-width: 980px;
+      margin: 0;
+    }
+
+    .time-header {
+      grid-template-columns: 120px repeat(5, 1fr);
+      margin-bottom: 18px;
+    }
+
+    .time-label {
+      aspect-ratio: auto;
+      padding: 8px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .day-row {
+      grid-template-columns: 120px repeat(5, 1fr);
+    }
+
+    .day-label {
+      font-size: 13px;
+      min-height: auto;
+      padding: 0;
+      aspect-ratio: 1 / 1;
+    }
+
+    .cell {
+      aspect-ratio: 1 / 1;
+      min-height: auto;
+    }
+
+    .bottom-bar {
+      position: relative;
+      width: 360px;
+      flex: 0 0 360px;
+      padding: 0 0 24px;
+      background: #193E75;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      margin-top: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .header-icons { display: none; }
+
+    .sidebar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px 24px;
+    }
+
+    .home-link {
+      background: white;
+      border-radius: 50%;
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .home-link img { width: 32px; height: 32px; }
+
+    .help-btn { display: none; }
+
+    .help-btn-desktop {
+      display: inline-flex;
+      width: 120px;
+      height: 120px;
+      border-radius: 999px;
+      font-size: 22px;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+
+    .worker-source {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0;
+      margin: 0 0 44px;
+      padding-left: 24px;
+    }
+
+    .worker-avatar {
+      width: 132px;
+      height: 132px;
+      margin: 0 -66px 0 0;
+      flex: 0 0 auto;
+      z-index: 2;
+    }
+
+    .worker-tube {
+      flex: 1 1 auto;
+      height: 165px;
+      padding-top: 0;
+      margin: 0;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      margin-right: -24px;
+    }
+
+    .worker-label {
+      font-size: 11px;
+      margin-top: 0;
+    }
+
+    .progress-track {
+      position: static;
+      margin-top: 10px;
+    }
+
+    .slots-count {
+      position: static;
+      margin-top: 6px;
+    }
   }
 
   .day-label {
@@ -240,6 +413,8 @@
     min-height: 140px;
   }
 
+  .sidebar-top { display: none; }
+
   .help-btn {
     position: absolute;
     left: 18px;
@@ -316,7 +491,7 @@
 
   .worker-source:nth-child(2) .worker-tube { background: linear-gradient(180deg, #e39f58 0%, #e39f58 100%); }
   .worker-source:nth-child(3) .worker-tube { background: linear-gradient(180deg, #E46F5B 0%, #E46F5B 100%); }
-  .worker-source:nth-child(4) .worker-tube { background: linear-gradient(180deg, #E8C66C 0%, #E8C66C 100%); }
+  .worker-source:nth-child(4) .worker-tube { background: linear-gradient(180deg, #E46F5B 0%, #E46F5B 100%); }
 
   .worker-avatar {
     width: 100px;
@@ -376,6 +551,56 @@
     bottom: 30px;
     z-index: 1;
     
+  }
+
+  @media (min-width: 1024px) {
+    .bottom-bar .worker-source {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0;
+      margin: 0 0 44px;
+      padding-left: 24px;
+    }
+
+    .bottom-bar .worker-avatar {
+      width: 132px;
+      height: 132px;
+      margin: 0 -66px 0 0;
+      flex: 0 0 auto;
+      z-index: 2;
+    }
+
+    .bottom-bar .worker-tube {
+      flex: 1 1 auto;
+      height: 165px;
+      padding-top: 0;
+      margin: 0;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      margin-right: -24px;
+    }
+
+    .bottom-bar .worker-label {
+      font-size: 11px;
+      margin-top: 0;
+    }
+
+    .bottom-bar .progress-track {
+      position: static;
+      margin-top: 10px;
+    }
+
+    .bottom-bar .slots-count {
+      position: static;
+      margin-top: 6px;
+    }
   }
 
   /* Drag ghost */
@@ -807,7 +1032,7 @@
       </a>
     </div>
   </div>
-
+<div class="main">
   <!-- Grid -->
   <div class="grid-wrapper">
     <div class="time-header">
@@ -821,6 +1046,12 @@
 
   <!-- Bottom Worker Bar -->
   <div class="bottom-bar">
+    <div class="sidebar-top">
+      <a class="header-icon home-link" href="https://rmit-ve-learningexperience.github.io/dmd/wis_demo/index.html" title="Home">
+        <img src="images/home.svg" alt="Home">
+      </a>
+      <button class="help-btn help-btn-desktop" onclick="showHelp()">HELP!</button>
+    </div>
     <button class="help-btn" onclick="showHelp()">HELP!</button>
 
     <div class="worker-source" draggable="true" data-role="crane" id="src-crane">
@@ -851,6 +1082,7 @@
     </div>
 
   </div>
+</div>
 </div>
 
 <!-- Help Modal -->
@@ -1015,7 +1247,47 @@ function workerSVG(role) {
 // ============================================================
 function buildGrid() {
   const grid = document.getElementById('scheduleGrid');
+  const header = document.querySelector('.time-header');
+  const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+
   grid.innerHTML = '';
+  header.innerHTML = '<span></span>';
+
+  if (isDesktop) {
+    // Desktop: days in header row, time in first column
+    days.forEach(day => {
+      const el = document.createElement('div');
+      el.className = 'time-label';
+      el.textContent = day;
+      header.appendChild(el);
+    });
+
+    slotLabels.forEach((label, si) => {
+      const row = document.createElement('div');
+      row.className = 'day-row';
+      row.innerHTML = `<div class="day-label">${label}</div>`;
+      days.forEach(day => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.day = day;
+        cell.dataset.slot = si;
+        const key = `${day}-${si}`;
+        cell.innerHTML = weatherSVG(weatherData[key]);
+        row.appendChild(cell);
+      });
+      grid.appendChild(row);
+    });
+    return;
+  }
+
+  // Mobile/Tablet: time in header row, days in first column
+  slotLabels.forEach(label => {
+    const el = document.createElement('div');
+    el.className = 'time-label';
+    el.textContent = label;
+    header.appendChild(el);
+  });
+
   days.forEach(day => {
     const row = document.createElement('div');
     row.className = 'day-row';
@@ -2118,6 +2390,15 @@ setAvatars();
 buildWeatherLegend();
 updateAllProgress();
 startIdleTimer();
+
+let lastDesktop = window.matchMedia('(min-width: 1024px)').matches;
+window.addEventListener('resize', () => {
+  const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+  if (isDesktop !== lastDesktop) {
+    lastDesktop = isDesktop;
+    buildGrid();
+  }
+});
 </script>
 </body>
 </html>
