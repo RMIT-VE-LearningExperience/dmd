@@ -112,6 +112,17 @@ html, body {
     margin-bottom: 20px;
 }
 
+@media (max-width: 767px) {
+    .hero-title {
+        font-size: clamp(28px, 9vw, 44px);
+        line-height: 1.2;
+    }
+
+    .hero-line {
+        padding: 4px 14px 6px;
+    }
+}
+
 .hero-line {
     display: inline-block;
     background: #1a3a6b;
@@ -138,7 +149,6 @@ html, body {
     line-height: 1.7;
     margin-bottom: 36px;
     max-width: 480px;
-    padding-top: 30px;
 }
 
 /* ===================================
@@ -262,7 +272,7 @@ html, body {
     }
 
     .hero-title {
-        padding: 4px 14px 6px;
+        padding: 4px 0px 6px;
         border-radius: 4px;
     }
 
