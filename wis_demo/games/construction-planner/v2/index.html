@@ -275,9 +275,22 @@
   .worker-source:active { cursor: grabbing; }
   .worker-source.completed { opacity: 0.45; cursor: default; }
 
+  .worker-source.idle-bob {
+    animation: idle-bob 1.6s ease-in-out infinite;
+  }
+
+  .worker-source.idle-bob:nth-child(2) { animation-delay: 0s; }
+  .worker-source.idle-bob:nth-child(3) { animation-delay: 0.15s; }
+  .worker-source.idle-bob:nth-child(4) { animation-delay: 0.3s; }
+
+  @keyframes idle-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
   .worker-tube {
     width: 100%;
-    height: 120px;
+    height: 140px;
     border-radius: 0;
     position: relative;
     display: flex;
@@ -288,6 +301,7 @@
     overflow: hidden;
     margin-top: -50px;
     z-index: 1;
+    margin-bottom: -60px;
   }
 
   .worker-tube::after {
@@ -340,7 +354,7 @@
     margin-top: 6px;
     overflow: hidden;
     position: absolute;
-    bottom: 25px;
+    bottom: 45px;
     z-index: 1;
   }
 
@@ -359,7 +373,7 @@
     color: #193E75; 
     margin-top: 2px;
     position: absolute;
-    bottom: 10px;
+    bottom: 30px;
     z-index: 1;
     
   }
@@ -413,6 +427,7 @@
     opacity: 0.3;
     transform: none;
     transition: opacity 0.15s;
+    bottom: -20px;
   }
 
   .worker-source .worker-avatar {
@@ -1627,6 +1642,24 @@ let touchDragging = false;
 let touchRole = null;
 let touchSourceCell = null;
 let dragOffset = { x: 0, y: 0 };
+let idleTimer = null;
+let idleActive = false;
+
+function startIdleTimer() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    if (idleActive) return;
+    idleActive = true;
+    document.querySelectorAll('.worker-source').forEach(el => el.classList.add('idle-bob'));
+  }, 3000);
+}
+
+function stopIdleAnimation() {
+  if (!idleActive) return;
+  idleActive = false;
+  document.querySelectorAll('.worker-source').forEach(el => el.classList.remove('idle-bob'));
+  clearTimeout(idleTimer);
+}
 
 // --- Band state ---
 let bandAnchor = null;   // {x, y, width} center-top of the tube
@@ -1879,6 +1912,7 @@ function canDragRole(role) {
 // --- Mouse: drag from source ---
 document.querySelectorAll('.worker-source').forEach(src => {
   src.addEventListener('dragstart', e => {
+    stopIdleAnimation();
     const role = src.dataset.role;
     if (!canDragRole(role)) { e.preventDefault(); return; }
     dragRole = role;
@@ -1903,6 +1937,7 @@ document.querySelectorAll('.worker-source').forEach(src => {
 // --- Touch: drag from source ---
 document.querySelectorAll('.worker-source').forEach(src => {
   src.addEventListener('touchstart', e => {
+    stopIdleAnimation();
     const role = src.dataset.role;
     if (!canDragRole(role)) return;
     e.preventDefault();
@@ -1918,6 +1953,7 @@ document.querySelectorAll('.worker-source').forEach(src => {
 document.addEventListener('touchstart', e => {
   const wcell = e.target.closest('.worker-in-cell');
   if (!wcell) return;
+  stopIdleAnimation();
   e.preventDefault();
   const cell = wcell.closest('.cell');
   const role = wcell.dataset.role;
@@ -1941,7 +1977,14 @@ document.addEventListener('touchmove', e => {
   });
   const el = document.elementFromPoint(t.clientX, t.clientY);
   const cell = el?.closest?.('.cell');
-  if (cell) cell.classList.add('drag-over');
+  if (cell) {
+    const key = `${cell.dataset.day}-${cell.dataset.slot}`;
+    if (gameState.schedule[key]) {
+      cell.classList.add('drag-over-invalid');
+    } else {
+      cell.classList.add('drag-over');
+    }
+  }
 }, { passive: false });
 
 // --- Touch end ---
@@ -2012,6 +2055,7 @@ document.addEventListener('dragend', e => {
 document.addEventListener('mousedown', e => {
   const wcell = e.target.closest('.worker-in-cell');
   if (!wcell) return;
+  stopIdleAnimation();
   const cell = wcell.closest('.cell');
   const role = wcell.dataset.role;
   wcell.setAttribute('draggable', 'true');
@@ -2073,6 +2117,7 @@ buildGrid();
 setAvatars();
 buildWeatherLegend();
 updateAllProgress();
+startIdleTimer();
 </script>
 </body>
 </html>
