@@ -2079,7 +2079,7 @@ function showBand(role, sourceEl) {
 
   // Anchor at tube edge: top-center on mobile, 100px left of tube right edge on desktop
   bandAnchor = isDesktop
-    ? { x: tubeRect.right - 200, y: tubeRect.top + tubeRect.height / 2, width: tubeRect.height }
+    ? { x: tubeRect.right - 255, y: tubeRect.top + tubeRect.height / 2, width: tubeRect.height }
     : { x: tubeRect.left + tubeRect.width / 2, y: avatarRect.bottom - 8, width: tubeRect.width };
   bandSourceEl = sourceEl;
 
@@ -2111,11 +2111,9 @@ function updateBand(tx, ty) {
 
   const ax = bandAnchor.x;
   const ay = bandAnchor.y;
-  const anchorHalf = bandAnchor.width * 0.48;
-  const targetHalf = 14;
+  const hw = bandAnchor.width * 0.48; // half-width at base
   const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
 
-  // Vector from anchor to target
   const dx = tx - ax;
   const dy = ty - ay;
   const dist = Math.sqrt(dx * dx + dy * dy);
@@ -2124,98 +2122,72 @@ function updateBand(tx, ty) {
     return;
   }
 
-  // Perpendicular unit vector
-  const px = -dy / dist;
-  const py = dx / dist;
+  // --- Cubic bezier spine: P0 → P1 → P2 → P3 ---
+  const p0 = { x: ax, y: ay };
 
-  // Consistent width along the band
-  const bandHalf = 50;
-  const aw = bandHalf;
-  const tw = bandHalf;
+  // P1: forces a straight exit from the base before curving
+  // Mobile: upward from tube; Desktop: leftward toward grid
+  const straightLen = Math.min(80, dist * 0.4);
+  const p1 = isDesktop
+    ? { x: ax - straightLen * 2.5, y: ay }
+    : { x: ax, y: ay - straightLen * 2.5 };
 
-  // 4 corners
-  const bl = isDesktop ? { x: ax, y: ay - aw } : { x: ax + aw, y: ay };
-  const br = isDesktop ? { x: ax, y: ay + aw } : { x: ax - aw, y: ay };
-  const tl = { x: tx + px * tw, y: ty + py * tw };
-  const tr = { x: tx - px * tw, y: ty - py * tw };
+  // P3: target (cursor / drag ghost)
+  const p3 = { x: tx, y: ty };
 
-  // Control points — create organic bulge in the middle
-  const bulge = Math.min(dist * 0.08, 14);
-  const midT = 0.35;
-  const mx = ax + dx * midT;
-  const my = ay + dy * midT;
+  // P2: ensures smooth arrival — pulls back from target toward anchor
+  const dirX = dx / dist;
+  const dirY = dy / dist;
+  const pullBack = Math.min(dist * 0.4, 120);
+  const p2 = { x: tx - dirX * pullBack, y: ty - dirY * pullBack };
 
-  const sideCurve = Math.max(-60, Math.min(60, dx * 0.28));
-  const liftCurve = -Math.min(55, Math.max(12, dist * 0.22));
-  const mxCur = mx + sideCurve * 0.65;
-  const myCur = my + liftCurve;
+  // --- Sample spine, offset perpendicular for left/right edges ---
+  const steps = 30;
+  const leftEdge = [];
+  const rightEdge = [];
 
-  // Desktop: make the curve follow pointer direction (no fixed up/down wobble)
-  if (isDesktop) {
-    const pull = Math.min(40, dist * 0.18);
-    const mxFollow = mx + (dx / dist) * pull;
-    const myFollow = my + (dy / dist) * pull;
-    const cL = { x: mxFollow + px * (aw * 0.7 + bulge), y: myFollow + py * (aw * 0.7 + bulge) };
-    const cR = { x: mxFollow - px * (aw * 0.7 + bulge), y: myFollow - py * (aw * 0.7 + bulge) };
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const mt = 1 - t;
 
-    const midT2 = 0.7;
-    const mx2 = ax + dx * midT2;
-    const my2 = ay + dy * midT2;
-    const cL2 = { x: mx2 + px * (tw + bulge * 0.4), y: my2 + py * (tw + bulge * 0.4) };
-    const cR2 = { x: mx2 - px * (tw + bulge * 0.4), y: my2 - py * (tw + bulge * 0.4) };
+    // Cubic bezier point
+    const ptx = mt*mt*mt*p0.x + 3*mt*mt*t*p1.x + 3*mt*t*t*p2.x + t*t*t*p3.x;
+    const pty = mt*mt*mt*p0.y + 3*mt*mt*t*p1.y + 3*mt*t*t*p2.y + t*t*t*p3.y;
 
-    const path = [
-      `M${bl.x.toFixed(1)},${bl.y.toFixed(1)}`,
-      `C${cL.x.toFixed(1)},${cL.y.toFixed(1)} ${cL2.x.toFixed(1)},${cL2.y.toFixed(1)} ${tl.x.toFixed(1)},${tl.y.toFixed(1)}`,
-      `L${tr.x.toFixed(1)},${tr.y.toFixed(1)}`,
-      `C${cR2.x.toFixed(1)},${cR2.y.toFixed(1)} ${cR.x.toFixed(1)},${cR.y.toFixed(1)} ${br.x.toFixed(1)},${br.y.toFixed(1)}`,
-      'Z'
-    ].join(' ');
+    // Tangent (first derivative)
+    const tanX = 3*mt*mt*(p1.x-p0.x) + 6*mt*t*(p2.x-p1.x) + 3*t*t*(p3.x-p2.x);
+    const tanY = 3*mt*mt*(p1.y-p0.y) + 6*mt*t*(p2.y-p1.y) + 3*t*t*(p3.y-p2.y);
+    const tanLen = Math.sqrt(tanX*tanX + tanY*tanY) || 1;
 
-    document.getElementById('bandPath').setAttribute('d', path);
+    // Perpendicular normal
+    const nx = -tanY / tanLen;
+    const ny = tanX / tanLen;
 
-    const grad = document.getElementById('bandGrad');
-    grad.setAttribute('x1', ax.toFixed(0));
-    grad.setAttribute('y1', ay.toFixed(0));
-    grad.setAttribute('x2', tx.toFixed(0));
-    grad.setAttribute('y2', ty.toFixed(0));
-    return;
+    // Taper: full width at base, narrows to 70% at target
+    const w = hw * (1 - t * 0.3);
+
+    leftEdge.push({ x: ptx + nx * w, y: pty + ny * w });
+    rightEdge.push({ x: ptx - nx * w, y: pty - ny * w });
   }
 
-  // Extra lift near the anchor so the band rises first, then bends toward the cursor
-  const aT = 0.28;
-  const axm = ax + dx * aT;
-  const aym = ay + dy * aT + liftCurve * 1.1;
+  // --- Build SVG path from sampled edges ---
+  let d = `M${leftEdge[0].x.toFixed(1)},${leftEdge[0].y.toFixed(1)}`;
+  for (let i = 1; i < leftEdge.length; i++) {
+    d += ` L${leftEdge[i].x.toFixed(1)},${leftEdge[i].y.toFixed(1)}`;
+  }
+  for (let i = rightEdge.length - 1; i >= 0; i--) {
+    d += ` L${rightEdge[i].x.toFixed(1)},${rightEdge[i].y.toFixed(1)}`;
+  }
+  d += ' Z';
 
-  const cL = { x: axm + px * (aw * 0.9 + bulge * 0.6), y: aym + py * (aw * 0.9 + bulge * 0.6) };
-  const cR = { x: axm - px * (aw * 0.9 + bulge * 0.6), y: aym - py * (aw * 0.9 + bulge * 0.6) };
+  document.getElementById('bandPath').setAttribute('d', d);
 
-  // Second set of control points closer to target for taper
-  const midT2 = 1;
-  const mx2 = ax + dx * midT2;
-  const my2 = ay + dy * midT2;
-  const mx2Cur = mx2 + sideCurve;
-  const my2Cur = my2 + liftCurve * 0.35;
-  const cL2 = { x: mx2Cur + px * (tw + bulge * 0.4), y: my2Cur + py * (tw + bulge * 0.4) };
-  const cR2 = { x: mx2Cur - px * (tw + bulge * 0.4), y: my2Cur - py * (tw + bulge * 0.4) };
-
-  const path = [
-    `M${bl.x.toFixed(1)},${bl.y.toFixed(1)}`,
-    `C${cL.x.toFixed(1)},${cL.y.toFixed(1)} ${cL2.x.toFixed(1)},${cL2.y.toFixed(1)} ${tl.x.toFixed(1)},${tl.y.toFixed(1)}`,
-    `L${tr.x.toFixed(1)},${tr.y.toFixed(1)}`,
-    `C${cR2.x.toFixed(1)},${cR2.y.toFixed(1)} ${cR.x.toFixed(1)},${cR.y.toFixed(1)} ${br.x.toFixed(1)},${br.y.toFixed(1)}`,
-    'Z'
-  ].join(' ');
-
-  document.getElementById('bandPath').setAttribute('d', path);
-
-  // Update gradient direction to follow the band (lighter toward the cursor)
+  // Update gradient direction (lighter toward cursor)
   const grad = document.getElementById('bandGrad');
   grad.setAttribute('x1', ax.toFixed(0));
   grad.setAttribute('y1', ay.toFixed(0));
   grad.setAttribute('x2', tx.toFixed(0));
   grad.setAttribute('y2', ty.toFixed(0));
-
 }
 
 function hideBand(animate = true) {
