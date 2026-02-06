@@ -351,6 +351,47 @@
     display: none;
   }
 
+  /* Stretchy band SVG */
+  .band-svg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9998;
+    display: none;
+  }
+
+  .band-svg path {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+  }
+
+  /* Tube jiggle on snap-back */
+  @keyframes tube-jiggle {
+    0%   { transform: scaleY(0.85) scaleX(1.08); }
+    30%  { transform: scaleY(1.1) scaleX(0.94); }
+    50%  { transform: scaleY(0.95) scaleX(1.03); }
+    70%  { transform: scaleY(1.03) scaleX(0.98); }
+    100% { transform: scaleY(1) scaleX(1); }
+  }
+
+  .tube-jiggle {
+    animation: tube-jiggle 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transform-origin: bottom center;
+  }
+
+  /* Avatar pop-out when dragging */
+  .worker-source.dragging .worker-avatar {
+    opacity: 0.3;
+    transform: scale(0.85);
+    transition: opacity 0.15s, transform 0.15s;
+  }
+
+  .worker-source .worker-avatar {
+    transition: opacity 0.25s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   /* Feedback modal */
   .feedback-overlay {
     position: fixed;
@@ -753,6 +794,18 @@
 
 <!-- Drag ghost -->
 <div class="drag-ghost" id="dragGhost"></div>
+
+<!-- Stretchy band SVG overlay -->
+<svg class="band-svg" id="bandSvg" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bandGrad" x1="0" y1="1" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" id="bandStop1" stop-color="#e8845a"/>
+      <stop offset="60%" id="bandStop2" stop-color="#e8845a" stop-opacity="0.85"/>
+      <stop offset="100%" id="bandStop3" stop-color="#e8845a" stop-opacity="0.5"/>
+    </linearGradient>
+  </defs>
+  <path id="bandPath" d="" fill="url(#bandGrad)"/>
+</svg>
 
 <script>
 // ============================================================
@@ -1422,7 +1475,7 @@ function checkCompletion() {
 }
 
 // ============================================================
-//  DRAG & DROP (touch + mouse)
+//  DRAG & DROP (touch + mouse) + STRETCHY BAND
 // ============================================================
 let dragRole = null;
 let dragSource = null;
@@ -1431,13 +1484,189 @@ let touchDragging = false;
 let touchRole = null;
 let touchSourceCell = null;
 
-function createGhost(role, x, y) {
+// --- Band state ---
+let bandAnchor = null;   // {x, y, width} center-top of the tube
+let bandSourceEl = null;  // the worker-source element being dragged from
+let bandAnimFrame = null;
+let lastGhostX = 0, lastGhostY = 0;
+
+// --- Band rendering ---
+function showBand(role, sourceEl) {
+  if (bandAnimFrame) { cancelAnimationFrame(bandAnimFrame); bandAnimFrame = null; }
+
+  const tubeEl = sourceEl.querySelector('.worker-tube');
+  const avatarEl = sourceEl.querySelector('.worker-avatar');
+  const tubeRect = tubeEl.getBoundingClientRect();
+  const avatarRect = avatarEl.getBoundingClientRect();
+
+  // Anchor at center-top of tube (where avatar meets tube)
+  bandAnchor = {
+    x: tubeRect.left + tubeRect.width / 2,
+    y: avatarRect.bottom - 8,
+    width: tubeRect.width
+  };
+  bandSourceEl = sourceEl;
+
+  // Set gradient colors + direction
+  const color = roleColors[role];
+  const grad = document.getElementById('bandGrad');
+  document.getElementById('bandStop1').setAttribute('stop-color', color);
+  document.getElementById('bandStop2').setAttribute('stop-color', color);
+  document.getElementById('bandStop3').setAttribute('stop-color', color);
+  grad.setAttribute('y1', bandAnchor.y);
+  grad.setAttribute('y2', bandAnchor.y - 200);
+  grad.setAttribute('x1', bandAnchor.x);
+  grad.setAttribute('x2', bandAnchor.x);
+  grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+
+  sourceEl.classList.add('dragging');
+  document.getElementById('bandSvg').style.display = 'block';
+}
+
+function updateBand(tx, ty) {
+  if (!bandAnchor) return;
+
+  const ax = bandAnchor.x;
+  const ay = bandAnchor.y;
+  const anchorHalf = bandAnchor.width * 0.48;
+  const targetHalf = 14;
+
+  // Vector from anchor to target
+  const dx = tx - ax;
+  const dy = ty - ay;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist < 2) {
+    document.getElementById('bandPath').setAttribute('d', '');
+    return;
+  }
+
+  // Perpendicular unit vector
+  const px = -dy / dist;
+  const py = dx / dist;
+
+  // Slight narrowing as it stretches (the further away, the thinner the band)
+  const stretchFactor = Math.max(0.4, 1 - dist / 800);
+  const aw = anchorHalf * stretchFactor;
+  const tw = targetHalf * stretchFactor;
+
+  // 4 corners
+  const bl = { x: ax + px * aw, y: ay + py * aw };
+  const br = { x: ax - px * aw, y: ay - py * aw };
+  const tl = { x: tx + px * tw, y: ty + py * tw };
+  const tr = { x: tx - px * tw, y: ty - py * tw };
+
+  // Control points — create organic bulge in the middle
+  const bulge = Math.min(dist * 0.08, 14) * stretchFactor;
+  const midT = 0.35;
+  const mx = ax + dx * midT;
+  const my = ay + dy * midT;
+
+  const cL = { x: mx + px * (aw * 0.7 + bulge), y: my + py * (aw * 0.7 + bulge) };
+  const cR = { x: mx - px * (aw * 0.7 + bulge), y: my - py * (aw * 0.7 + bulge) };
+
+  // Second set of control points closer to target for taper
+  const midT2 = 0.7;
+  const mx2 = ax + dx * midT2;
+  const my2 = ay + dy * midT2;
+  const cL2 = { x: mx2 + px * (tw + bulge * 0.4), y: my2 + py * (tw + bulge * 0.4) };
+  const cR2 = { x: mx2 - px * (tw + bulge * 0.4), y: my2 - py * (tw + bulge * 0.4) };
+
+  const path = [
+    `M${bl.x.toFixed(1)},${bl.y.toFixed(1)}`,
+    `C${cL.x.toFixed(1)},${cL.y.toFixed(1)} ${cL2.x.toFixed(1)},${cL2.y.toFixed(1)} ${tl.x.toFixed(1)},${tl.y.toFixed(1)}`,
+    `L${tr.x.toFixed(1)},${tr.y.toFixed(1)}`,
+    `C${cR2.x.toFixed(1)},${cR2.y.toFixed(1)} ${cR.x.toFixed(1)},${cR.y.toFixed(1)} ${br.x.toFixed(1)},${br.y.toFixed(1)}`,
+    'Z'
+  ].join(' ');
+
+  document.getElementById('bandPath').setAttribute('d', path);
+
+  // Update gradient direction to follow the band
+  const grad = document.getElementById('bandGrad');
+  grad.setAttribute('y1', ay.toFixed(0));
+  grad.setAttribute('y2', ty.toFixed(0));
+  grad.setAttribute('x1', ax.toFixed(0));
+  grad.setAttribute('x2', tx.toFixed(0));
+}
+
+function hideBand(animate = true) {
+  if (!bandAnchor) {
+    document.getElementById('bandSvg').style.display = 'none';
+    if (bandSourceEl) { bandSourceEl.classList.remove('dragging'); bandSourceEl = null; }
+    return;
+  }
+
+  if (!animate) {
+    document.getElementById('bandSvg').style.display = 'none';
+    document.getElementById('bandPath').setAttribute('d', '');
+    if (bandSourceEl) { bandSourceEl.classList.remove('dragging'); bandSourceEl = null; }
+    bandAnchor = null;
+    return;
+  }
+
+  // Animate snap-back to anchor
+  const startX = lastGhostX;
+  const startY = lastGhostY;
+  const endX = bandAnchor.x;
+  const endY = bandAnchor.y;
+  const srcEl = bandSourceEl;
+  const duration = 380;
+  const startTime = performance.now();
+
+  function animateSnap(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+
+    // Elastic ease-out
+    const p = 1 - Math.pow(1 - t, 3);
+    const bounce = t < 1 ? Math.sin(t * Math.PI * 2.2) * Math.pow(1 - t, 2) * 0.15 : 0;
+    const ease = p + bounce;
+
+    const cx = startX + (endX - startX) * ease;
+    const cy = startY + (endY - startY) * ease;
+
+    updateBand(cx, cy);
+
+    if (t < 1) {
+      bandAnimFrame = requestAnimationFrame(animateSnap);
+    } else {
+      document.getElementById('bandSvg').style.display = 'none';
+      document.getElementById('bandPath').setAttribute('d', '');
+      bandAnchor = null;
+
+      // Jiggle the tube on snap
+      if (srcEl) {
+        srcEl.classList.remove('dragging');
+        const tube = srcEl.querySelector('.worker-tube');
+        if (tube) {
+          tube.classList.remove('tube-jiggle');
+          void tube.offsetWidth; // force reflow
+          tube.classList.add('tube-jiggle');
+          tube.addEventListener('animationend', () => tube.classList.remove('tube-jiggle'), { once: true });
+        }
+        bandSourceEl = null;
+      }
+    }
+  }
+
+  bandAnimFrame = requestAnimationFrame(animateSnap);
+}
+
+// --- Ghost (circle) ---
+function createGhost(role, x, y, sourceEl) {
+  if (bandAnimFrame) { cancelAnimationFrame(bandAnimFrame); bandAnimFrame = null; }
   ghostEl = document.getElementById('dragGhost');
   ghostEl.style.background = roleColors[role];
   ghostEl.innerHTML = workerSVG(role);
   ghostEl.querySelector('svg').style.cssText = 'width:100%;height:100%;border-radius:50%;';
   ghostEl.style.display = 'block';
   moveGhost(x, y);
+
+  // Start band if dragging from a source worker
+  if (sourceEl) {
+    showBand(role, sourceEl);
+    updateBand(x, y);
+  }
 }
 
 function moveGhost(x, y) {
@@ -1445,10 +1674,14 @@ function moveGhost(x, y) {
     ghostEl.style.left = x + 'px';
     ghostEl.style.top = y + 'px';
   }
+  lastGhostX = x;
+  lastGhostY = y;
+  updateBand(x, y);
 }
 
-function hideGhost() {
+function hideGhost(animateBand = true) {
   if (ghostEl) ghostEl.style.display = 'none';
+  hideBand(animateBand);
 }
 
 function canDragRole(role) {
@@ -1458,7 +1691,7 @@ function canDragRole(role) {
   return used < 3;
 }
 
-// Mouse: drag from source
+// --- Mouse: drag from source ---
 document.querySelectorAll('.worker-source').forEach(src => {
   src.addEventListener('dragstart', e => {
     const role = src.dataset.role;
@@ -1467,10 +1700,12 @@ document.querySelectorAll('.worker-source').forEach(src => {
     dragSource = null;
     e.dataTransfer.setData('text/plain', role);
     e.dataTransfer.effectAllowed = 'copy';
+    // Show band for mouse drag too
+    showBand(role, src);
   });
 });
 
-// Touch: drag from source
+// --- Touch: drag from source ---
 document.querySelectorAll('.worker-source').forEach(src => {
   src.addEventListener('touchstart', e => {
     const role = src.dataset.role;
@@ -1480,11 +1715,11 @@ document.querySelectorAll('.worker-source').forEach(src => {
     touchRole = role;
     touchSourceCell = null;
     const t = e.touches[0];
-    createGhost(role, t.clientX, t.clientY);
+    createGhost(role, t.clientX, t.clientY, src);
   }, { passive: false });
 });
 
-// Touch: drag from placed cell
+// --- Touch: drag from placed cell (no band) ---
 document.addEventListener('touchstart', e => {
   const wcell = e.target.closest('.worker-in-cell');
   if (!wcell) return;
@@ -1496,10 +1731,10 @@ document.addEventListener('touchstart', e => {
   touchSourceCell = { day: cell.dataset.day, slot: cell.dataset.slot };
   removeWorker(role, cell);
   const t = e.touches[0];
-  createGhost(role, t.clientX, t.clientY);
+  createGhost(role, t.clientX, t.clientY, null);
 }, { passive: false });
 
-// Touch move
+// --- Touch move ---
 document.addEventListener('touchmove', e => {
   if (!touchDragging) return;
   e.preventDefault();
@@ -1514,11 +1749,11 @@ document.addEventListener('touchmove', e => {
   if (cell) cell.classList.add('drag-over');
 }, { passive: false });
 
-// Touch end
+// --- Touch end ---
 document.addEventListener('touchend', e => {
   if (!touchDragging) return;
   touchDragging = false;
-  hideGhost();
+  hideGhost(true);
   document.querySelectorAll('.cell').forEach(c => {
     c.classList.remove('drag-over');
     c.classList.remove('drag-over-invalid');
@@ -1533,13 +1768,17 @@ document.addEventListener('touchend', e => {
   touchSourceCell = null;
 });
 
-// Mouse: drag over
+// --- Mouse: drag over ---
 document.addEventListener('dragover', e => {
   const cell = e.target.closest?.('.cell');
   if (cell) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
     cell.classList.add('drag-over');
+  }
+  // Update band during mouse drag
+  if (bandAnchor) {
+    moveGhost(e.clientX, e.clientY);
   }
 });
 
@@ -1548,12 +1787,15 @@ document.addEventListener('dragleave', e => {
   if (cell) cell.classList.remove('drag-over');
 });
 
-// Mouse: drop
+// --- Mouse: drop ---
 document.addEventListener('drop', e => {
   e.preventDefault();
   document.querySelectorAll('.cell').forEach(c => c.classList.remove('drag-over'));
   const cell = e.target.closest?.('.cell');
-  if (!cell) return;
+  lastGhostX = e.clientX;
+  lastGhostY = e.clientY;
+  hideGhost(true);
+  if (!cell) { dragRole = null; dragSource = null; return; }
   const role = e.dataTransfer.getData('text/plain') || dragRole;
   if (role) {
     attemptPlacement(role, cell.dataset.day, parseInt(cell.dataset.slot), cell);
@@ -1562,7 +1804,15 @@ document.addEventListener('drop', e => {
   dragSource = null;
 });
 
-// Mouse: drag from placed cell
+// --- Mouse: dragend (if dropped outside) ---
+document.addEventListener('dragend', e => {
+  lastGhostX = e.clientX;
+  lastGhostY = e.clientY;
+  hideGhost(true);
+  document.querySelectorAll('.cell').forEach(c => c.classList.remove('drag-over'));
+});
+
+// --- Mouse: drag from placed cell (no band) ---
 document.addEventListener('mousedown', e => {
   const wcell = e.target.closest('.worker-in-cell');
   if (!wcell) return;
