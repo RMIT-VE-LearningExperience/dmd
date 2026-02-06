@@ -224,7 +224,6 @@
 
   /* Bottom bar */
   .bottom-bar {
-    background: #193E75;
     padding: 16px 12px 24px 84px;
     display: flex;
     align-items: flex-end;
@@ -272,7 +271,7 @@
 
   .worker-tube {
     width: 100%;
-    height: 100px;
+    height: 120px;
     border-radius: 0;
     position: relative;
     display: flex;
@@ -281,6 +280,8 @@
     justify-content: flex-start;
     padding-top: 36px;
     overflow: hidden;
+    margin-top: -50px;
+    z-index: 1;
   }
 
   .worker-tube::after {
@@ -298,15 +299,14 @@
   .worker-source:nth-child(4) .worker-tube { background: linear-gradient(180deg, #E8C66C 0%, #E8C66C 100%); }
 
   .worker-avatar {
-    width: 60px;
-    height: 60px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    border: 3px solid #1a2744;
     background: white;
     position: relative;
     z-index: 2;
     overflow: hidden;
-    top: 30px;
+  
   }
 
   .worker-avatar svg { width: 100%; height: 100%; }
@@ -317,7 +317,7 @@
     font-weight: 800;
     color: #193e75;
     text-align: center;
-    margin-top: 4px;
+    margin-top: 20px;
     letter-spacing: 0.3px;
     text-transform: uppercase;
     opacity: 0.85;
@@ -350,7 +350,7 @@
   .slots-count {
     font-size: 8px;
     font-weight: 800;
-    color: rgba(255,255,255,0.7);
+    color: #193E75; 
     margin-top: 2px;
     position: absolute;
     bottom: 10px;
@@ -386,9 +386,7 @@
     display: none;
   }
 
-  .band-svg path {
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
-  }
+  .band-svg path { filter: none; }
 
   /* Tube jiggle on snap-back */
   @keyframes tube-jiggle {
@@ -816,14 +814,7 @@
 
 <!-- Stretchy band SVG overlay -->
 <svg class="band-svg" id="bandSvg" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bandGrad" x1="0" y1="1" x2="0" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" id="bandStop1" stop-color="#e8845a"/>
-      <stop offset="60%" id="bandStop2" stop-color="#e8845a" stop-opacity="0.85"/>
-      <stop offset="100%" id="bandStop3" stop-color="#e8845a" stop-opacity="0.5"/>
-    </linearGradient>
-  </defs>
-  <path id="bandPath" d="" fill="url(#bandGrad)"/>
+  <path id="bandPath" d="" fill="#e8845a"/>
 </svg>
 
 <script>
@@ -872,8 +863,8 @@ const weatherNames = {
 };
 
 const roleColors = {
-  crane: '#e8845a',
-  concreter: '#e89a8a',
+  crane: '#E39F58',
+  concreter: '#E46F5B',
   carpenter: '#E8C66C'
 };
 
@@ -1499,6 +1490,7 @@ let ghostEl = null;
 let touchDragging = false;
 let touchRole = null;
 let touchSourceCell = null;
+let dragOffset = { x: 0, y: 0 };
 
 // --- Band state ---
 let bandAnchor = null;   // {x, y, width} center-top of the tube
@@ -1523,17 +1515,9 @@ function showBand(role, sourceEl) {
   };
   bandSourceEl = sourceEl;
 
-  // Set gradient colors + direction
+  // Set band color to match the role tube
   const color = roleColors[role];
-  const grad = document.getElementById('bandGrad');
-  document.getElementById('bandStop1').setAttribute('stop-color', color);
-  document.getElementById('bandStop2').setAttribute('stop-color', color);
-  document.getElementById('bandStop3').setAttribute('stop-color', color);
-  grad.setAttribute('y1', bandAnchor.y);
-  grad.setAttribute('y2', bandAnchor.y - 200);
-  grad.setAttribute('x1', bandAnchor.x);
-  grad.setAttribute('x2', bandAnchor.x);
-  grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+  document.getElementById('bandPath').setAttribute('fill', color);
 
   sourceEl.classList.add('dragging');
   document.getElementById('bandSvg').style.display = 'block';
@@ -1561,13 +1545,13 @@ function updateBand(tx, ty) {
   const py = dx / dist;
 
   // Consistent width along the band
-  const bandHalf = anchorHalf * 0.85;
+  const bandHalf = 50;
   const aw = bandHalf;
   const tw = bandHalf;
 
   // 4 corners
-  const bl = { x: ax + px * aw, y: ay + py * aw };
-  const br = { x: ax - px * aw, y: ay - py * aw };
+  const bl = { x: ax + aw, y: ay };
+  const br = { x: ax - aw, y: ay };
   const tl = { x: tx + px * tw, y: ty + py * tw };
   const tr = { x: tx - px * tw, y: ty - py * tw };
 
@@ -1609,12 +1593,6 @@ function updateBand(tx, ty) {
 
   document.getElementById('bandPath').setAttribute('d', path);
 
-  // Update gradient direction to follow the band
-  const grad = document.getElementById('bandGrad');
-  grad.setAttribute('y1', ay.toFixed(0));
-  grad.setAttribute('y2', ty.toFixed(0));
-  grad.setAttribute('x1', ax.toFixed(0));
-  grad.setAttribute('x2', tx.toFixed(0));
 }
 
 function hideBand(animate = true) {
@@ -1681,12 +1659,22 @@ function hideBand(animate = true) {
 }
 
 // --- Ghost (circle) ---
-function createGhost(role, x, y, sourceEl) {
+function createGhost(role, x, y, sourceEl, centerEl) {
   if (bandAnimFrame) { cancelAnimationFrame(bandAnimFrame); bandAnimFrame = null; }
   ghostEl = document.getElementById('dragGhost');
   ghostEl.style.background = roleColors[role];
   ghostEl.innerHTML = workerSVG(role);
   ghostEl.style.display = 'block';
+  const el = centerEl || sourceEl?.querySelector?.('.worker-avatar') || sourceEl;
+  if (el) {
+    const rect = el.getBoundingClientRect();
+    dragOffset = {
+      x: rect.left + rect.width / 2 - x,
+      y: rect.top + rect.height / 2 - y
+    };
+  } else {
+    dragOffset = { x: 0, y: 0 };
+  }
   moveGhost(x, y);
 
   // Start band if dragging from a source worker
@@ -1697,18 +1685,21 @@ function createGhost(role, x, y, sourceEl) {
 }
 
 function moveGhost(x, y) {
+  const cx = x + dragOffset.x;
+  const cy = y + dragOffset.y;
   if (ghostEl) {
-    ghostEl.style.left = x + 'px';
-    ghostEl.style.top = y + 'px';
+    ghostEl.style.left = cx + 'px';
+    ghostEl.style.top = cy + 'px';
   }
-  lastGhostX = x;
-  lastGhostY = y;
-  updateBand(x, y);
+  lastGhostX = cx;
+  lastGhostY = cy;
+  updateBand(cx, cy);
 }
 
 function hideGhost(animateBand = true) {
   if (ghostEl) ghostEl.style.display = 'none';
   hideBand(animateBand);
+  dragOffset = { x: 0, y: 0 };
 }
 
 function canDragRole(role) {
@@ -1727,6 +1718,16 @@ document.querySelectorAll('.worker-source').forEach(src => {
     dragSource = null;
     e.dataTransfer.setData('text/plain', role);
     e.dataTransfer.effectAllowed = 'copy';
+    const avatarEl = src.querySelector('.worker-avatar');
+    if (avatarEl) {
+      const rect = avatarEl.getBoundingClientRect();
+      dragOffset = {
+        x: rect.left + rect.width / 2 - e.clientX,
+        y: rect.top + rect.height / 2 - e.clientY
+      };
+    } else {
+      dragOffset = { x: 0, y: 0 };
+    }
     // Show band for mouse drag too
     showBand(role, src);
   });
@@ -1758,7 +1759,7 @@ document.addEventListener('touchstart', e => {
   touchSourceCell = { day: cell.dataset.day, slot: cell.dataset.slot };
   removeWorker(role, cell);
   const t = e.touches[0];
-  createGhost(role, t.clientX, t.clientY, null);
+  createGhost(role, t.clientX, t.clientY, null, wcell);
 }, { passive: false });
 
 // --- Touch move ---
@@ -1837,6 +1838,7 @@ document.addEventListener('dragend', e => {
   lastGhostY = e.clientY;
   hideGhost(true);
   document.querySelectorAll('.cell').forEach(c => c.classList.remove('drag-over'));
+  dragOffset = { x: 0, y: 0 };
 });
 
 // --- Mouse: drag from placed cell (no band) ---
