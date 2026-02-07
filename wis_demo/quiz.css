@@ -294,6 +294,15 @@ h2 {
     margin-left: calc(-50vw + 50%);
 }
 
+#results {
+    top: 0;
+    left: 0;
+    transform: none;
+    height: 100vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 #results .container {
     max-width: 100%;
     padding: 0;
