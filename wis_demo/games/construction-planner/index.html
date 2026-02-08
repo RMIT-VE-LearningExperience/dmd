@@ -617,7 +617,7 @@ padding-bottom: 60px;
     margin-top: 6px;
     overflow: hidden;
     position: absolute;
-    bottom: 45px;
+    bottom: 55px;
     z-index: 1;
   }
 
@@ -636,7 +636,7 @@ padding-bottom: 60px;
     color: #193E75; 
     margin-top: 2px;
     position: absolute;
-    bottom: 30px;
+    bottom: 43px;
     z-index: 1;
     
   }
@@ -2365,7 +2365,7 @@ function showBand(role, sourceEl) {
   // Anchor at tube edge: top-center on mobile, 100px left of tube right edge on desktop
   bandAnchor = isDesktop
     ? { x: tubeRect.right - 255, y: tubeRect.top + tubeRect.height / 2, width: tubeRect.height }
-    : { x: tubeRect.left + tubeRect.width / 2, y: avatarRect.bottom - 8, width: tubeRect.width };
+    : { x: tubeRect.left + tubeRect.width / 2, y: avatarRect.bottom - 35, width: tubeRect.width };
   bandSourceEl = sourceEl;
 
   // Set gradient colors to match role tube (lighter near the avatar)
