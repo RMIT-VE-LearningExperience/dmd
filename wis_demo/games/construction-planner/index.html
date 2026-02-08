@@ -21,7 +21,7 @@
 
   .app {
     width: 100%;
-    max-width: 420px;
+    max-width: none;
     min-height: 100vh;
     background: #DAD8D8;
     display: flex;
@@ -1132,11 +1132,11 @@ max-height: 130px;
   }
 
   /* ===================================
-     MOBILE VIEWPORT FIT
-     Constrain the entire game to the
-     viewport so nothing is cropped.
+     PORTRAIT MOBILE / TABLET VIEWPORT FIT
+     Constrain the game to the viewport
+     height so nothing is cropped.
      =================================== */
-  @media (max-width: 1023px) {
+  @media (max-width: 1023px) and (orientation: portrait) {
     .app {
       height: 100vh;
       height: 100dvh;
@@ -1204,6 +1204,207 @@ max-height: 130px;
       height: 100px;
       margin-top: -36px;
       margin-bottom: -40px;
+    }
+  }
+
+  /* ===================================
+     LANDSCAPE LAYOUT (phones & tablets)
+     Switch to horizontal desktop-style
+     layout with sidebar on the right.
+     =================================== */
+  @media (orientation: landscape) and (min-width: 640px) and (max-width: 1023px) {
+    body {
+      justify-content: flex-start;
+    }
+
+    .app {
+      max-width: none;
+      height: 100vh;
+      height: 100dvh;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .header {
+      display: none;
+    }
+
+    .main {
+      flex-direction: row;
+      align-items: stretch;
+    }
+
+    .sidebar {
+      width: 150px;
+      flex-shrink: 0;
+      background-color: #193E75;
+    }
+
+    .desktop-title {
+      display: block;
+      font-size: 20px;
+      font-weight: 900;
+      color: #1a2744;
+      line-height: 1.05;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+
+    .grid-wrapper {
+      flex: 1;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .time-header,
+    .schedule-grid {
+      width: 100%;
+    }
+
+    .schedule-grid {
+      flex: 1;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    .time-header {
+      grid-template-columns: 80px 1fr 1fr 1fr;
+      margin-bottom: 4px;
+    }
+
+    .time-label {
+      padding: 4px;
+      font-size: 10px;
+    }
+
+    .day-row {
+      grid-template-columns: 80px 1fr 1fr 1fr;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .day-label {
+      font-size: 12px;
+      min-height: 0;
+    }
+
+    .cell {
+      min-height: 0;
+    }
+
+    .cell .weather-icon {
+      width: 36px;
+      height: 36px;
+      max-width: 36px;
+      max-height: 36px;
+    }
+
+    .bottom-bar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 150px;
+      padding: 0;
+      padding-bottom: 0;
+      padding-left: 0;
+      background: #193E75;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      overflow: visible;
+      z-index: 50;
+      margin-top: 0;
+      min-height: auto;
+    }
+
+    .sidebar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 10px 0;
+      flex: 0 0 auto;
+    }
+
+    .home-link { display: flex; }
+
+    .help-btn {
+      position: relative;
+      left: auto;
+      right: auto;
+      top: auto;
+      bottom: auto;
+      width: auto;
+      height: auto;
+      font-size: 12px;
+      margin-bottom: 4px;
+      margin-top: 6px;
+      align-self: auto;
+    }
+
+    .worker-source {
+      width: 100%;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0;
+      flex: 1;
+      margin: 0;
+      padding: 4px 8px 4px 0;
+      overflow: visible;
+    }
+
+    .worker-avatar {
+      width: 72px !important;
+      height: 72px !important;
+      margin: 0 0 0 -36px !important;
+      flex: 0 0 auto;
+      z-index: 2;
+    }
+
+    .worker-tube {
+      flex: 1 1 auto;
+      align-self: stretch;
+      height: auto;
+      padding-top: 0;
+      margin: 0;
+      margin-bottom: 0;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      width: calc(100% + 100px);
+      margin-left: -100px;
+    }
+
+    .worker-label {
+      font-size: 9px;
+      margin-top: 0;
+    }
+
+    .progress-track {
+      position: static;
+      margin-top: 4px;
+    }
+
+    .slots-count {
+      position: static;
+      margin-top: 2px;
+      font-size: 8px;
+    }
+
+    .worker-source.idle-bob {
+      animation: idle-slide 3.2s ease-in-out infinite;
     }
   }
 </style>
