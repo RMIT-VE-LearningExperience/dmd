@@ -1130,6 +1130,82 @@ max-height: 130px;
     0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
     100% { transform: translateY(80px) rotate(360deg); opacity: 0; }
   }
+
+  /* ===================================
+     MOBILE VIEWPORT FIT
+     Constrain the entire game to the
+     viewport so nothing is cropped.
+     =================================== */
+  @media (max-width: 1023px) {
+    .app {
+      height: 100vh;
+      height: 100dvh;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 12px 16px 6px;
+    }
+
+    .grid-wrapper {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .time-header {
+      margin-bottom: 4px;
+    }
+
+    .time-label {
+      padding: 5px 4px;
+    }
+
+    .schedule-grid {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .day-row {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .day-label,
+    .cell {
+      min-height: 0;
+    }
+
+    .bottom-bar {
+      min-height: 0;
+      margin-top: 6px;
+      padding-bottom: 24px;
+      padding-left: 12px;
+    }
+
+    .help-btn {
+      position: relative;
+      left: auto;
+      bottom: auto;
+      width: 40px;
+      height: 40px;
+      font-size: 11px;
+      align-self: flex-end;
+      margin-bottom: 4px;
+    }
+
+    .worker-avatar {
+      width: 72px !important;
+      height: 72px !important;
+    }
+
+    .worker-tube {
+      height: 100px;
+      margin-top: -36px;
+      margin-bottom: -40px;
+    }
+  }
 </style>
 </head>
 <body>
