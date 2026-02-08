@@ -1238,21 +1238,17 @@ max-height: 130px;
       width: 150px;
       flex-shrink: 0;
       background-color: #193E75;
+      overflow: visible;
     }
 
+    /* Hide title on landscape phones to maximise grid space */
     .desktop-title {
-      display: block;
-      font-size: 20px;
-      font-weight: 900;
-      color: #1a2744;
-      line-height: 1.05;
-      letter-spacing: -0.5px;
-      margin-bottom: 10px;
+      display: none;
     }
 
     .grid-wrapper {
       flex: 1;
-      padding: 12px 16px;
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -1272,7 +1268,7 @@ max-height: 130px;
     }
 
     .time-header {
-      grid-template-columns: 80px 1fr 1fr 1fr;
+      grid-template-columns: 64px 1fr 1fr 1fr;
       margin-bottom: 4px;
     }
 
@@ -1282,13 +1278,13 @@ max-height: 130px;
     }
 
     .day-row {
-      grid-template-columns: 80px 1fr 1fr 1fr;
+      grid-template-columns: 64px 1fr 1fr 1fr;
       flex: 1;
       min-height: 0;
     }
 
     .day-label {
-      font-size: 12px;
+      font-size: 11px;
       min-height: 0;
     }
 
@@ -1297,27 +1293,23 @@ max-height: 130px;
     }
 
     .cell .weather-icon {
-      width: 36px;
-      height: 36px;
-      max-width: 36px;
-      max-height: 36px;
+      width: 32px;
+      height: 32px;
+      max-width: 32px;
+      max-height: 32px;
     }
 
     .bottom-bar {
-      position: fixed;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 150px;
+      position: static;
+      width: 100%;
+      height: 100%;
       padding: 0;
-      padding-bottom: 0;
-      padding-left: 0;
       background: #193E75;
       display: flex;
       flex-direction: column;
       align-items: stretch;
       justify-content: flex-start;
-      overflow: visible;
+      overflow: hidden;
       z-index: 50;
       margin-top: 0;
       min-height: auto;
@@ -1327,24 +1319,21 @@ max-height: 130px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 10px 0;
+      padding: 8px 8px 0;
       flex: 0 0 auto;
     }
 
     .home-link { display: flex; }
 
-    .help-btn {
-      position: relative;
-      left: auto;
-      right: auto;
-      top: auto;
-      bottom: auto;
-      width: auto;
-      height: auto;
-      font-size: 12px;
-      margin-bottom: 4px;
-      margin-top: 6px;
-      align-self: auto;
+    /* Hide the standalone help button; use the one in sidebar-top */
+    .bottom-bar > .help-btn:not(.help-btn-desktop) {
+      display: none;
+    }
+
+    .help-btn-desktop {
+      width: 40px;
+      height: 40px;
+      font-size: 10px;
     }
 
     .worker-source {
@@ -1356,14 +1345,14 @@ max-height: 130px;
       gap: 0;
       flex: 1;
       margin: 0;
-      padding: 4px 8px 4px 0;
+      padding: 4px 6px 4px 0;
       overflow: visible;
     }
 
     .worker-avatar {
-      width: 72px !important;
-      height: 72px !important;
-      margin: 0 0 0 -36px !important;
+      width: 60px !important;
+      height: 60px !important;
+      margin: 0 0 0 -24px !important;
       flex: 0 0 auto;
       z-index: 2;
     }
@@ -1383,8 +1372,6 @@ max-height: 130px;
       overflow: hidden;
       position: relative;
       z-index: 1;
-      width: calc(100% + 100px);
-      margin-left: -100px;
     }
 
     .worker-label {
@@ -1405,6 +1392,19 @@ max-height: 130px;
 
     .worker-source.idle-bob {
       animation: idle-slide 3.2s ease-in-out infinite;
+    }
+  }
+
+  /* Show title on wider landscape tablets */
+  @media (orientation: landscape) and (min-width: 800px) and (max-width: 1023px) {
+    .desktop-title {
+      display: block;
+      font-size: 18px;
+      font-weight: 900;
+      color: #1a2744;
+      line-height: 1.05;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
     }
   }
 </style>
