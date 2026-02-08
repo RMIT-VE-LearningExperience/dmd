@@ -1624,7 +1624,8 @@ function countCarpenterSlotsAfterDay(afterDayIdx, extraOccupied = {}) {
     const day = dayFromIndex[di];
     for (let s = 0; s < 3; s++) {
       const key = `${day}-${s}`;
-      if (!gameState.schedule[key] && !extraOccupied[key]) count++;
+      // Count slots already assigned to carpenter OR still available
+      if (gameState.schedule[key] === 'carpenter' || (!gameState.schedule[key] && !extraOccupied[key])) count++;
     }
   }
   return count;
