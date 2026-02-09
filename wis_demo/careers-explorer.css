@@ -1677,10 +1677,10 @@ body {
         padding-bottom: 0;
     }
 
-    /* Mobile: show careers side by side within each section */
+    /* Mobile: show careers stacked within each section */
     .mobile-comparison-row {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
         gap: 12px;
     }
 

@@ -39,6 +39,7 @@ let careerScores = {};
 // DOM ELEMENTS
 // ===================================
 const startBtn = document.getElementById('startBtn');
+const skipBtn = document.getElementById('skipBtn');
 const exploreBtn = document.getElementById('exploreBtn');
 const retakeBtn = document.getElementById('retakeBtn');
 const resultsGrid = document.getElementById('resultsGrid');
@@ -63,6 +64,10 @@ const questionScreens = [
 function initializeEventListeners() {
     if (startBtn) {
         startBtn.addEventListener('click', startQuiz);
+    }
+
+    if (skipBtn) {
+        skipBtn.addEventListener('click', skipQuiz);
     }
 
     questionScreens.forEach((screen, index) => {
@@ -90,6 +95,11 @@ function startQuiz() {
     selectedSkills = [];
     careerScores = {};
     switchScreen(screens.intro, screens.question1);
+}
+
+function skipQuiz() {
+    console.log('⏭️ Skipping quiz...');
+    window.location.href = 'careers-explorer.html';
 }
 
 function switchScreen(fromScreen, toScreen) {
@@ -179,7 +189,7 @@ function calculateScores() {
 function showResults() {
     console.log('🎉 Showing results...');
 
-    const sortedResults = Object.entries(careerScores)
+    const allResults = Object.entries(careerScores)
         .map(([name, scoreData]) => {
             const careerObj = careersData.roles.find(c => c.name === name);
             return {
@@ -194,31 +204,64 @@ function showResults() {
         .sort((a, b) => {
             if (b.score !== a.score) return b.score - a.score;
             return a.name.localeCompare(b.name);
-        })
-        .filter(career => career.score > 0)
-        .slice(0, 3);
+        });
 
-    console.log('🎯 Top 3 results:', sortedResults);
+    const topResults = allResults.filter(c => c.score > 0).slice(0, 3);
+    const otherResults = allResults.filter(c => !topResults.includes(c));
 
-    renderResults(sortedResults);
-    saveToLocalStorage(sortedResults);
+    console.log('🎯 Top 3 results:', topResults);
+    console.log('📋 Other careers:', otherResults.length);
+
+    renderResults(topResults, otherResults);
+    saveToLocalStorage(topResults);
 
     const lastQuestionScreen = questionScreens[questionScreens.length - 1];
     switchScreen(lastQuestionScreen, screens.results);
 }
 
-function renderResults(results) {
+function renderResults(topResults, otherResults) {
     resultsGrid.innerHTML = '';
 
-    if (results.length === 0) {
+    if (topResults.length === 0) {
         resultsGrid.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.7);">No matches found. Please retake the quiz.</p>';
         return;
     }
 
-    results.forEach(career => {
+    // Top 3 matches with full percentage cards
+    topResults.forEach(career => {
         const card = createResultCard(career);
         resultsGrid.appendChild(card);
     });
+
+    // Remaining careers in a compact list
+    if (otherResults && otherResults.length > 0) {
+        const divider = document.createElement('div');
+        divider.className = 'results-divider';
+        divider.innerHTML = '<span>OTHER CAREERS TO EXPLORE</span>';
+        resultsGrid.appendChild(divider);
+
+        const otherGrid = document.createElement('div');
+        otherGrid.className = 'other-careers-grid';
+
+        otherResults.forEach(career => {
+            const item = document.createElement('div');
+            item.className = 'other-career-item';
+
+            const name = document.createElement('div');
+            name.className = 'other-career-name';
+            name.textContent = career.name;
+
+            const score = document.createElement('div');
+            score.className = 'other-career-score';
+            score.textContent = career.score > 0 ? career.score + '% match' : 'Not matched';
+
+            item.appendChild(name);
+            item.appendChild(score);
+            otherGrid.appendChild(item);
+        });
+
+        resultsGrid.appendChild(otherGrid);
+    }
 }
 
 // Build a result card matching the screenshot layout:
