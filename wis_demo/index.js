@@ -11,8 +11,16 @@ function navigateToCareersExplorer() {
 
 function navigateToGames() {
     console.log('🎮 Opening Mini Games...');
-    // Navigate to the games section or a games hub page
-    // For now, go to the construction planner as the primary game
+    const overlay = document.getElementById('dashboardOverlay');
+    const fab = document.getElementById('gamesFab');
+    if (overlay) {
+        overlay.classList.add('active');
+        if (fab) {
+            fab.classList.add('hidden');
+        }
+        return;
+    }
+    // Fallback if overlay isn't present
     window.location.href = 'games/construction-planner/';
 }
 
