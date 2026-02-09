@@ -264,7 +264,7 @@ html, body {
 @media (max-width: 480px) {
     .hero {
         align-items: flex-end;
-        padding-bottom: 24px;
+        padding-bottom: 120px;
     }
 
     .hero-content {
@@ -285,6 +285,7 @@ html, body {
     .hero-buttons {
         flex-direction: column;
         gap: 12px;
+        margin-bottom: 8px;
     }
 
     .btn {
