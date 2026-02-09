@@ -99,7 +99,7 @@ function startQuiz() {
 
 function skipQuiz() {
     console.log('⏭️ Skipping quiz...');
-    window.location.href = 'careers-explorer.html';
+    window.location.href = 'career-explorer.html';
 }
 
 function switchScreen(fromScreen, toScreen) {
@@ -358,7 +358,7 @@ function navigateToExplorer() {
         params.append(`score${index + 1}`, career.score);
     });
 
-    const url = `career-explorer-2.html?${params.toString()}`;
+    const url = `career-explorer.html?${params.toString()}`;
     console.log('🔗 Navigating to:', url);
     window.location.href = url;
 }

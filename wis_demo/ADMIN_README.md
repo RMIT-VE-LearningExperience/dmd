@@ -329,7 +329,7 @@ If something breaks:
 | **Access Dashboard** | [Admin Dashboard](https://rmit-ve-learningexperience.github.io/dmd/wis_demo/admin.html) |
 | **View Commits** | [GitHub Commits](https://github.com/RMIT-VE-LearningExperience/dmd/commits/main) |
 | **View JSON File** | [wis.json](https://github.com/RMIT-VE-LearningExperience/dmd/blob/main/wis_demo/wis.json) |
-| **Careers Explorer** | [Live Site](https://rmit-ve-learningexperience.github.io/dmd/wis_demo/careers-explorer.html) |
+| **Careers Explorer** | [Live Site](https://rmit-ve-learningexperience.github.io/dmd/wis_demo/career-explorer.html) |
 
 ---
 
