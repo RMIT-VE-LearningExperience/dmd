@@ -2781,11 +2781,6 @@ document.getElementById('helpModal').addEventListener('click', e => {
 // ============================================================
 function closeWelcome() {
   document.getElementById('welcomeOverlay').style.display = 'none';
-  if (window.matchMedia('(max-width: 1023px)').matches) {
-    setTimeout(() => {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }, 2000);
-  }
 }
 
 // ============================================================
