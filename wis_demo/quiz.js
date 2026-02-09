@@ -315,7 +315,7 @@ function navigateToExplorer() {
         params.append(`score${index + 1}`, career.score);
     });
 
-    const url = `careers-explorer.html?${params.toString()}`;
+    const url = `career-explorer-2.html?${params.toString()}`;
     console.log('🔗 Navigating to:', url);
     window.location.href = url;
 }
