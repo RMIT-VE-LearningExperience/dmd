@@ -1258,20 +1258,35 @@ function showEndScreen(won) {
 }
 
 // ============ INPUT ============
+const keyDirMap = {
+  ArrowLeft: 'left', a: 'left',
+  ArrowRight: 'right', d: 'right',
+  ArrowUp: 'up', w: 'up',
+  ArrowDown: 'down', s: 'down',
+};
+
+function setDirBtnActive(dir, active) {
+  const btn = document.querySelector(`.ctrl-btn[data-dir="${dir}"]`);
+  if (btn) btn.classList.toggle('active', active);
+}
+
 window.addEventListener('keydown', e => {
   if (gameState !== 'playing') return;
-  if (e.key === 'ArrowLeft' || e.key === 'a') inputState.left = true;
-  if (e.key === 'ArrowRight' || e.key === 'd') inputState.right = true;
-  if (e.key === 'ArrowUp' || e.key === 'w') inputState.up = true;
-  if (e.key === 'ArrowDown' || e.key === 's') inputState.down = true;
-  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleHook(); }
+  const dir = keyDirMap[e.key];
+  if (dir) { inputState[dir] = true; setDirBtnActive(dir, true); }
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    toggleHook();
+    // Flash the hook button
+    const hb = document.getElementById('hookBtn');
+    hb.classList.add('active');
+    setTimeout(() => hb.classList.remove('active'), 150);
+  }
 });
 
 window.addEventListener('keyup', e => {
-  if (e.key === 'ArrowLeft' || e.key === 'a') inputState.left = false;
-  if (e.key === 'ArrowRight' || e.key === 'd') inputState.right = false;
-  if (e.key === 'ArrowUp' || e.key === 'w') inputState.up = false;
-  if (e.key === 'ArrowDown' || e.key === 's') inputState.down = false;
+  const dir = keyDirMap[e.key];
+  if (dir) { inputState[dir] = false; setDirBtnActive(dir, false); }
 });
 
 document.querySelectorAll('.ctrl-btn[data-dir]').forEach(btn => {
