@@ -287,6 +287,29 @@
     .ctrl-btn { width: 48px; height: 48px; font-size: 1.2rem; }
     .ctrl-btn.hook-btn { width: 68px; font-size: 0.65rem; }
   }
+
+  /* Landscape: move controls to the left */
+  @media (orientation: landscape) and (max-height: 500px) {
+    #controls {
+      left: 16px;
+      bottom: 50%;
+      transform: translateY(50%);
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ctrl-btn { width: 44px; height: 44px; font-size: 1.1rem; }
+    .ctrl-btn.hook-btn { width: 64px; height: 44px; font-size: 0.6rem; }
+  }
+
+  @media (orientation: landscape) and (min-height: 501px) {
+    #controls {
+      left: 16px;
+      bottom: 50%;
+      transform: translateY(50%);
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
 </style>
 </head>
 <body>
