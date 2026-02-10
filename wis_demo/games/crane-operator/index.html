@@ -978,54 +978,41 @@ function drawCrane() {
 }
 
 function drawWire() {
-  // Draw two wires that spread at the trolley and converge at the hook
-  const SPREAD = 7; // half-gap at the trolley end
+  // Draw two parallel wires with constant spacing
+  const SPREAD = 6; // half-gap between the two wires
 
   for (let side = -1; side <= 1; side += 2) {
+    const offset = side * SPREAD;
+
     // Main wire stroke
     ctx.beginPath();
     for (let i = 0; i <= WIRE_SEG_COUNT; i++) {
-      const t = i / WIRE_SEG_COUNT;
-      // Spread at top (t=0), converge at bottom (t=1)
-      const offset = side * SPREAD * (1 - t * t);
       const sx = wireSegments[i].x + offset;
       const sy = wireSegments[i].y;
       if (i === 0) {
         ctx.moveTo(sx, sy);
       } else {
-        const prevT = (i - 1) / WIRE_SEG_COUNT;
-        const prevOffset = side * SPREAD * (1 - prevT * prevT);
-        const prevSx = wireSegments[i - 1].x + prevOffset;
+        const prevSx = wireSegments[i - 1].x + offset;
         const prevSy = wireSegments[i - 1].y;
         const cpx = (prevSx + sx) / 2;
         const cpy = (prevSy + sy) / 2;
         ctx.quadraticCurveTo(prevSx, prevSy, cpx, cpy);
       }
     }
-    const lastOffset = side * SPREAD * 0; // converge fully at hook
-    ctx.quadraticCurveTo(
-      wireSegments[WIRE_SEG_COUNT - 1].x + side * SPREAD * (1 - ((WIRE_SEG_COUNT - 1) / WIRE_SEG_COUNT) ** 2),
-      wireSegments[WIRE_SEG_COUNT - 1].y,
-      wireSegments[WIRE_SEG_COUNT].x + lastOffset,
-      wireSegments[WIRE_SEG_COUNT].y
-    );
     ctx.strokeStyle = '#ccc';
     ctx.lineWidth = 1.2;
     ctx.stroke();
 
     // Highlight stroke for depth
+    const hlOff = offset + (side > 0 ? 0.8 : -0.8);
     ctx.beginPath();
     for (let i = 0; i <= WIRE_SEG_COUNT; i++) {
-      const t = i / WIRE_SEG_COUNT;
-      const offset = side * SPREAD * (1 - t * t) + (side > 0 ? 0.8 : -0.8);
-      const sx = wireSegments[i].x + offset;
+      const sx = wireSegments[i].x + hlOff;
       const sy = wireSegments[i].y;
       if (i === 0) {
         ctx.moveTo(sx, sy);
       } else {
-        const prevT = (i - 1) / WIRE_SEG_COUNT;
-        const prevOffset = side * SPREAD * (1 - prevT * prevT) + (side > 0 ? 0.8 : -0.8);
-        const prevSx = wireSegments[i - 1].x + prevOffset;
+        const prevSx = wireSegments[i - 1].x + hlOff;
         const prevSy = wireSegments[i - 1].y;
         const cpx = (prevSx + sx) / 2;
         const cpy = (prevSy + sy) / 2;
