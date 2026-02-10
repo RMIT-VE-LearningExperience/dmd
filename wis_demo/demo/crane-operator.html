@@ -171,8 +171,8 @@
     color: #f55;
   }
 
-  /* Win Screen */
-  #winScreen {
+  /* End Screen (win & game over) */
+  #endScreen {
     position: fixed;
     inset: 0;
     background: rgba(15,12,41,0.92);
@@ -183,17 +183,25 @@
     z-index: 200;
   }
 
-  #winScreen h2 {
+  #endScreen h2 {
     font-family: 'Oswald', sans-serif;
     font-size: 3rem;
-    color: #77dd77;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    text-shadow: 0 0 40px rgba(119,221,119,0.5);
     margin-bottom: 0.5em;
   }
 
-  #winScreen p { color: #aaa; margin-bottom: 1.5em; }
+  #endScreen h2.win-title {
+    color: #77dd77;
+    text-shadow: 0 0 40px rgba(119,221,119,0.5);
+  }
+
+  #endScreen h2.lose-title {
+    color: #f55;
+    text-shadow: 0 0 40px rgba(255,80,80,0.5);
+  }
+
+  #endScreen p { color: #aaa; margin-bottom: 1.5em; }
 
   #restartBtn {
     font-family: 'Oswald', sans-serif;
@@ -208,6 +216,11 @@
     letter-spacing: 0.15em;
     font-weight: 700;
     box-shadow: 0 4px 0 #3a8a3a, 0 6px 20px rgba(119,221,119,0.3);
+  }
+
+  #restartBtn.lose-btn {
+    background: linear-gradient(180deg, #f5a623, #d4891a);
+    box-shadow: 0 4px 0 #a06510, 0 6px 20px rgba(245,166,35,0.3);
   }
 
   @media (max-width: 600px) {
@@ -230,6 +243,7 @@
 <!-- HUD -->
 <div id="hud">
   <div class="hud-box" id="statusText">Ready</div>
+  <div class="hud-box" id="livesText">Lives: 3</div>
   <div class="hud-box" id="scoreText">Crates: 0/3</div>
 </div>
 
@@ -250,10 +264,10 @@
   <button class="ctrl-btn hook-btn" id="hookBtn">Hook</button>
 </div>
 
-<!-- Win Screen -->
-<div id="winScreen">
-  <h2>Job Complete!</h2>
-  <p id="winMsg">All crates delivered.</p>
+<!-- End Screen -->
+<div id="endScreen">
+  <h2 id="endTitle">Job Complete!</h2>
+  <p id="endMsg">All crates delivered.</p>
   <button id="restartBtn">Play Again</button>
 </div>
 
@@ -316,6 +330,9 @@ let dropZone = { x: 900, y: WORLD.groundY - 25, width: 120, height: 50 };
 let hookedCrate = null;
 let score = 0;
 let totalCrates = 3;
+let lives = 3;
+let hitCooldown = 0; // prevent multiple life losses from single collision
+let droppedCrates = []; // crates falling with gravity after release
 
 // Input
 let inputState = { left: false, right: false, up: false, down: false };
@@ -360,6 +377,9 @@ function initGame() {
   hookedCrate = null;
   score = 0;
   totalCrates = crates.length;
+  lives = 3;
+  hitCooldown = 0;
+  droppedCrates = [];
 
   initWireSegments();
   updateHUD();
@@ -434,59 +454,110 @@ function updatePhysics(dt) {
   hook.x = wireSegments[WIRE_SEG_COUNT].x;
   hook.y = wireSegments[WIRE_SEG_COUNT].y;
 
+  // Compute wire angle for crate rotation
+  const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
+  const lastSeg = wireSegments[WIRE_SEG_COUNT];
+  const currentWireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
+
   // Move hooked crate
   if (hookedCrate) {
     hookedCrate.x = hook.x - hookedCrate.w / 2;
     hookedCrate.y = hook.y + 15;
+    hookedCrate.rotation = currentWireAngle;
   }
 
-  // Check drop zone
-  if (hookedCrate) {
-    const cx = hookedCrate.x + hookedCrate.w / 2;
-    const cy = hookedCrate.y + hookedCrate.h / 2;
-    if (cx > dropZone.x && cx < dropZone.x + dropZone.width &&
-        cy > dropZone.y - 60 && cy < dropZone.y + dropZone.height) {
-      // Auto-drop in zone
-      document.getElementById('statusText').textContent = '\u2713 Delivered!';
-      document.getElementById('statusText').style.color = '#77dd77';
-      hookedCrate.delivered = true;
-      hookedCrate.x = dropZone.x + (dropZone.width - hookedCrate.w) / 2;
-      hookedCrate.y = dropZone.y - hookedCrate.h + 25;
-      // Stack crates
-      const deliveredCount = crates.filter(c => c.delivered).length;
-      hookedCrate.y -= (deliveredCount - 1) * 35;
-      hookedCrate = null;
-      score++;
-      updateHUD();
+  // Update dropped crates (gravity + collision)
+  for (let i = droppedCrates.length - 1; i >= 0; i--) {
+    const dc = droppedCrates[i];
+    dc.vy += 800 * dt; // gravity
+    dc.x += dc.vx * dt;
+    dc.y += dc.vy * dt;
+    // Dampen rotation towards 0
+    dc.rotation *= 0.96;
 
-      if (score >= totalCrates) {
-        setTimeout(() => {
-          gameState = 'win';
-          document.getElementById('winScreen').style.display = 'flex';
-        }, 800);
-      } else {
-        setTimeout(() => {
-          document.getElementById('statusText').textContent = 'Next crate!';
-          document.getElementById('statusText').style.color = '#f5a623';
-        }, 1000);
+    // Ground collision
+    if (dc.y + dc.h >= WORLD.groundY) {
+      dc.y = WORLD.groundY - dc.h;
+      dc.vy = 0;
+      dc.vx *= 0.3;
+      dc.landed = true;
+    }
+
+    // Obstacle collision for falling crates
+    for (const obs of obstacles) {
+      if (dc.x + dc.w > obs.x && dc.x < obs.x + obs.w &&
+          dc.y + dc.h > obs.y && dc.y < obs.y + obs.h) {
+        // Push out vertically (landed on top)
+        if (dc.y + dc.h - obs.y < obs.y + obs.h - dc.y) {
+          dc.y = obs.y - dc.h;
+          dc.vy = 0;
+          dc.vx *= 0.3;
+          dc.landed = true;
+        }
       }
+    }
+
+    // Check if landed in drop zone
+    if (dc.landed && !dc.scored) {
+      dc.scored = true;
+      const cx = dc.x + dc.w / 2;
+      if (cx > dropZone.x && cx < dropZone.x + dropZone.width) {
+        dc.delivered = true;
+        dc.x = dropZone.x + (dropZone.width - dc.w) / 2;
+        dc.y = dropZone.y - dc.h + 25;
+        const deliveredCount = crates.filter(c => c.delivered).length;
+        dc.y -= (deliveredCount - 1) * 35;
+        dc.rotation = 0;
+        score++;
+        updateHUD();
+        document.getElementById('statusText').textContent = '\u2713 Delivered!';
+        document.getElementById('statusText').style.color = '#77dd77';
+
+        if (score >= totalCrates) {
+          setTimeout(() => {
+            gameState = 'win';
+            showEndScreen(true);
+          }, 800);
+        } else {
+          setTimeout(() => {
+            document.getElementById('statusText').textContent = 'Next crate!';
+            document.getElementById('statusText').style.color = '#f5a623';
+          }, 1000);
+        }
+      } else {
+        document.getElementById('statusText').textContent = 'Missed! Crate lost';
+        document.getElementById('statusText').style.color = '#f55';
+        setTimeout(() => {
+          if (gameState === 'playing') {
+            document.getElementById('statusText').textContent = 'Hook another crate';
+            document.getElementById('statusText').style.color = '#f5a623';
+          }
+        }, 1500);
+      }
+      // Remove from droppedCrates after settling
+      setTimeout(() => {
+        const idx = droppedCrates.indexOf(dc);
+        if (idx !== -1) droppedCrates.splice(idx, 1);
+      }, 500);
     }
   }
 
+  // Decrease hit cooldown
+  if (hitCooldown > 0) hitCooldown -= dt;
+
   // Obstacle collision - check hook and hooked crate against obstacles
   for (const obs of obstacles) {
+    let wasHit = false;
     // Check hook collision
     if (hook.x > obs.x && hook.x < obs.x + obs.w &&
         hook.y > obs.y && hook.y < obs.y + obs.h) {
-      // Bounce the hook back
       hook.angleVel *= -0.5;
       if (hook.x < obs.x + obs.w / 2) {
         trolley.speed = Math.min(trolley.speed, -40);
       } else {
         trolley.speed = Math.max(trolley.speed, 40);
       }
-      document.getElementById('statusText').textContent = '\u26a0 Obstacle hit!';
-      document.getElementById('statusText').style.color = '#ff4444';
+      wasHit = true;
     }
     // Check hooked crate collision
     if (hookedCrate) {
@@ -498,8 +569,20 @@ function updatePhysics(dt) {
         } else {
           trolley.speed = Math.max(trolley.speed, 60);
         }
-        document.getElementById('statusText').textContent = '\u26a0 Crate hit obstacle!';
-        document.getElementById('statusText').style.color = '#ff4444';
+        wasHit = true;
+      }
+    }
+    if (wasHit && hitCooldown <= 0) {
+      hitCooldown = 1.0; // 1 second cooldown between life losses
+      lives--;
+      updateHUD();
+      document.getElementById('statusText').textContent = '\u26a0 Obstacle hit! Lives: ' + lives;
+      document.getElementById('statusText').style.color = '#ff4444';
+      if (lives <= 0) {
+        setTimeout(() => {
+          gameState = 'gameover';
+          showEndScreen(false);
+        }, 600);
       }
     }
   }
@@ -585,6 +668,9 @@ function drawWorld() {
 
   // Draw hook
   drawHook();
+
+  // Draw dropped crates (falling)
+  droppedCrates.forEach(dc => drawCrate(dc));
 
   // Draw hooked crate on top
   if (hookedCrate) drawCrate(hookedCrate);
@@ -804,31 +890,38 @@ function drawHook() {
 function drawCrate(c) {
   ctx.save();
 
+  const cx = c.x + c.w / 2;
+  const cy = c.y + c.h / 2;
+  const rot = c.rotation || 0;
+
+  ctx.translate(cx, cy);
+  ctx.rotate(rot);
+
   // Shadow
   ctx.fillStyle = 'rgba(0,0,0,0.2)';
-  ctx.fillRect(c.x + 3, c.y + 3, c.w, c.h);
+  ctx.fillRect(-c.w / 2 + 3, -c.h / 2 + 3, c.w, c.h);
 
   // Body
   ctx.fillStyle = c.color;
-  ctx.fillRect(c.x, c.y, c.w, c.h);
+  ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
 
   // Highlight
   ctx.fillStyle = 'rgba(255,255,255,0.15)';
-  ctx.fillRect(c.x, c.y, c.w, c.h * 0.3);
+  ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h * 0.3);
 
   // Border
   ctx.strokeStyle = 'rgba(0,0,0,0.3)';
   ctx.lineWidth = 1.5;
-  ctx.strokeRect(c.x, c.y, c.w, c.h);
+  ctx.strokeRect(-c.w / 2, -c.h / 2, c.w, c.h);
 
   // Cross marking
   ctx.strokeStyle = 'rgba(255,255,255,0.2)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(c.x + 5, c.y + 5);
-  ctx.lineTo(c.x + c.w - 5, c.y + c.h - 5);
-  ctx.moveTo(c.x + c.w - 5, c.y + 5);
-  ctx.lineTo(c.x + 5, c.y + c.h - 5);
+  ctx.moveTo(-c.w / 2 + 5, -c.h / 2 + 5);
+  ctx.lineTo(c.w / 2 - 5, c.h / 2 - 5);
+  ctx.moveTo(c.w / 2 - 5, -c.h / 2 + 5);
+  ctx.lineTo(-c.w / 2 + 5, c.h / 2 - 5);
   ctx.stroke();
 
   ctx.restore();
@@ -912,7 +1005,7 @@ function findNearestCrate() {
   let best = null;
   let bestDist = 60; // max hook range
   for (const c of crates) {
-    if (c.delivered) continue;
+    if (c.delivered || droppedCrates.includes(c)) continue;
     const cx = c.x + c.w / 2;
     const cy = c.y + c.h / 2;
     const dist = Math.hypot(hook.x - cx, hook.y - cy);
@@ -926,11 +1019,16 @@ function findNearestCrate() {
 
 function toggleHook() {
   if (hookedCrate) {
-    // Unhook
+    // Release crate - it falls with gravity
+    hookedCrate.vx = trolley.speed * 0.3;
+    hookedCrate.vy = 0;
+    hookedCrate.landed = false;
+    hookedCrate.scored = false;
+    droppedCrates.push(hookedCrate);
     hookedCrate = null;
     document.getElementById('hookBtn').textContent = 'Hook';
     document.getElementById('hookBtn').classList.remove('hooked');
-    document.getElementById('statusText').textContent = 'Unhooked';
+    document.getElementById('statusText').textContent = 'Released!';
     document.getElementById('statusText').style.color = '#f5a623';
   } else {
     const crate = findNearestCrate();
@@ -955,6 +1053,28 @@ function toggleHook() {
 
 function updateHUD() {
   document.getElementById('scoreText').textContent = `Crates: ${score}/${totalCrates}`;
+  document.getElementById('livesText').textContent = `Lives: ${lives}`;
+}
+
+function showEndScreen(won) {
+  const el = document.getElementById('endScreen');
+  const title = document.getElementById('endTitle');
+  const msg = document.getElementById('endMsg');
+  const btn = document.getElementById('restartBtn');
+  el.style.display = 'flex';
+  if (won) {
+    title.textContent = 'Job Complete!';
+    title.className = 'win-title';
+    msg.textContent = 'All crates delivered.';
+    btn.className = '';
+    btn.textContent = 'Play Again';
+  } else {
+    title.textContent = 'Game Over';
+    title.className = 'lose-title';
+    msg.textContent = `You delivered ${score}/${totalCrates} crates.`;
+    btn.className = 'lose-btn';
+    btn.textContent = 'Try Again';
+  }
 }
 
 // ============ INPUT ============
@@ -994,7 +1114,7 @@ document.getElementById('hookBtn').addEventListener('touchstart', e => { e.preve
 // ============ GAME FLOW ============
 document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('restartBtn').addEventListener('click', () => {
-  document.getElementById('winScreen').style.display = 'none';
+  document.getElementById('endScreen').style.display = 'none';
   startGame();
 });
 
