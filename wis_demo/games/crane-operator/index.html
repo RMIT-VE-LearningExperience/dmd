@@ -416,7 +416,7 @@ let hitCooldown = 0;
 let droppedCrates = [];
 let spotterMsg = '';
 let spotterArrow = null;  // { x, y, dir } for world-space arrow
-const BREAK_HEIGHT = 250; // drop higher than this = crate breaks
+const DROP_ZONE_TOP_Y = () => dropZone.y - 80; // top of green zone
 
 let inputState = { left: false, right: false, up: false, down: false };
 
@@ -520,12 +520,11 @@ function updateSpotter() {
 
   // Check if over drop zone
   if (crateX > dropZone.x && crateX < dropZone.x + dropZone.width) {
-    const heightAboveGround = WORLD.groundY - crateY;
-    if (heightAboveGround < BREAK_HEIGHT) {
-      spotterMsg = '\u2b07 RELEASE now! Good height!';
+    if (crateY >= DROP_ZONE_TOP_Y()) {
+      spotterMsg = '\u2b07 RELEASE now! In the green zone!';
       spotterArrow = { x: dzCenterX, y: dropZone.y - 40, dir: 'down' };
     } else {
-      spotterMsg = '\u2b07 Lower more! Too high to drop!';
+      spotterMsg = '\u2b07 Lower into the green zone first!';
       spotterArrow = { x: dzCenterX, y: dropZone.y - 40, dir: 'down' };
     }
     return;
@@ -649,11 +648,10 @@ function updatePhysics(dt) {
 
     if (dc.landed && !dc.scored) {
       dc.scored = true;
-      const fallDist = (dc.y + dc.h) - dc.releaseY;
       const cx = dc.x + dc.w / 2;
       const inZone = cx > dropZone.x && cx < dropZone.x + dropZone.width;
 
-      if (fallDist > BREAK_HEIGHT) {
+      if (dc.releasedTooHigh) {
         // Crate broke!
         dc.broken = true;
         dc.delivered = false;
@@ -980,35 +978,64 @@ function drawCrane() {
 }
 
 function drawWire() {
-  ctx.beginPath();
-  ctx.moveTo(wireSegments[0].x, wireSegments[0].y);
-  for (let i = 1; i < WIRE_SEG_COUNT; i++) {
-    const cpx = (wireSegments[i].x + wireSegments[i - 1].x) / 2;
-    const cpy = (wireSegments[i].y + wireSegments[i - 1].y) / 2;
-    ctx.quadraticCurveTo(wireSegments[i - 1].x, wireSegments[i - 1].y, cpx, cpy);
-  }
-  ctx.quadraticCurveTo(
-    wireSegments[WIRE_SEG_COUNT - 1].x, wireSegments[WIRE_SEG_COUNT - 1].y,
-    wireSegments[WIRE_SEG_COUNT].x, wireSegments[WIRE_SEG_COUNT].y
-  );
-  ctx.strokeStyle = '#ccc';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
+  // Draw two wires that spread at the trolley and converge at the hook
+  const SPREAD = 7; // half-gap at the trolley end
 
-  ctx.beginPath();
-  ctx.moveTo(wireSegments[0].x + 1, wireSegments[0].y);
-  for (let i = 1; i < WIRE_SEG_COUNT; i++) {
-    const cpx = (wireSegments[i].x + wireSegments[i - 1].x) / 2 + 1;
-    const cpy = (wireSegments[i].y + wireSegments[i - 1].y) / 2;
-    ctx.quadraticCurveTo(wireSegments[i - 1].x + 1, wireSegments[i - 1].y, cpx, cpy);
+  for (let side = -1; side <= 1; side += 2) {
+    // Main wire stroke
+    ctx.beginPath();
+    for (let i = 0; i <= WIRE_SEG_COUNT; i++) {
+      const t = i / WIRE_SEG_COUNT;
+      // Spread at top (t=0), converge at bottom (t=1)
+      const offset = side * SPREAD * (1 - t * t);
+      const sx = wireSegments[i].x + offset;
+      const sy = wireSegments[i].y;
+      if (i === 0) {
+        ctx.moveTo(sx, sy);
+      } else {
+        const prevT = (i - 1) / WIRE_SEG_COUNT;
+        const prevOffset = side * SPREAD * (1 - prevT * prevT);
+        const prevSx = wireSegments[i - 1].x + prevOffset;
+        const prevSy = wireSegments[i - 1].y;
+        const cpx = (prevSx + sx) / 2;
+        const cpy = (prevSy + sy) / 2;
+        ctx.quadraticCurveTo(prevSx, prevSy, cpx, cpy);
+      }
+    }
+    const lastOffset = side * SPREAD * 0; // converge fully at hook
+    ctx.quadraticCurveTo(
+      wireSegments[WIRE_SEG_COUNT - 1].x + side * SPREAD * (1 - ((WIRE_SEG_COUNT - 1) / WIRE_SEG_COUNT) ** 2),
+      wireSegments[WIRE_SEG_COUNT - 1].y,
+      wireSegments[WIRE_SEG_COUNT].x + lastOffset,
+      wireSegments[WIRE_SEG_COUNT].y
+    );
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Highlight stroke for depth
+    ctx.beginPath();
+    for (let i = 0; i <= WIRE_SEG_COUNT; i++) {
+      const t = i / WIRE_SEG_COUNT;
+      const offset = side * SPREAD * (1 - t * t) + (side > 0 ? 0.8 : -0.8);
+      const sx = wireSegments[i].x + offset;
+      const sy = wireSegments[i].y;
+      if (i === 0) {
+        ctx.moveTo(sx, sy);
+      } else {
+        const prevT = (i - 1) / WIRE_SEG_COUNT;
+        const prevOffset = side * SPREAD * (1 - prevT * prevT) + (side > 0 ? 0.8 : -0.8);
+        const prevSx = wireSegments[i - 1].x + prevOffset;
+        const prevSy = wireSegments[i - 1].y;
+        const cpx = (prevSx + sx) / 2;
+        const cpy = (prevSy + sy) / 2;
+        ctx.quadraticCurveTo(prevSx, prevSy, cpx, cpy);
+      }
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
   }
-  ctx.quadraticCurveTo(
-    wireSegments[WIRE_SEG_COUNT - 1].x + 1, wireSegments[WIRE_SEG_COUNT - 1].y,
-    wireSegments[WIRE_SEG_COUNT].x + 1, wireSegments[WIRE_SEG_COUNT].y
-  );
-  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-  ctx.lineWidth = 0.5;
-  ctx.stroke();
 }
 
 function drawHook() {
@@ -1022,19 +1049,32 @@ function drawHook() {
   ctx.translate(hx, hy);
   ctx.rotate(wireAngle);
 
-  ctx.fillStyle = '#999';
+  // Pulley block housing
+  ctx.fillStyle = '#888';
+  ctx.fillRect(-10, -8, 20, 18);
+  ctx.fillStyle = '#666';
   ctx.fillRect(-8, -6, 16, 14);
+  // Pulley wheels (where wires wrap)
+  ctx.fillStyle = '#555';
+  ctx.beginPath();
+  ctx.arc(-4, 0, 3.5, 0, Math.PI * 2);
+  ctx.arc(4, 0, 3.5, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = '#777';
-  ctx.fillRect(-6, -4, 12, 10);
+  ctx.beginPath();
+  ctx.arc(-4, 0, 1.5, 0, Math.PI * 2);
+  ctx.arc(4, 0, 1.5, 0, Math.PI * 2);
+  ctx.fill();
 
+  // Hook below the block
   ctx.strokeStyle = hookedCrate ? '#f55' : '#ddd';
   ctx.lineWidth = 3;
   ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.moveTo(0, 8);
-  ctx.lineTo(0, 18);
-  ctx.quadraticCurveTo(10, 22, 10, 16);
-  ctx.quadraticCurveTo(10, 8, 0, 10);
+  ctx.moveTo(0, 10);
+  ctx.lineTo(0, 20);
+  ctx.quadraticCurveTo(10, 24, 10, 18);
+  ctx.quadraticCurveTo(10, 10, 0, 12);
   ctx.stroke();
   ctx.restore();
 
@@ -1178,13 +1218,13 @@ function findNearestCrate() {
 
 function toggleHook() {
   if (hookedCrate) {
-    // Release - record height for break check
+    // Release - check if crate bottom is above the green zone
     hookedCrate.vx = trolley.speed * 0.3;
     hookedCrate.vy = 0;
     hookedCrate.landed = false;
     hookedCrate.scored = false;
     hookedCrate.broken = false;
-    hookedCrate.releaseY = hookedCrate.y + hookedCrate.h;
+    hookedCrate.releasedTooHigh = (hookedCrate.y + hookedCrate.h) < DROP_ZONE_TOP_Y();
     droppedCrates.push(hookedCrate);
     hookedCrate = null;
     resetHookBtn();
