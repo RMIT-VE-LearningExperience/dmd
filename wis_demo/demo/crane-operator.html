@@ -1,768 +1,1064 @@
-
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Crane Operator, 3 Stage Pickup and Drop</title>
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-      background: #0b0f14;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Crane Operator — Construction Game</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Oswald:wght@500;700&display=swap');
 
-    #app {
-      position: fixed;
-      inset: 0;
-    }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
+  body {
+    background: #1a1a2e;
+    overflow: hidden;
+    font-family: 'Chakra Petch', monospace;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
 
-    /* UI */
-    #hud {
-      position: fixed;
-      left: 16px;
-      top: 16px;
-      right: 16px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      pointer-events: none;
-      color: #e6edf3;
-    }
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
 
-    .panel {
-      pointer-events: auto;
-      width: min(520px, calc(100vw - 32px));
-      background: rgba(10, 14, 20, 0.72);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px;
-      padding: 12px 12px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    }
+  /* Start Screen */
+  #startScreen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
 
-    .row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
+  #startScreen.hiding {
+    opacity: 0;
+    transform: scale(1.1);
+    pointer-events: none;
+  }
 
-    .title {
-      font-weight: 650;
-      letter-spacing: 0.2px;
-    }
+  #startScreen h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(2rem, 6vw, 4.5rem);
+    color: #f5a623;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    text-shadow: 0 0 40px rgba(245,166,35,0.4), 0 4px 0 #c47d10;
+    margin-bottom: 0.3em;
+  }
 
-    .meta {
-      opacity: 0.9;
-      font-size: 13px;
-      line-height: 1.3;
-    }
+  #startScreen p {
+    color: #8888aa;
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    margin-bottom: 2em;
+    letter-spacing: 0.05em;
+  }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.10);
-      font-size: 12px;
-      white-space: nowrap;
-    }
+  #startBtn {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.4rem;
+    padding: 0.8em 3em;
+    background: linear-gradient(180deg, #f5a623, #d4891a);
+    color: #1a1a2e;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    box-shadow: 0 6px 0 #a06510, 0 8px 30px rgba(245,166,35,0.3);
+    transition: all 0.15s;
+  }
 
-    .pill b {
-      font-weight: 700;
-    }
+  #startBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #a06510, 0 12px 40px rgba(245,166,35,0.4); }
+  #startBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #a06510; }
 
-    .btn {
-      appearance: none;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(255, 255, 255, 0.10);
-      color: #e6edf3;
-      padding: 8px 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: transform 120ms ease, background 120ms ease;
-    }
+  /* HUD */
+  #hud {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    gap: 20px;
+    z-index: 50;
+    align-items: center;
+  }
 
-    .btn:hover { background: rgba(255, 255, 255, 0.16); }
-    .btn:active { transform: translateY(1px); }
+  .hud-box {
+    background: rgba(15,12,41,0.85);
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 6px;
+    padding: 6px 16px;
+    color: #f5a623;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(8px);
+    white-space: nowrap;
+  }
 
-    #toast {
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      pointer-events: none;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(10, 14, 20, 0.78);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      color: #e6edf3;
-      font-size: 13px;
-      opacity: 0;
-      transition: opacity 180ms ease;
-      backdrop-filter: blur(8px);
-    }
+  #statusText {
+    color: #77dd77;
+  }
 
-    #toast.show { opacity: 1; }
+  /* Controls */
+  #controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    z-index: 50;
+    gap: 12px;
+    align-items: end;
+  }
 
-    /* On screen controls, optional */
-    #controls {
-      position: fixed;
-      left: 16px;
-      right: 16px;
-      bottom: 16px;
-      display: grid;
-      gap: 10px;
-      grid-template-columns: 1fr;
-      pointer-events: none;
-    }
+  .ctrl-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
 
-    .controls-wrap {
-      pointer-events: auto;
-      width: min(720px, calc(100vw - 32px));
-      margin: 0 auto;
-      background: rgba(10, 14, 20, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 14px;
-      padding: 10px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      backdrop-filter: blur(8px);
-    }
+  .ctrl-row {
+    display: flex;
+    gap: 6px;
+  }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
+  .ctrl-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    border: 2px solid rgba(245,166,35,0.5);
+    background: rgba(15,12,41,0.8);
+    color: #f5a623;
+    font-size: 1.4rem;
+    font-family: 'Chakra Petch', monospace;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    transition: all 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-    .grid .btn { width: 100%; padding: 10px 8px; }
+  .ctrl-btn:active, .ctrl-btn.active {
+    background: rgba(245,166,35,0.3);
+    border-color: #f5a623;
+    transform: scale(0.93);
+  }
 
-    .kbd {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12px;
-      padding: 1px 6px;
-      border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(255, 255, 255, 0.08);
-    }
+  .ctrl-btn.hook-btn {
+    width: 80px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+  }
 
-    @media (min-width: 840px) {
-      #hud {
-        grid-template-columns: 1fr;
-      }
-      .controls-wrap {
-        grid-template-columns: 1fr 1fr 1fr;
-      }
-    }
-  </style>
+  .ctrl-btn.hook-btn.hooked {
+    background: rgba(245,60,60,0.3);
+    border-color: #f55;
+    color: #f55;
+  }
+
+  /* Win Screen */
+  #winScreen {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,12,41,0.92);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+
+  #winScreen h2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 3rem;
+    color: #77dd77;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    text-shadow: 0 0 40px rgba(119,221,119,0.5);
+    margin-bottom: 0.5em;
+  }
+
+  #winScreen p { color: #aaa; margin-bottom: 1.5em; }
+
+  #restartBtn {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.2rem;
+    padding: 0.7em 2.5em;
+    background: linear-gradient(180deg, #77dd77, #55bb55);
+    color: #1a1a2e;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    box-shadow: 0 4px 0 #3a8a3a, 0 6px 20px rgba(119,221,119,0.3);
+  }
+
+  @media (max-width: 600px) {
+    .ctrl-btn { width: 48px; height: 48px; font-size: 1.2rem; }
+    .ctrl-btn.hook-btn { width: 68px; font-size: 0.65rem; }
+  }
+</style>
 </head>
 <body>
-  <div id="app"></div>
 
-  <div id="hud">
-    <div class="panel">
-      <div class="row">
-        <div>
-          <div class="title">Crane Operator, 3 Stage Pickup and Drop</div>
-          <div class="meta" id="objectiveText">Rotate the crane with A and D, pick up the load in the pickup zone, then drop it in the drop zone.</div>
-        </div>
-        <div class="row" style="gap: 8px;">
-          <span class="pill"><b>Stage</b> <span id="stageText">1</span> of 3</span>
-          <span class="pill"><b>Status</b> <span id="statusText">Move to pickup</span></span>
-          <button class="btn" id="resetBtn" title="Reset the current stage">Reset</button>
-        </div>
-      </div>
+<canvas id="gameCanvas"></canvas>
 
-      <div class="meta" style="margin-top: 10px;">
-        Controls, rotate crane <span class="kbd">A</span> <span class="kbd">D</span>, trolley <span class="kbd">W</span> <span class="kbd">S</span>, hook up and down <span class="kbd">R</span> <span class="kbd">F</span>, grab or release <span class="kbd">Space</span>.
-      </div>
+<!-- Start Screen -->
+<div id="startScreen">
+  <h1>Crane Operator</h1>
+  <p>Move the crate to the drop zone</p>
+  <button id="startBtn">Start Game</button>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-box" id="statusText">Ready</div>
+  <div class="hud-box" id="scoreText">Crates: 0/3</div>
+</div>
+
+<!-- On-screen Controls -->
+<div id="controls">
+  <div class="ctrl-group">
+    <div class="ctrl-row">
+      <div style="width:56px"></div>
+      <button class="ctrl-btn" data-dir="up">&#9650;</button>
+      <div style="width:56px"></div>
+    </div>
+    <div class="ctrl-row">
+      <button class="ctrl-btn" data-dir="left">&#9664;</button>
+      <button class="ctrl-btn" data-dir="down">&#9660;</button>
+      <button class="ctrl-btn" data-dir="right">&#9654;</button>
     </div>
   </div>
+  <button class="ctrl-btn hook-btn" id="hookBtn">Hook</button>
+</div>
 
-  <div id="controls">
-    <div class="controls-wrap">
-      <div>
-        <div class="meta" style="margin-bottom: 6px;">Rotate</div>
-        <div class="grid">
-          <button class="btn" data-hold="rotLeft">Left</button>
-          <button class="btn" data-press="grab">Grab</button>
-          <button class="btn" data-hold="rotRight">Right</button>
-        </div>
-      </div>
+<!-- Win Screen -->
+<div id="winScreen">
+  <h2>Job Complete!</h2>
+  <p id="winMsg">All crates delivered.</p>
+  <button id="restartBtn">Play Again</button>
+</div>
 
-      <div>
-        <div class="meta" style="margin-bottom: 6px;">Trolley</div>
-        <div class="grid">
-          <button class="btn" data-hold="trolleyOut">Out</button>
-          <button class="btn" data-press="reset">Reset</button>
-          <button class="btn" data-hold="trolleyIn">In</button>
-        </div>
-      </div>
+<script>
+// ============ GAME ENGINE ============
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
-      <div>
-        <div class="meta" style="margin-bottom: 6px;">Hook</div>
-        <div class="grid">
-          <button class="btn" data-hold="hookUp">Up</button>
-          <button class="btn" data-press="release">Release</button>
-          <button class="btn" data-hold="hookDown">Down</button>
-        </div>
-      </div>
-    </div>
-  </div>
+function resize() {
+  canvas.width = window.innerWidth * devicePixelRatio;
+  canvas.height = window.innerHeight * devicePixelRatio;
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+}
+resize();
+window.addEventListener('resize', resize);
 
-  <div id="toast"></div>
+const W = () => window.innerWidth;
+const H = () => window.innerHeight;
 
-  <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+// ============ GAME STATE ============
+const WORLD = {
+  groundY: 700,
+  craneBaseX: 200,
+  craneTopY: 50,
+  jibLength: 900,
+  towerHeight: 650,
+};
 
-    // Basic settings
-    const app = document.getElementById('app');
-    const stageText = document.getElementById('stageText');
-    const statusText = document.getElementById('statusText');
-    const objectiveText = document.getElementById('objectiveText');
-    const toastEl = document.getElementById('toast');
+let gameState = 'start'; // start, zooming, playing, win
+let camera = { x: 0, y: 0, zoom: 0.55 };
+let targetCamera = { x: 0, y: 0, zoom: 0.55 };
 
-    function toast(msg) {
-      toastEl.textContent = msg;
-      toastEl.classList.add('show');
-      clearTimeout(toastEl._t);
-      toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 1600);
-    }
+// Trolley position along the jib (horizontal)
+let trolley = {
+  x: WORLD.craneBaseX + 200,
+  ropeLength: 200,
+  speed: 0,
+  ropeSpeed: 0,
+};
 
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    app.appendChild(renderer.domElement);
+const TROLLEY_MIN_X = WORLD.craneBaseX + 30;
+const TROLLEY_MAX_X = WORLD.craneBaseX + WORLD.jibLength - 30;
+const ROPE_MIN = 60;
+const ROPE_MAX = 680;
 
-    // Scene
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x0b0f14, 16, 80);
+// Hook with physics
+let hook = {
+  x: 0,
+  y: 0,
+  vx: 0,
+  vy: 0,
+  angle: 0,       // swing angle
+  angleVel: 0,    // swing angular velocity
+};
 
-    // Camera
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
-    camera.position.set(16, 14, 18);
+// Cargo
+let crates = [];
+let obstacles = [];
+let dropZone = { x: 900, y: WORLD.groundY - 25, width: 120, height: 50 };
+let hookedCrate = null;
+let score = 0;
+let totalCrates = 3;
 
-    // Lights
-    const hemi = new THREE.HemisphereLight(0x9fd2ff, 0x1b2b3a, 0.85);
-    scene.add(hemi);
+// Input
+let inputState = { left: false, right: false, up: false, down: false };
 
-    const sun = new THREE.DirectionalLight(0xffffff, 1.15);
-    sun.position.set(18, 26, 10);
-    sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
-    sun.shadow.camera.left = -35;
-    sun.shadow.camera.right = 35;
-    sun.shadow.camera.top = 35;
-    sun.shadow.camera.bottom = -35;
-    scene.add(sun);
+// Wire segments for visual flex
+let wireSegments = [];
+const WIRE_SEG_COUNT = 20;
 
-    // Ground
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(120, 120),
-      new THREE.MeshStandardMaterial({ color: 0x111824, roughness: 1.0, metalness: 0.0 })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
+function initWireSegments() {
+  wireSegments = [];
+  for (let i = 0; i <= WIRE_SEG_COUNT; i++) {
+    wireSegments.push({ x: trolley.x, y: WORLD.craneTopY + (trolley.ropeLength * i / WIRE_SEG_COUNT) });
+  }
+}
 
-    // Simple grid lines
-    const grid = new THREE.GridHelper(120, 60, 0x1e2a3a, 0x1e2a3a);
-    grid.material.opacity = 0.35;
-    grid.material.transparent = true;
-    scene.add(grid);
+function initGame() {
+  trolley.x = WORLD.craneBaseX + 150;
+  trolley.ropeLength = 200;
+  trolley.speed = 0;
+  trolley.ropeSpeed = 0;
 
-    // Zones
-    const pickupZone = {
-      center: new THREE.Vector3(-10, 0, -6),
-      size: 6
-    };
+  hook.x = trolley.x;
+  hook.y = WORLD.craneTopY + trolley.ropeLength;
+  hook.vx = 0;
+  hook.vy = 0;
+  hook.angle = 0;
+  hook.angleVel = 0;
 
-    const dropZone = {
-      center: new THREE.Vector3(12, 0, 8),
-      size: 6
-    };
+  crates = [
+    { x: WORLD.craneBaseX + 100, y: WORLD.groundY - 50, w: 60, h: 40, color: '#e07030', delivered: false },
+    { x: WORLD.craneBaseX + 250, y: WORLD.groundY - 60, w: 50, h: 50, color: '#3090e0', delivered: false },
+    { x: WORLD.craneBaseX + 400, y: WORLD.groundY - 45, w: 70, h: 35, color: '#e0d030', delivered: false },
+  ];
 
-    function makeZoneMesh(color, center, size, label) {
-      const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry(size, size),
-        new THREE.MeshStandardMaterial({
-          color,
-          roughness: 0.9,
-          metalness: 0.0,
-          transparent: true,
-          opacity: 0.35
-        })
-      );
-      plane.rotation.x = -Math.PI / 2;
-      plane.position.set(center.x, 0.01, center.z);
-      plane.receiveShadow = true;
+  // Red obstacles between pickup area and drop zone
+  obstacles = [
+    { x: WORLD.craneBaseX + 580, y: WORLD.groundY - 180, w: 50, h: 180, color: '#cc2222' },
+    { x: WORLD.craneBaseX + 580, y: WORLD.groundY - 250, w: 80, h: 20, color: '#aa1818' },
+  ];
 
-      const border = new THREE.LineSegments(
-        new THREE.EdgesGeometry(new THREE.PlaneGeometry(size, size)),
-        new THREE.LineBasicMaterial({ color })
-      );
-      border.rotation.x = -Math.PI / 2;
-      border.position.set(center.x, 0.03, center.z);
+  dropZone.x = WORLD.craneBaseX + WORLD.jibLength - 200;
+  hookedCrate = null;
+  score = 0;
+  totalCrates = crates.length;
 
-      const group = new THREE.Group();
-      group.add(plane);
-      group.add(border);
-      group.userData.label = label;
-      return group;
-    }
+  initWireSegments();
+  updateHUD();
+}
 
-    const pickupMesh = makeZoneMesh(0x2ea043, pickupZone.center, pickupZone.size, 'Pickup');
-    const dropMesh = makeZoneMesh(0x1f6feb, dropZone.center, dropZone.size, 'Drop');
-    scene.add(pickupMesh, dropMesh);
+// ============ PHYSICS ============
+const TROLLEY_ACCEL = 320;
+const TROLLEY_FRICTION = 0.93;
+const ROPE_ACCEL = 220;
+const ROPE_FRICTION = 0.92;
+const GRAVITY = 9.81;
+const SWING_DAMPING = 0.988;
+const HOOK_MASS_FACTOR = 0.6;
 
-    // Simple crane
-    const crane = new THREE.Group();
-    scene.add(crane);
+function updatePhysics(dt) {
+  // Trolley horizontal movement
+  if (inputState.left) trolley.speed -= TROLLEY_ACCEL * dt;
+  if (inputState.right) trolley.speed += TROLLEY_ACCEL * dt;
+  trolley.speed *= TROLLEY_FRICTION;
+  trolley.x += trolley.speed * dt;
+  trolley.x = Math.max(TROLLEY_MIN_X, Math.min(TROLLEY_MAX_X, trolley.x));
 
-    const craneBase = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.4, 1.6, 1.0, 24),
-      new THREE.MeshStandardMaterial({ color: 0x2b3545, roughness: 0.7, metalness: 0.25 })
-    );
-    craneBase.castShadow = true;
-    craneBase.receiveShadow = true;
-    craneBase.position.set(0, 0.5, 0);
-    crane.add(craneBase);
+  // Rope length
+  if (inputState.down) trolley.ropeSpeed += ROPE_ACCEL * dt;
+  if (inputState.up) trolley.ropeSpeed -= ROPE_ACCEL * dt;
+  trolley.ropeSpeed *= ROPE_FRICTION;
+  trolley.ropeLength += trolley.ropeSpeed * dt;
+  trolley.ropeLength = Math.max(ROPE_MIN, Math.min(ROPE_MAX, trolley.ropeLength));
 
-    const tower = new THREE.Mesh(
-      new THREE.BoxGeometry(1.2, 8.5, 1.2),
-      new THREE.MeshStandardMaterial({ color: 0x3b475b, roughness: 0.65, metalness: 0.25 })
-    );
-    tower.position.set(0, 4.75, 0);
-    tower.castShadow = true;
-    crane.add(tower);
+  // Pendulum physics for hook swing
+  // When trolley moves right, hook should lag left (negative angle = left of anchor)
+  // Real physics: in the trolley's reference frame, acceleration right creates pseudo-force left on hook
+  const trolleyAccel = (inputState.left ? -TROLLEY_ACCEL : 0) + (inputState.right ? TROLLEY_ACCEL : 0);
+  const speedFactor = 1 + Math.abs(trolley.speed) * 0.003;
+  const gravityRestore = -GRAVITY * Math.sin(hook.angle) * 1.3;
+  const trolleyForce = -trolleyAccel * Math.cos(hook.angle) * 0.008 * speedFactor;
+  const pendulumAccel = (gravityRestore + trolleyForce) / (trolley.ropeLength * 0.009);
+  hook.angleVel += pendulumAccel * dt;
+  hook.angleVel *= SWING_DAMPING;
+  // Direct velocity-based drag - hook lags behind trolley velocity
+  hook.angleVel -= trolley.speed * 0.00001;
+  hook.angle += hook.angleVel * dt;
 
-    // Rotating top
-    const top = new THREE.Group();
-    top.position.set(0, 9.0, 0);
-    crane.add(top);
+  // Wider clamp to allow bigger swings
+  hook.angle = Math.max(-0.75, Math.min(0.75, hook.angle));
 
-    const cab = new THREE.Mesh(
-      new THREE.BoxGeometry(2.2, 1.1, 1.6),
-      new THREE.MeshStandardMaterial({ color: 0x2f81f7, roughness: 0.5, metalness: 0.15 })
-    );
-    cab.position.set(-1.2, 0.2, -0.6);
-    cab.castShadow = true;
-    top.add(cab);
+  // Compute pendulum target (where the hook WANTS to be)
+  const anchorX = trolley.x;
+  const anchorY = WORLD.craneTopY;
+  const targetHookX = anchorX + Math.sin(hook.angle) * trolley.ropeLength;
+  const targetHookY = anchorY + Math.cos(hook.angle) * trolley.ropeLength;
 
-    const boom = new THREE.Mesh(
-      new THREE.BoxGeometry(18, 0.35, 0.55),
-      new THREE.MeshStandardMaterial({ color: 0xf0b429, roughness: 0.55, metalness: 0.25 })
-    );
-    boom.position.set(9.2, 0.4, 0);
-    boom.castShadow = true;
-    top.add(boom);
+  // Update wire segments with verlet-like flex
+  wireSegments[0].x = anchorX;
+  wireSegments[0].y = anchorY;
 
-    const counter = new THREE.Mesh(
-      new THREE.BoxGeometry(4.2, 0.35, 0.55),
-      new THREE.MeshStandardMaterial({ color: 0xf0b429, roughness: 0.55, metalness: 0.25 })
-    );
-    counter.position.set(-3.0, 0.4, 0);
-    counter.castShadow = true;
-    top.add(counter);
+  for (let i = 1; i <= WIRE_SEG_COUNT; i++) {
+    const t = i / WIRE_SEG_COUNT;
+    const targetX = anchorX + (targetHookX - anchorX) * t;
+    const targetY = anchorY + (targetHookY - anchorY) * t;
+    // Vertical sag
+    const speedSag = Math.abs(trolley.speed) * 0.015;
+    const sag = Math.sin(t * Math.PI) * (trolley.ropeLength * 0.018 + Math.abs(hook.angleVel) * 4 + speedSag);
+    // Horizontal drag - middle segments lag more, creating a curve
+    const lateralDrag = -trolley.speed * 0.12 * Math.sin(t * Math.PI);
+    const lerpSpeed = 0.08 + (1 - Math.sin(t * Math.PI)) * 0.06; // ends catch up faster
+    wireSegments[i].x += (targetX + lateralDrag - wireSegments[i].x) * lerpSpeed;
+    wireSegments[i].y += (targetY + sag - wireSegments[i].y) * lerpSpeed;
+  }
 
-    // Trolley and hook
-    const trolley = new THREE.Group();
-    top.add(trolley);
+  // Hook follows the last wire segment (not the pendulum target directly)
+  hook.x = wireSegments[WIRE_SEG_COUNT].x;
+  hook.y = wireSegments[WIRE_SEG_COUNT].y;
 
-    const trolleyBody = new THREE.Mesh(
-      new THREE.BoxGeometry(0.8, 0.55, 0.8),
-      new THREE.MeshStandardMaterial({ color: 0x8b949e, roughness: 0.7, metalness: 0.2 })
-    );
-    trolleyBody.castShadow = true;
-    trolleyBody.position.set(0, 0.45, 0);
-    trolley.add(trolleyBody);
+  // Move hooked crate
+  if (hookedCrate) {
+    hookedCrate.x = hook.x - hookedCrate.w / 2;
+    hookedCrate.y = hook.y + 15;
+  }
 
-    const rope = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.04, 0.04, 1, 10),
-      new THREE.MeshStandardMaterial({ color: 0x8b949e, roughness: 0.9, metalness: 0.0 })
-    );
-    rope.castShadow = true;
-    rope.position.set(0, -0.6, 0);
-    trolley.add(rope);
+  // Check drop zone
+  if (hookedCrate) {
+    const cx = hookedCrate.x + hookedCrate.w / 2;
+    const cy = hookedCrate.y + hookedCrate.h / 2;
+    if (cx > dropZone.x && cx < dropZone.x + dropZone.width &&
+        cy > dropZone.y - 60 && cy < dropZone.y + dropZone.height) {
+      // Auto-drop in zone
+      document.getElementById('statusText').textContent = '\u2713 Delivered!';
+      document.getElementById('statusText').style.color = '#77dd77';
+      hookedCrate.delivered = true;
+      hookedCrate.x = dropZone.x + (dropZone.width - hookedCrate.w) / 2;
+      hookedCrate.y = dropZone.y - hookedCrate.h + 25;
+      // Stack crates
+      const deliveredCount = crates.filter(c => c.delivered).length;
+      hookedCrate.y -= (deliveredCount - 1) * 35;
+      hookedCrate = null;
+      score++;
+      updateHUD();
 
-    const hook = new THREE.Mesh(
-      new THREE.SphereGeometry(0.18, 16, 16),
-      new THREE.MeshStandardMaterial({ color: 0xff7b72, roughness: 0.45, metalness: 0.25 })
-    );
-    hook.castShadow = true;
-    hook.position.set(0, -1.1, 0);
-    trolley.add(hook);
-
-    // State
-    const limits = {
-      trolleyMin: 2.0,
-      trolleyMax: 17.5,
-      hookMinY: 1.2,
-      hookMaxY: 10.0
-    };
-
-    const state = {
-      stage: 0,
-      holding: false,
-      load: null,
-      loadRestingY: 0.55,
-      rotSpeed: 0.85,
-      trolleySpeed: 6.5,
-      hookSpeed: 6.0,
-      craneRot: 0,
-      trolleyX: 7.5,
-      hookY: 6.0,
-      velocityDrop: 0,
-      isDropping: false,
-      phase: 'toPickup' // toPickup -> toDrop -> done
-    };
-
-    // Stage loads
-    const stages = [
-      { type: 'box', color: 0xffc107, label: 'Crate' },
-      { type: 'cylinder', color: 0xa371f7, label: 'Drum' },
-      { type: 'cone', color: 0x3fb950, label: 'Cone' }
-    ];
-
-    function makeLoad(stageDef) {
-      let geom;
-      let restY;
-      if (stageDef.type === 'box') {
-        geom = new THREE.BoxGeometry(1.0, 1.0, 1.0);
-        restY = 0.5;
-      } else if (stageDef.type === 'cylinder') {
-        geom = new THREE.CylinderGeometry(0.55, 0.55, 1.1, 18);
-        restY = 0.55;
+      if (score >= totalCrates) {
+        setTimeout(() => {
+          gameState = 'win';
+          document.getElementById('winScreen').style.display = 'flex';
+        }, 800);
       } else {
-        geom = new THREE.ConeGeometry(0.6, 1.2, 18);
-        restY = 0.6;
+        setTimeout(() => {
+          document.getElementById('statusText').textContent = 'Next crate!';
+          document.getElementById('statusText').style.color = '#f5a623';
+        }, 1000);
       }
-
-      const mesh = new THREE.Mesh(
-        geom,
-        new THREE.MeshStandardMaterial({ color: stageDef.color, roughness: 0.55, metalness: 0.2 })
-      );
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      mesh.userData.label = stageDef.label;
-      return { mesh, restY };
     }
+  }
 
-    function randomPointInZone(zone) {
-      const half = zone.size * 0.45;
-      const x = zone.center.x + (Math.random() * 2 - 1) * half;
-      const z = zone.center.z + (Math.random() * 2 - 1) * half;
-      return new THREE.Vector3(x, 0, z);
-    }
-
-    function resetStage() {
-      // remove previous load
-      if (state.load) {
-        scene.remove(state.load);
-        state.load = null;
-      }
-
-      state.holding = false;
-      state.isDropping = false;
-      state.velocityDrop = 0;
-      state.phase = 'toPickup';
-
-      // reset crane positions
-      state.craneRot = -0.4;
-      state.trolleyX = 7.5;
-      state.hookY = 6.2;
-
-      // create new load in pickup zone
-      const def = stages[state.stage];
-      const { mesh, restY } = makeLoad(def);
-      state.loadRestingY = restY;
-      const p = randomPointInZone(pickupZone);
-      mesh.position.set(p.x, restY, p.z);
-      state.load = mesh;
-      scene.add(mesh);
-
-      stageText.textContent = String(state.stage + 1);
-      statusText.textContent = 'Move to pickup';
-      objectiveText.textContent = `Stage ${state.stage + 1}, pick up the ${def.label}, then drop it in the blue zone.`;
-      toast(`Stage ${state.stage + 1}, ${def.label}`);
-    }
-
-    function advanceStage() {
-      if (state.stage < stages.length - 1) {
-        state.stage += 1;
-        resetStage();
+  // Obstacle collision - check hook and hooked crate against obstacles
+  for (const obs of obstacles) {
+    // Check hook collision
+    if (hook.x > obs.x && hook.x < obs.x + obs.w &&
+        hook.y > obs.y && hook.y < obs.y + obs.h) {
+      // Bounce the hook back
+      hook.angleVel *= -0.5;
+      if (hook.x < obs.x + obs.w / 2) {
+        trolley.speed = Math.min(trolley.speed, -40);
       } else {
-        state.phase = 'done';
-        statusText.textContent = 'All done';
-        objectiveText.textContent = 'Nice work, all 3 loads delivered. Press Reset to play again.';
-        toast('All stages complete');
+        trolley.speed = Math.max(trolley.speed, 40);
       }
+      document.getElementById('statusText').textContent = '\u26a0 Obstacle hit!';
+      document.getElementById('statusText').style.color = '#ff4444';
     }
-
-    // Helpers
-    function hookWorldPos(target = new THREE.Vector3()) {
-      hook.getWorldPosition(target);
-      return target;
-    }
-
-    function withinZone(x, z, zone) {
-      const half = zone.size / 2;
-      return (
-        x >= zone.center.x - half &&
-        x <= zone.center.x + half &&
-        z >= zone.center.z - half &&
-        z <= zone.center.z + half
-      );
-    }
-
-    function tryGrabOrRelease() {
-      if (!state.load || state.phase === 'done') return;
-
-      if (!state.holding) {
-        // Try grab
-        const hookPos = hookWorldPos();
-        const loadPos = state.load.position;
-        const dx = hookPos.x - loadPos.x;
-        const dz = hookPos.z - loadPos.z;
-        const dist = Math.hypot(dx, dz);
-        const heightOk = hookPos.y <= (state.loadRestingY + 1.7);
-
-        if (dist < 0.75 && heightOk && withinZone(loadPos.x, loadPos.z, pickupZone)) {
-          state.holding = true;
-          state.isDropping = false;
-          state.velocityDrop = 0;
-          statusText.textContent = 'Carry to drop';
-          state.phase = 'toDrop';
-          toast('Grabbed');
+    // Check hooked crate collision
+    if (hookedCrate) {
+      if (hookedCrate.x + hookedCrate.w > obs.x && hookedCrate.x < obs.x + obs.w &&
+          hookedCrate.y + hookedCrate.h > obs.y && hookedCrate.y < obs.y + obs.h) {
+        hook.angleVel *= -0.5;
+        if (hookedCrate.x < obs.x) {
+          trolley.speed = Math.min(trolley.speed, -60);
         } else {
-          toast('Lower hook over the load in the green zone');
+          trolley.speed = Math.max(trolley.speed, 60);
         }
-      } else {
-        // Release
-        const hookPos = hookWorldPos();
-        const x = hookPos.x;
-        const z = hookPos.z;
+        document.getElementById('statusText').textContent = '\u26a0 Crate hit obstacle!';
+        document.getElementById('statusText').style.color = '#ff4444';
+      }
+    }
+  }
+}
+function updateCamera(dt) {
+  if (gameState === 'zooming') {
+    // Zoom in on hook
+    targetCamera.zoom = 1.4;
+    targetCamera.x = hook.x;
+    targetCamera.y = hook.y;
+  } else if (gameState === 'playing') {
+    targetCamera.zoom = 1.3;
+    targetCamera.x = hook.x;
+    targetCamera.y = hook.y + 30;
+  }
 
-        state.holding = false;
-        state.isDropping = true;
-        state.velocityDrop = 0;
-        toast('Released');
+  const lerpSpeed = 2.5 * dt;
+  camera.x += (targetCamera.x - camera.x) * lerpSpeed;
+  camera.y += (targetCamera.y - camera.y) * lerpSpeed;
+  camera.zoom += (targetCamera.zoom - camera.zoom) * lerpSpeed;
+}
 
-        // Immediate check if low enough and in drop zone
-        if (withinZone(x, z, dropZone)) {
-          statusText.textContent = 'Drop in zone';
-        } else {
-          statusText.textContent = 'Drop in zone';
+// ============ RENDERING ============
+function drawWorld() {
+  const w = W();
+  const h = H();
+
+  ctx.save();
+
+  // Apply camera transform
+  const cx = w / 2 - camera.x * camera.zoom;
+  const cy = h / 2 - camera.y * camera.zoom;
+  ctx.translate(cx, cy);
+  ctx.scale(camera.zoom, camera.zoom);
+
+  // Sky gradient
+  const skyGrad = ctx.createLinearGradient(0, -200, 0, WORLD.groundY);
+  skyGrad.addColorStop(0, '#1a1a3e');
+  skyGrad.addColorStop(0.5, '#2a2a5e');
+  skyGrad.addColorStop(1, '#3a3a6e');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(-2000, -500, 5000, WORLD.groundY + 500);
+
+  // Ground
+  const gndGrad = ctx.createLinearGradient(0, WORLD.groundY - 10, 0, WORLD.groundY + 300);
+  gndGrad.addColorStop(0, '#5a5040');
+  gndGrad.addColorStop(0.05, '#4a4030');
+  gndGrad.addColorStop(1, '#2a2520');
+  ctx.fillStyle = gndGrad;
+  ctx.fillRect(-2000, WORLD.groundY - 10, 5000, 500);
+
+  // Ground texture lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let i = -2000; i < 3000; i += 40) {
+    ctx.beginPath();
+    ctx.moveTo(i, WORLD.groundY);
+    ctx.lineTo(i + 20, WORLD.groundY + 200);
+    ctx.stroke();
+  }
+
+  // Draw crane
+  drawCrane();
+
+  // Draw drop zone
+  drawDropZone();
+
+  // Draw obstacles
+  obstacles.forEach(obs => drawObstacle(obs));
+
+  // Draw crates
+  crates.forEach(c => {
+    if (!c.delivered || c === hookedCrate) return;
+    drawCrate(c);
+  });
+  crates.forEach(c => {
+    if (c.delivered || c === hookedCrate) return;
+    drawCrate(c);
+  });
+
+  // Draw wire
+  drawWire();
+
+  // Draw hook
+  drawHook();
+
+  // Draw hooked crate on top
+  if (hookedCrate) drawCrate(hookedCrate);
+
+  // Nearby crate indicator
+  if (!hookedCrate && gameState === 'playing') {
+    const nearby = findNearestCrate();
+    if (nearby) {
+      ctx.strokeStyle = 'rgba(245,166,35,0.5)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(nearby.x - 4, nearby.y - 4, nearby.w + 8, nearby.h + 8);
+      ctx.setLineDash([]);
+    }
+  }
+
+  ctx.restore();
+}
+
+function drawCrane() {
+  const bx = WORLD.craneBaseX;
+  const topY = WORLD.craneTopY;
+  const gndY = WORLD.groundY;
+
+  // Base feet
+  ctx.fillStyle = '#555';
+  ctx.fillRect(bx - 80, gndY - 15, 180, 25);
+
+  // Tower (lattice)
+  ctx.strokeStyle = '#666';
+  ctx.lineWidth = 3;
+  const towerW = 30;
+
+  // Main tower verticals
+  ctx.beginPath();
+  ctx.moveTo(bx - towerW / 2, gndY - 15);
+  ctx.lineTo(bx - towerW / 2, topY);
+  ctx.moveTo(bx + towerW / 2, gndY - 15);
+  ctx.lineTo(bx + towerW / 2, topY);
+  ctx.stroke();
+
+  // Cross braces
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = '#555';
+  const segH = 50;
+  for (let y = gndY - 15; y > topY; y -= segH) {
+    ctx.beginPath();
+    ctx.moveTo(bx - towerW / 2, y);
+    ctx.lineTo(bx + towerW / 2, y - segH);
+    ctx.moveTo(bx + towerW / 2, y);
+    ctx.lineTo(bx - towerW / 2, y - segH);
+    ctx.stroke();
+    // Horizontal
+    ctx.beginPath();
+    ctx.moveTo(bx - towerW / 2, y - segH);
+    ctx.lineTo(bx + towerW / 2, y - segH);
+    ctx.stroke();
+  }
+
+  // Jib (horizontal boom)
+  const jibY = topY;
+  const jibEnd = bx + WORLD.jibLength;
+
+  ctx.strokeStyle = '#666';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(bx, jibY);
+  ctx.lineTo(jibEnd, jibY);
+  ctx.moveTo(bx, jibY + 14);
+  ctx.lineTo(jibEnd, jibY + 14);
+  ctx.stroke();
+
+  // Jib cross braces
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#555';
+  const jibSegW = 40;
+  for (let x = bx; x < jibEnd; x += jibSegW) {
+    ctx.beginPath();
+    ctx.moveTo(x, jibY);
+    ctx.lineTo(x + jibSegW, jibY + 14);
+    ctx.moveTo(x + jibSegW, jibY);
+    ctx.lineTo(x, jibY + 14);
+    ctx.stroke();
+  }
+
+  // Counter jib (left)
+  ctx.strokeStyle = '#666';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(bx, jibY);
+  ctx.lineTo(bx - 100, jibY);
+  ctx.moveTo(bx, jibY + 14);
+  ctx.lineTo(bx - 100, jibY + 14);
+  ctx.stroke();
+
+  // Counterweight
+  ctx.fillStyle = '#444';
+  ctx.fillRect(bx - 100, jibY - 5, 40, 40);
+  ctx.fillStyle = '#555';
+  ctx.fillRect(bx - 95, jibY, 30, 30);
+
+  // Cat head / apex
+  ctx.strokeStyle = '#777';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(bx, topY - 40);
+  ctx.lineTo(bx - 60, jibY);
+  ctx.moveTo(bx, topY - 40);
+  ctx.lineTo(bx + 80, jibY);
+  ctx.stroke();
+
+  // Pendant lines
+  ctx.strokeStyle = 'rgba(200,200,200,0.3)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(bx, topY - 40);
+  ctx.lineTo(jibEnd - 50, jibY);
+  ctx.stroke();
+
+  // Operator cab
+  ctx.fillStyle = '#f5a623';
+  ctx.fillRect(bx - 5, topY + 14, 35, 30);
+  ctx.fillStyle = '#88ccff';
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(bx, topY + 16, 26, 14);
+  ctx.globalAlpha = 1;
+
+  // Trolley
+  ctx.fillStyle = '#888';
+  ctx.fillRect(trolley.x - 12, topY + 5, 24, 12);
+  ctx.fillStyle = '#666';
+  ctx.beginPath();
+  ctx.arc(trolley.x - 6, topY + 5, 4, 0, Math.PI * 2);
+  ctx.arc(trolley.x + 6, topY + 5, 4, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawWire() {
+  // Smooth curve through all wire segments
+  ctx.beginPath();
+  ctx.moveTo(wireSegments[0].x, wireSegments[0].y);
+  for (let i = 1; i < WIRE_SEG_COUNT; i++) {
+    const cpx = (wireSegments[i].x + wireSegments[i - 1].x) / 2;
+    const cpy = (wireSegments[i].y + wireSegments[i - 1].y) / 2;
+    ctx.quadraticCurveTo(wireSegments[i - 1].x, wireSegments[i - 1].y, cpx, cpy);
+  }
+  ctx.quadraticCurveTo(
+    wireSegments[WIRE_SEG_COUNT - 1].x, wireSegments[WIRE_SEG_COUNT - 1].y,
+    wireSegments[WIRE_SEG_COUNT].x, wireSegments[WIRE_SEG_COUNT].y
+  );
+  ctx.strokeStyle = '#ccc';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Wire highlight
+  ctx.beginPath();
+  ctx.moveTo(wireSegments[0].x + 1, wireSegments[0].y);
+  for (let i = 1; i < WIRE_SEG_COUNT; i++) {
+    const cpx = (wireSegments[i].x + wireSegments[i - 1].x) / 2 + 1;
+    const cpy = (wireSegments[i].y + wireSegments[i - 1].y) / 2;
+    ctx.quadraticCurveTo(wireSegments[i - 1].x + 1, wireSegments[i - 1].y, cpx, cpy);
+  }
+  ctx.quadraticCurveTo(
+    wireSegments[WIRE_SEG_COUNT - 1].x + 1, wireSegments[WIRE_SEG_COUNT - 1].y,
+    wireSegments[WIRE_SEG_COUNT].x + 1, wireSegments[WIRE_SEG_COUNT].y
+  );
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+}
+
+function drawHook() {
+  const hx = hook.x;
+  const hy = hook.y;
+
+  // Calculate rotation from the last two wire segments (wire direction at bottom)
+  const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
+  const lastSeg = wireSegments[WIRE_SEG_COUNT];
+  const wireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
+
+  // Hook body
+  ctx.save();
+  ctx.translate(hx, hy);
+  ctx.rotate(wireAngle);
+
+  // Pulley block
+  ctx.fillStyle = '#999';
+  ctx.fillRect(-8, -6, 16, 14);
+  ctx.fillStyle = '#777';
+  ctx.fillRect(-6, -4, 12, 10);
+
+  // Hook shape
+  ctx.strokeStyle = hookedCrate ? '#f55' : '#ddd';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(0, 8);
+  ctx.lineTo(0, 18);
+  ctx.quadraticCurveTo(10, 22, 10, 16);
+  ctx.quadraticCurveTo(10, 8, 0, 10);
+  ctx.stroke();
+
+  ctx.restore();
+
+  // Hook glow when near crate
+  if (!hookedCrate && gameState === 'playing') {
+    const nearby = findNearestCrate();
+    if (nearby) {
+      ctx.beginPath();
+      ctx.arc(hx, hy, 20, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(245,166,35,0.15)';
+      ctx.fill();
+    }
+  }
+}
+
+function drawCrate(c) {
+  ctx.save();
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.fillRect(c.x + 3, c.y + 3, c.w, c.h);
+
+  // Body
+  ctx.fillStyle = c.color;
+  ctx.fillRect(c.x, c.y, c.w, c.h);
+
+  // Highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.fillRect(c.x, c.y, c.w, c.h * 0.3);
+
+  // Border
+  ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(c.x, c.y, c.w, c.h);
+
+  // Cross marking
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(c.x + 5, c.y + 5);
+  ctx.lineTo(c.x + c.w - 5, c.y + c.h - 5);
+  ctx.moveTo(c.x + c.w - 5, c.y + 5);
+  ctx.lineTo(c.x + 5, c.y + c.h - 5);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawObstacle(obs) {
+  ctx.save();
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(obs.x + 4, obs.y + 4, obs.w, obs.h);
+
+  // Body
+  ctx.fillStyle = obs.color;
+  ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+
+  // Hazard stripes
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(obs.x, obs.y, obs.w, obs.h);
+  ctx.clip();
+  ctx.strokeStyle = 'rgba(255,255,0,0.3)';
+  ctx.lineWidth = 4;
+  const stripeGap = 16;
+  for (let i = -obs.h; i < obs.w + obs.h; i += stripeGap) {
+    ctx.beginPath();
+    ctx.moveTo(obs.x + i, obs.y);
+    ctx.lineTo(obs.x + i - obs.h, obs.y + obs.h);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Border glow
+  ctx.strokeStyle = 'rgba(255,60,60,0.6)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+
+  // Highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  ctx.fillRect(obs.x, obs.y, obs.w, obs.h * 0.15);
+
+  // DANGER label on the wider piece
+  if (obs.w >= 60) {
+    ctx.fillStyle = '#ffcc00';
+    ctx.font = 'bold 14px "Chakra Petch", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('\u26a0 DANGER', obs.x + obs.w / 2, obs.y + obs.h / 2 + 5);
+    ctx.textAlign = 'left';
+  }
+
+  ctx.restore();
+}
+
+function drawDropZone() {
+  const dz = dropZone;
+
+  // Striped area
+  ctx.fillStyle = 'rgba(119,221,119,0.1)';
+  ctx.fillRect(dz.x, dz.y - 80, dz.width, 130);
+
+  ctx.strokeStyle = '#77dd77';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 6]);
+  ctx.strokeRect(dz.x, dz.y - 80, dz.width, 130);
+  ctx.setLineDash([]);
+
+  // Label
+  ctx.fillStyle = '#77dd77';
+  ctx.font = '12px "Chakra Petch", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('DROP ZONE', dz.x + dz.width / 2, dz.y - 88);
+  ctx.textAlign = 'left';
+
+  // Ground marker
+  ctx.fillStyle = 'rgba(119,221,119,0.3)';
+  ctx.fillRect(dz.x, dz.y - 10, dz.width, 35);
+}
+
+// ============ HOOK/UNHOOK ============
+function findNearestCrate() {
+  let best = null;
+  let bestDist = 60; // max hook range
+  for (const c of crates) {
+    if (c.delivered) continue;
+    const cx = c.x + c.w / 2;
+    const cy = c.y + c.h / 2;
+    const dist = Math.hypot(hook.x - cx, hook.y - cy);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = c;
+    }
+  }
+  return best;
+}
+
+function toggleHook() {
+  if (hookedCrate) {
+    // Unhook
+    hookedCrate = null;
+    document.getElementById('hookBtn').textContent = 'Hook';
+    document.getElementById('hookBtn').classList.remove('hooked');
+    document.getElementById('statusText').textContent = 'Unhooked';
+    document.getElementById('statusText').style.color = '#f5a623';
+  } else {
+    const crate = findNearestCrate();
+    if (crate) {
+      hookedCrate = crate;
+      document.getElementById('hookBtn').textContent = 'Release';
+      document.getElementById('hookBtn').classList.add('hooked');
+      document.getElementById('statusText').textContent = 'Hooked! Move to drop zone \u2192';
+      document.getElementById('statusText').style.color = '#88ccff';
+    } else {
+      document.getElementById('statusText').textContent = 'No crate nearby';
+      document.getElementById('statusText').style.color = '#f55';
+      setTimeout(() => {
+        if (gameState === 'playing') {
+          document.getElementById('statusText').textContent = 'Lower hook near a crate';
+          document.getElementById('statusText').style.color = '#8888aa';
         }
-      }
+      }, 1500);
     }
+  }
+}
 
-    // Inputs
-    const keys = new Set();
+function updateHUD() {
+  document.getElementById('scoreText').textContent = `Crates: ${score}/${totalCrates}`;
+}
 
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        tryGrabOrRelease();
-        return;
-      }
-      keys.add(e.code);
+// ============ INPUT ============
+// Keyboard
+window.addEventListener('keydown', e => {
+  if (gameState !== 'playing') return;
+  if (e.key === 'ArrowLeft' || e.key === 'a') inputState.left = true;
+  if (e.key === 'ArrowRight' || e.key === 'd') inputState.right = true;
+  if (e.key === 'ArrowUp' || e.key === 'w') inputState.up = true;
+  if (e.key === 'ArrowDown' || e.key === 's') inputState.down = true;
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleHook(); }
+});
 
-      if (e.code === 'KeyX') {
-        e.preventDefault();
-        resetStage();
-      }
-    });
+window.addEventListener('keyup', e => {
+  if (e.key === 'ArrowLeft' || e.key === 'a') inputState.left = false;
+  if (e.key === 'ArrowRight' || e.key === 'd') inputState.right = false;
+  if (e.key === 'ArrowUp' || e.key === 'w') inputState.up = false;
+  if (e.key === 'ArrowDown' || e.key === 's') inputState.down = false;
+});
 
-    window.addEventListener('keyup', (e) => keys.delete(e.code));
+// Touch / mouse controls
+document.querySelectorAll('.ctrl-btn[data-dir]').forEach(btn => {
+  const dir = btn.dataset.dir;
+  const start = () => { if (gameState === 'playing') { inputState[dir] = true; btn.classList.add('active'); } };
+  const end = () => { inputState[dir] = false; btn.classList.remove('active'); };
+  btn.addEventListener('mousedown', start);
+  btn.addEventListener('mouseup', end);
+  btn.addEventListener('mouseleave', end);
+  btn.addEventListener('touchstart', e => { e.preventDefault(); start(); });
+  btn.addEventListener('touchend', e => { e.preventDefault(); end(); });
+  btn.addEventListener('touchcancel', end);
+});
 
-    // On-screen controls
-    const holdState = {
-      rotLeft: false,
-      rotRight: false,
-      trolleyOut: false,
-      trolleyIn: false,
-      hookUp: false,
-      hookDown: false
-    };
+document.getElementById('hookBtn').addEventListener('click', () => { if (gameState === 'playing') toggleHook(); });
+document.getElementById('hookBtn').addEventListener('touchstart', e => { e.preventDefault(); });
 
-    function setHold(name, val) {
-      if (name in holdState) holdState[name] = val;
-    }
+// ============ GAME FLOW ============
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('restartBtn').addEventListener('click', () => {
+  document.getElementById('winScreen').style.display = 'none';
+  startGame();
+});
 
-    function pressAction(name) {
-      if (name === 'grab' || name === 'release') tryGrabOrRelease();
-      if (name === 'reset') resetStage();
-    }
+function startGame() {
+  initGame();
+  gameState = 'zooming';
 
-    document.querySelectorAll('[data-hold]').forEach((btn) => {
-      const k = btn.getAttribute('data-hold');
-      const on = (ev) => { ev.preventDefault(); setHold(k, true); };
-      const off = (ev) => { ev.preventDefault(); setHold(k, false); };
-      btn.addEventListener('pointerdown', on);
-      btn.addEventListener('pointerup', off);
-      btn.addEventListener('pointercancel', off);
-      btn.addEventListener('pointerleave', off);
-    });
+  // Show full crane first
+  camera = { x: WORLD.craneBaseX + WORLD.jibLength / 2, y: WORLD.groundY / 2, zoom: 0.45 };
+  targetCamera = { ...camera };
 
-    document.querySelectorAll('[data-press]').forEach((btn) => {
-      const k = btn.getAttribute('data-press');
-      btn.addEventListener('click', (ev) => {
-        ev.preventDefault();
-        pressAction(k);
-      });
-    });
+  document.getElementById('startScreen').classList.add('hiding');
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('controls').style.display = 'flex';
 
-    // Reset button
-    document.getElementById('resetBtn').addEventListener('click', (ev) => {
-      ev.preventDefault();
-      if (state.phase === 'done') {
-        state.stage = 0;
-      }
-      resetStage();
-    });
+  document.getElementById('statusText').textContent = 'Zooming in...';
+  document.getElementById('statusText').style.color = '#8888aa';
 
-    // Animate
-    const clock = new THREE.Clock();
+  setTimeout(() => {
+    document.getElementById('startScreen').style.display = 'none';
+  }, 900);
 
-    function updateControls(dt) {
-      // Keyboard
-      const rotLeft = keys.has('KeyA') || keys.has('ArrowLeft') || holdState.rotLeft;
-      const rotRight = keys.has('KeyD') || keys.has('ArrowRight') || holdState.rotRight;
-      const trolleyOut = keys.has('KeyW') || keys.has('ArrowUp') || holdState.trolleyOut;
-      const trolleyIn = keys.has('KeyS') || keys.has('ArrowDown') || holdState.trolleyIn;
-      const hookUp = keys.has('KeyR') || holdState.hookUp;
-      const hookDown = keys.has('KeyF') || holdState.hookDown;
+  // After showing full view, zoom into hook
+  setTimeout(() => {
+    gameState = 'playing';
+    document.getElementById('statusText').textContent = 'Lower hook to a crate';
+    document.getElementById('statusText').style.color = '#f5a623';
+  }, 2000);
+}
 
-      const rotDir = (rotLeft ? 1 : 0) + (rotRight ? -1 : 0);
-      state.craneRot += rotDir * state.rotSpeed * dt;
+// ============ MAIN LOOP ============
+let lastTime = 0;
 
-      const trolleyDir = (trolleyOut ? 1 : 0) + (trolleyIn ? -1 : 0);
-      state.trolleyX += trolleyDir * state.trolleySpeed * dt;
-      state.trolleyX = THREE.MathUtils.clamp(state.trolleyX, limits.trolleyMin, limits.trolleyMax);
+function gameLoop(time) {
+  const dt = Math.min((time - lastTime) / 1000, 0.05);
+  lastTime = time;
 
-      const hookDir = (hookUp ? 1 : 0) + (hookDown ? -1 : 0);
-      state.hookY += hookDir * state.hookSpeed * dt;
-      state.hookY = THREE.MathUtils.clamp(state.hookY, limits.hookMinY, limits.hookMaxY);
-    }
+  if (gameState === 'playing' || gameState === 'zooming') {
+    updatePhysics(dt);
+    updateCamera(dt);
+  }
 
-    function updateCrane() {
-      top.rotation.y = state.craneRot;
-      trolley.position.set(state.trolleyX, 0, 0);
+  // Clear
+  ctx.clearRect(0, 0, W(), H());
 
-      // Rope and hook length based on hookY
-      const hookLocalY = -(state.hookY - top.position.y);
-      hook.position.y = hookLocalY;
+  // Dark background
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(0, 0, W(), H());
 
-      const ropeLen = Math.max(0.6, Math.abs(hookLocalY) - 0.35);
-      rope.scale.set(1, ropeLen, 1);
-      rope.position.y = -0.35 - ropeLen * 0.5;
-    }
+  if (gameState !== 'start') {
+    drawWorld();
+  }
 
-    function updateLoad(dt) {
-      if (!state.load) return;
+  // Vignette overlay
+  const vGrad = ctx.createRadialGradient(W() / 2, H() / 2, W() * 0.3, W() / 2, H() / 2, W() * 0.8);
+  vGrad.addColorStop(0, 'rgba(0,0,0,0)');
+  vGrad.addColorStop(1, 'rgba(0,0,0,0.4)');
+  ctx.fillStyle = vGrad;
+  ctx.fillRect(0, 0, W(), H());
 
-      if (state.holding) {
-        const hookPos = hookWorldPos();
-        state.load.position.set(hookPos.x, hookPos.y - 0.65, hookPos.z);
-        state.load.rotation.y += dt * 1.2;
-      } else if (state.isDropping) {
-        // Simple gravity drop to ground
-        state.velocityDrop += 18.0 * dt;
-        state.load.position.y -= state.velocityDrop * dt;
+  requestAnimationFrame(gameLoop);
+}
 
-        if (state.load.position.y <= state.loadRestingY) {
-          state.load.position.y = state.loadRestingY;
-          state.isDropping = false;
-          state.velocityDrop = 0;
-
-          const x = state.load.position.x;
-          const z = state.load.position.z;
-
-          if (withinZone(x, z, dropZone)) {
-            statusText.textContent = 'Delivered';
-            toast('Delivered');
-            // small pause then next stage
-            setTimeout(() => {
-              if (state.load) {
-                scene.remove(state.load);
-                state.load = null;
-              }
-              advanceStage();
-            }, 450);
-          } else {
-            statusText.textContent = 'Try again';
-            toast('Missed the zone, try again');
-            // put back to pickup zone
-            setTimeout(() => {
-              if (!state.load) return;
-              const p = randomPointInZone(pickupZone);
-              state.load.position.set(p.x, state.loadRestingY, p.z);
-              state.phase = 'toPickup';
-              statusText.textContent = 'Move to pickup';
-            }, 450);
-          }
-        }
-      }
-
-      // subtle idle bob when waiting
-      if (!state.holding && !state.isDropping && state.phase !== 'done') {
-        state.load.rotation.y += dt * 0.35;
-      }
-    }
-
-    function updateCamera(dt) {
-      // Fixed, stable camera so rotating the crane does not feel like rotating the whole world.
-      // This makes A/D clearly rotate the crane, not the view.
-      const target = new THREE.Vector3(0, 7.5, 0);
-      const desired = new THREE.Vector3(22, 16, 26);
-
-      camera.position.lerp(desired, 1 - Math.pow(0.001, dt));
-      camera.lookAt(target);
-    }
-
-    function animate() {
-      const dt = Math.min(clock.getDelta(), 0.04);
-      updateControls(dt);
-      updateCrane();
-      updateLoad(dt);
-      updateCamera(dt);
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }
-
-    function onResize() {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    window.addEventListener('resize', onResize);
-
-    // Start
-    resetStage();
-    animate();
-
-    // Helpful first toast
-    setTimeout(() => toast('Use A and D, W and S, R and F, Space to grab'), 400);
-  </script>
+requestAnimationFrame(gameLoop);
+</script>
 </body>
 </html>
