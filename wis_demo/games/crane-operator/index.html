@@ -82,12 +82,20 @@
   /* HUD */
   #hud {
     position: fixed;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 8px;
+    left: 8px;
+    right: 8px;
     display: none;
-    gap: 20px;
     z-index: 50;
+    flex-direction: column;
+    gap: 6px;
+    align-items: stretch;
+  }
+
+  #hudRow1 {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
     align-items: center;
   }
 
@@ -95,17 +103,69 @@
     background: rgba(15,12,41,0.85);
     border: 1px solid rgba(245,166,35,0.3);
     border-radius: 6px;
-    padding: 6px 16px;
+    padding: 4px 10px;
     color: #f5a623;
-    font-size: 0.85rem;
+    font-size: clamp(0.65rem, 2.2vw, 0.85rem);
     font-weight: 600;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.03em;
     backdrop-filter: blur(8px);
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  #spotterBox {
+    background: rgba(15,12,41,0.9);
+    border: 1px solid rgba(136,204,255,0.4);
+    border-radius: 6px;
+    padding: 5px 12px;
+    color: #88ccff;
+    font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    backdrop-filter: blur(8px);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Damage bar */
+  #damageWrap {
+    background: rgba(15,12,41,0.85);
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 6px;
+    padding: 3px;
+    flex: 1;
+    max-width: 160px;
+    min-width: 80px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(8px);
+  }
+
+  #damageLabel {
+    color: #f5a623;
+    font-size: clamp(0.55rem, 1.8vw, 0.7rem);
+    font-weight: 600;
+    padding-left: 4px;
     white-space: nowrap;
   }
 
-  #statusText {
-    color: #77dd77;
+  #damageTrack {
+    flex: 1;
+    height: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  #damageFill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #77dd77, #f5a623, #f55);
+    border-radius: 4px;
+    transition: width 0.3s ease;
   }
 
   /* Controls */
@@ -242,9 +302,14 @@
 
 <!-- HUD -->
 <div id="hud">
-  <div class="hud-box" id="statusText">Ready</div>
-  <div class="hud-box" id="livesText">Lives: 3</div>
-  <div class="hud-box" id="scoreText">Crates: 0/3</div>
+  <div id="hudRow1">
+    <div class="hud-box" id="scoreText">Crates: 0/3</div>
+    <div id="damageWrap">
+      <span id="damageLabel">DMG</span>
+      <div id="damageTrack"><div id="damageFill"></div></div>
+    </div>
+  </div>
+  <div id="spotterBox">Ready</div>
 </div>
 
 <!-- On-screen Controls -->
@@ -296,11 +361,10 @@ const WORLD = {
   towerHeight: 650,
 };
 
-let gameState = 'start'; // start, zooming, playing, win
+let gameState = 'start';
 let camera = { x: 0, y: 0, zoom: 0.55 };
 let targetCamera = { x: 0, y: 0, zoom: 0.55 };
 
-// Trolley position along the jib (horizontal)
 let trolley = {
   x: WORLD.craneBaseX + 200,
   ropeLength: 200,
@@ -313,31 +377,26 @@ const TROLLEY_MAX_X = WORLD.craneBaseX + WORLD.jibLength - 30;
 const ROPE_MIN = 60;
 const ROPE_MAX = 680;
 
-// Hook with physics
 let hook = {
-  x: 0,
-  y: 0,
-  vx: 0,
-  vy: 0,
-  angle: 0,       // swing angle
-  angleVel: 0,    // swing angular velocity
+  x: 0, y: 0, vx: 0, vy: 0,
+  angle: 0, angleVel: 0,
 };
 
-// Cargo
 let crates = [];
 let obstacles = [];
 let dropZone = { x: 900, y: WORLD.groundY - 25, width: 120, height: 50 };
 let hookedCrate = null;
 let score = 0;
 let totalCrates = 3;
-let lives = 3;
-let hitCooldown = 0; // prevent multiple life losses from single collision
-let droppedCrates = []; // crates falling with gravity after release
+let damage = 0;          // 0-100
+let hitCooldown = 0;
+let droppedCrates = [];
+let spotterMsg = '';
+let spotterArrow = null;  // { x, y, dir } for world-space arrow
+const BREAK_HEIGHT = 250; // drop higher than this = crate breaks
 
-// Input
 let inputState = { left: false, right: false, up: false, down: false };
 
-// Wire segments for visual flex
 let wireSegments = [];
 const WIRE_SEG_COUNT = 20;
 
@@ -356,10 +415,8 @@ function initGame() {
 
   hook.x = trolley.x;
   hook.y = WORLD.craneTopY + trolley.ropeLength;
-  hook.vx = 0;
-  hook.vy = 0;
-  hook.angle = 0;
-  hook.angleVel = 0;
+  hook.vx = 0; hook.vy = 0;
+  hook.angle = 0; hook.angleVel = 0;
 
   crates = [
     { x: WORLD.craneBaseX + 100, y: WORLD.groundY - 50, w: 60, h: 40, color: '#e07030', delivered: false },
@@ -367,7 +424,6 @@ function initGame() {
     { x: WORLD.craneBaseX + 400, y: WORLD.groundY - 45, w: 70, h: 35, color: '#e0d030', delivered: false },
   ];
 
-  // Red obstacles between pickup area and drop zone
   obstacles = [
     { x: WORLD.craneBaseX + 580, y: WORLD.groundY - 180, w: 50, h: 180, color: '#cc2222' },
     { x: WORLD.craneBaseX + 580, y: WORLD.groundY - 250, w: 80, h: 20, color: '#aa1818' },
@@ -377,12 +433,103 @@ function initGame() {
   hookedCrate = null;
   score = 0;
   totalCrates = crates.length;
-  lives = 3;
+  damage = 0;
   hitCooldown = 0;
   droppedCrates = [];
+  spotterMsg = '';
+  spotterArrow = null;
 
+  resetHookBtn();
   initWireSegments();
   updateHUD();
+}
+
+function resetHookBtn() {
+  document.getElementById('hookBtn').textContent = 'Hook';
+  document.getElementById('hookBtn').classList.remove('hooked');
+}
+
+// ============ SPOTTER SYSTEM ============
+function updateSpotter() {
+  const obstacleX = WORLD.craneBaseX + 580;
+  const obstacleTopY = WORLD.groundY - 250;
+
+  if (!hookedCrate) {
+    // Find next available crate
+    const avail = crates.find(c => !c.delivered && !droppedCrates.includes(c));
+    if (!avail) {
+      if (score >= totalCrates) {
+        spotterMsg = '';
+        spotterArrow = null;
+      } else {
+        spotterMsg = 'No crates left!';
+        spotterArrow = null;
+      }
+      return;
+    }
+    const cx = avail.x + avail.w / 2;
+    const cy = avail.y + avail.h / 2;
+    const dist = Math.hypot(hook.x - cx, hook.y - cy);
+
+    if (dist < 60) {
+      spotterMsg = '\u261d PRESS HOOK to attach';
+      spotterArrow = { x: cx, y: cy - 50, dir: 'down' };
+    } else if (hook.y < cy - 80) {
+      spotterMsg = '\u2b07 LOWER the hook to the crate';
+      spotterArrow = { x: cx, y: cy - 60, dir: 'down' };
+    } else {
+      const dx = cx - hook.x;
+      if (Math.abs(dx) > 40) {
+        spotterMsg = (dx > 0 ? '\u27a1' : '\u2b05') + ' Move hook over the crate';
+        spotterArrow = { x: cx, y: cy - 60, dir: dx > 0 ? 'right' : 'left' };
+      } else {
+        spotterMsg = '\u2b07 LOWER the hook';
+        spotterArrow = { x: cx, y: cy - 60, dir: 'down' };
+      }
+    }
+    return;
+  }
+
+  // Has hooked crate
+  const crateX = hookedCrate.x + hookedCrate.w / 2;
+  const crateY = hookedCrate.y + hookedCrate.h;
+  const dzCenterX = dropZone.x + dropZone.width / 2;
+
+  // Check if over drop zone
+  if (crateX > dropZone.x && crateX < dropZone.x + dropZone.width) {
+    const heightAboveGround = WORLD.groundY - crateY;
+    if (heightAboveGround < BREAK_HEIGHT) {
+      spotterMsg = '\u2b07 RELEASE now! Good height!';
+      spotterArrow = { x: dzCenterX, y: dropZone.y - 40, dir: 'down' };
+    } else {
+      spotterMsg = '\u2b07 Lower more! Too high to drop!';
+      spotterArrow = { x: dzCenterX, y: dropZone.y - 40, dir: 'down' };
+    }
+    return;
+  }
+
+  // Check if past obstacle
+  if (crateX > obstacleX + 80) {
+    spotterMsg = '\u27a1 Almost there! Move to drop zone';
+    spotterArrow = { x: dzCenterX, y: dropZone.y - 60, dir: 'right' };
+    return;
+  }
+
+  // Near obstacle - check if high enough
+  if (crateX > obstacleX - 100 && crateX < obstacleX + 130) {
+    if (crateY > obstacleTopY - 20) {
+      spotterMsg = '\u2b06 RAISE the load! Clear the obstacle!';
+      spotterArrow = { x: obstacleX + 25, y: obstacleTopY - 60, dir: 'up' };
+    } else {
+      spotterMsg = '\u27a1 Clear! Move past the obstacle';
+      spotterArrow = { x: obstacleX + 130, y: obstacleTopY - 40, dir: 'right' };
+    }
+    return;
+  }
+
+  // Left of obstacle
+  spotterMsg = '\u27a1 Move right towards drop zone';
+  spotterArrow = { x: obstacleX - 30, y: crateY - 60, dir: 'right' };
 }
 
 // ============ PHYSICS ============
@@ -392,26 +539,20 @@ const ROPE_ACCEL = 220;
 const ROPE_FRICTION = 0.92;
 const GRAVITY = 9.81;
 const SWING_DAMPING = 0.988;
-const HOOK_MASS_FACTOR = 0.6;
 
 function updatePhysics(dt) {
-  // Trolley horizontal movement
   if (inputState.left) trolley.speed -= TROLLEY_ACCEL * dt;
   if (inputState.right) trolley.speed += TROLLEY_ACCEL * dt;
   trolley.speed *= TROLLEY_FRICTION;
   trolley.x += trolley.speed * dt;
   trolley.x = Math.max(TROLLEY_MIN_X, Math.min(TROLLEY_MAX_X, trolley.x));
 
-  // Rope length
   if (inputState.down) trolley.ropeSpeed += ROPE_ACCEL * dt;
   if (inputState.up) trolley.ropeSpeed -= ROPE_ACCEL * dt;
   trolley.ropeSpeed *= ROPE_FRICTION;
   trolley.ropeLength += trolley.ropeSpeed * dt;
   trolley.ropeLength = Math.max(ROPE_MIN, Math.min(ROPE_MAX, trolley.ropeLength));
 
-  // Pendulum physics for hook swing
-  // When trolley moves right, hook should lag left (negative angle = left of anchor)
-  // Real physics: in the trolley's reference frame, acceleration right creates pseudo-force left on hook
   const trolleyAccel = (inputState.left ? -TROLLEY_ACCEL : 0) + (inputState.right ? TROLLEY_ACCEL : 0);
   const speedFactor = 1 + Math.abs(trolley.speed) * 0.003;
   const gravityRestore = -GRAVITY * Math.sin(hook.angle) * 1.3;
@@ -419,20 +560,15 @@ function updatePhysics(dt) {
   const pendulumAccel = (gravityRestore + trolleyForce) / (trolley.ropeLength * 0.009);
   hook.angleVel += pendulumAccel * dt;
   hook.angleVel *= SWING_DAMPING;
-  // Direct velocity-based drag - hook lags behind trolley velocity
   hook.angleVel -= trolley.speed * 0.00001;
   hook.angle += hook.angleVel * dt;
-
-  // Wider clamp to allow bigger swings
   hook.angle = Math.max(-0.75, Math.min(0.75, hook.angle));
 
-  // Compute pendulum target (where the hook WANTS to be)
   const anchorX = trolley.x;
   const anchorY = WORLD.craneTopY;
   const targetHookX = anchorX + Math.sin(hook.angle) * trolley.ropeLength;
   const targetHookY = anchorY + Math.cos(hook.angle) * trolley.ropeLength;
 
-  // Update wire segments with verlet-like flex
   wireSegments[0].x = anchorX;
   wireSegments[0].y = anchorY;
 
@@ -440,42 +576,35 @@ function updatePhysics(dt) {
     const t = i / WIRE_SEG_COUNT;
     const targetX = anchorX + (targetHookX - anchorX) * t;
     const targetY = anchorY + (targetHookY - anchorY) * t;
-    // Vertical sag
     const speedSag = Math.abs(trolley.speed) * 0.015;
     const sag = Math.sin(t * Math.PI) * (trolley.ropeLength * 0.018 + Math.abs(hook.angleVel) * 4 + speedSag);
-    // Horizontal drag - middle segments lag more, creating a curve
     const lateralDrag = -trolley.speed * 0.12 * Math.sin(t * Math.PI);
-    const lerpSpeed = 0.08 + (1 - Math.sin(t * Math.PI)) * 0.06; // ends catch up faster
+    const lerpSpeed = 0.08 + (1 - Math.sin(t * Math.PI)) * 0.06;
     wireSegments[i].x += (targetX + lateralDrag - wireSegments[i].x) * lerpSpeed;
     wireSegments[i].y += (targetY + sag - wireSegments[i].y) * lerpSpeed;
   }
 
-  // Hook follows the last wire segment (not the pendulum target directly)
   hook.x = wireSegments[WIRE_SEG_COUNT].x;
   hook.y = wireSegments[WIRE_SEG_COUNT].y;
 
-  // Compute wire angle for crate rotation
   const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
   const lastSeg = wireSegments[WIRE_SEG_COUNT];
   const currentWireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
 
-  // Move hooked crate
   if (hookedCrate) {
     hookedCrate.x = hook.x - hookedCrate.w / 2;
     hookedCrate.y = hook.y + 15;
     hookedCrate.rotation = currentWireAngle;
   }
 
-  // Update dropped crates (gravity + collision)
+  // Update dropped crates
   for (let i = droppedCrates.length - 1; i >= 0; i--) {
     const dc = droppedCrates[i];
-    dc.vy += 800 * dt; // gravity
+    dc.vy += 800 * dt;
     dc.x += dc.vx * dt;
     dc.y += dc.vy * dt;
-    // Dampen rotation towards 0
     dc.rotation *= 0.96;
 
-    // Ground collision
     if (dc.y + dc.h >= WORLD.groundY) {
       dc.y = WORLD.groundY - dc.h;
       dc.vy = 0;
@@ -483,11 +612,9 @@ function updatePhysics(dt) {
       dc.landed = true;
     }
 
-    // Obstacle collision for falling crates
     for (const obs of obstacles) {
       if (dc.x + dc.w > obs.x && dc.x < obs.x + obs.w &&
           dc.y + dc.h > obs.y && dc.y < obs.y + obs.h) {
-        // Push out vertically (landed on top)
         if (dc.y + dc.h - obs.y < obs.y + obs.h - dc.y) {
           dc.y = obs.y - dc.h;
           dc.vy = 0;
@@ -497,11 +624,23 @@ function updatePhysics(dt) {
       }
     }
 
-    // Check if landed in drop zone
     if (dc.landed && !dc.scored) {
       dc.scored = true;
+      const fallDist = (dc.y + dc.h) - dc.releaseY;
       const cx = dc.x + dc.w / 2;
-      if (cx > dropZone.x && cx < dropZone.x + dropZone.width) {
+      const inZone = cx > dropZone.x && cx < dropZone.x + dropZone.width;
+
+      if (fallDist > BREAK_HEIGHT) {
+        // Crate broke!
+        dc.broken = true;
+        dc.delivered = false;
+        setSpotterAlert('\u26a0 DROPPED TOO HIGH! Crate destroyed!');
+        addDamage(30);
+        setTimeout(() => {
+          const idx = droppedCrates.indexOf(dc);
+          if (idx !== -1) droppedCrates.splice(idx, 1);
+        }, 1200);
+      } else if (inZone) {
         dc.delivered = true;
         dc.x = dropZone.x + (dropZone.width - dc.w) / 2;
         dc.y = dropZone.y - dc.h + 25;
@@ -510,86 +649,89 @@ function updatePhysics(dt) {
         dc.rotation = 0;
         score++;
         updateHUD();
-        document.getElementById('statusText').textContent = '\u2713 Delivered!';
-        document.getElementById('statusText').style.color = '#77dd77';
+        setSpotterAlert('\u2705 Delivered! Good work!');
 
         if (score >= totalCrates) {
           setTimeout(() => {
             gameState = 'win';
             showEndScreen(true);
           }, 800);
-        } else {
-          setTimeout(() => {
-            document.getElementById('statusText').textContent = 'Next crate!';
-            document.getElementById('statusText').style.color = '#f5a623';
-          }, 1000);
         }
-      } else {
-        document.getElementById('statusText').textContent = 'Missed! Crate lost';
-        document.getElementById('statusText').style.color = '#f55';
         setTimeout(() => {
-          if (gameState === 'playing') {
-            document.getElementById('statusText').textContent = 'Hook another crate';
-            document.getElementById('statusText').style.color = '#f5a623';
-          }
+          const idx = droppedCrates.indexOf(dc);
+          if (idx !== -1) droppedCrates.splice(idx, 1);
+        }, 500);
+      } else {
+        setSpotterAlert('\u274c Missed the drop zone! Crate lost.');
+        setTimeout(() => {
+          const idx = droppedCrates.indexOf(dc);
+          if (idx !== -1) droppedCrates.splice(idx, 1);
         }, 1500);
       }
-      // Remove from droppedCrates after settling
-      setTimeout(() => {
-        const idx = droppedCrates.indexOf(dc);
-        if (idx !== -1) droppedCrates.splice(idx, 1);
-      }, 500);
     }
   }
 
-  // Decrease hit cooldown
+  // Ensure hook btn is synced
+  if (!hookedCrate) {
+    const btn = document.getElementById('hookBtn');
+    if (btn.classList.contains('hooked')) resetHookBtn();
+  }
+
   if (hitCooldown > 0) hitCooldown -= dt;
 
-  // Obstacle collision - check hook and hooked crate against obstacles
+  // Obstacle collision
   for (const obs of obstacles) {
     let wasHit = false;
-    // Check hook collision
     if (hook.x > obs.x && hook.x < obs.x + obs.w &&
         hook.y > obs.y && hook.y < obs.y + obs.h) {
       hook.angleVel *= -0.5;
-      if (hook.x < obs.x + obs.w / 2) {
-        trolley.speed = Math.min(trolley.speed, -40);
-      } else {
-        trolley.speed = Math.max(trolley.speed, 40);
-      }
+      if (hook.x < obs.x + obs.w / 2) trolley.speed = Math.min(trolley.speed, -40);
+      else trolley.speed = Math.max(trolley.speed, 40);
       wasHit = true;
     }
-    // Check hooked crate collision
     if (hookedCrate) {
       if (hookedCrate.x + hookedCrate.w > obs.x && hookedCrate.x < obs.x + obs.w &&
           hookedCrate.y + hookedCrate.h > obs.y && hookedCrate.y < obs.y + obs.h) {
         hook.angleVel *= -0.5;
-        if (hookedCrate.x < obs.x) {
-          trolley.speed = Math.min(trolley.speed, -60);
-        } else {
-          trolley.speed = Math.max(trolley.speed, 60);
-        }
+        if (hookedCrate.x < obs.x) trolley.speed = Math.min(trolley.speed, -60);
+        else trolley.speed = Math.max(trolley.speed, 60);
         wasHit = true;
       }
     }
     if (wasHit && hitCooldown <= 0) {
-      hitCooldown = 1.0; // 1 second cooldown between life losses
-      lives--;
-      updateHUD();
-      document.getElementById('statusText').textContent = '\u26a0 Obstacle hit! Lives: ' + lives;
-      document.getElementById('statusText').style.color = '#ff4444';
-      if (lives <= 0) {
-        setTimeout(() => {
-          gameState = 'gameover';
-          showEndScreen(false);
-        }, 600);
-      }
+      hitCooldown = 1.0;
+      addDamage(25);
+      setSpotterAlert('\u26a0 COLLISION! Avoid the obstacle!');
     }
   }
+
+  // Update spotter
+  if (gameState === 'playing' && !spotterAlertTimer) {
+    updateSpotter();
+    document.getElementById('spotterBox').textContent = spotterMsg;
+  }
 }
+
+let spotterAlertTimer = null;
+function setSpotterAlert(msg) {
+  document.getElementById('spotterBox').textContent = msg;
+  if (spotterAlertTimer) clearTimeout(spotterAlertTimer);
+  spotterAlertTimer = setTimeout(() => { spotterAlertTimer = null; }, 2000);
+}
+
+function addDamage(amount) {
+  damage = Math.min(100, damage + amount);
+  updateHUD();
+  if (damage >= 100) {
+    setTimeout(() => {
+      gameState = 'gameover';
+      showEndScreen(false);
+    }, 600);
+  }
+}
+
 function updateCamera(dt) {
   if (gameState === 'zooming') {
-    // Zoom in on hook
     targetCamera.zoom = 1.4;
     targetCamera.x = hook.x;
     targetCamera.y = hook.y;
@@ -598,7 +740,6 @@ function updateCamera(dt) {
     targetCamera.x = hook.x;
     targetCamera.y = hook.y + 30;
   }
-
   const lerpSpeed = 2.5 * dt;
   camera.x += (targetCamera.x - camera.x) * lerpSpeed;
   camera.y += (targetCamera.y - camera.y) * lerpSpeed;
@@ -609,16 +750,14 @@ function updateCamera(dt) {
 function drawWorld() {
   const w = W();
   const h = H();
-
   ctx.save();
 
-  // Apply camera transform
   const cx = w / 2 - camera.x * camera.zoom;
   const cy = h / 2 - camera.y * camera.zoom;
   ctx.translate(cx, cy);
   ctx.scale(camera.zoom, camera.zoom);
 
-  // Sky gradient
+  // Sky
   const skyGrad = ctx.createLinearGradient(0, -200, 0, WORLD.groundY);
   skyGrad.addColorStop(0, '#1a1a3e');
   skyGrad.addColorStop(0.5, '#2a2a5e');
@@ -634,7 +773,6 @@ function drawWorld() {
   ctx.fillStyle = gndGrad;
   ctx.fillRect(-2000, WORLD.groundY - 10, 5000, 500);
 
-  // Ground texture lines
   ctx.strokeStyle = 'rgba(255,255,255,0.04)';
   ctx.lineWidth = 1;
   for (let i = -2000; i < 3000; i += 40) {
@@ -644,35 +782,17 @@ function drawWorld() {
     ctx.stroke();
   }
 
-  // Draw crane
   drawCrane();
-
-  // Draw drop zone
   drawDropZone();
-
-  // Draw obstacles
   obstacles.forEach(obs => drawObstacle(obs));
 
-  // Draw crates
-  crates.forEach(c => {
-    if (!c.delivered || c === hookedCrate) return;
-    drawCrate(c);
-  });
-  crates.forEach(c => {
-    if (c.delivered || c === hookedCrate) return;
-    drawCrate(c);
-  });
+  crates.forEach(c => { if (!c.delivered || c === hookedCrate) return; drawCrate(c); });
+  crates.forEach(c => { if (c.delivered || c === hookedCrate || droppedCrates.includes(c)) return; drawCrate(c); });
 
-  // Draw wire
   drawWire();
-
-  // Draw hook
   drawHook();
 
-  // Draw dropped crates (falling)
   droppedCrates.forEach(dc => drawCrate(dc));
-
-  // Draw hooked crate on top
   if (hookedCrate) drawCrate(hookedCrate);
 
   // Nearby crate indicator
@@ -687,6 +807,47 @@ function drawWorld() {
     }
   }
 
+  // Spotter arrow in world space
+  if (spotterArrow && gameState === 'playing') {
+    drawSpotterArrow(spotterArrow);
+  }
+
+  ctx.restore();
+}
+
+function drawSpotterArrow(arrow) {
+  const { x, y, dir } = arrow;
+  const t = performance.now() / 1000;
+  const bob = Math.sin(t * 4) * 6;
+
+  ctx.save();
+  ctx.translate(x, y + bob);
+  ctx.fillStyle = 'rgba(136,204,255,0.8)';
+  ctx.strokeStyle = 'rgba(136,204,255,0.9)';
+  ctx.lineWidth = 2;
+
+  const s = 14;
+  ctx.beginPath();
+  if (dir === 'down') {
+    ctx.moveTo(0, s);
+    ctx.lineTo(-s * 0.7, -s * 0.3);
+    ctx.lineTo(s * 0.7, -s * 0.3);
+  } else if (dir === 'up') {
+    ctx.moveTo(0, -s);
+    ctx.lineTo(-s * 0.7, s * 0.3);
+    ctx.lineTo(s * 0.7, s * 0.3);
+  } else if (dir === 'right') {
+    ctx.moveTo(s, 0);
+    ctx.lineTo(-s * 0.3, -s * 0.7);
+    ctx.lineTo(-s * 0.3, s * 0.7);
+  } else if (dir === 'left') {
+    ctx.moveTo(-s, 0);
+    ctx.lineTo(s * 0.3, -s * 0.7);
+    ctx.lineTo(s * 0.3, s * 0.7);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -695,16 +856,13 @@ function drawCrane() {
   const topY = WORLD.craneTopY;
   const gndY = WORLD.groundY;
 
-  // Base feet
   ctx.fillStyle = '#555';
   ctx.fillRect(bx - 80, gndY - 15, 180, 25);
 
-  // Tower (lattice)
   ctx.strokeStyle = '#666';
   ctx.lineWidth = 3;
   const towerW = 30;
 
-  // Main tower verticals
   ctx.beginPath();
   ctx.moveTo(bx - towerW / 2, gndY - 15);
   ctx.lineTo(bx - towerW / 2, topY);
@@ -712,7 +870,6 @@ function drawCrane() {
   ctx.lineTo(bx + towerW / 2, topY);
   ctx.stroke();
 
-  // Cross braces
   ctx.lineWidth = 1.5;
   ctx.strokeStyle = '#555';
   const segH = 50;
@@ -723,14 +880,12 @@ function drawCrane() {
     ctx.moveTo(bx + towerW / 2, y);
     ctx.lineTo(bx - towerW / 2, y - segH);
     ctx.stroke();
-    // Horizontal
     ctx.beginPath();
     ctx.moveTo(bx - towerW / 2, y - segH);
     ctx.lineTo(bx + towerW / 2, y - segH);
     ctx.stroke();
   }
 
-  // Jib (horizontal boom)
   const jibY = topY;
   const jibEnd = bx + WORLD.jibLength;
 
@@ -743,7 +898,6 @@ function drawCrane() {
   ctx.lineTo(jibEnd, jibY + 14);
   ctx.stroke();
 
-  // Jib cross braces
   ctx.lineWidth = 1;
   ctx.strokeStyle = '#555';
   const jibSegW = 40;
@@ -756,7 +910,6 @@ function drawCrane() {
     ctx.stroke();
   }
 
-  // Counter jib (left)
   ctx.strokeStyle = '#666';
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -766,13 +919,11 @@ function drawCrane() {
   ctx.lineTo(bx - 100, jibY + 14);
   ctx.stroke();
 
-  // Counterweight
   ctx.fillStyle = '#444';
   ctx.fillRect(bx - 100, jibY - 5, 40, 40);
   ctx.fillStyle = '#555';
   ctx.fillRect(bx - 95, jibY, 30, 30);
 
-  // Cat head / apex
   ctx.strokeStyle = '#777';
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -782,7 +933,6 @@ function drawCrane() {
   ctx.lineTo(bx + 80, jibY);
   ctx.stroke();
 
-  // Pendant lines
   ctx.strokeStyle = 'rgba(200,200,200,0.3)';
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -790,7 +940,6 @@ function drawCrane() {
   ctx.lineTo(jibEnd - 50, jibY);
   ctx.stroke();
 
-  // Operator cab
   ctx.fillStyle = '#f5a623';
   ctx.fillRect(bx - 5, topY + 14, 35, 30);
   ctx.fillStyle = '#88ccff';
@@ -798,7 +947,6 @@ function drawCrane() {
   ctx.fillRect(bx, topY + 16, 26, 14);
   ctx.globalAlpha = 1;
 
-  // Trolley
   ctx.fillStyle = '#888';
   ctx.fillRect(trolley.x - 12, topY + 5, 24, 12);
   ctx.fillStyle = '#666';
@@ -809,7 +957,6 @@ function drawCrane() {
 }
 
 function drawWire() {
-  // Smooth curve through all wire segments
   ctx.beginPath();
   ctx.moveTo(wireSegments[0].x, wireSegments[0].y);
   for (let i = 1; i < WIRE_SEG_COUNT; i++) {
@@ -825,7 +972,6 @@ function drawWire() {
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // Wire highlight
   ctx.beginPath();
   ctx.moveTo(wireSegments[0].x + 1, wireSegments[0].y);
   for (let i = 1; i < WIRE_SEG_COUNT; i++) {
@@ -845,24 +991,19 @@ function drawWire() {
 function drawHook() {
   const hx = hook.x;
   const hy = hook.y;
-
-  // Calculate rotation from the last two wire segments (wire direction at bottom)
   const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
   const lastSeg = wireSegments[WIRE_SEG_COUNT];
   const wireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
 
-  // Hook body
   ctx.save();
   ctx.translate(hx, hy);
   ctx.rotate(wireAngle);
 
-  // Pulley block
   ctx.fillStyle = '#999';
   ctx.fillRect(-8, -6, 16, 14);
   ctx.fillStyle = '#777';
   ctx.fillRect(-6, -4, 12, 10);
 
-  // Hook shape
   ctx.strokeStyle = hookedCrate ? '#f55' : '#ddd';
   ctx.lineWidth = 3;
   ctx.lineCap = 'round';
@@ -872,10 +1013,8 @@ function drawHook() {
   ctx.quadraticCurveTo(10, 22, 10, 16);
   ctx.quadraticCurveTo(10, 8, 0, 10);
   ctx.stroke();
-
   ctx.restore();
 
-  // Hook glow when near crate
   if (!hookedCrate && gameState === 'playing') {
     const nearby = findNearestCrate();
     if (nearby) {
@@ -889,7 +1028,6 @@ function drawHook() {
 
 function drawCrate(c) {
   ctx.save();
-
   const cx = c.x + c.w / 2;
   const cy = c.y + c.h / 2;
   const rot = c.rotation || 0;
@@ -897,24 +1035,37 @@ function drawCrate(c) {
   ctx.translate(cx, cy);
   ctx.rotate(rot);
 
-  // Shadow
+  if (c.broken) {
+    // Draw broken crate - red X and faded
+    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = '#555';
+    ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+    ctx.strokeStyle = '#f55';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-c.w / 2 + 5, -c.h / 2 + 5);
+    ctx.lineTo(c.w / 2 - 5, c.h / 2 - 5);
+    ctx.moveTo(c.w / 2 - 5, -c.h / 2 + 5);
+    ctx.lineTo(-c.w / 2 + 5, c.h / 2 - 5);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    return;
+  }
+
   ctx.fillStyle = 'rgba(0,0,0,0.2)';
   ctx.fillRect(-c.w / 2 + 3, -c.h / 2 + 3, c.w, c.h);
 
-  // Body
   ctx.fillStyle = c.color;
   ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
 
-  // Highlight
   ctx.fillStyle = 'rgba(255,255,255,0.15)';
   ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h * 0.3);
 
-  // Border
   ctx.strokeStyle = 'rgba(0,0,0,0.3)';
   ctx.lineWidth = 1.5;
   ctx.strokeRect(-c.w / 2, -c.h / 2, c.w, c.h);
 
-  // Cross marking
   ctx.strokeStyle = 'rgba(255,255,255,0.2)';
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -923,22 +1074,18 @@ function drawCrate(c) {
   ctx.moveTo(c.w / 2 - 5, -c.h / 2 + 5);
   ctx.lineTo(-c.w / 2 + 5, c.h / 2 - 5);
   ctx.stroke();
-
   ctx.restore();
 }
 
 function drawObstacle(obs) {
   ctx.save();
 
-  // Shadow
   ctx.fillStyle = 'rgba(0,0,0,0.3)';
   ctx.fillRect(obs.x + 4, obs.y + 4, obs.w, obs.h);
 
-  // Body
   ctx.fillStyle = obs.color;
   ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
 
-  // Hazard stripes
   ctx.save();
   ctx.beginPath();
   ctx.rect(obs.x, obs.y, obs.w, obs.h);
@@ -954,16 +1101,13 @@ function drawObstacle(obs) {
   }
   ctx.restore();
 
-  // Border glow
   ctx.strokeStyle = 'rgba(255,60,60,0.6)';
   ctx.lineWidth = 2;
   ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
 
-  // Highlight
   ctx.fillStyle = 'rgba(255,255,255,0.1)';
   ctx.fillRect(obs.x, obs.y, obs.w, obs.h * 0.15);
 
-  // DANGER label on the wider piece
   if (obs.w >= 60) {
     ctx.fillStyle = '#ffcc00';
     ctx.font = 'bold 14px "Chakra Petch", monospace';
@@ -971,14 +1115,11 @@ function drawObstacle(obs) {
     ctx.fillText('\u26a0 DANGER', obs.x + obs.w / 2, obs.y + obs.h / 2 + 5);
     ctx.textAlign = 'left';
   }
-
   ctx.restore();
 }
 
 function drawDropZone() {
   const dz = dropZone;
-
-  // Striped area
   ctx.fillStyle = 'rgba(119,221,119,0.1)';
   ctx.fillRect(dz.x, dz.y - 80, dz.width, 130);
 
@@ -988,14 +1129,12 @@ function drawDropZone() {
   ctx.strokeRect(dz.x, dz.y - 80, dz.width, 130);
   ctx.setLineDash([]);
 
-  // Label
   ctx.fillStyle = '#77dd77';
   ctx.font = '12px "Chakra Petch", monospace';
   ctx.textAlign = 'center';
   ctx.fillText('DROP ZONE', dz.x + dz.width / 2, dz.y - 88);
   ctx.textAlign = 'left';
 
-  // Ground marker
   ctx.fillStyle = 'rgba(119,221,119,0.3)';
   ctx.fillRect(dz.x, dz.y - 10, dz.width, 35);
 }
@@ -1003,57 +1142,48 @@ function drawDropZone() {
 // ============ HOOK/UNHOOK ============
 function findNearestCrate() {
   let best = null;
-  let bestDist = 60; // max hook range
+  let bestDist = 60;
   for (const c of crates) {
     if (c.delivered || droppedCrates.includes(c)) continue;
     const cx = c.x + c.w / 2;
     const cy = c.y + c.h / 2;
     const dist = Math.hypot(hook.x - cx, hook.y - cy);
-    if (dist < bestDist) {
-      bestDist = dist;
-      best = c;
-    }
+    if (dist < bestDist) { bestDist = dist; best = c; }
   }
   return best;
 }
 
 function toggleHook() {
   if (hookedCrate) {
-    // Release crate - it falls with gravity
+    // Release - record height for break check
     hookedCrate.vx = trolley.speed * 0.3;
     hookedCrate.vy = 0;
     hookedCrate.landed = false;
     hookedCrate.scored = false;
+    hookedCrate.broken = false;
+    hookedCrate.releaseY = hookedCrate.y + hookedCrate.h;
     droppedCrates.push(hookedCrate);
     hookedCrate = null;
-    document.getElementById('hookBtn').textContent = 'Hook';
-    document.getElementById('hookBtn').classList.remove('hooked');
-    document.getElementById('statusText').textContent = 'Released!';
-    document.getElementById('statusText').style.color = '#f5a623';
+    resetHookBtn();
   } else {
     const crate = findNearestCrate();
     if (crate) {
       hookedCrate = crate;
       document.getElementById('hookBtn').textContent = 'Release';
       document.getElementById('hookBtn').classList.add('hooked');
-      document.getElementById('statusText').textContent = 'Hooked! Move to drop zone \u2192';
-      document.getElementById('statusText').style.color = '#88ccff';
-    } else {
-      document.getElementById('statusText').textContent = 'No crate nearby';
-      document.getElementById('statusText').style.color = '#f55';
-      setTimeout(() => {
-        if (gameState === 'playing') {
-          document.getElementById('statusText').textContent = 'Lower hook near a crate';
-          document.getElementById('statusText').style.color = '#8888aa';
-        }
-      }, 1500);
     }
   }
 }
 
 function updateHUD() {
   document.getElementById('scoreText').textContent = `Crates: ${score}/${totalCrates}`;
-  document.getElementById('livesText').textContent = `Lives: ${lives}`;
+  const pct = Math.min(100, Math.max(0, damage));
+  document.getElementById('damageFill').style.width = pct + '%';
+  // Color the label
+  const lbl = document.getElementById('damageLabel');
+  if (pct > 75) lbl.style.color = '#f55';
+  else if (pct > 40) lbl.style.color = '#f5a623';
+  else lbl.style.color = '#77dd77';
 }
 
 function showEndScreen(won) {
@@ -1065,20 +1195,19 @@ function showEndScreen(won) {
   if (won) {
     title.textContent = 'Job Complete!';
     title.className = 'win-title';
-    msg.textContent = 'All crates delivered.';
+    msg.textContent = `All crates delivered. Damage: ${Math.round(damage)}%`;
     btn.className = '';
     btn.textContent = 'Play Again';
   } else {
     title.textContent = 'Game Over';
     title.className = 'lose-title';
-    msg.textContent = `You delivered ${score}/${totalCrates} crates.`;
+    msg.textContent = `Too much damage! Delivered ${score}/${totalCrates} crates.`;
     btn.className = 'lose-btn';
     btn.textContent = 'Try Again';
   }
 }
 
 // ============ INPUT ============
-// Keyboard
 window.addEventListener('keydown', e => {
   if (gameState !== 'playing') return;
   if (e.key === 'ArrowLeft' || e.key === 'a') inputState.left = true;
@@ -1095,7 +1224,6 @@ window.addEventListener('keyup', e => {
   if (e.key === 'ArrowDown' || e.key === 's') inputState.down = false;
 });
 
-// Touch / mouse controls
 document.querySelectorAll('.ctrl-btn[data-dir]').forEach(btn => {
   const dir = btn.dataset.dir;
   const start = () => { if (gameState === 'playing') { inputState[dir] = true; btn.classList.add('active'); } };
@@ -1122,7 +1250,6 @@ function startGame() {
   initGame();
   gameState = 'zooming';
 
-  // Show full crane first
   camera = { x: WORLD.craneBaseX + WORLD.jibLength / 2, y: WORLD.groundY / 2, zoom: 0.45 };
   targetCamera = { ...camera };
 
@@ -1130,18 +1257,13 @@ function startGame() {
   document.getElementById('hud').style.display = 'flex';
   document.getElementById('controls').style.display = 'flex';
 
-  document.getElementById('statusText').textContent = 'Zooming in...';
-  document.getElementById('statusText').style.color = '#8888aa';
+  document.getElementById('spotterBox').textContent = 'Stand by...';
 
-  setTimeout(() => {
-    document.getElementById('startScreen').style.display = 'none';
-  }, 900);
+  setTimeout(() => { document.getElementById('startScreen').style.display = 'none'; }, 900);
 
-  // After showing full view, zoom into hook
   setTimeout(() => {
     gameState = 'playing';
-    document.getElementById('statusText').textContent = 'Lower hook to a crate';
-    document.getElementById('statusText').style.color = '#f5a623';
+    document.getElementById('spotterBox').textContent = '\u2b07 Lower the hook to a crate';
   }, 2000);
 }
 
@@ -1157,18 +1279,12 @@ function gameLoop(time) {
     updateCamera(dt);
   }
 
-  // Clear
   ctx.clearRect(0, 0, W(), H());
-
-  // Dark background
   ctx.fillStyle = '#1a1a2e';
   ctx.fillRect(0, 0, W(), H());
 
-  if (gameState !== 'start') {
-    drawWorld();
-  }
+  if (gameState !== 'start') drawWorld();
 
-  // Vignette overlay
   const vGrad = ctx.createRadialGradient(W() / 2, H() / 2, W() * 0.3, W() / 2, H() / 2, W() * 0.8);
   vGrad.addColorStop(0, 'rgba(0,0,0,0)');
   vGrad.addColorStop(1, 'rgba(0,0,0,0.4)');
