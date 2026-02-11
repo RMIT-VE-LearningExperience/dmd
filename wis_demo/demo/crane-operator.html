@@ -28,7 +28,7 @@
   #startScreen {
     position: fixed;
     inset: 0;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    background: rgba(15,12,41,0.75);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -415,8 +415,13 @@ const WORLD = {
 };
 
 let gameState = 'start';
-let camera = { x: 0, y: 0, zoom: 0.55 };
-let targetCamera = { x: 0, y: 0, zoom: 0.55 };
+const OVERVIEW_CAM = () => ({
+  x: WORLD.craneBaseX + WORLD.jibLength / 2,
+  y: WORLD.groundY / 2 + 40,
+  zoom: 0.55
+});
+let camera = OVERVIEW_CAM();
+let targetCamera = OVERVIEW_CAM();
 
 let trolley = {
   x: WORLD.craneBaseX + 200,
@@ -782,7 +787,12 @@ function addDamage(amount) {
 }
 
 function updateCamera(dt) {
-  if (gameState === 'zooming') {
+  if (gameState === 'start') {
+    // Overview: show entire playing field
+    targetCamera.zoom = 0.55;
+    targetCamera.x = WORLD.craneBaseX + WORLD.jibLength / 2;
+    targetCamera.y = WORLD.groundY / 2 + 40;
+  } else if (gameState === 'zooming') {
     targetCamera.zoom = 1.4;
     targetCamera.x = hook.x;
     targetCamera.y = hook.y;
@@ -1464,9 +1474,21 @@ joyCanvas.addEventListener('touchcancel', handleJoyEnd);
 // Initial draw
 drawJoystick();
 
+// Init game objects so the world is visible on start screen
+initGame();
+
 // ============ GAME FLOW ============
-document.getElementById('startBtn').addEventListener('click', startGame);
+function handleStart() {
+  startGame();
+}
+document.getElementById('startBtn').addEventListener('click', handleStart);
+document.getElementById('startBtn').addEventListener('touchstart', e => { e.preventDefault(); handleStart(); });
 document.getElementById('restartBtn').addEventListener('click', () => {
+  document.getElementById('endScreen').style.display = 'none';
+  startGame();
+});
+document.getElementById('restartBtn').addEventListener('touchstart', e => {
+  e.preventDefault();
   document.getElementById('endScreen').style.display = 'none';
   startGame();
 });
@@ -1475,16 +1497,18 @@ function startGame() {
   initGame();
   gameState = 'zooming';
 
-  camera = { x: WORLD.craneBaseX + WORLD.jibLength / 2, y: WORLD.groundY / 2, zoom: 0.45 };
-  targetCamera = { ...camera };
-
+  // Camera is already at overview; the zooming state will lerp to the hook
   document.getElementById('startScreen').classList.add('hiding');
   document.getElementById('hud').style.display = 'flex';
   document.getElementById('controls').style.display = 'flex';
 
   document.getElementById('spotterBox').textContent = 'Stand by...';
 
-  setTimeout(() => { document.getElementById('startScreen').style.display = 'none'; }, 900);
+  setTimeout(() => {
+    const ss = document.getElementById('startScreen');
+    ss.style.display = 'none';
+    ss.classList.remove('hiding');
+  }, 900);
 
   setTimeout(() => {
     gameState = 'playing';
@@ -1502,13 +1526,15 @@ function gameLoop(time) {
   if (gameState === 'playing' || gameState === 'zooming') {
     updatePhysics(dt);
     updateCamera(dt);
+  } else if (gameState === 'start') {
+    updateCamera(dt);
   }
 
   ctx.clearRect(0, 0, W(), H());
   ctx.fillStyle = '#1a1a2e';
   ctx.fillRect(0, 0, W(), H());
 
-  if (gameState !== 'start') drawWorld();
+  drawWorld();
 
   const vGrad = ctx.createRadialGradient(W() / 2, H() / 2, W() * 0.3, W() / 2, H() / 2, W() * 0.8);
   vGrad.addColorStop(0, 'rgba(0,0,0,0)');
