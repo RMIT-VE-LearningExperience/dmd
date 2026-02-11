@@ -403,7 +403,8 @@ const assetPaths = {
   precast: 'img/precast.svg',
   brokenprecast: 'img/brokenprecast.svg',
   background: 'img/background.png',
-  hill01: 'img/hill01.svg'
+  hill01: 'img/hill01.svg',
+  hill02: 'img/hill02.svg'
 };
 
 async function loadSVGAssets() {
@@ -903,18 +904,21 @@ function drawWorld() {
   const w = W();
   const h = H();
   ctx.save();
+  const applyLayerTransform = (parallaxX = 1, parallaxY = 1) => {
+    const cx = w / 2 - camera.x * camera.zoom * parallaxX;
+    const cy = h / 2 - camera.y * camera.zoom * parallaxY;
+    ctx.translate(cx, cy);
+    ctx.scale(camera.zoom, camera.zoom);
+  };
 
   // Draw background image in screen space (no blur/filter effects).
   if (svgImages.background) {
     ctx.drawImage(svgImages.background, 0, 0, w, h);
   }
 
-  const cx = w / 2 - camera.x * camera.zoom;
-  const cy = h / 2 - camera.y * camera.zoom;
-  ctx.translate(cx, cy);
-  ctx.scale(camera.zoom, camera.zoom);
-
   if (!svgImages.background) {
+    ctx.save();
+    applyLayerTransform(1);
     // Fallback: Sky - lighter gradient
     const skyGrad = ctx.createLinearGradient(0, -200, 0, WORLD.groundY);
     skyGrad.addColorStop(0, '#D8DBE3');
@@ -922,25 +926,48 @@ function drawWorld() {
     skyGrad.addColorStop(1, '#A6ADC1');
     ctx.fillStyle = skyGrad;
     ctx.fillRect(-2000, -500, 5000, WORLD.groundY + 500);
-
+    ctx.restore();
   }
 
-  // Hill layer: world-aligned, just above ground, behind gameplay elements.
+  // Hill layers: world-aligned, with depth parallax (hill02 behind hill01).
+  if (svgImages.hill02) {
+    ctx.save();
+    applyLayerTransform(0.58, 1);
+    const hillImg = svgImages.hill02;
+    const hillW = 2200;
+    const hillCenterX = WORLD.craneBaseX + WORLD.jibLength / 2;
+    const hillX = hillCenterX - hillW / 2 - 120;
+    const aspect = hillImg.naturalWidth > 0 ? (hillImg.naturalHeight / hillImg.naturalWidth) : 0.35;
+    const hillH = hillW * aspect;
+    const hillY = WORLD.groundY - hillH + 5;
+    ctx.drawImage(hillImg, hillX, hillY, hillW, hillH);
+    ctx.restore();
+  }
+
+  // Foreground hill layer.
   if (svgImages.hill01) {
+    ctx.save();
+    applyLayerTransform(0.72, 1);
     const hillImg = svgImages.hill01;
     const hillW = 1800;
     const hillCenterX = WORLD.craneBaseX + WORLD.jibLength / 2;
     const hillX = hillCenterX - hillW / 2;
     const aspect = hillImg.naturalWidth > 0 ? (hillImg.naturalHeight / hillImg.naturalWidth) : 0.35;
     const hillH = hillW * aspect;
-    const hillY = WORLD.groundY - hillH + 100;
+    const hillY = WORLD.groundY - hillH + 40;
     ctx.drawImage(hillImg, hillX, hillY, hillW, hillH);
+    ctx.restore();
   }
 
   // Ground - solid color
+  ctx.save();
+  applyLayerTransform(0.88, 1);
   ctx.fillStyle = '#B17F57';
   ctx.fillRect(-2000, WORLD.groundY - 10, 5000, 500);
+  ctx.restore();
 
+  ctx.save();
+  applyLayerTransform(1);
   drawCrane();
   drawDropZone();
   obstacles.forEach(obs => drawObstacle(obs));
@@ -964,6 +991,7 @@ function drawWorld() {
     drawSpotterArrow(spotterArrow);
   }
 
+  ctx.restore();
   ctx.restore();
 }
 
