@@ -10,7 +10,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: #A69D93;
+    background: #1a1a2e;
     overflow: hidden;
     font-family: 'Chakra Petch', monospace;
     user-select: none;
@@ -28,7 +28,7 @@
   #startScreen {
     position: fixed;
     inset: 0;
-    background: linear-gradient(135deg, #8C90A1, #A69D93, #BBC0CD);
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -46,39 +46,38 @@
   #startScreen h1 {
     font-family: 'Oswald', sans-serif;
     font-size: clamp(2rem, 6vw, 4.5rem);
-    color: #F5C942;
+    color: #f5a623;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    text-shadow: 0 0 40px rgba(245,198,66,0.4), 0 4px 0 #F37329;
+    text-shadow: 0 0 40px rgba(245,166,35,0.4), 0 4px 0 #c47d10;
     margin-bottom: 0.3em;
   }
 
   #startScreen p {
-    color: #193E75;
+    color: #8888aa;
     font-size: clamp(0.8rem, 2vw, 1.1rem);
     margin-bottom: 2em;
     letter-spacing: 0.05em;
-    font-weight: 600;
   }
 
   #startBtn {
     font-family: 'Oswald', sans-serif;
     font-size: 1.4rem;
     padding: 0.8em 3em;
-    background: linear-gradient(180deg, #F5C942, #F37329);
-    color: #193E75;
+    background: linear-gradient(180deg, #f5a623, #d4891a);
+    color: #1a1a2e;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.2em;
     font-weight: 700;
-    box-shadow: 0 6px 0 #F1732A, 0 8px 30px rgba(245,198,66,0.3);
+    box-shadow: 0 6px 0 #a06510, 0 8px 30px rgba(245,166,35,0.3);
     transition: all 0.15s;
   }
 
-  #startBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #F1732A, 0 12px 40px rgba(245,198,66,0.4); }
-  #startBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #F1732A; }
+  #startBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #a06510, 0 12px 40px rgba(245,166,35,0.4); }
+  #startBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #a06510; }
 
   /* HUD */
   #hud {
@@ -101,11 +100,11 @@
   }
 
   .hud-box {
-    background: rgba(193,62,75,0.85);
-    border: 1px solid rgba(245,198,66,0.3);
+    background: rgba(15,12,41,0.85);
+    border: 1px solid rgba(245,166,35,0.3);
     border-radius: 6px;
     padding: 4px 10px;
-    color: #F5C942;
+    color: #f5a623;
     font-size: clamp(0.65rem, 2.2vw, 0.85rem);
     font-weight: 600;
     letter-spacing: 0.03em;
@@ -115,7 +114,7 @@
   }
 
   #spotterBox {
-    background: rgba(25,62,117,0.9);
+    background: rgba(15,12,41,0.9);
     border: 1px solid rgba(136,204,255,0.4);
     border-radius: 6px;
     padding: 5px 12px;
@@ -132,8 +131,8 @@
 
   /* Damage bar */
   #damageWrap {
-    background: rgba(25,62,117,0.85);
-    border: 1px solid rgba(245,198,66,0.3);
+    background: rgba(15,12,41,0.85);
+    border: 1px solid rgba(245,166,35,0.3);
     border-radius: 6px;
     padding: 3px;
     flex: 1;
@@ -146,7 +145,7 @@
   }
 
   #damageLabel {
-    color: #F5C942;
+    color: #f5a623;
     font-size: clamp(0.55rem, 1.8vw, 0.7rem);
     font-weight: 600;
     padding-left: 4px;
@@ -164,7 +163,7 @@
   #damageFill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #3CA63C, #F5C942, #f55);
+    background: linear-gradient(90deg, #77dd77, #f5a623, #f55);
     border-radius: 4px;
     transition: width 0.3s ease;
   }
@@ -179,20 +178,6 @@
     z-index: 50;
     gap: 12px;
     align-items: end;
-  }
-
-  #mobileNavBar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 116px;
-    display: none;
-    z-index: 45;
-    pointer-events: none;
-    background: linear-gradient(180deg, rgba(25,62,117,0), rgba(25,62,117,0.4) 26%, rgba(25,62,117,0.78));
-    border-top: 1px solid rgba(245,198,66,0.28);
-    backdrop-filter: blur(4px);
   }
 
   .ctrl-group {
@@ -211,9 +196,9 @@
     width: 56px;
     height: 56px;
     border-radius: 10px;
-    border: 2px solid rgba(245,198,66,0.5);
-    background: rgba(25,62,117,0.8);
-    color: #F5C942;
+    border: 2px solid rgba(245,166,35,0.5);
+    background: rgba(15,12,41,0.8);
+    color: #f5a623;
     font-size: 1.4rem;
     font-family: 'Chakra Petch', monospace;
     cursor: pointer;
@@ -226,8 +211,8 @@
   }
 
   .ctrl-btn:active, .ctrl-btn.active {
-    background: rgba(245,198,66,0.3);
-    border-color: #F5C942;
+    background: rgba(245,166,35,0.3);
+    border-color: #f5a623;
     transform: scale(0.93);
   }
 
@@ -250,7 +235,7 @@
   #endScreen {
     position: fixed;
     inset: 0;
-    background: rgba(25,62,117,0.92);
+    background: rgba(15,12,41,0.92);
     display: none;
     flex-direction: column;
     align-items: center;
@@ -267,8 +252,8 @@
   }
 
   #endScreen h2.win-title {
-    color: #3CA63C;
-    text-shadow: 0 0 40px rgba(60,166,60,0.5);
+    color: #77dd77;
+    text-shadow: 0 0 40px rgba(119,221,119,0.5);
   }
 
   #endScreen h2.lose-title {
@@ -282,27 +267,25 @@
     font-family: 'Oswald', sans-serif;
     font-size: 1.2rem;
     padding: 0.7em 2.5em;
-    background: linear-gradient(180deg, #3CA63C, #2a8a2a);
-    color: #fff;
+    background: linear-gradient(180deg, #77dd77, #55bb55);
+    color: #1a1a2e;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.15em;
     font-weight: 700;
-    box-shadow: 0 4px 0 #1a6a1a, 0 6px 20px rgba(60,166,60,0.3);
+    box-shadow: 0 4px 0 #3a8a3a, 0 6px 20px rgba(119,221,119,0.3);
   }
 
   #restartBtn.lose-btn {
-    background: linear-gradient(180deg, #F5C942, #F37329);
-    box-shadow: 0 4px 0 #F1732A, 0 6px 20px rgba(245,198,66,0.3);
+    background: linear-gradient(180deg, #f5a623, #d4891a);
+    box-shadow: 0 4px 0 #a06510, 0 6px 20px rgba(245,166,35,0.3);
   }
 
   @media (max-width: 600px) {
     .ctrl-btn { width: 48px; height: 48px; font-size: 1.2rem; }
     .ctrl-btn.hook-btn { width: 68px; font-size: 0.65rem; }
-    #mobileNavBar { display: block; }
-    #controls { bottom: 12px; }
   }
 
   /* Landscape: move controls to the left */
@@ -327,22 +310,11 @@
       gap: 10px;
     }
   }
-
-  /* Hidden SVG container for loading assets */
-  #svg-assets {
-    position: absolute;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-  }
 </style>
 </head>
 <body>
 
 <canvas id="gameCanvas"></canvas>
-
-<!-- SVG Assets Container -->
-<div id="svg-assets"></div>
 
 <!-- Start Screen -->
 <div id="startScreen">
@@ -362,8 +334,6 @@
   </div>
   <div id="spotterBox">Ready</div>
 </div>
-
-<div id="mobileNavBar" aria-hidden="true"></div>
 
 <!-- On-screen Controls -->
 <div id="controls">
@@ -390,80 +360,6 @@
 </div>
 
 <script>
-// ============ SVG ASSET LOADING ============
-const svgAssets = {};
-const svgImages = {}; // Store loaded Image objects for rendering
-const assetPaths = {
-  crane: 'img/crane.svg',
-  crate: 'img/crate.svg',
-  drum: 'img/drum.svg',
-  block: 'img/block.svg',
-  hook: 'img/hook.svg',
-  tophook: 'img/tophook.svg',
-  precast: 'img/precast.svg',
-  brokenprecast: 'img/brokenprecast.svg',
-  background: 'img/background.png',
-  hill01: 'img/hill01.svg'
-};
-
-async function loadSVGAssets() {
-  const container = document.getElementById('svg-assets');
-  const imagePromises = [];
-
-  for (const [name, path] of Object.entries(assetPaths)) {
-    // Non-SVG assets (e.g. PNG background) load directly as images.
-    if (/\.(png|jpg|jpeg|webp)$/i.test(path)) {
-      const promise = new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          svgImages[name] = img;
-          resolve();
-        };
-        img.onerror = () => {
-          console.warn(`Failed to load image for ${name}`);
-          resolve();
-        };
-        img.src = path;
-      });
-      imagePromises.push(promise);
-      continue;
-    }
-
-    try {
-      const response = await fetch(path);
-      const svgText = await response.text();
-      const div = document.createElement('div');
-      div.innerHTML = svgText;
-      const svgEl = div.querySelector('svg');
-      if (svgEl) {
-        container.appendChild(svgEl);
-        svgAssets[name] = svgEl;
-
-        // Create Image object for canvas rendering
-        const promise = new Promise((resolve) => {
-          const img = new Image();
-          const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
-          const url = URL.createObjectURL(svgBlob);
-          img.onload = () => {
-            svgImages[name] = img;
-            resolve();
-          };
-          img.onerror = () => {
-            console.warn(`Failed to load image for ${name}`);
-            resolve();
-          };
-          img.src = url;
-        });
-        imagePromises.push(promise);
-      }
-    } catch (e) {
-      console.warn(`Failed to load ${name}:`, e);
-    }
-  }
-
-  await Promise.all(imagePromises);
-}
-
 // ============ GAME ENGINE ============
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -501,7 +397,6 @@ let trolley = {
 
 const TROLLEY_MIN_X = WORLD.craneBaseX + 30;
 const TROLLEY_MAX_X = WORLD.craneBaseX + WORLD.jibLength - 30;
-const OBSTACLE_BASE_X = WORLD.craneBaseX + 510;
 const ROPE_MIN = 60;
 const ROPE_MAX = 680;
 
@@ -512,27 +407,26 @@ let hook = {
 
 let crates = [];
 let obstacles = [];
-let dropZone = { x: 1100, y: WORLD.groundY - 25, width: 120, height: 50 };
+let dropZone = { x: 900, y: WORLD.groundY - 25, width: 120, height: 50 };
 let hookedCrate = null;
 let score = 0;
 let totalCrates = 3;
-let damage = 0;
+let damage = 0;          // 0-100
 let hitCooldown = 0;
 let droppedCrates = [];
 let spotterMsg = '';
-let spotterArrow = null;
-const DROP_ZONE_TOP_Y = () => dropZone.y - 80;
+let spotterArrow = null;  // { x, y, dir } for world-space arrow
+const DROP_ZONE_TOP_Y = () => dropZone.y - 80; // top of green zone
 
 let inputState = { left: false, right: false, up: false, down: false };
 
 let wireSegments = [];
 const WIRE_SEG_COUNT = 20;
-const WIRE_ANCHOR_Y_OFFSET = 16; // lowered so wire tops sit behind trolley body
 
 function initWireSegments() {
   wireSegments = [];
   for (let i = 0; i <= WIRE_SEG_COUNT; i++) {
-    wireSegments.push({ x: trolley.x, y: WORLD.craneTopY + WIRE_ANCHOR_Y_OFFSET + (trolley.ropeLength * i / WIRE_SEG_COUNT) });
+    wireSegments.push({ x: trolley.x, y: WORLD.craneTopY + (trolley.ropeLength * i / WIRE_SEG_COUNT) });
   }
 }
 
@@ -547,52 +441,16 @@ function initGame() {
   hook.vx = 0; hook.vy = 0;
   hook.angle = 0; hook.angleVel = 0;
 
-  // Precast concrete elements to transport (276x161 aspect ratio from SVG)
   crates = [
-    { x: WORLD.craneBaseX + 100, y: WORLD.groundY - 45, w: 80, h: 47, color: '#C0C9CE', type: 'precast', delivered: false },
-    { x: WORLD.craneBaseX + 250, y: WORLD.groundY - 45, w: 80, h: 47, color: '#C0C9CE', type: 'precast', delivered: false },
-    { x: WORLD.craneBaseX + 400, y: WORLD.groundY - 45, w: 80, h: 47, color: '#C0C9CE', type: 'precast', delivered: false },
+    { x: WORLD.craneBaseX + 100, y: WORLD.groundY - 50, w: 60, h: 40, color: '#e07030', delivered: false },
+    { x: WORLD.craneBaseX + 250, y: WORLD.groundY - 60, w: 50, h: 50, color: '#3090e0', delivered: false },
+    { x: WORLD.craneBaseX + 400, y: WORLD.groundY - 45, w: 70, h: 35, color: '#e0d030', delivered: false },
   ];
 
-  // Create drum pyramid obstacle (3 levels high)
-  const drumW = 38;
-  const drumH = 47; // 95:118 ratio, scaled down by ~20%
-  const obstacleBaseX = OBSTACLE_BASE_X;
-
-  obstacles = [];
-  // Bottom row: 4 drums
-  for (let i = 0; i < 4; i++) {
-    obstacles.push({
-      x: obstacleBaseX + i * drumW,
-      y: WORLD.groundY - drumH,
-      w: drumW,
-      h: drumH,
-      color: '#F9893D',
-      type: 'drum'
-    });
-  }
-  // Middle row: 3 drums
-  for (let i = 0; i < 3; i++) {
-    obstacles.push({
-      x: obstacleBaseX + drumW/2 + i * drumW,
-      y: WORLD.groundY - drumH * 2,
-      w: drumW,
-      h: drumH,
-      color: '#F9893D',
-      type: 'drum'
-    });
-  }
-  // Top row: 2 drums
-  for (let i = 0; i < 2; i++) {
-    obstacles.push({
-      x: obstacleBaseX + drumW + i * drumW,
-      y: WORLD.groundY - drumH * 3,
-      w: drumW,
-      h: drumH,
-      color: '#F9893D',
-      type: 'drum'
-    });
-  }
+  obstacles = [
+    { x: WORLD.craneBaseX + 580, y: WORLD.groundY - 180, w: 50, h: 180, color: '#cc2222' },
+    { x: WORLD.craneBaseX + 580, y: WORLD.groundY - 250, w: 80, h: 20, color: '#aa1818' },
+  ];
 
   dropZone.x = WORLD.craneBaseX + WORLD.jibLength - 200;
   hookedCrate = null;
@@ -616,10 +474,11 @@ function resetHookBtn() {
 
 // ============ SPOTTER SYSTEM ============
 function updateSpotter() {
-  const obstacleX = OBSTACLE_BASE_X;
+  const obstacleX = WORLD.craneBaseX + 580;
   const obstacleTopY = WORLD.groundY - 250;
 
   if (!hookedCrate) {
+    // Find next available crate
     const avail = crates.find(c => !c.delivered && !droppedCrates.includes(c));
     if (!avail) {
       if (score >= totalCrates) {
@@ -654,10 +513,12 @@ function updateSpotter() {
     return;
   }
 
+  // Has hooked crate
   const crateX = hookedCrate.x + hookedCrate.w / 2;
   const crateY = hookedCrate.y + hookedCrate.h;
   const dzCenterX = dropZone.x + dropZone.width / 2;
 
+  // Check if over drop zone
   if (crateX > dropZone.x && crateX < dropZone.x + dropZone.width) {
     if (crateY >= DROP_ZONE_TOP_Y()) {
       spotterMsg = '\u2b07 RELEASE now! In the green zone!';
@@ -669,12 +530,14 @@ function updateSpotter() {
     return;
   }
 
+  // Check if past obstacle
   if (crateX > obstacleX + 80) {
     spotterMsg = '\u27a1 Almost there! Move to drop zone';
     spotterArrow = { x: dzCenterX, y: dropZone.y - 60, dir: 'right' };
     return;
   }
 
+  // Near obstacle - check if high enough
   if (crateX > obstacleX - 100 && crateX < obstacleX + 130) {
     if (crateY > obstacleTopY - 20) {
       spotterMsg = '\u2b06 RAISE the load! Clear the obstacle!';
@@ -686,6 +549,7 @@ function updateSpotter() {
     return;
   }
 
+  // Left of obstacle
   spotterMsg = '\u27a1 Move right towards drop zone';
   spotterArrow = { x: obstacleX - 30, y: crateY - 60, dir: 'right' };
 }
@@ -723,7 +587,7 @@ function updatePhysics(dt) {
   hook.angle = Math.max(-0.75, Math.min(0.75, hook.angle));
 
   const anchorX = trolley.x;
-  const anchorY = WORLD.craneTopY + WIRE_ANCHOR_Y_OFFSET;
+  const anchorY = WORLD.craneTopY;
   const targetHookX = anchorX + Math.sin(hook.angle) * trolley.ropeLength;
   const targetHookY = anchorY + Math.cos(hook.angle) * trolley.ropeLength;
 
@@ -755,6 +619,7 @@ function updatePhysics(dt) {
     hookedCrate.rotation = currentWireAngle;
   }
 
+  // Update dropped crates
   for (let i = droppedCrates.length - 1; i >= 0; i--) {
     const dc = droppedCrates[i];
     dc.vy += 800 * dt;
@@ -787,6 +652,7 @@ function updatePhysics(dt) {
       const inZone = cx > dropZone.x && cx < dropZone.x + dropZone.width;
 
       if (dc.releasedTooHigh) {
+        // Crate broke!
         dc.broken = true;
         dc.delivered = false;
         setSpotterAlert('\u26a0 DROPPED TOO HIGH! Crate destroyed!');
@@ -826,6 +692,7 @@ function updatePhysics(dt) {
     }
   }
 
+  // Ensure hook btn is synced
   if (!hookedCrate) {
     const btn = document.getElementById('hookBtn');
     if (btn.classList.contains('hooked')) resetHookBtn();
@@ -833,6 +700,7 @@ function updatePhysics(dt) {
 
   if (hitCooldown > 0) hitCooldown -= dt;
 
+  // Obstacle collision
   for (const obs of obstacles) {
     let wasHit = false;
     if (hook.x > obs.x && hook.x < obs.x + obs.w &&
@@ -858,6 +726,7 @@ function updatePhysics(dt) {
     }
   }
 
+  // Update spotter
   if (gameState === 'playing' && !spotterAlertTimer) {
     updateSpotter();
     document.getElementById('spotterBox').textContent = spotterMsg;
@@ -904,62 +773,62 @@ function drawWorld() {
   const h = H();
   ctx.save();
 
-  // Draw background image in screen space (no blur/filter effects).
-  if (svgImages.background) {
-    ctx.drawImage(svgImages.background, 0, 0, w, h);
-  }
-
   const cx = w / 2 - camera.x * camera.zoom;
   const cy = h / 2 - camera.y * camera.zoom;
   ctx.translate(cx, cy);
   ctx.scale(camera.zoom, camera.zoom);
 
-  if (!svgImages.background) {
-    // Fallback: Sky - lighter gradient
-    const skyGrad = ctx.createLinearGradient(0, -200, 0, WORLD.groundY);
-    skyGrad.addColorStop(0, '#D8DBE3');
-    skyGrad.addColorStop(0.5, '#BBC0CD');
-    skyGrad.addColorStop(1, '#A6ADC1');
-    ctx.fillStyle = skyGrad;
-    ctx.fillRect(-2000, -500, 5000, WORLD.groundY + 500);
+  // Sky
+  const skyGrad = ctx.createLinearGradient(0, -200, 0, WORLD.groundY);
+  skyGrad.addColorStop(0, '#1a1a3e');
+  skyGrad.addColorStop(0.5, '#2a2a5e');
+  skyGrad.addColorStop(1, '#3a3a6e');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(-2000, -500, 5000, WORLD.groundY + 500);
 
-  }
-
-  // Hill layer: world-aligned, just above ground, behind gameplay elements.
-  if (svgImages.hill01) {
-    const hillImg = svgImages.hill01;
-    const hillW = 1800;
-    const hillCenterX = WORLD.craneBaseX + WORLD.jibLength / 2;
-    const hillX = hillCenterX - hillW / 2;
-    const aspect = hillImg.naturalWidth > 0 ? (hillImg.naturalHeight / hillImg.naturalWidth) : 0.35;
-    const hillH = hillW * aspect;
-    const hillY = WORLD.groundY - hillH + 100;
-    ctx.drawImage(hillImg, hillX, hillY, hillW, hillH);
-  }
-
-  // Ground - solid color
-  ctx.fillStyle = '#B17F57';
+  // Ground
+  const gndGrad = ctx.createLinearGradient(0, WORLD.groundY - 10, 0, WORLD.groundY + 300);
+  gndGrad.addColorStop(0, '#5a5040');
+  gndGrad.addColorStop(0.05, '#4a4030');
+  gndGrad.addColorStop(1, '#2a2520');
+  ctx.fillStyle = gndGrad;
   ctx.fillRect(-2000, WORLD.groundY - 10, 5000, 500);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let i = -2000; i < 3000; i += 40) {
+    ctx.beginPath();
+    ctx.moveTo(i, WORLD.groundY);
+    ctx.lineTo(i + 20, WORLD.groundY + 200);
+    ctx.stroke();
+  }
 
   drawCrane();
   drawDropZone();
   obstacles.forEach(obs => drawObstacle(obs));
 
-  if (!hookedCrate && gameState === 'playing') {
-    const pickupTarget = getPickupTargetCrate();
-    if (pickupTarget) drawPickupMarker(pickupTarget);
-  }
-
   crates.forEach(c => { if (!c.delivered || c === hookedCrate) return; drawCrate(c); });
   crates.forEach(c => { if (c.delivered || c === hookedCrate || droppedCrates.includes(c)) return; drawCrate(c); });
 
   drawWire();
-  drawTrolley();
   drawHook();
 
   droppedCrates.forEach(dc => drawCrate(dc));
   if (hookedCrate) drawCrate(hookedCrate);
 
+  // Nearby crate indicator
+  if (!hookedCrate && gameState === 'playing') {
+    const nearby = findNearestCrate();
+    if (nearby) {
+      ctx.strokeStyle = 'rgba(245,166,35,0.5)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(nearby.x - 4, nearby.y - 4, nearby.w + 8, nearby.h + 8);
+      ctx.setLineDash([]);
+    }
+  }
+
+  // Spotter arrow in world space
   if (spotterArrow && gameState === 'playing') {
     drawSpotterArrow(spotterArrow);
   }
@@ -971,60 +840,14 @@ function drawSpotterArrow(arrow) {
   const { x, y, dir } = arrow;
   const t = performance.now() / 1000;
   const bob = Math.sin(t * 4) * 6;
-  const s = 14;
-  const edgePadPx = 18 + s;
-
-  const toScreenX = (wx) => (wx - camera.x) * camera.zoom + W() / 2;
-  const toScreenY = (wy) => (wy - camera.y) * camera.zoom + H() / 2;
-  const toWorldX = (sx) => (sx - W() / 2) / camera.zoom + camera.x;
-  const toWorldY = (sy) => (sy - H() / 2) / camera.zoom + camera.y;
-
-  let minX = edgePadPx;
-  let maxX = W() - edgePadPx;
-  let minY = edgePadPx;
-  let maxY = H() - edgePadPx;
-
-  const navBar = document.getElementById('mobileNavBar');
-  if (navBar) {
-    const navStyle = getComputedStyle(navBar);
-    if (navStyle.display !== 'none') {
-      const navRect = navBar.getBoundingClientRect();
-      maxY = Math.min(maxY, navRect.top - edgePadPx);
-    }
-  }
-
-  const controlsEl = document.getElementById('controls');
-  if (controlsEl) {
-    const controlsStyle = getComputedStyle(controlsEl);
-    if (controlsStyle.display !== 'none') {
-      const r = controlsEl.getBoundingClientRect();
-      if (r.width > 0 && r.height > 0) {
-        // Portrait mobile: keep guidance arrow above the control cluster.
-        if (window.matchMedia('(max-width: 700px) and (orientation: portrait)').matches) {
-          maxY = Math.min(maxY, r.top - edgePadPx);
-        }
-        // Landscape mobile: controls sit on the left, so keep arrow out of that strip.
-        if (window.matchMedia('(orientation: landscape)').matches && r.left < W() * 0.35) {
-          minX = Math.max(minX, r.right + edgePadPx);
-        }
-      }
-    }
-  }
-
-  if (minX > maxX) minX = maxX = W() / 2;
-  if (minY > maxY) minY = maxY = H() / 2;
-
-  const screenX = toScreenX(x);
-  const screenY = toScreenY(y + bob);
-  const clampedX = toWorldX(Math.min(maxX, Math.max(minX, screenX)));
-  const clampedY = toWorldY(Math.min(maxY, Math.max(minY, screenY)));
 
   ctx.save();
-  ctx.translate(clampedX, clampedY);
+  ctx.translate(x, y + bob);
   ctx.fillStyle = 'rgba(136,204,255,0.8)';
   ctx.strokeStyle = 'rgba(136,204,255,0.9)';
   ctx.lineWidth = 2;
 
+  const s = 14;
   ctx.beginPath();
   if (dir === 'down') {
     ctx.moveTo(0, s);
@@ -1049,40 +872,15 @@ function drawSpotterArrow(arrow) {
   ctx.restore();
 }
 
-function drawCraneSVG(svg, x, y, width, height) {
-  const img = new Image();
-  const svgData = new XMLSerializer().serializeToString(svg);
-  const blob = new Blob([svgData], { type: 'image/svg+xml' });
-  const url = URL.createObjectURL(blob);
-  img.src = url;
-  ctx.drawImage(img, x, y, width, height);
-  URL.revokeObjectURL(url);
-}
-
 function drawCrane() {
   const bx = WORLD.craneBaseX;
   const topY = WORLD.craneTopY;
   const gndY = WORLD.groundY;
-  const drawRoundedRect = (x, y, w, h, r) => {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  };
 
-  // Base - using yellow/orange tones from SVG
-  ctx.fillStyle = '#B18058';
+  ctx.fillStyle = '#555';
   ctx.fillRect(bx - 80, gndY - 15, 180, 25);
 
-  // Tower structure - crane yellow
-  ctx.strokeStyle = '#F5C942';
+  ctx.strokeStyle = '#666';
   ctx.lineWidth = 3;
   const towerW = 30;
 
@@ -1094,7 +892,7 @@ function drawCrane() {
   ctx.stroke();
 
   ctx.lineWidth = 1.5;
-  ctx.strokeStyle = '#F37329';
+  ctx.strokeStyle = '#555';
   const segH = 50;
   for (let y = gndY - 15; y > topY; y -= segH) {
     ctx.beginPath();
@@ -1109,11 +907,10 @@ function drawCrane() {
     ctx.stroke();
   }
 
-  // Jib - crane yellow
   const jibY = topY;
   const jibEnd = bx + WORLD.jibLength;
 
-  ctx.strokeStyle = '#F5C942';
+  ctx.strokeStyle = '#666';
   ctx.lineWidth = 2.5;
   ctx.beginPath();
   ctx.moveTo(bx, jibY);
@@ -1123,7 +920,7 @@ function drawCrane() {
   ctx.stroke();
 
   ctx.lineWidth = 1;
-  ctx.strokeStyle = '#F37329';
+  ctx.strokeStyle = '#555';
   const jibSegW = 40;
   for (let x = bx; x < jibEnd; x += jibSegW) {
     ctx.beginPath();
@@ -1134,46 +931,21 @@ function drawCrane() {
     ctx.stroke();
   }
 
-  // Counterweight (outer corners rounded, inner touching corners square)
-  const cwX = bx - 96;
-  const cwY = jibY - 5;
-  const cwOrangeW = 13;
-  const cwBlueW = 26;
-  const cwH = 42;
-  const cwRadius = 8;
-  const cwOverlap = 4;
-
-  ctx.fillStyle = '#F37329';
+  ctx.strokeStyle = '#666';
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(cwX + cwRadius, cwY);
-  ctx.lineTo(cwX + cwOrangeW + cwOverlap, cwY);
-  ctx.lineTo(cwX + cwOrangeW + cwOverlap, cwY + cwH);
-  ctx.lineTo(cwX + cwRadius, cwY + cwH);
-  ctx.quadraticCurveTo(cwX, cwY + cwH, cwX, cwY + cwH - cwRadius);
-  ctx.lineTo(cwX, cwY + cwRadius);
-  ctx.quadraticCurveTo(cwX, cwY, cwX + cwRadius, cwY);
-  ctx.closePath();
-  ctx.fill();
+  ctx.moveTo(bx, jibY);
+  ctx.lineTo(bx - 100, jibY);
+  ctx.moveTo(bx, jibY + 14);
+  ctx.lineTo(bx - 100, jibY + 14);
+  ctx.stroke();
 
-  ctx.fillStyle = '#3268A5';
-  const cwBlueX = cwX + cwOrangeW - cwOverlap;
-  ctx.beginPath();
-  ctx.moveTo(cwBlueX, cwY);
-  ctx.lineTo(cwBlueX + cwBlueW - cwRadius, cwY);
-  ctx.quadraticCurveTo(cwBlueX + cwBlueW, cwY, cwBlueX + cwBlueW, cwY + cwRadius);
-  ctx.lineTo(cwBlueX + cwBlueW, cwY + cwH - cwRadius);
-  ctx.quadraticCurveTo(cwBlueX + cwBlueW, cwY + cwH, cwBlueX + cwBlueW - cwRadius, cwY + cwH);
-  ctx.lineTo(cwBlueX, cwY + cwH);
-  ctx.lineTo(cwBlueX, cwY);
-  ctx.closePath();
-  ctx.fill();
+  ctx.fillStyle = '#444';
+  ctx.fillRect(bx - 100, jibY - 5, 40, 40);
+  ctx.fillStyle = '#555';
+  ctx.fillRect(bx - 95, jibY, 30, 30);
 
-  ctx.fillStyle = '#F5C942';
-  drawRoundedRect(bx - 116, jibY + 10, 122, 8, 4);
-  ctx.fill();
-
-  // Support cables
-  ctx.strokeStyle = '#193E75';
+  ctx.strokeStyle = '#777';
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(bx, topY - 40);
@@ -1182,176 +954,123 @@ function drawCrane() {
   ctx.lineTo(bx + 80, jibY);
   ctx.stroke();
 
-  ctx.strokeStyle = 'rgba(25,62,117,0.3)';
+  ctx.strokeStyle = 'rgba(200,200,200,0.3)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(bx, topY - 40);
   ctx.lineTo(jibEnd - 50, jibY);
   ctx.stroke();
 
-  // Cabin (square with chamfered top-right corner and subtle corner radius)
-  const cabinW = 48;
-  const cabinH = 54;
-  const cabinX = bx - cabinW / 2;
-  const cabinY = topY - 5;
-  const cabinChamfer = 14;
-  const cabinRadius = 5;
+  ctx.fillStyle = '#f5a623';
+  ctx.fillRect(bx - 5, topY + 14, 35, 30);
+  ctx.fillStyle = '#88ccff';
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(bx, topY + 16, 26, 14);
+  ctx.globalAlpha = 1;
 
-  ctx.fillStyle = '#F37329';
+  ctx.fillStyle = '#888';
+  ctx.fillRect(trolley.x - 12, topY + 5, 24, 12);
+  ctx.fillStyle = '#666';
   ctx.beginPath();
-  ctx.moveTo(cabinX + cabinRadius, cabinY);
-  ctx.lineTo(cabinX + cabinW - cabinChamfer, cabinY);
-  ctx.lineTo(cabinX + cabinW, cabinY + cabinChamfer);
-  ctx.lineTo(cabinX + cabinW, cabinY + cabinH - cabinRadius);
-  ctx.quadraticCurveTo(
-    cabinX + cabinW,
-    cabinY + cabinH,
-    cabinX + cabinW - cabinRadius,
-    cabinY + cabinH
-  );
-  ctx.lineTo(cabinX + cabinRadius, cabinY + cabinH);
-  ctx.quadraticCurveTo(cabinX, cabinY + cabinH, cabinX, cabinY + cabinH - cabinRadius);
-  ctx.lineTo(cabinX, cabinY + cabinRadius);
-  ctx.quadraticCurveTo(cabinX, cabinY, cabinX + cabinRadius, cabinY);
-  ctx.closePath();
-  ctx.fill();
-
-  // Cabin window (square with matching top-right chamfer and subtle corner radius)
-  const winX = cabinX + 10;
-  const winY = cabinY + 11;
-  const winW = 24;
-  const winH = 27;
-  const winChamfer = 8;
-  const winRadius = 3;
-
-  ctx.fillStyle = '#3268A5';
-  ctx.beginPath();
-  ctx.moveTo(winX + winRadius, winY);
-  ctx.lineTo(winX + winW - winChamfer, winY);
-  ctx.lineTo(winX + winW, winY + winChamfer);
-  ctx.lineTo(winX + winW, winY + winH - winRadius);
-  ctx.quadraticCurveTo(winX + winW, winY + winH, winX + winW - winRadius, winY + winH);
-  ctx.lineTo(winX + winRadius, winY + winH);
-  ctx.quadraticCurveTo(winX, winY + winH, winX, winY + winH - winRadius);
-  ctx.lineTo(winX, winY + winRadius);
-  ctx.quadraticCurveTo(winX, winY, winX + winRadius, winY);
-  ctx.closePath();
-  ctx.fill();
-
-}
-
-function drawTrolley() {
-  const topY = WORLD.craneTopY;
-  ctx.fillStyle = '#F4762B';
-  const trolleyX = trolley.x - 17;
-  const trolleyY = topY + 14;
-  const trolleyW = 34;
-  const trolleyH = 12;
-  const trolleyRadius = 4;
-
-  ctx.beginPath();
-  ctx.moveTo(trolleyX, trolleyY);
-  ctx.lineTo(trolleyX + trolleyW, trolleyY);
-  ctx.lineTo(trolleyX + trolleyW, trolleyY + trolleyH - trolleyRadius);
-  ctx.quadraticCurveTo(
-    trolleyX + trolleyW,
-    trolleyY + trolleyH,
-    trolleyX + trolleyW - trolleyRadius,
-    trolleyY + trolleyH
-  );
-  ctx.lineTo(trolleyX + trolleyRadius, trolleyY + trolleyH);
-  ctx.quadraticCurveTo(
-    trolleyX,
-    trolleyY + trolleyH,
-    trolleyX,
-    trolleyY + trolleyH - trolleyRadius
-  );
-  ctx.closePath();
+  ctx.arc(trolley.x - 6, topY + 5, 4, 0, Math.PI * 2);
+  ctx.arc(trolley.x + 6, topY + 5, 4, 0, Math.PI * 2);
   ctx.fill();
 }
 
 function drawWire() {
-  const TOP_SPREAD = 8;
-  const BOTTOM_SPREAD = 3.5; // slightly closer at the hook, but not touching
+  // Draw two parallel wires with constant spacing
+  const SPREAD = 6; // half-gap between the two wires
 
   for (let side = -1; side <= 1; side += 2) {
+    const offset = side * SPREAD;
+
+    // Main wire stroke
     ctx.beginPath();
     for (let i = 0; i <= WIRE_SEG_COUNT; i++) {
-      const t = i / WIRE_SEG_COUNT;
-      const spread = TOP_SPREAD + (BOTTOM_SPREAD - TOP_SPREAD) * t;
-      const sx = wireSegments[i].x + side * spread;
+      const sx = wireSegments[i].x + offset;
       const sy = wireSegments[i].y;
       if (i === 0) {
         ctx.moveTo(sx, sy);
       } else {
-        const prevT = (i - 1) / WIRE_SEG_COUNT;
-        const prevSpread = TOP_SPREAD + (BOTTOM_SPREAD - TOP_SPREAD) * prevT;
-        const prevSx = wireSegments[i - 1].x + side * prevSpread;
+        const prevSx = wireSegments[i - 1].x + offset;
         const prevSy = wireSegments[i - 1].y;
         const cpx = (prevSx + sx) / 2;
         const cpy = (prevSy + sy) / 2;
         ctx.quadraticCurveTo(prevSx, prevSy, cpx, cpy);
       }
     }
-    ctx.strokeStyle = '#193E75';
-    ctx.lineWidth = 2.6;
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 1.2;
     ctx.stroke();
 
+    // Highlight stroke for depth
+    const hlOff = offset + (side > 0 ? 0.8 : -0.8);
     ctx.beginPath();
     for (let i = 0; i <= WIRE_SEG_COUNT; i++) {
-      const t = i / WIRE_SEG_COUNT;
-      const spread = TOP_SPREAD + (BOTTOM_SPREAD - TOP_SPREAD) * t;
-      const hlOff = side * (spread + 0.9);
       const sx = wireSegments[i].x + hlOff;
       const sy = wireSegments[i].y;
       if (i === 0) {
         ctx.moveTo(sx, sy);
       } else {
-        const prevT = (i - 1) / WIRE_SEG_COUNT;
-        const prevSpread = TOP_SPREAD + (BOTTOM_SPREAD - TOP_SPREAD) * prevT;
-        const prevHlOff = side * (prevSpread + 0.9);
-        const prevSx = wireSegments[i - 1].x + prevHlOff;
+        const prevSx = wireSegments[i - 1].x + hlOff;
         const prevSy = wireSegments[i - 1].y;
         const cpx = (prevSx + sx) / 2;
         const cpy = (prevSy + sy) / 2;
         ctx.quadraticCurveTo(prevSx, prevSy, cpx, cpy);
       }
     }
-    ctx.strokeStyle = 'rgba(25,62,117,0.12)';
-    ctx.lineWidth = 1.1;
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 0.5;
     ctx.stroke();
   }
 }
 
 function drawHook() {
   const hx = hook.x;
-  const hy = hook.y - 8;
+  const hy = hook.y;
   const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
   const lastSeg = wireSegments[WIRE_SEG_COUNT];
   const wireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
-
-  // Hook dimensions (20% smaller: 30px -> 24px)
-  const hookWidth = 24;
-  const hookHeight = (79 / 37) * hookWidth;
 
   ctx.save();
   ctx.translate(hx, hy);
   ctx.rotate(wireAngle);
 
-  // Draw hook SVG without color overlay
-  if (svgImages.hook) {
-    ctx.drawImage(svgImages.hook, -hookWidth / 2, 0, hookWidth, hookHeight);
-  }
+  // Pulley block housing
+  ctx.fillStyle = '#888';
+  ctx.fillRect(-10, -8, 20, 18);
+  ctx.fillStyle = '#666';
+  ctx.fillRect(-8, -6, 16, 14);
+  // Pulley wheels (where wires wrap)
+  ctx.fillStyle = '#555';
+  ctx.beginPath();
+  ctx.arc(-4, 0, 3.5, 0, Math.PI * 2);
+  ctx.arc(4, 0, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#777';
+  ctx.beginPath();
+  ctx.arc(-4, 0, 1.5, 0, Math.PI * 2);
+  ctx.arc(4, 0, 1.5, 0, Math.PI * 2);
+  ctx.fill();
 
+  // Hook below the block
+  ctx.strokeStyle = hookedCrate ? '#f55' : '#ddd';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(0, 10);
+  ctx.lineTo(0, 20);
+  ctx.quadraticCurveTo(10, 24, 10, 18);
+  ctx.quadraticCurveTo(10, 10, 0, 12);
+  ctx.stroke();
   ctx.restore();
 
-  // Proximity indicator - centered at bottom of hook
   if (!hookedCrate && gameState === 'playing') {
     const nearby = findNearestCrate();
     if (nearby) {
       ctx.beginPath();
-      ctx.arc(hx, hy + hookHeight, 20, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(245,198,66,0.15)';
+      ctx.arc(hx, hy, 20, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(245,166,35,0.15)';
       ctx.fill();
     }
   }
@@ -1366,12 +1085,8 @@ function drawCrate(c) {
   ctx.translate(cx, cy);
   ctx.rotate(rot);
 
-  // Draw SVG if available, otherwise fallback to colored rectangle
-  if (c.broken && c.type === 'precast' && svgImages.brokenprecast) {
-    // Draw broken precast SVG
-    ctx.drawImage(svgImages.brokenprecast, -c.w / 2, -c.h / 2, c.w, c.h);
-  } else if (c.broken) {
-    // Fallback for broken crates without SVG
+  if (c.broken) {
+    // Draw broken crate - red X and faded
     ctx.globalAlpha = 0.4;
     ctx.fillStyle = '#555';
     ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
@@ -1384,136 +1099,97 @@ function drawCrate(c) {
     ctx.lineTo(-c.w / 2 + 5, c.h / 2 - 5);
     ctx.stroke();
     ctx.globalAlpha = 1;
-  } else if (c.type === 'precast' && svgImages.precast) {
-    ctx.drawImage(svgImages.precast, -c.w / 2, -c.h / 2, c.w, c.h);
-  } else if (c.type === 'drum' && svgImages.drum) {
-    ctx.drawImage(svgImages.drum, -c.w / 2, -c.h / 2, c.w, c.h);
-  } else if (c.type === 'crate' && svgImages.crate) {
-    ctx.drawImage(svgImages.crate, -c.w / 2, -c.h / 2, c.w, c.h);
-  } else {
-    // Fallback: colored rectangle
-    ctx.fillStyle = c.color;
-    ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
-
-    // Highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h * 0.3);
-
-    // Border
-    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(-c.w / 2, -c.h / 2, c.w, c.h);
-
-    // Detail lines
-    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(-c.w / 2 + 5, -c.h / 2 + 5);
-    ctx.lineTo(c.w / 2 - 5, c.h / 2 - 5);
-    ctx.moveTo(c.w / 2 - 5, -c.h / 2 + 5);
-    ctx.lineTo(-c.w / 2 + 5, c.h / 2 - 5);
-    ctx.stroke();
+    ctx.restore();
+    return;
   }
 
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.fillRect(-c.w / 2 + 3, -c.h / 2 + 3, c.w, c.h);
+
+  ctx.fillStyle = c.color;
+  ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h * 0.3);
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(-c.w / 2, -c.h / 2, c.w, c.h);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(-c.w / 2 + 5, -c.h / 2 + 5);
+  ctx.lineTo(c.w / 2 - 5, c.h / 2 - 5);
+  ctx.moveTo(c.w / 2 - 5, -c.h / 2 + 5);
+  ctx.lineTo(-c.w / 2 + 5, c.h / 2 - 5);
+  ctx.stroke();
   ctx.restore();
 }
 
 function drawObstacle(obs) {
   ctx.save();
 
-  // Draw SVG if available (drums), otherwise fallback
-  if (obs.type === 'drum' && svgImages.drum) {
-    ctx.drawImage(svgImages.drum, obs.x, obs.y, obs.w, obs.h);
-  } else if (obs.type === 'block' && svgImages.block) {
-    ctx.drawImage(svgImages.block, obs.x, obs.y, obs.w, obs.h);
-  } else {
-    // Fallback: colored rectangle with stripes
-    ctx.fillStyle = obs.color;
-    ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(obs.x + 4, obs.y + 4, obs.w, obs.h);
 
-    // Diagonal stripes
-    ctx.save();
+  ctx.fillStyle = obs.color;
+  ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(obs.x, obs.y, obs.w, obs.h);
+  ctx.clip();
+  ctx.strokeStyle = 'rgba(255,255,0,0.3)';
+  ctx.lineWidth = 4;
+  const stripeGap = 16;
+  for (let i = -obs.h; i < obs.w + obs.h; i += stripeGap) {
     ctx.beginPath();
-    ctx.rect(obs.x, obs.y, obs.w, obs.h);
-    ctx.clip();
-    ctx.strokeStyle = 'rgba(255,198,66,0.3)';
-    ctx.lineWidth = 4;
-    const stripeGap = 16;
-    for (let i = -obs.h; i < obs.w + obs.h; i += stripeGap) {
-      ctx.beginPath();
-      ctx.moveTo(obs.x + i, obs.y);
-      ctx.lineTo(obs.x + i - obs.h, obs.y + obs.h);
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // Border
-    ctx.strokeStyle = 'rgba(128,143,150,0.6)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
-
-    // Highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.1)';
-    ctx.fillRect(obs.x, obs.y, obs.w, obs.h * 0.15);
-
-    if (obs.w >= 60) {
-      ctx.fillStyle = '#F5C942';
-      ctx.font = 'bold 14px "Chakra Petch", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('\u26a0 DANGER', obs.x + obs.w / 2, obs.y + obs.h / 2 + 5);
-      ctx.textAlign = 'left';
-    }
+    ctx.moveTo(obs.x + i, obs.y);
+    ctx.lineTo(obs.x + i - obs.h, obs.y + obs.h);
+    ctx.stroke();
   }
+  ctx.restore();
 
+  ctx.strokeStyle = 'rgba(255,60,60,0.6)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  ctx.fillRect(obs.x, obs.y, obs.w, obs.h * 0.15);
+
+  if (obs.w >= 60) {
+    ctx.fillStyle = '#ffcc00';
+    ctx.font = 'bold 14px "Chakra Petch", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('\u26a0 DANGER', obs.x + obs.w / 2, obs.y + obs.h / 2 + 5);
+    ctx.textAlign = 'left';
+  }
   ctx.restore();
 }
 
 function drawDropZone() {
   const dz = dropZone;
-
-  // Green safe zone
-  ctx.fillStyle = 'rgba(60,166,60,0.1)';
+  ctx.fillStyle = 'rgba(119,221,119,0.1)';
   ctx.fillRect(dz.x, dz.y - 80, dz.width, 130);
 
-  ctx.strokeStyle = '#3CA63C';
+  ctx.strokeStyle = '#77dd77';
   ctx.lineWidth = 2;
   ctx.setLineDash([8, 6]);
   ctx.strokeRect(dz.x, dz.y - 80, dz.width, 130);
   ctx.setLineDash([]);
 
-  ctx.fillStyle = '#3CA63C';
+  ctx.fillStyle = '#77dd77';
   ctx.font = '12px "Chakra Petch", monospace';
   ctx.textAlign = 'center';
   ctx.fillText('DROP ZONE', dz.x + dz.width / 2, dz.y - 88);
   ctx.textAlign = 'left';
 
-  // Landing platform
-  ctx.fillStyle = 'rgba(60,166,60,0.3)';
+  ctx.fillStyle = 'rgba(119,221,119,0.3)';
   ctx.fillRect(dz.x, dz.y - 10, dz.width, 35);
 }
 
-function drawPickupMarker(c) {
-  const t = performance.now() / 1000;
-  const pulse = 1 + Math.sin(t * 4) * 0.06;
-  const alpha = 0.55 + Math.sin(t * 4) * 0.12;
-  const cx = c.x + c.w / 2;
-  const cy = c.y + c.h + 6;
-  const rx = Math.max(24, c.w * 0.9) * pulse;
-  const ry = Math.max(8, c.h * 0.28) * pulse;
-
-  ctx.save();
-  ctx.fillStyle = `rgba(245,201,66,${alpha.toFixed(3)})`;
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
 // ============ HOOK/UNHOOK ============
-function getPickupTargetCrate() {
-  return crates.find(c => !c.delivered && !droppedCrates.includes(c)) || null;
-}
-
 function findNearestCrate() {
   let best = null;
   let bestDist = 60;
@@ -1529,6 +1205,7 @@ function findNearestCrate() {
 
 function toggleHook() {
   if (hookedCrate) {
+    // Release - check if crate bottom is above the green zone
     hookedCrate.vx = trolley.speed * 0.3;
     hookedCrate.vy = 0;
     hookedCrate.landed = false;
@@ -1552,10 +1229,11 @@ function updateHUD() {
   document.getElementById('scoreText').textContent = `Crates: ${score}/${totalCrates}`;
   const pct = Math.min(100, Math.max(0, damage));
   document.getElementById('damageFill').style.width = pct + '%';
+  // Color the label
   const lbl = document.getElementById('damageLabel');
   if (pct > 75) lbl.style.color = '#f55';
-  else if (pct > 40) lbl.style.color = '#F5C942';
-  else lbl.style.color = '#3CA63C';
+  else if (pct > 40) lbl.style.color = '#f5a623';
+  else lbl.style.color = '#77dd77';
 }
 
 function showEndScreen(won) {
@@ -1599,6 +1277,7 @@ window.addEventListener('keydown', e => {
   if (e.key === ' ' || e.key === 'Enter') {
     e.preventDefault();
     toggleHook();
+    // Flash the hook button
     const hb = document.getElementById('hookBtn');
     hb.classList.add('active');
     setTimeout(() => hb.classList.remove('active'), 150);
@@ -1666,7 +1345,7 @@ function gameLoop(time) {
   }
 
   ctx.clearRect(0, 0, W(), H());
-  ctx.fillStyle = '#A69D93';
+  ctx.fillStyle = '#1a1a2e';
   ctx.fillRect(0, 0, W(), H());
 
   if (gameState !== 'start') drawWorld();
@@ -1680,14 +1359,7 @@ function gameLoop(time) {
   requestAnimationFrame(gameLoop);
 }
 
-// ============ INITIALIZATION ============
-loadSVGAssets().then(() => {
-  console.log('SVG assets loaded:', Object.keys(svgAssets));
-  console.log('SVG images ready:', Object.keys(svgImages));
-  if (!svgImages.hook) console.warn('Hook image not loaded!');
-  if (!svgImages.tophook) console.warn('Tophook image not loaded!');
-  requestAnimationFrame(gameLoop);
-});
+requestAnimationFrame(gameLoop);
 </script>
 </body>
 </html>
