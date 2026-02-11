@@ -231,6 +231,30 @@
     color: #f55;
   }
 
+  /* Joystick */
+  #joystickWrap {
+    display: none;
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+  }
+  #joystickCanvas {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+  }
+
+  /* Touch devices: show joystick, hide d-pad */
+  @media (pointer: coarse) {
+    #dpadGroup { display: none !important; }
+    #joystickWrap { display: block; }
+  }
+  /* Non-touch (mouse/keyboard): show d-pad, hide joystick */
+  @media (pointer: fine) {
+    #dpadGroup { display: flex; }
+    #joystickWrap { display: none !important; }
+  }
+
   /* End Screen (win & game over) */
   #endScreen {
     position: fixed;
@@ -299,6 +323,7 @@
     }
     .ctrl-btn { width: 44px; height: 44px; font-size: 1.1rem; }
     .ctrl-btn.hook-btn { width: 64px; height: 44px; font-size: 0.6rem; }
+    #joystickWrap, #joystickCanvas { width: 110px; height: 110px; }
   }
 
   @media (orientation: landscape) and (min-height: 501px) {
@@ -337,7 +362,8 @@
 
 <!-- On-screen Controls -->
 <div id="controls">
-  <div class="ctrl-group">
+  <!-- D-pad: hidden on touch, visible on desktop for keyboard highlights -->
+  <div class="ctrl-group" id="dpadGroup">
     <div class="ctrl-row">
       <div style="width:56px"></div>
       <button class="ctrl-btn" data-dir="up">&#9650;</button>
@@ -348,6 +374,10 @@
       <button class="ctrl-btn" data-dir="down">&#9660;</button>
       <button class="ctrl-btn" data-dir="right">&#9654;</button>
     </div>
+  </div>
+  <!-- Joystick: visible on touch only -->
+  <div id="joystickWrap">
+    <canvas id="joystickCanvas" width="140" height="140"></canvas>
   </div>
   <button class="ctrl-btn hook-btn" id="hookBtn">Hook</button>
 </div>
@@ -1303,6 +1333,136 @@ document.querySelectorAll('.ctrl-btn[data-dir]').forEach(btn => {
 
 document.getElementById('hookBtn').addEventListener('click', () => { if (gameState === 'playing') toggleHook(); });
 document.getElementById('hookBtn').addEventListener('touchstart', e => { e.preventDefault(); if (gameState === 'playing') toggleHook(); });
+
+// ============ VIRTUAL JOYSTICK ============
+const joyCanvas = document.getElementById('joystickCanvas');
+const joyCtx = joyCanvas.getContext('2d');
+const JOY_RADIUS = 70;       // outer radius (half of 140)
+const KNOB_RADIUS = 24;
+const DEAD_ZONE = 0.18;      // fraction of radius
+let joyActive = false;
+let joyKnobX = 0, joyKnobY = 0; // offset from center
+let joyTouchId = null;
+
+function drawJoystick() {
+  const w = joyCanvas.width;
+  const h = joyCanvas.height;
+  const cx = w / 2, cy = h / 2;
+  const dpr = window.devicePixelRatio || 1;
+
+  // Resize canvas for sharp rendering
+  const rect = joyCanvas.getBoundingClientRect();
+  const cw = rect.width * dpr;
+  const ch = rect.height * dpr;
+  if (joyCanvas.width !== cw || joyCanvas.height !== ch) {
+    joyCanvas.width = cw;
+    joyCanvas.height = ch;
+  }
+  joyCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const r = rect.width / 2;
+  const knobR = KNOB_RADIUS;
+  const cxR = rect.width / 2;
+  const cyR = rect.height / 2;
+
+  joyCtx.clearRect(0, 0, rect.width, rect.height);
+
+  // Outer ring
+  joyCtx.beginPath();
+  joyCtx.arc(cxR, cyR, r - 2, 0, Math.PI * 2);
+  joyCtx.fillStyle = 'rgba(15,12,41,0.6)';
+  joyCtx.fill();
+  joyCtx.strokeStyle = 'rgba(245,166,35,0.35)';
+  joyCtx.lineWidth = 2;
+  joyCtx.stroke();
+
+  // Cross-hair guides
+  joyCtx.strokeStyle = 'rgba(245,166,35,0.12)';
+  joyCtx.lineWidth = 1;
+  joyCtx.beginPath();
+  joyCtx.moveTo(cxR, cyR - r + 14);
+  joyCtx.lineTo(cxR, cyR + r - 14);
+  joyCtx.moveTo(cxR - r + 14, cyR);
+  joyCtx.lineTo(cxR + r - 14, cyR);
+  joyCtx.stroke();
+
+  // Knob
+  const kx = cxR + joyKnobX;
+  const ky = cyR + joyKnobY;
+  joyCtx.beginPath();
+  joyCtx.arc(kx, ky, knobR, 0, Math.PI * 2);
+  joyCtx.fillStyle = joyActive ? 'rgba(245,166,35,0.55)' : 'rgba(245,166,35,0.3)';
+  joyCtx.fill();
+  joyCtx.strokeStyle = joyActive ? '#f5a623' : 'rgba(245,166,35,0.5)';
+  joyCtx.lineWidth = 2;
+  joyCtx.stroke();
+
+  // Inner dot
+  joyCtx.beginPath();
+  joyCtx.arc(kx, ky, 5, 0, Math.PI * 2);
+  joyCtx.fillStyle = 'rgba(245,166,35,0.7)';
+  joyCtx.fill();
+}
+
+function updateJoystickInput() {
+  const rect = joyCanvas.getBoundingClientRect();
+  const r = rect.width / 2;
+  const maxDist = r - KNOB_RADIUS;
+  const nx = joyKnobX / maxDist; // -1 to 1
+  const ny = joyKnobY / maxDist;
+
+  inputState.left = nx < -DEAD_ZONE;
+  inputState.right = nx > DEAD_ZONE;
+  inputState.up = ny < -DEAD_ZONE;
+  inputState.down = ny > DEAD_ZONE;
+}
+
+function handleJoyTouch(e) {
+  e.preventDefault();
+  if (gameState !== 'playing') return;
+  const rect = joyCanvas.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const maxDist = rect.width / 2 - KNOB_RADIUS;
+
+  for (const touch of e.changedTouches) {
+    if (joyTouchId !== null && touch.identifier !== joyTouchId) continue;
+    joyTouchId = touch.identifier;
+    let dx = touch.clientX - cx;
+    let dy = touch.clientY - cy;
+    const dist = Math.hypot(dx, dy);
+    if (dist > maxDist) { dx *= maxDist / dist; dy *= maxDist / dist; }
+    joyKnobX = dx;
+    joyKnobY = dy;
+    joyActive = true;
+    updateJoystickInput();
+    drawJoystick();
+  }
+}
+
+function handleJoyEnd(e) {
+  for (const touch of e.changedTouches) {
+    if (touch.identifier === joyTouchId) {
+      joyTouchId = null;
+      joyActive = false;
+      joyKnobX = 0;
+      joyKnobY = 0;
+      inputState.left = false;
+      inputState.right = false;
+      inputState.up = false;
+      inputState.down = false;
+      drawJoystick();
+    }
+  }
+}
+
+joyCanvas.addEventListener('touchstart', handleJoyTouch, { passive: false });
+joyCanvas.addEventListener('touchmove', handleJoyTouch, { passive: false });
+joyCanvas.addEventListener('touchend', handleJoyEnd);
+joyCanvas.addEventListener('touchcancel', handleJoyEnd);
+
+// Initial draw
+drawJoystick();
 
 // ============ GAME FLOW ============
 document.getElementById('startBtn').addEventListener('click', startGame);
