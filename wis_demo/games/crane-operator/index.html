@@ -427,7 +427,7 @@ const assetPaths = {
   tophook: 'img/tophook.svg',
   precast: 'img/precast.svg',
   brokenprecast: 'img/brokenprecast.svg',
-  background: 'img/background.png',
+  background: 'img/cityscape.svg',
   hill01: 'img/hill01.svg',
   hill02: 'img/hill02.svg'
 };
@@ -517,6 +517,8 @@ const WORLD = {
 let gameState = 'start';
 let camera = { x: 0, y: 0, zoom: 0.55 };
 let targetCamera = { x: 0, y: 0, zoom: 0.55 };
+let introOverviewTimer = null;
+let introZoomTimer = null;
 
 let trolley = {
   x: WORLD.craneBaseX + 200,
@@ -947,7 +949,11 @@ function addDamage(amount) {
 }
 
 function updateCamera(dt) {
-  if (gameState === 'zooming') {
+  if (gameState === 'overview') {
+    targetCamera.zoom = 0.45;
+    targetCamera.x = WORLD.craneBaseX + WORLD.jibLength / 2;
+    targetCamera.y = WORLD.groundY / 2;
+  } else if (gameState === 'zooming') {
     targetCamera.zoom = 1.4;
     targetCamera.x = hook.x;
     targetCamera.y = hook.y;
@@ -1729,8 +1735,11 @@ document.getElementById('restartBtn').addEventListener('click', () => {
 });
 
 function startGame() {
+  if (introOverviewTimer) clearTimeout(introOverviewTimer);
+  if (introZoomTimer) clearTimeout(introZoomTimer);
+
   initGame();
-  gameState = 'zooming';
+  gameState = 'overview';
 
   camera = { x: WORLD.craneBaseX + WORLD.jibLength / 2, y: WORLD.groundY / 2, zoom: 0.45 };
   targetCamera = { ...camera };
@@ -1743,9 +1752,12 @@ function startGame() {
 
   setTimeout(() => { document.getElementById('startScreen').style.display = 'none'; }, 900);
 
-  setTimeout(() => {
-    gameState = 'playing';
-    document.getElementById('spotterBox').textContent = '⬇️ Lower the hook to a crate';
+  introOverviewTimer = setTimeout(() => {
+    gameState = 'zooming';
+    introZoomTimer = setTimeout(() => {
+      gameState = 'playing';
+      document.getElementById('spotterBox').textContent = '⬇️ Lower the hook to a crate';
+    }, 1000);
   }, 2000);
 }
 
@@ -1756,7 +1768,7 @@ function gameLoop(time) {
   const dt = Math.min((time - lastTime) / 1000, 0.05);
   lastTime = time;
 
-  if (gameState === 'playing' || gameState === 'zooming') {
+  if (gameState === 'playing' || gameState === 'zooming' || gameState === 'overview') {
     updatePhysics(dt);
     updateCamera(dt);
   }
