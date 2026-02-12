@@ -159,7 +159,7 @@ export class TowerCrane {
         if (deltaTime === 0) return;
 
         const speedMult = precisionMode ? this.precisionMultiplier : 1.0;
-        const moveSpeed = (precisionMode ? 1.5 : 3.0) * speedMult; // m/s in world space
+        const moveSpeed = (precisionMode ? 1.5 : 4.5) * speedMult; // m/s in world space
         const hoistSpeed = (precisionMode ? 1.0 : 2.0) * speedMult;
 
         // Update target hook position based on controls (world space)
