@@ -439,6 +439,13 @@ body {
     height: 20px;
 }
 
+/* Hide view switcher on mobile */
+@media (max-width: 768px) {
+    .view-switcher {
+        display: none;
+    }
+}
+
 .header {
     text-align: center;
     padding: 24px 0;

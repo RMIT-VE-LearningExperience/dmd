@@ -875,6 +875,155 @@ padding-bottom: 60px;
 
   .success-card button:active { transform: scale(0.95); }
 
+  /* Help Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    background: white;
+    border-radius: 16px;
+    padding: 32px 24px 24px;
+    width: 90vw;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    position: relative;
+  }
+
+  .modal h2 {
+    color: #193E75;
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #193E75;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .slide-container {
+    min-height: 250px;
+    position: relative;
+  }
+
+  .slide {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .slide.active {
+    display: block;
+  }
+
+  .slide p {
+    color: #1a2744;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .slide ul, .slide ol {
+    margin-left: 20px;
+    color: #1a2744;
+    font-size: 15px;
+    line-height: 1.8;
+  }
+
+  .slide li {
+    margin-bottom: 8px;
+  }
+
+  .modal-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    gap: 12px;
+  }
+
+  .slide-dots {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .slide-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d1d5db;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .slide-dot.active {
+    background: #193E75;
+    width: 24px;
+    border-radius: 4px;
+  }
+
+  .modal-btn {
+    background: #e5e7eb;
+    color: #1a2744;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .modal-btn:hover {
+    background: #d1d5db;
+  }
+
+  .modal-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .modal-btn-primary {
+    background: #193E75;
+    color: white;
+  }
+
+  .modal-btn-primary:hover {
+    background: #142d5a;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   /* Reset button */
   .reset-btn {
     position: absolute;
@@ -1371,6 +1520,49 @@ padding-bottom: 60px;
     <div class="feedback-avatar" id="feedbackAvatar"></div>
     <div class="feedback-msg" id="feedbackMsg"></div>
     <div class="feedback-hint" id="feedbackHint"></div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal">
+    <h2>Game Rules</h2>
+    <div class="slide-container">
+      <div class="slide active" data-slide="0">
+        <p><strong>Your Goal:</strong> Schedule the Crane Operator, Concreter, and Carpenter to complete the construction project on time.</p>
+        <p>Each worker has specific tasks and requirements that must be followed.</p>
+      </div>
+      <div class="slide" data-slide="1">
+        <p><strong>Weather Matters:</strong></p>
+        <ul>
+          <li>☀️ Sunny - All workers can work</li>
+          <li>⛅ Partly Cloudy - All workers can work</li>
+          <li>☁️ Cloudy - All workers can work</li>
+          <li>🌧️ Rainy - Concreter cannot work</li>
+          <li>💨 Windy - Crane Operator cannot work</li>
+          <li>🌙 Night - Carpenter cannot work</li>
+        </ul>
+      </div>
+      <div class="slide" data-slide="2">
+        <p><strong>Work Order:</strong></p>
+        <ol>
+          <li>🏗️ Crane Operator must work first</li>
+          <li>🧱 Concreter works after the Crane Operator</li>
+          <li>🔨 Carpenter works last, after concrete sets (needs 1 day)</li>
+        </ol>
+      </div>
+      <div class="slide" data-slide="3">
+        <p><strong>How to Play:</strong></p>
+        <p>Drag workers from the bottom bar onto the schedule grid. Place them in time slots that match the weather and work order requirements.</p>
+        <p>Each worker needs to fill all 3 of their slots to complete their work.</p>
+      </div>
+    </div>
+    <div class="modal-nav">
+      <button class="modal-btn" id="prevSlide">← Back</button>
+      <div class="slide-dots" id="slideDots"></div>
+      <button class="modal-btn modal-btn-primary" id="nextSlide">Next →</button>
+    </div>
+    <button class="modal-close" onclick="closeHelp()">×</button>
   </div>
 </div>
 
@@ -2594,6 +2786,60 @@ function resetGame() {
 function closeWelcome() {
   document.getElementById('welcomeOverlay').style.display = 'none';
 }
+
+// ============================================================
+//  HELP MODAL
+// ============================================================
+let currentSlide = 0;
+const totalSlides = 4;
+
+function showHelp() {
+  goToSlide(0);
+  document.getElementById('helpModal').classList.add('active');
+}
+
+function closeHelp() {
+  document.getElementById('helpModal').classList.remove('active');
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+
+  // Update slides
+  document.querySelectorAll('.slide').forEach((slide, i) => {
+    slide.classList.toggle('active', i === currentSlide);
+  });
+
+  // Update dots
+  const dotsContainer = document.getElementById('slideDots');
+  dotsContainer.innerHTML = '';
+  for (let i = 0; i < totalSlides; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'slide-dot' + (i === currentSlide ? ' active' : '');
+    dot.onclick = () => goToSlide(i);
+    dotsContainer.appendChild(dot);
+  }
+
+  // Update buttons
+  document.getElementById('prevSlide').disabled = currentSlide === 0;
+  const nextBtn = document.getElementById('nextSlide');
+  if (currentSlide === totalSlides - 1) {
+    nextBtn.textContent = 'Got it!';
+    nextBtn.onclick = closeHelp;
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.onclick = () => goToSlide(currentSlide + 1);
+  }
+}
+
+// Event listeners for help modal
+document.getElementById('prevSlide').addEventListener('click', () => {
+  if (currentSlide > 0) goToSlide(currentSlide - 1);
+});
+
+document.getElementById('helpModal').addEventListener('click', (e) => {
+  if (e.target.id === 'helpModal') closeHelp();
+});
 
 // ============================================================
 //  INIT
