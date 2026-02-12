@@ -958,6 +958,23 @@ padding-bottom: 60px;
     margin-bottom: 8px;
   }
 
+  .weather-list {
+    list-style: none;
+    margin-left: 0;
+  }
+
+  .weather-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .weather-list .weather-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
   .modal-nav {
     display: flex;
     justify-content: space-between;
@@ -1534,13 +1551,13 @@ padding-bottom: 60px;
       </div>
       <div class="slide" data-slide="1">
         <p><strong>Weather Matters:</strong></p>
-        <ul>
-          <li>☀️ Sunny - All workers can work</li>
-          <li>⛅ Partly Cloudy - All workers can work</li>
-          <li>☁️ Cloudy - All workers can work</li>
-          <li>🌧️ Rainy - Concreter cannot work</li>
-          <li>💨 Windy - Crane Operator cannot work</li>
-          <li>🌙 Night - Carpenter cannot work</li>
+        <ul class="weather-list">
+          <li><img class="weather-icon small" src="images/weather_icons/sunny02.svg" alt="Sunny"> Sunny - All workers can work</li>
+          <li><img class="weather-icon small" src="images/weather_icons/partlycloudy02.svg" alt="Partly Cloudy"> Partly Cloudy - All workers can work</li>
+          <li><img class="weather-icon small" src="images/weather_icons/cloudy01.svg" alt="Cloudy"> Cloudy - All workers can work</li>
+          <li><img class="weather-icon small" src="images/weather_icons/thunder02.svg" alt="Storms"> Storms - Crane Operator & Concreter cannot work</li>
+          <li><img class="weather-icon small" src="images/weather_icons/wind01.svg" alt="Windy"> Windy - Crane Operator & Concreter cannot work</li>
+          <li><img class="weather-icon small" src="images/weather_icons/moon.svg" alt="Night"> Night - Crane Operator & Concreter cannot work</li>
         </ul>
       </div>
       <div class="slide" data-slide="2">
