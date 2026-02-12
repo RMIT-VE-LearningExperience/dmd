@@ -799,6 +799,12 @@ function updatePhysics(dt) {
     const dx = hook.x - trolley.x;
     const maxLen = Math.sqrt(dx * dx + dy * dy);
     if (trolley.ropeLength > maxLen) trolley.ropeLength = maxLen;
+    // Trigger collision damage when being pushed into the obstacle
+    if (hitCooldown <= 0) {
+      hitCooldown = 1.0;
+      addDamage(25);
+      setSpotterAlert('⚠️ COLLISION! Avoid the obstacle!');
+    }
   }
 
   const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
