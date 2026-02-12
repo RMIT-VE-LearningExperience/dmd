@@ -206,6 +206,29 @@ html, body {
     box-shadow: 0 8px 24px rgba(232, 184, 48, 0.4);
 }
 
+/* Yellow button (Career Explorer) */
+.btn-yellow {
+    background: #e8b830;
+    color: #1a365d;
+    box-shadow: 0 4px 16px rgba(232, 184, 48, 0.3);
+}
+
+.btn-yellow:hover {
+    background: #d4a828;
+    box-shadow: 0 8px 24px rgba(232, 184, 48, 0.4);
+}
+
+/* About button - white */
+.btn-about {
+    background: #ffffff;
+    color: #1a365d;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-about:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
 /* ===================================
    ANIMATIONS
    =================================== */
@@ -283,7 +306,7 @@ html, body {
     }
 
     .hero-buttons {
-        flex-direction: column;
+        flex-direction: column-reverse;
         gap: 12px;
         margin-bottom: 8px;
     }
