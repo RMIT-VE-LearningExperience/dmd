@@ -771,6 +771,36 @@ function updatePhysics(dt) {
   hook.x = wireSegments[WIRE_SEG_COUNT].x;
   hook.y = wireSegments[WIRE_SEG_COUNT].y;
 
+  // --- Hard block: prevent hook/crate from going under obstacles ---
+  const obsLeft = OBSTACLE_BASE_X - 10;
+  const obsRight = OBSTACLE_BASE_X + 4 * 38 + 10;
+  const obsTop = WORLD.groundY - 3 * 47;
+  const margin = 8;
+
+  let blockY = null;
+  if (hookedCrate) {
+    const cLeft = hook.x - hookedCrate.w / 2;
+    const cRight = hook.x + hookedCrate.w / 2;
+    const cBottom = hook.y + 15 + hookedCrate.h;
+    if (cRight > obsLeft && cLeft < obsRight && cBottom > obsTop - margin) {
+      blockY = obsTop - margin - 15 - hookedCrate.h;
+    }
+  } else {
+    if (hook.x > obsLeft && hook.x < obsRight && hook.y > obsTop - margin) {
+      blockY = obsTop - margin;
+    }
+  }
+  if (blockY !== null && hook.y > blockY) {
+    hook.y = blockY;
+    wireSegments[WIRE_SEG_COUNT].y = blockY;
+    if (trolley.ropeSpeed > 0) trolley.ropeSpeed = 0;
+    const anchorYBlock = WORLD.craneTopY + WIRE_ANCHOR_Y_OFFSET;
+    const dy = hook.y - anchorYBlock;
+    const dx = hook.x - trolley.x;
+    const maxLen = Math.sqrt(dx * dx + dy * dy);
+    if (trolley.ropeLength > maxLen) trolley.ropeLength = maxLen;
+  }
+
   const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
   const lastSeg = wireSegments[WIRE_SEG_COUNT];
   const currentWireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
@@ -815,7 +845,7 @@ function updatePhysics(dt) {
       if (dc.releasedTooHigh) {
         dc.broken = true;
         dc.delivered = false;
-        setSpotterAlert('\u26a0 DROPPED TOO HIGH! Crate destroyed!');
+        setSpotterAlert('⚠️ DROPPED TOO HIGH! Crate destroyed!');
         addDamage(30);
         setTimeout(() => {
           const idx = droppedCrates.indexOf(dc);
@@ -830,7 +860,7 @@ function updatePhysics(dt) {
         dc.rotation = 0;
         score++;
         updateHUD();
-        setSpotterAlert('\u2705 Delivered! Good work!');
+        setSpotterAlert('✅ Delivered! Good work!');
 
         if (score >= totalCrates) {
           setTimeout(() => {
@@ -843,7 +873,7 @@ function updatePhysics(dt) {
           if (idx !== -1) droppedCrates.splice(idx, 1);
         }, 500);
       } else {
-        setSpotterAlert('\u274c Missed the drop zone! Crate lost.');
+        setSpotterAlert('❌ Missed the drop zone! Crate lost.');
         setTimeout(() => {
           const idx = droppedCrates.indexOf(dc);
           if (idx !== -1) droppedCrates.splice(idx, 1);
