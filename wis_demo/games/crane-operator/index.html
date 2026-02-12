@@ -296,8 +296,9 @@
   }
 
   #restartBtn.lose-btn {
-    background: linear-gradient(180deg, #F5C942, #F37329);
-    box-shadow: 0 4px 0 #F1732A, 0 6px 20px rgba(245,198,66,0.3);
+    background: #F37329;
+    color: #193E75;
+    box-shadow: 0 4px 0 #193E75, 0 6px 20px rgba(245,198,66,0.3);
   }
 
   @media (max-width: 600px) {
@@ -1579,26 +1580,20 @@ function drawObstacle(obs) {
 
 function drawDropZone() {
   const dz = dropZone;
+  const t = performance.now() / 1000;
+  const pulse = 1 + Math.sin(t * 4) * 0.06;
+  const alpha = 0.5 + Math.sin(t * 4) * 0.12;
+  const cx = dz.x + dz.width / 2;
+  const cy = dz.y + 6;
+  const rx = Math.max(30, dz.width * 0.46) * pulse;
+  const ry = Math.max(10, dz.height * 0.34) * pulse;
 
-  // Green safe zone
-  ctx.fillStyle = 'rgba(60,166,60,0.1)';
-  ctx.fillRect(dz.x, dz.y - 80, dz.width, 130);
-
-  ctx.strokeStyle = '#3CA63C';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([8, 6]);
-  ctx.strokeRect(dz.x, dz.y - 80, dz.width, 130);
-  ctx.setLineDash([]);
-
-  ctx.fillStyle = '#3CA63C';
-  ctx.font = '12px "Chakra Petch", monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText('DROP ZONE', dz.x + dz.width / 2, dz.y - 88);
-  ctx.textAlign = 'left';
-
-  // Landing platform
-  ctx.fillStyle = 'rgba(60,166,60,0.3)';
-  ctx.fillRect(dz.x, dz.y - 10, dz.width, 35);
+  ctx.save();
+  ctx.fillStyle = `rgba(60,166,60,${alpha.toFixed(3)})`;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
 
 function drawPickupMarker(c) {
