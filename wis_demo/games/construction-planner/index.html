@@ -1309,6 +1309,80 @@ padding-bottom: 60px;
     border-radius: 4px;
   }
 
+  .onboarding-role-highlight {
+    position: relative;
+    z-index: 430;
+  }
+
+  .onboarding-drop-highlight {
+    position: relative;
+    z-index: 430;
+  }
+
+  .onboarding-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 410;
+    background: rgba(7, 17, 37, 0.16);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+  }
+
+  .onboarding-backdrop.show {
+    opacity: 1;
+  }
+
+  .onboarding-focus-ring {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    border: 4px solid rgba(160, 194, 255, 0.98);
+    border-radius: 18px;
+    pointer-events: none;
+    z-index: 435;
+    opacity: 0;
+    transition: left 0.16s ease, top 0.16s ease, width 0.16s ease, height 0.16s ease, opacity 0.16s ease;
+    box-shadow: 0 0 0 10px rgba(93, 139, 219, 0.22);
+    animation: onboarding-pulse 1.2s ease-in-out infinite;
+  }
+
+  .onboarding-focus-ring.show {
+    opacity: 1;
+  }
+
+  .onboarding-hint {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 440;
+    pointer-events: none;
+    background: #1a2744;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
+    padding: 9px 13px;
+    border-radius: 999px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+
+  .onboarding-hint.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @keyframes onboarding-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+
   @media (max-width: 1023px) {
     .welcome-intro-body {
       padding: 44px 22px 136px;
@@ -2476,6 +2550,7 @@ function attemptPlacement(role, day, slotNum, cellEl) {
 
   updateAllProgress();
   showToast(`${workers[role].name} assigned to ${day} ${slotLabels[slotNum]}!`);
+  maybeFinishOnboarding(role, day, slotNum);
   checkCompletion();
   return true;
 }
@@ -2901,6 +2976,245 @@ function canDragRole(role) {
   return used < 3;
 }
 
+// ============================================================
+//  ONBOARDING
+// ============================================================
+const onboarding = {
+  role: 'crane',
+  targetDay: 'Mon',
+  targetSlot: 0,
+  step: 0
+};
+let onboardingFocusRaf = null;
+
+function clearOnboardingHighlights() {
+  document.querySelectorAll('.onboarding-role-highlight').forEach(el => el.classList.remove('onboarding-role-highlight'));
+  document.querySelectorAll('.onboarding-drop-highlight').forEach(el => el.classList.remove('onboarding-drop-highlight'));
+}
+
+function ensureOnboardingHint() {
+  let el = document.getElementById('onboardingHint');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'onboardingHint';
+    el.className = 'onboarding-hint';
+    document.body.appendChild(el);
+  }
+  return el;
+}
+
+function ensureOnboardingBackdrop() {
+  let el = document.getElementById('onboardingBackdrop');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'onboardingBackdrop';
+    el.className = 'onboarding-backdrop';
+    document.body.appendChild(el);
+  }
+  return el;
+}
+
+function showOnboardingBackdrop() {
+  ensureOnboardingBackdrop().classList.add('show');
+}
+
+function hideOnboardingBackdrop() {
+  const el = document.getElementById('onboardingBackdrop');
+  if (el) el.classList.remove('show');
+}
+
+function ensureOnboardingFocusRing() {
+  let el = document.getElementById('onboardingFocusRing');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'onboardingFocusRing';
+    el.className = 'onboarding-focus-ring';
+    document.body.appendChild(el);
+  }
+  return el;
+}
+
+function showOnboardingFocusRing(rect, options = {}) {
+  if (!rect) return;
+  const ring = ensureOnboardingFocusRing();
+  const pad = options.pad ?? 6;
+  const radius = options.radius ?? 18;
+  const borderColor = options.borderColor || 'rgba(160, 194, 255, 0.98)';
+  const glowColor = options.glowColor || 'rgba(93, 139, 219, 0.22)';
+  ring.style.left = `${Math.max(4, rect.left - pad)}px`;
+  ring.style.top = `${Math.max(4, rect.top - pad)}px`;
+  ring.style.width = `${Math.max(20, rect.width + pad * 2)}px`;
+  ring.style.height = `${Math.max(20, rect.height + pad * 2)}px`;
+  ring.style.borderRadius = `${radius}px`;
+  ring.style.borderColor = borderColor;
+  ring.style.boxShadow = `0 0 0 10px ${glowColor}`;
+  ring.classList.add('show');
+}
+
+function hideOnboardingFocusRing() {
+  const ring = document.getElementById('onboardingFocusRing');
+  if (ring) ring.classList.remove('show');
+}
+
+function getRoleAvatarRect(roleEl) {
+  if (!roleEl) return null;
+  const avatar = roleEl.querySelector('.worker-avatar');
+  const target = avatar || roleEl;
+  const r = target.getBoundingClientRect();
+  return { left: r.left, top: r.top, width: r.width, height: r.height };
+}
+
+function stopOnboardingFocusTracking() {
+  if (onboardingFocusRaf !== null) {
+    cancelAnimationFrame(onboardingFocusRaf);
+    onboardingFocusRaf = null;
+  }
+}
+
+function trackOnboardingFocus() {
+  if (onboarding.step === 0) {
+    stopOnboardingFocusTracking();
+    return;
+  }
+
+  if (onboarding.step === 1) {
+    const roleEl = document.getElementById(`src-${onboarding.role}`);
+    if (roleEl) {
+      const avatarEl = roleEl.querySelector('.worker-avatar');
+      showOnboardingFocusRing(getRoleAvatarRect(roleEl), {
+        pad: 8,
+        radius: 999,
+        borderColor: 'rgba(160, 194, 255, 0.98)',
+        glowColor: 'rgba(93, 139, 219, 0.22)'
+      });
+      placeOnboardingHint(avatarEl || roleEl, 'Drag me');
+    }
+  } else if (onboarding.step === 2) {
+    const cell = document.querySelector(`.cell[data-day="${onboarding.targetDay}"][data-slot="${onboarding.targetSlot}"]`);
+    if (cell) {
+      showOnboardingFocusRing(cell.getBoundingClientRect(), {
+        pad: 4,
+        radius: 14,
+        borderColor: 'rgba(102, 217, 102, 0.98)',
+        glowColor: 'rgba(102, 217, 102, 0.18)'
+      });
+      placeOnboardingHint(cell, 'Drop me here');
+    }
+  }
+
+  onboardingFocusRaf = requestAnimationFrame(trackOnboardingFocus);
+}
+
+function startOnboardingFocusTracking() {
+  stopOnboardingFocusTracking();
+  onboardingFocusRaf = requestAnimationFrame(trackOnboardingFocus);
+}
+
+function hideOnboardingHint() {
+  const el = document.getElementById('onboardingHint');
+  if (el) el.classList.remove('show');
+}
+
+function placeOnboardingHint(targetEl, text) {
+  if (!targetEl) return;
+  const hint = ensureOnboardingHint();
+  hint.textContent = text;
+  hint.classList.add('show');
+  const rect = targetEl.getBoundingClientRect();
+  const gap = 12;
+  const maxLeft = window.innerWidth - hint.offsetWidth - 8;
+  const left = Math.max(8, Math.min(rect.left + rect.width / 2 - hint.offsetWidth / 2, maxLeft));
+  let top = rect.top - hint.offsetHeight - gap;
+  if (top < 8) top = rect.bottom + gap;
+  hint.style.left = `${left}px`;
+  hint.style.top = `${top}px`;
+}
+
+function startOnboarding() {
+  if (onboarding.step !== 0) return;
+  clearOnboardingHighlights();
+  const roleEl = document.getElementById(`src-${onboarding.role}`);
+  if (!roleEl) return;
+  const avatarEl = roleEl.querySelector('.worker-avatar');
+  showOnboardingBackdrop();
+  onboarding.step = 1;
+  roleEl.classList.add('onboarding-role-highlight');
+  showOnboardingFocusRing(getRoleAvatarRect(roleEl), {
+    pad: 8,
+    radius: 999,
+    borderColor: 'rgba(160, 194, 255, 0.98)',
+    glowColor: 'rgba(93, 139, 219, 0.22)'
+  });
+  placeOnboardingHint(avatarEl || roleEl, 'Drag me');
+  startOnboardingFocusTracking();
+}
+
+function advanceOnboardingToDrop() {
+  if (onboarding.step !== 1) return;
+  clearOnboardingHighlights();
+  showOnboardingBackdrop();
+  const targetCell = document.querySelector(`.cell[data-day="${onboarding.targetDay}"][data-slot="${onboarding.targetSlot}"]`);
+  if (!targetCell) {
+    finishOnboarding();
+    return;
+  }
+  onboarding.step = 2;
+  targetCell.classList.add('onboarding-drop-highlight');
+  showOnboardingFocusRing(targetCell.getBoundingClientRect(), {
+    pad: 4,
+    radius: 14,
+    borderColor: 'rgba(102, 217, 102, 0.98)',
+    glowColor: 'rgba(102, 217, 102, 0.18)'
+  });
+  placeOnboardingHint(targetCell, 'Drop me here');
+  startOnboardingFocusTracking();
+}
+
+function maybeFinishOnboarding(role, day, slotNum) {
+  if (onboarding.step !== 2) return;
+  if (role === onboarding.role && day === onboarding.targetDay && slotNum === onboarding.targetSlot) {
+    finishOnboarding();
+  }
+}
+
+function refreshOnboarding() {
+  if (onboarding.step === 1) {
+    const roleEl = document.getElementById(`src-${onboarding.role}`);
+    if (!roleEl) return;
+    const avatarEl = roleEl.querySelector('.worker-avatar');
+    roleEl.classList.add('onboarding-role-highlight');
+    showOnboardingFocusRing(getRoleAvatarRect(roleEl), {
+      pad: 8,
+      radius: 999,
+      borderColor: 'rgba(160, 194, 255, 0.98)',
+      glowColor: 'rgba(93, 139, 219, 0.22)'
+    });
+    placeOnboardingHint(avatarEl || roleEl, 'Drag me');
+    return;
+  }
+  if (onboarding.step === 2) {
+    const cell = document.querySelector(`.cell[data-day="${onboarding.targetDay}"][data-slot="${onboarding.targetSlot}"]`);
+    if (!cell) return;
+    cell.classList.add('onboarding-drop-highlight');
+    showOnboardingFocusRing(cell.getBoundingClientRect(), {
+      pad: 4,
+      radius: 14,
+      borderColor: 'rgba(102, 217, 102, 0.98)',
+      glowColor: 'rgba(102, 217, 102, 0.18)'
+    });
+    placeOnboardingHint(cell, 'Drop me here');
+  }
+}
+
+function finishOnboarding() {
+  onboarding.step = 0;
+  clearOnboardingHighlights();
+  hideOnboardingHint();
+  hideOnboardingBackdrop();
+  hideOnboardingFocusRing();
+  stopOnboardingFocusTracking();
+}
+
 // --- Prevent ALL native HTML5 drag (eliminates browser ghost) ---
 document.querySelectorAll('.worker-source').forEach(src => {
   src.setAttribute('draggable', 'false');
@@ -2917,6 +3231,7 @@ document.querySelectorAll('.worker-source').forEach(src => {
     if (e.button !== 0) return;
     const role = src.dataset.role;
     if (!canDragRole(role)) return;
+    if (onboarding.step === 1 && role === onboarding.role) advanceOnboardingToDrop();
     stopIdleAnimation();
     e.preventDefault();
     mouseDragging = true;
@@ -2985,6 +3300,7 @@ document.querySelectorAll('.worker-source').forEach(src => {
     stopIdleAnimation();
     const role = src.dataset.role;
     if (!canDragRole(role)) return;
+    if (onboarding.step === 1 && role === onboarding.role) advanceOnboardingToDrop();
     e.preventDefault();
     touchDragging = true;
     touchRole = role;
@@ -3109,6 +3425,7 @@ function closeWelcome() {
   document.getElementById('welcomeOverlay').style.display = 'none';
   welcomeSlideIndex = 0;
   renderWelcomeSlide();
+  setTimeout(startOnboarding, 100);
 }
 
 renderWelcomeSlide();
@@ -3182,6 +3499,7 @@ window.addEventListener('resize', () => {
     lastDesktop = isDesktop;
     buildGrid();
   }
+  refreshOnboarding();
 });
 
 const menuBtnHeader = document.getElementById('menuBtnHeader');
