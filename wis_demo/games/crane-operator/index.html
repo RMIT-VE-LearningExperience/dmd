@@ -255,6 +255,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    text-align: center;
     z-index: 200;
   }
 
@@ -661,18 +662,18 @@ function updateSpotter() {
     const dist = Math.hypot(hook.x - cx, hook.y - cy);
 
     if (dist < 60) {
-      spotterMsg = '\u261d PRESS HOOK to attach';
+      spotterMsg = '🪝 PRESS HOOK to attach';
       spotterArrow = { x: cx, y: cy - 50, dir: 'down' };
     } else if (hook.y < cy - 80) {
-      spotterMsg = '\u2b07 LOWER the hook to the crate';
+      spotterMsg = '⬇️ LOWER the hook to the crate';
       spotterArrow = { x: cx, y: cy - 60, dir: 'down' };
     } else {
       const dx = cx - hook.x;
       if (Math.abs(dx) > 40) {
-        spotterMsg = (dx > 0 ? '\u27a1' : '\u2b05') + ' Move hook over the crate';
+        spotterMsg = (dx > 0 ? '➡️' : '⬅️') + ' Move hook over the crate';
         spotterArrow = { x: cx, y: cy - 60, dir: dx > 0 ? 'right' : 'left' };
       } else {
-        spotterMsg = '\u2b07 LOWER the hook';
+        spotterMsg = '⬇️ LOWER the hook';
         spotterArrow = { x: cx, y: cy - 60, dir: 'down' };
       }
     }
@@ -685,33 +686,33 @@ function updateSpotter() {
 
   if (crateX > dropZone.x && crateX < dropZone.x + dropZone.width) {
     if (crateY >= DROP_ZONE_TOP_Y()) {
-      spotterMsg = '\u2b07 RELEASE now! In the green zone!';
+      spotterMsg = '👍 RELEASE now! In the green zone!';
       spotterArrow = { x: dzCenterX, y: dropZone.y - 40, dir: 'down' };
     } else {
-      spotterMsg = '\u2b07 Lower into the green zone first!';
+      spotterMsg = '⬇️ Lower into the green zone first!';
       spotterArrow = { x: dzCenterX, y: dropZone.y - 40, dir: 'down' };
     }
     return;
   }
 
   if (crateX > obstacleX + 80) {
-    spotterMsg = '\u27a1 Almost there! Move to drop zone';
+    spotterMsg = '➡️ Almost there! Move to drop zone';
     spotterArrow = { x: dzCenterX, y: dropZone.y - 60, dir: 'right' };
     return;
   }
 
   if (crateX > obstacleX - 100 && crateX < obstacleX + 130) {
     if (crateY > obstacleTopY - 20) {
-      spotterMsg = '\u2b06 RAISE the load! Clear the obstacle!';
+      spotterMsg = '⬆️ RAISE the load! Clear the obstacle!';
       spotterArrow = { x: obstacleX + 25, y: obstacleTopY - 60, dir: 'up' };
     } else {
-      spotterMsg = '\u27a1 Clear! Move past the obstacle';
+      spotterMsg = '➡️ Clear! Move past the obstacle';
       spotterArrow = { x: obstacleX + 130, y: obstacleTopY - 40, dir: 'right' };
     }
     return;
   }
 
-  spotterMsg = '\u27a1 Move right towards drop zone';
+  spotterMsg = '➡️ Move right towards drop zone';
   spotterArrow = { x: obstacleX - 30, y: crateY - 60, dir: 'right' };
 }
 
@@ -879,7 +880,7 @@ function updatePhysics(dt) {
     if (wasHit && hitCooldown <= 0) {
       hitCooldown = 1.0;
       addDamage(25);
-      setSpotterAlert('\u26a0 COLLISION! Avoid the obstacle!');
+      setSpotterAlert('⚠️ COLLISION! Avoid the obstacle!');
     }
   }
 
@@ -1706,7 +1707,7 @@ function startGame() {
 
   setTimeout(() => {
     gameState = 'playing';
-    document.getElementById('spotterBox').textContent = '\u2b07 Lower the hook to a crate';
+    document.getElementById('spotterBox').textContent = '⬇️ Lower the hook to a crate';
   }, 2000);
 }
 
