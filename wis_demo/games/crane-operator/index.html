@@ -950,7 +950,7 @@ function addDamage(amount) {
 
 function updateCamera(dt) {
   if (gameState === 'overview') {
-    targetCamera.zoom = 0.45;
+    targetCamera.zoom = 0.52;
     targetCamera.x = WORLD.craneBaseX + WORLD.jibLength / 2;
     targetCamera.y = WORLD.groundY / 2;
   } else if (gameState === 'zooming') {
@@ -1434,7 +1434,7 @@ function drawWire() {
 
 function drawHook() {
   const hx = hook.x;
-  const hy = hook.y - 23;
+  const hy = hook.y - 18;
   const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
   const lastSeg = wireSegments[WIRE_SEG_COUNT];
   const wireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
@@ -1748,7 +1748,7 @@ function startGame() {
   initGame();
   gameState = 'overview';
 
-  camera = { x: WORLD.craneBaseX + WORLD.jibLength / 2, y: WORLD.groundY / 2, zoom: 0.45 };
+  camera = { x: WORLD.craneBaseX + WORLD.jibLength / 2, y: WORLD.groundY / 2, zoom: 0.52 };
   targetCamera = { ...camera };
 
   document.getElementById('startScreen').classList.add('hiding');
