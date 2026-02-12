@@ -1056,6 +1056,11 @@ function drawSpotterArrow(arrow) {
     }
   }
 
+  // Extra bottom padding on mobile so the down-arrow doesn't go behind the control panel.
+  if (window.matchMedia('(max-width: 700px)').matches) {
+    maxY -= 120;
+  }
+
   if (minX > maxX) minX = maxX = W() / 2;
   if (minY > maxY) minY = maxY = H() / 2;
 
