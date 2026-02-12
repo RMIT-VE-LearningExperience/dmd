@@ -224,7 +224,7 @@ h2 {
 .btn-skip {
     background: transparent;
     color: rgba(255, 255, 255, 0.7);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: none;
     box-shadow: none;
     margin-top: 12px;
     padding: 14px 48px;
@@ -233,9 +233,8 @@ h2 {
 }
 
 .btn-skip:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent;
     color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-1px);
 }
 
@@ -276,7 +275,7 @@ h2 {
     color: #2d3748;
     cursor: pointer;
     transition: all 0.2s ease;
-    text-align: center;
+    text-align: left;
     line-height: 1.5;
     font-family: 'Inter', sans-serif;
 }

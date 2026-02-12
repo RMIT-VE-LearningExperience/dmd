@@ -9,6 +9,11 @@ function navigateToCareersExplorer() {
     window.location.href = 'quiz.html';
 }
 
+function navigateToAbout() {
+    console.log('ℹ️ Opening About Page...');
+    window.location.href = 'about.html';
+}
+
 function navigateToGames() {
     console.log('🎮 Opening Mini Games...');
     const overlay = document.getElementById('dashboardOverlay');
@@ -37,10 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
         careerBtn.addEventListener('click', navigateToCareersExplorer);
     }
 
-    // Mini Games button
-    const gamesBtn = document.querySelector('.btn-games');
-    if (gamesBtn) {
-        gamesBtn.addEventListener('click', navigateToGames);
+    // About button
+    const aboutBtn = document.querySelector('.btn-about');
+    if (aboutBtn) {
+        aboutBtn.addEventListener('click', navigateToAbout);
     }
 
     // Hamburger menu is handled by nav.js

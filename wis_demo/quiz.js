@@ -233,35 +233,7 @@ function renderResults(topResults, otherResults) {
         resultsGrid.appendChild(card);
     });
 
-    // Remaining careers in a compact list
-    if (otherResults && otherResults.length > 0) {
-        const divider = document.createElement('div');
-        divider.className = 'results-divider';
-        divider.innerHTML = '<span>OTHER CAREERS TO EXPLORE</span>';
-        resultsGrid.appendChild(divider);
-
-        const otherGrid = document.createElement('div');
-        otherGrid.className = 'other-careers-grid';
-
-        otherResults.forEach(career => {
-            const item = document.createElement('div');
-            item.className = 'other-career-item';
-
-            const name = document.createElement('div');
-            name.className = 'other-career-name';
-            name.textContent = career.name;
-
-            const score = document.createElement('div');
-            score.className = 'other-career-score';
-            score.textContent = career.score > 0 ? career.score + '% match' : 'Not matched';
-
-            item.appendChild(name);
-            item.appendChild(score);
-            otherGrid.appendChild(item);
-        });
-
-        resultsGrid.appendChild(otherGrid);
-    }
+    // "Other careers to explore" section removed per user request
 }
 
 // Build a result card matching the screenshot layout:
