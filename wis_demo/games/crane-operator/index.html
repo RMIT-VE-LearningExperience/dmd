@@ -803,12 +803,8 @@ function updatePhysics(dt) {
     const dx = hook.x - trolley.x;
     const maxLen = Math.sqrt(dx * dx + dy * dy);
     if (trolley.ropeLength > maxLen) trolley.ropeLength = maxLen;
-    // Trigger collision damage when being pushed into the obstacle
-    if (hitCooldown <= 0) {
-      hitCooldown = 1.0;
-      addDamage(25);
-      setSpotterAlert('⚠️ COLLISION! Avoid the obstacle!');
-    }
+    // Hard block only prevents clipping below the stack; damage is handled
+    // by real obstacle overlap checks further below.
   }
 
   const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
@@ -1584,7 +1580,7 @@ function drawDropZone() {
   const pulse = 1 + Math.sin(t * 4) * 0.06;
   const alpha = 0.5 + Math.sin(t * 4) * 0.12;
   const cx = dz.x + dz.width / 2;
-  const cy = dz.y + 6;
+  const cy = dz.y + 18;
   const rx = Math.max(30, dz.width * 0.46) * pulse;
   const ry = Math.max(10, dz.height * 0.34) * pulse;
 
