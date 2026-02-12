@@ -982,7 +982,21 @@ function drawWorld() {
 
   // Draw background image in screen space (no blur/filter effects).
   if (svgImages.background) {
-    ctx.drawImage(svgImages.background, 0, 0, w, h);
+    const bgScale = 0.88;
+    const imgAspect = (svgImages.background.naturalWidth > 0 && svgImages.background.naturalHeight > 0)
+      ? (svgImages.background.naturalWidth / svgImages.background.naturalHeight)
+      : (w / h);
+    const frameW = w * bgScale;
+    const frameH = h * bgScale;
+    let bgW = frameW;
+    let bgH = bgW / imgAspect;
+    if (bgH > frameH) {
+      bgH = frameH;
+      bgW = bgH * imgAspect;
+    }
+    const bgX = (w - bgW) / 2;
+    const bgY = (h - bgH) / 2 + 40;
+    ctx.drawImage(svgImages.background, bgX, bgY, bgW, bgH);
   }
 
   if (!svgImages.background) {
