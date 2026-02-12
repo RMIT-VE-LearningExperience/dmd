@@ -509,9 +509,9 @@ const H = () => window.innerHeight;
 const WORLD = {
   groundY: 700,
   craneBaseX: 200,
-  craneTopY: 50,
+  craneTopY: 245, // 30% shorter tower (650px -> 455px)
   jibLength: 900,
-  towerHeight: 650,
+  towerHeight: 455,
 };
 
 let gameState = 'start';
@@ -719,8 +719,8 @@ function updateSpotter() {
 }
 
 // ============ PHYSICS ============
-const TROLLEY_ACCEL = 320;
-const TROLLEY_FRICTION = 0.93;
+const TROLLEY_ACCEL = 520;
+const TROLLEY_FRICTION = 0.95;
 const ROPE_ACCEL = 220;
 const ROPE_FRICTION = 0.92;
 const GRAVITY = 9.81;
@@ -982,20 +982,13 @@ function drawWorld() {
 
   // Draw background image in screen space (no blur/filter effects).
   if (svgImages.background) {
-    const bgScale = 0.88;
     const imgAspect = (svgImages.background.naturalWidth > 0 && svgImages.background.naturalHeight > 0)
       ? (svgImages.background.naturalWidth / svgImages.background.naturalHeight)
       : (w / h);
-    const frameW = w * bgScale;
-    const frameH = h * bgScale;
-    let bgW = frameW;
-    let bgH = bgW / imgAspect;
-    if (bgH > frameH) {
-      bgH = frameH;
-      bgW = bgH * imgAspect;
-    }
+    const bgH = h;
+    const bgW = bgH * imgAspect;
     const bgX = (w - bgW) / 2;
-    const bgY = (h - bgH) / 2 + 40;
+    const bgY = h - bgH;
     ctx.drawImage(svgImages.background, bgX, bgY, bgW, bgH);
   }
 
