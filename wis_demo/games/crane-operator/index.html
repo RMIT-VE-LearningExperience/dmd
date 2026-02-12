@@ -1060,7 +1060,7 @@ function drawWorld() {
     const hillX = hillCenterX - hillW / 2;
     const aspect = hillImg.naturalWidth > 0 ? (hillImg.naturalHeight / hillImg.naturalWidth) : 0.35;
     const hillH = hillW * aspect;
-    const hillY = WORLD.groundY - hillH + 40;
+    const hillY = WORLD.groundY - hillH + 10;
     ctx.drawImage(hillImg, hillX, hillY, hillW, hillH);
     ctx.restore();
   }
@@ -1613,7 +1613,7 @@ function drawDropZone() {
   const pulse = 1 + Math.sin(t * 4) * 0.06;
   const alpha = 0.5 + Math.sin(t * 4) * 0.12;
   const cx = dz.x + dz.width / 2;
-  const cy = dz.y + 18;
+  const cy = dz.y + 30;
   const rx = Math.max(30, dz.width * 0.46) * pulse;
   const ry = Math.max(10, dz.height * 0.34) * pulse;
 
