@@ -159,6 +159,17 @@ body {
     transform: scale(0.98);
 }
 
+.explore-center:focus-visible,
+.video-legend:focus-visible,
+.skill-filter-tag:focus-visible,
+.career-card:focus-visible,
+.career-item:focus-visible,
+.level-header:focus-visible,
+.related-role-tag:focus-visible {
+    outline: 3px solid #e8b830;
+    outline-offset: 3px;
+}
+
 .explore-center::before {
     content: '';
     position: absolute;

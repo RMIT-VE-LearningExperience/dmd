@@ -110,6 +110,16 @@ const closeComparisonBtn = document.getElementById('closeComparisonBtn');
 const exploreCenter = document.getElementById('exploreCenter');
 const viewSwitcher = document.getElementById('viewSwitcher');
 
+function bindKeyboardActivate(element, handler) {
+    if (!element) return;
+    element.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handler();
+        }
+    });
+}
+
 // View switcher event listener
 if (viewSwitcher) {
     viewSwitcher.addEventListener('click', () => {
@@ -125,7 +135,11 @@ Object.keys(skillCategories).forEach(category => {
     tag.className = 'skill-filter-tag';
     tag.textContent = category;
     tag.dataset.category = category;
-    tag.addEventListener('click', () => toggleCategoryFilter(category, tag));
+    tag.setAttribute('role', 'button');
+    tag.setAttribute('tabindex', '0');
+    const activateTag = () => toggleCategoryFilter(category, tag);
+    tag.addEventListener('click', activateTag);
+    bindKeyboardActivate(tag, activateTag);
     skillsFilterContainer.appendChild(tag);
 });
 
@@ -370,14 +384,19 @@ function createFloatingCareerItem(career, index, total) {
     item.dataset.speed = 0.0002 + Math.random() * 0.0003;
     item.dataset.career = JSON.stringify(career);
 
-    item.addEventListener('click', () => {
+    item.setAttribute('role', 'button');
+    item.setAttribute('tabindex', '0');
+    item.setAttribute('aria-label', `Open details for ${career.name}`);
+    const activateItem = () => {
         if (selectedCareer) {
             selectedCareer.classList.remove('clicked');
         }
         item.classList.add('clicked');
         selectedCareer = item;
         showCareerInfo(career);
-    });
+    };
+    item.addEventListener('click', activateItem);
+    bindKeyboardActivate(item, activateItem);
 
     floatingContainer.appendChild(item);
     return item;
@@ -422,6 +441,9 @@ function animate() {
 function createCareerCard(career, matchingLevels = null) {
     const card = document.createElement('div');
     card.className = 'career-card';
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', `Open details for ${career.name}`);
     if (career.video_url) {
         card.classList.add('has-video');
     }
@@ -493,9 +515,11 @@ function createCareerCard(career, matchingLevels = null) {
 
     card.appendChild(compareBtn);
 
-    card.addEventListener('click', () => {
+    const activateCard = () => {
         showCareerInfo(career);
-    });
+    };
+    card.addEventListener('click', activateCard);
+    bindKeyboardActivate(card, activateCard);
 
     return card;
 }
@@ -1072,9 +1096,15 @@ function showCareerInfo(career) {
             `;
 
             const header = card.querySelector('.level-header');
-            header.addEventListener('click', () => {
+            header.setAttribute('role', 'button');
+            header.setAttribute('tabindex', '0');
+            header.setAttribute('aria-expanded', 'false');
+            const toggleLevel = () => {
                 card.classList.toggle('active');
-            });
+                header.setAttribute('aria-expanded', card.classList.contains('active') ? 'true' : 'false');
+            };
+            header.addEventListener('click', toggleLevel);
+            bindKeyboardActivate(header, toggleLevel);
 
             levelsContainer.appendChild(card);
         });
@@ -1091,12 +1121,17 @@ function showCareerInfo(career) {
             const tag = document.createElement('div');
             tag.className = 'related-role-tag';
             tag.textContent = roleName;
-            tag.onclick = () => {
+            tag.setAttribute('role', 'button');
+            tag.setAttribute('tabindex', '0');
+            tag.setAttribute('aria-label', `View related role ${roleName}`);
+            const activateTag = () => {
                 const relatedCareer = careersData.roles.find(c => c.name === roleName);
                 if (relatedCareer) {
                     showCareerInfo(relatedCareer);
                 }
             };
+            tag.addEventListener('click', activateTag);
+            bindKeyboardActivate(tag, activateTag);
             relatedRolesContainer.appendChild(tag);
         });
     } else {
@@ -1282,7 +1317,9 @@ pauseBtn.addEventListener('click', () => {
 });
 
 // Video legend click to filter
-videoLegend.addEventListener('click', () => {
+videoLegend.setAttribute('role', 'button');
+videoLegend.setAttribute('tabindex', '0');
+const toggleVideoFilter = () => {
     videoFilterActive = !videoFilterActive;
     videoLegend.classList.toggle('active');
 
@@ -1300,13 +1337,20 @@ videoLegend.addEventListener('click', () => {
         // In card view, use the main filter function
         filterCareers();
     }
-});
+};
+videoLegend.addEventListener('click', toggleVideoFilter);
+bindKeyboardActivate(videoLegend, toggleVideoFilter);
 
 // Explore center click to switch to card view
 if (exploreCenter) {
-    exploreCenter.addEventListener('click', () => {
+    exploreCenter.setAttribute('role', 'button');
+    exploreCenter.setAttribute('tabindex', '0');
+    exploreCenter.setAttribute('aria-label', 'Switch to card view');
+    const activateExploreCenter = () => {
         switchView('cards');
-    });
+    };
+    exploreCenter.addEventListener('click', activateExploreCenter);
+    bindKeyboardActivate(exploreCenter, activateExploreCenter);
 }
 
 // Load quiz results from URL parameters (preferred) or localStorage (fallback)

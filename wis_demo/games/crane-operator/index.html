@@ -80,6 +80,12 @@
   #startBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #193E75, 0 12px 40px rgba(245,198,66,0.4); }
   #startBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #193E75; }
 
+  button:focus-visible,
+  a:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+  }
+
   /* HUD */
   #hud {
     position: fixed;
@@ -359,13 +365,13 @@
 <div class="nav-scrim" id="navScrim"></div>
 
 <!-- Hamburger menu -->
-<button class="menu-btn" id="menuBtn" aria-label="Open menu" style="position: fixed; top: 32px; right: 32px; z-index: 10;">
+<button class="menu-btn" id="menuBtn" aria-label="Open menu" style="position: fixed; top: 32px; right: 32px; z-index: 220;">
   <span></span>
   <span></span>
   <span></span>
 </button>
 
-<canvas id="gameCanvas"></canvas>
+<canvas id="gameCanvas" aria-label="Crane Operator game canvas"></canvas>
 
 <!-- SVG Assets Container -->
 <div id="svg-assets"></div>
@@ -386,7 +392,7 @@
       <div id="damageTrack"><div id="damageFill"></div></div>
     </div>
   </div>
-  <div id="spotterBox">Ready</div>
+  <div id="spotterBox" role="status" aria-live="polite">Ready</div>
 </div>
 
 <div id="mobileNavBar" aria-hidden="true"></div>
@@ -396,16 +402,16 @@
   <div class="ctrl-group">
     <div class="ctrl-row">
       <div style="width:56px"></div>
-      <button class="ctrl-btn" data-dir="up">&#9650;</button>
+      <button class="ctrl-btn" data-dir="up" aria-label="Move hook up">&#9650;</button>
       <div style="width:56px"></div>
     </div>
     <div class="ctrl-row">
-      <button class="ctrl-btn" data-dir="left">&#9664;</button>
-      <button class="ctrl-btn" data-dir="down">&#9660;</button>
-      <button class="ctrl-btn" data-dir="right">&#9654;</button>
+      <button class="ctrl-btn" data-dir="left" aria-label="Move hook left">&#9664;</button>
+      <button class="ctrl-btn" data-dir="down" aria-label="Move hook down">&#9660;</button>
+      <button class="ctrl-btn" data-dir="right" aria-label="Move hook right">&#9654;</button>
     </div>
   </div>
-  <button class="ctrl-btn hook-btn" id="hookBtn">Hook</button>
+  <button class="ctrl-btn hook-btn" id="hookBtn" aria-label="Hook" aria-pressed="false">Hook</button>
 </div>
 
 <!-- End Screen -->
@@ -639,8 +645,11 @@ function initGame() {
 }
 
 function resetHookBtn() {
-  document.getElementById('hookBtn').textContent = 'Hook';
-  document.getElementById('hookBtn').classList.remove('hooked');
+  const hookBtn = document.getElementById('hookBtn');
+  hookBtn.textContent = 'Hook';
+  hookBtn.classList.remove('hooked');
+  hookBtn.setAttribute('aria-label', 'Hook');
+  hookBtn.setAttribute('aria-pressed', 'false');
 }
 
 // ============ SPOTTER SYSTEM ============
@@ -1057,7 +1066,7 @@ function drawWorld() {
     const hillImg = svgImages.hill01;
     const hillW = 1800;
     const hillCenterX = WORLD.craneBaseX + WORLD.jibLength / 2;
-    const hillX = hillCenterX - hillW / 2;
+    const hillX = hillCenterX - hillW / 2 - 120;
     const aspect = hillImg.naturalWidth > 0 ? (hillImg.naturalHeight / hillImg.naturalWidth) : 0.35;
     const hillH = hillW * aspect;
     const hillY = WORLD.groundY - hillH + 10;
@@ -1217,13 +1226,26 @@ function drawCrane() {
   };
 
   // Base - using yellow/orange tones from SVG
-  ctx.fillStyle = '#B18058';
-  ctx.fillRect(bx - 80, gndY - 15, 180, 25);
+  ctx.fillStyle = '#F5C942';
+  const baseX = bx - 40;
+  const baseY = gndY - 15;
+  const baseW = 80;
+  const baseH = 25;
+  const baseTopRadius = 8;
+  ctx.beginPath();
+  ctx.moveTo(baseX, baseY + baseH);
+  ctx.lineTo(baseX, baseY + baseTopRadius);
+  ctx.quadraticCurveTo(baseX, baseY, baseX + baseTopRadius, baseY);
+  ctx.lineTo(baseX + baseW - baseTopRadius, baseY);
+  ctx.quadraticCurveTo(baseX + baseW, baseY, baseX + baseW, baseY + baseTopRadius);
+  ctx.lineTo(baseX + baseW, baseY + baseH);
+  ctx.closePath();
+  ctx.fill();
 
   // Tower structure - crane yellow
   ctx.strokeStyle = '#F5C942';
-  ctx.lineWidth = 3;
-  const towerW = 30;
+  ctx.lineWidth = 5;
+  const towerW = 28;
 
   ctx.beginPath();
   ctx.moveTo(bx - towerW / 2, gndY - 15);
@@ -1232,8 +1254,8 @@ function drawCrane() {
   ctx.lineTo(bx + towerW / 2, topY);
   ctx.stroke();
 
-  ctx.lineWidth = 1.5;
-  ctx.strokeStyle = '#F37329';
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = '#F5C942';
   const segH = 50;
   for (let y = gndY - 15; y > topY; y -= segH) {
     ctx.beginPath();
@@ -1251,20 +1273,26 @@ function drawCrane() {
   // Jib - crane yellow
   const jibY = topY;
   const jibEnd = bx + WORLD.jibLength;
+  const jibTipDiagX = jibEnd - 48;
+  const jibTipNoseX = jibEnd - 10;
 
   ctx.strokeStyle = '#F5C942';
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
   ctx.beginPath();
   ctx.moveTo(bx, jibY);
-  ctx.lineTo(jibEnd, jibY);
+  ctx.lineTo(jibTipDiagX, jibY);
   ctx.moveTo(bx, jibY + 14);
   ctx.lineTo(jibEnd, jibY + 14);
+  ctx.moveTo(jibTipDiagX, jibY);
+  ctx.lineTo(jibTipNoseX, jibY + 14);
   ctx.stroke();
+  ctx.lineCap = 'butt';
 
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = '#F37329';
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#F5C942';
   const jibSegW = 40;
-  for (let x = bx; x < jibEnd; x += jibSegW) {
+  for (let x = bx; x < jibTipDiagX - jibSegW; x += jibSegW) {
     ctx.beginPath();
     ctx.moveTo(x, jibY);
     ctx.lineTo(x + jibSegW, jibY + 14);
@@ -1272,6 +1300,14 @@ function drawCrane() {
     ctx.lineTo(x, jibY + 14);
     ctx.stroke();
   }
+
+  // Tip truss detail
+  ctx.beginPath();
+  ctx.moveTo(jibTipDiagX - 24, jibY);
+  ctx.lineTo(jibTipDiagX - 24, jibY + 14);
+  ctx.moveTo(jibTipDiagX - 24, jibY);
+  ctx.lineTo(jibTipNoseX - 10, jibY + 14);
+  ctx.stroke();
 
   // Counterweight (outer corners rounded, inner touching corners square)
   const cwX = bx - 96;
@@ -1311,15 +1347,51 @@ function drawCrane() {
   drawRoundedRect(bx - 116, jibY + 10, 122, 8, 4);
   ctx.fill();
 
+  // Triangular truss between cabin and top joint
+  const triApexX = bx;
+  const triApexY = topY - 40;
+  const triBaseY = topY + 10;
+  const triHalfW = 24;
+  const triLeftX = triApexX - triHalfW;
+  const triRightX = triApexX + triHalfW;
+
+  ctx.strokeStyle = '#F5C942';
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(triLeftX, triBaseY);
+  ctx.lineTo(triApexX, triApexY);
+  ctx.lineTo(triRightX, triBaseY);
+  ctx.lineTo(triLeftX, triBaseY);
+  ctx.stroke();
+
+  ctx.strokeStyle = '#F5C942';
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(triLeftX + 3, triBaseY - 2);
+  ctx.lineTo(triApexX + 9, triBaseY - 16);
+  ctx.moveTo(triApexX - 9, triBaseY - 16);
+  ctx.lineTo(triRightX - 3, triBaseY - 2);
+  ctx.moveTo(triLeftX + 8, triBaseY - 22);
+  ctx.lineTo(triApexX + 6, triApexY + 10);
+  ctx.moveTo(triRightX - 8, triBaseY - 22);
+  ctx.lineTo(triApexX - 6, triApexY + 10);
+  ctx.stroke();
+
   // Support cables
   ctx.strokeStyle = '#193E75';
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(bx, topY - 40);
   ctx.lineTo(bx - 60, jibY);
   ctx.moveTo(bx, topY - 40);
   ctx.lineTo(bx + 80, jibY);
   ctx.stroke();
+
+  // Orange joint at cable intersection
+  ctx.fillStyle = '#F37329';
+  ctx.beginPath();
+  ctx.arc(bx, topY - 40, 6, 0, Math.PI * 2);
+  ctx.fill();
 
   ctx.strokeStyle = 'rgba(25,62,117,0.3)';
   ctx.lineWidth = 1;
@@ -1329,8 +1401,8 @@ function drawCrane() {
   ctx.stroke();
 
   // Cabin (square with chamfered top-right corner and subtle corner radius)
-  const cabinW = 48;
-  const cabinH = 54;
+  const cabinW = 54;
+  const cabinH = 60;
   const cabinX = bx - cabinW / 2;
   const cabinY = topY - 5;
   const cabinChamfer = 14;
@@ -1356,10 +1428,10 @@ function drawCrane() {
   ctx.fill();
 
   // Cabin window (square with matching top-right chamfer and subtle corner radius)
-  const winX = cabinX + 10;
-  const winY = cabinY + 11;
-  const winW = 24;
-  const winH = 27;
+  const winX = cabinX + 11;
+  const winY = cabinY + 12;
+  const winW = 27;
+  const winH = 30;
   const winChamfer = 8;
   const winRadius = 3;
 
@@ -1609,19 +1681,30 @@ function drawObstacle(obs) {
 
 function drawDropZone() {
   const dz = dropZone;
+  const refCrate = getPickupTargetCrate() || hookedCrate || crates[0];
+  const refW = refCrate ? refCrate.w : 80;
+  const refH = refCrate ? refCrate.h : 47;
   const t = performance.now() / 1000;
   const pulse = 1 + Math.sin(t * 4) * 0.06;
   const alpha = 0.5 + Math.sin(t * 4) * 0.12;
   const cx = dz.x + dz.width / 2;
   const cy = dz.y + 30;
-  const rx = Math.max(30, dz.width * 0.46) * pulse;
-  const ry = Math.max(10, dz.height * 0.34) * pulse;
+  const rx = Math.max(24, refW * 0.9) * pulse;
+  const ry = Math.max(8, refH * 0.28) * pulse;
 
   ctx.save();
   ctx.fillStyle = `rgba(60,166,60,${alpha.toFixed(3)})`;
   ctx.beginPath();
   ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
   ctx.fill();
+
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 12px "Chakra Petch", monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('DROP ZONE', cx, cy);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
   ctx.restore();
 }
 
@@ -1675,8 +1758,11 @@ function toggleHook() {
     if (crate) {
       hookedCrate = crate;
       if (typeof hookedCrate.broken !== 'boolean') hookedCrate.broken = false;
-      document.getElementById('hookBtn').textContent = 'Release';
-      document.getElementById('hookBtn').classList.add('hooked');
+      const hookBtn = document.getElementById('hookBtn');
+      hookBtn.textContent = 'Release';
+      hookBtn.classList.add('hooked');
+      hookBtn.setAttribute('aria-label', 'Release');
+      hookBtn.setAttribute('aria-pressed', 'true');
     }
   }
 }
@@ -1725,10 +1811,20 @@ function setDirBtnActive(dir, active) {
   if (btn) btn.classList.toggle('active', active);
 }
 
+function bindButtonKeyboardClick(button, handler) {
+  if (!button) return;
+  button.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      handler();
+    }
+  });
+}
+
 window.addEventListener('keydown', e => {
   if (gameState !== 'playing') return;
   const dir = keyDirMap[e.key];
-  if (dir) { inputState[dir] = true; setDirBtnActive(dir, true); }
+  if (dir) { e.preventDefault(); inputState[dir] = true; setDirBtnActive(dir, true); }
   if (e.key === ' ' || e.key === 'Enter') {
     e.preventDefault();
     toggleHook();
@@ -1740,7 +1836,7 @@ window.addEventListener('keydown', e => {
 
 window.addEventListener('keyup', e => {
   const dir = keyDirMap[e.key];
-  if (dir) { inputState[dir] = false; setDirBtnActive(dir, false); }
+  if (dir) { e.preventDefault(); inputState[dir] = false; setDirBtnActive(dir, false); }
 });
 
 document.querySelectorAll('.ctrl-btn[data-dir]').forEach(btn => {
@@ -1753,10 +1849,26 @@ document.querySelectorAll('.ctrl-btn[data-dir]').forEach(btn => {
   btn.addEventListener('touchstart', e => { e.preventDefault(); start(); });
   btn.addEventListener('touchend', e => { e.preventDefault(); end(); });
   btn.addEventListener('touchcancel', end);
+  btn.addEventListener('keydown', e => {
+    if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) {
+      e.preventDefault();
+      start();
+    }
+  });
+  btn.addEventListener('keyup', e => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      end();
+    }
+  });
+  btn.addEventListener('blur', end);
 });
 
 document.getElementById('hookBtn').addEventListener('click', () => { if (gameState === 'playing') toggleHook(); });
 document.getElementById('hookBtn').addEventListener('touchstart', e => { e.preventDefault(); if (gameState === 'playing') toggleHook(); });
+bindButtonKeyboardClick(document.getElementById('hookBtn'), () => {
+  if (gameState === 'playing') toggleHook();
+});
 
 // ============ GAME FLOW ============
 document.getElementById('startBtn').addEventListener('click', startGame);
@@ -1764,13 +1876,21 @@ document.getElementById('restartBtn').addEventListener('click', () => {
   document.getElementById('endScreen').style.display = 'none';
   startGame();
 });
+bindButtonKeyboardClick(document.getElementById('startBtn'), startGame);
+bindButtonKeyboardClick(document.getElementById('restartBtn'), () => {
+  document.getElementById('endScreen').style.display = 'none';
+  startGame();
+});
 
 function startGame() {
   if (introOverviewTimer) clearTimeout(introOverviewTimer);
   if (introZoomTimer) clearTimeout(introZoomTimer);
+  introOverviewTimer = null;
+  introZoomTimer = null;
 
   initGame();
-  gameState = 'overview';
+  const isDesktopView = window.matchMedia('(min-width: 701px)').matches;
+  gameState = isDesktopView ? 'zooming' : 'overview';
 
   camera = { x: WORLD.craneBaseX + WORLD.jibLength / 2, y: WORLD.groundY / 2, zoom: 0.52 };
   targetCamera = { ...camera };
@@ -1783,13 +1903,20 @@ function startGame() {
 
   setTimeout(() => { document.getElementById('startScreen').style.display = 'none'; }, 900);
 
-  introOverviewTimer = setTimeout(() => {
-    gameState = 'zooming';
+  if (isDesktopView) {
     introZoomTimer = setTimeout(() => {
       gameState = 'playing';
       document.getElementById('spotterBox').textContent = '⬇️ Lower the hook to a crate';
     }, 1000);
-  }, 2000);
+  } else {
+    introOverviewTimer = setTimeout(() => {
+      gameState = 'zooming';
+      introZoomTimer = setTimeout(() => {
+        gameState = 'playing';
+        document.getElementById('spotterBox').textContent = '⬇️ Lower the hook to a crate';
+      }, 1000);
+    }, 2000);
+  }
 }
 
 // ============ MAIN LOOP ============

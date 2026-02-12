@@ -302,10 +302,21 @@
         });
 
         document.querySelectorAll('.game-card:not(.locked)').forEach(function(card) {
-            card.addEventListener('click', function() {
+            card.setAttribute('role', 'button');
+            card.setAttribute('tabindex', '0');
+            var cardTitle = card.querySelector('.game-card-name');
+            card.setAttribute('aria-label', 'Open ' + (cardTitle ? cardTitle.textContent : 'mini game'));
+            var openCard = function() {
                 var href = card.getAttribute('data-href');
                 if (href) {
                     window.location.href = href;
+                }
+            };
+            card.addEventListener('click', openCard);
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openCard();
                 }
             });
         });
