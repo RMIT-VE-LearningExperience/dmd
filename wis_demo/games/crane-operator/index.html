@@ -85,19 +85,20 @@
     position: fixed;
     top: 8px;
     left: 8px;
-    right: 8px;
     display: none;
     z-index: 50;
     flex-direction: column;
     gap: 6px;
-    align-items: stretch;
+    align-items: flex-start;
+    max-width: calc(100% - 70px);
   }
 
   #hudRow1 {
     display: flex;
     gap: 8px;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .hud-box {
@@ -306,10 +307,9 @@
     #controls { bottom: 24px; }
   }
 
-  /* Mobile: move HUD to top-left so it doesn't overlap the hamburger menu */
+  /* Mobile: ensure HUD doesn't overlap the hamburger menu */
   @media (max-width: 700px) {
-    #hud { right: 60px; align-items: flex-start; }
-    #hudRow1 { justify-content: flex-start; }
+    #hud { max-width: calc(100% - 70px); }
     #spotterBox { text-align: left; }
   }
 
