@@ -1097,73 +1097,274 @@ padding-bottom: 60px;
   }
 
   .welcome-card {
-    background: white;
+    background: #efefef;
     border-radius: 16px;
     height: 80%;
     width: 100%;
     max-width: 400px;
-    padding: 28px 24px 90px;
+    padding: 0;
     position: relative;
     box-shadow: 0 18px 50px rgba(0,0,0,0.25);
+    overflow: hidden;
   }
 
-  .welcome-title {
-    font-size: 22px;
-    font-weight: 900;
-    color: #193E75;
-    text-align: center;
-    margin-bottom: 16px;
+  .welcome-role-slides {
+    position: relative;
+    width: 100%;
+    height: 100%;
   }
 
-  .welcome-text {
-    font-size: 14px;
+  .welcome-role-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .welcome-role-slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .welcome-intro-body {
+    position: absolute;
+    inset: 0;
+    padding: 56px 28px 140px;
     color: #1a2744;
-    line-height: 1.45;
+    z-index: 2;
+  }
+
+  .welcome-intro-title {
+    font-size: 48px;
+    font-weight: 900;
+    color: #224987;
+    text-align: center;
+    line-height: 0.95;
+    letter-spacing: 0.4px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+
+  .welcome-intro-text {
+    font-size: 16px;
+    line-height: 1.35;
     margin-bottom: 14px;
   }
 
-  .welcome-ready {
+  .welcome-intro-manager {
+    position: fixed;
+    right: 6px;
+    bottom: -8px;
+    width: 52vw;
+    max-width: 250px;
+    height: auto;
+    pointer-events: none;
+    z-index: 402;
+  }
+
+  .welcome-role-header {
+    height: 150px;
+    background: #e26f5b;
+  }
+
+  .welcome-role-header.crane { background: #e79f57; }
+  .welcome-role-header.concreter { background: #e26f5b; }
+  .welcome-role-header.carpenter { background: #e8c66c; }
+
+  .welcome-role-avatar-wrap {
+    position: absolute;
+    left: 50%;
+    top: 112px;
+    transform: translateX(-50%);
+    width: 116px;
+    height: 116px;
+    border-radius: 50%;
+    background: #f4f4f4;
+    border: 5px solid #224987;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 2;
+  }
+
+  .welcome-role-avatar {
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+  }
+
+  .welcome-role-body {
+    position: absolute;
+    inset: 0;
+    padding: 246px 18px 108px;
+    color: #1a2744;
+  }
+
+  .welcome-role-title {
+    font-size: 44px;
+    font-weight: 900;
+    color: #224987;
+    text-align: center;
+    line-height: 1;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .welcome-role-desc {
+    font-size: 16px;
+    line-height: 1.35;
+    margin-bottom: 18px;
+  }
+
+  .welcome-blockers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #111;
+  }
+
+  .welcome-blockers .cross {
+    color: #e63946;
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  .welcome-blocker-icons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .welcome-blocker-icons .icon-tile {
+    width: 78px;
+    height: 78px;
+    border-radius: 8px;
+    background: #224987;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .welcome-blocker-icons .icon-tile img {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+  }
+
+  .welcome-clear {
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #2b7a2b;
+  }
+
+  .welcome-next {
     position: absolute;
     left: 24px;
     bottom: 24px;
     background: #3BA53B;
     color: white;
     border: none;
-    width: 72px;
-    height: 72px;
+    width: 82px;
+    height: 82px;
     border-radius: 50%;
     font-family: 'Inter', sans-serif;
     font-weight: 900;
-    font-size: 14px;
+    font-size: 21px;
     cursor: pointer;
     box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    z-index: 3;
   }
 
-  .welcome-manager {
-    position: fixed;
-    right: 0;
-   bottom: -50px;
-    width: 100vw;
-    max-width: 400px;
-    height: auto;
-    pointer-events: none;
-    z-index: 401;
+  .welcome-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 40px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 3;
+  }
+
+  .welcome-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d1d5db;
+    transition: all 0.2s;
+  }
+
+  .welcome-dot.active {
+    background: #224987;
+    width: 24px;
+    border-radius: 4px;
   }
 
   @media (max-width: 1023px) {
-    .welcome-manager {
-      position: fixed;
-        right: -8px;
-        bottom: -10px;
-        width: 62vw;
-        max-width: 280px;
-        z-index: 402;
+    .welcome-intro-body {
+      padding: 44px 22px 136px;
     }
 
-    .welcome-title,
-    .welcome-text {
-      position: relative;
-      z-index: 2;
+    .welcome-intro-title {
+      font-size: 42px;
+      margin-bottom: 20px;
+    }
+
+    .welcome-intro-text {
+      font-size: 14px;
+    }
+
+    .welcome-intro-manager {
+      right: 2px;
+      bottom: -10px;
+      width: 40vw;
+      max-width: 280px;
+    }
+
+    .welcome-role-header {
+      height: 128px;
+    }
+
+    .welcome-role-avatar-wrap {
+      top: 35px;
+      width: 144px;
+      height: 144px;
+    }
+
+    .welcome-role-avatar {
+      width: 150px;
+      height: 150px;
+    }
+
+    .welcome-role-body {
+      padding: 212px 18px 110px;
+    }
+
+    .welcome-role-title {
+      font-size: 40px;
+    }
+
+    .welcome-role-desc {
+      font-size: 14px;
+    }
+
+    .welcome-next {
+      width: 76px;
+      height: 76px;
+      font-size: 19px;
+    }
+
+    .welcome-blocker-icons .icon-tile {
+      width: 72px;
+      height: 72px;
     }
   }
 
@@ -1460,15 +1661,74 @@ padding-bottom: 60px;
 <div class="nav-scrim" id="navScrim"></div>
 <div class="welcome-overlay" id="welcomeOverlay">
   <div class="welcome-card">
-    <div class="welcome-title">WELCOME TO<br>CREW PLANNER!</div>
-    <p class="welcome-text">
-      You're in charge of scheduling trades for a construction project.
-    </p>
-    <p class="welcome-text">
-      Schedule the Crane Operator, Concreter, and Carpenter to complete the job on time while working around the weather.
-    </p>
-    <button class="welcome-ready" onclick="closeWelcome()">READY</button>
-    <img class="welcome-manager" src="images/character_coins/manager.svg" alt="Manager">
+    <div class="welcome-role-slides">
+      <div class="welcome-role-slide active" data-role-slide="0">
+        <div class="welcome-intro-body">
+          <div class="welcome-intro-title">WELCOME TO<br>CREW PLANNER!</div>
+          <p class="welcome-intro-text">
+            You're in charge of scheduling trades for a construction project.
+          </p>
+          <p class="welcome-intro-text">
+            Schedule the Crane Operator, Concreter, and Carpenter to complete the job on time while working around the weather.
+          </p>
+        </div>
+        <img class="welcome-intro-manager" src="images/character_coins/manager.svg" alt="Manager">
+      </div>
+
+      <div class="welcome-role-slide" data-role-slide="1">
+        <div class="welcome-role-header crane"></div>
+        <div class="welcome-role-avatar-wrap">
+          <img class="welcome-role-avatar" src="images/character_coins/craneoperator_coin.svg" alt="Crane Operator">
+        </div>
+        <div class="welcome-role-body">
+          <div class="welcome-role-title">CRANE OPERATOR</div>
+          <p class="welcome-role-desc">
+            I lift and move heavy materials safely around site to support each stage of construction.
+          </p>
+          <div class="welcome-blockers"><span class="cross">✕</span><span>Task blockers</span></div>
+          <div class="welcome-blocker-icons">
+            <div class="icon-tile"><img src="images/weather_icons/wind01.svg" alt="Windy"></div>
+            <div class="icon-tile"><img src="images/weather_icons/thunder02.svg" alt="Storms"></div>
+            <div class="icon-tile"><img src="images/weather_icons/moon.svg" alt="Night"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="welcome-role-slide" data-role-slide="2">
+        <div class="welcome-role-header concreter"></div>
+        <div class="welcome-role-avatar-wrap">
+          <img class="welcome-role-avatar" src="images/character_coins/concreter_coin.svg" alt="Concreter">
+        </div>
+        <div class="welcome-role-body">
+          <div class="welcome-role-title">CONCRETER</div>
+          <p class="welcome-role-desc">
+            I prepare, pour, and finish concrete to form strong foundations and slabs on site.
+          </p>
+          <div class="welcome-blockers"><span class="cross">✕</span><span>Task blockers</span></div>
+          <div class="welcome-blocker-icons">
+            <div class="icon-tile"><img src="images/weather_icons/wind01.svg" alt="Windy"></div>
+            <div class="icon-tile"><img src="images/weather_icons/thunder02.svg" alt="Storms"></div>
+            <div class="icon-tile"><img src="images/weather_icons/moon.svg" alt="Night"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="welcome-role-slide" data-role-slide="3">
+        <div class="welcome-role-header carpenter"></div>
+        <div class="welcome-role-avatar-wrap">
+          <img class="welcome-role-avatar" src="images/character_coins/carpenter_coin.svg" alt="Carpenter">
+        </div>
+        <div class="welcome-role-body">
+          <div class="welcome-role-title">CARPENTER</div>
+          <p class="welcome-role-desc">
+            I build and install timber structures once concrete has set and the site is ready for fit-out.
+          </p>
+          <div class="welcome-clear">No weather blockers for this role.</div>
+        </div>
+      </div>
+    </div>
+    <button class="welcome-next" id="welcomeNextBtn" onclick="nextWelcomeSlide()">NEXT</button>
+    <div class="welcome-dots" id="welcomeDots"></div>
   </div>
 </div>
 <div class="app">
@@ -2813,9 +3073,47 @@ function resetGame() {
 // ============================================================
 //  WELCOME
 // ============================================================
+let welcomeSlideIndex = 0;
+const totalWelcomeSlides = 4;
+
+function renderWelcomeSlide() {
+  const slides = document.querySelectorAll('.welcome-role-slide');
+  slides.forEach((slide, i) => {
+    slide.classList.toggle('active', i === welcomeSlideIndex);
+  });
+
+  const dots = document.getElementById('welcomeDots');
+  if (dots) {
+    dots.innerHTML = '';
+    for (let i = 0; i < totalWelcomeSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'welcome-dot' + (i === welcomeSlideIndex ? ' active' : '');
+      dots.appendChild(dot);
+    }
+  }
+
+  const nextBtn = document.getElementById('welcomeNextBtn');
+  if (nextBtn) {
+    nextBtn.textContent = welcomeSlideIndex === totalWelcomeSlides - 1 ? 'READY' : 'NEXT';
+  }
+}
+
+function nextWelcomeSlide() {
+  if (welcomeSlideIndex < totalWelcomeSlides - 1) {
+    welcomeSlideIndex += 1;
+    renderWelcomeSlide();
+  } else {
+    closeWelcome();
+  }
+}
+
 function closeWelcome() {
   document.getElementById('welcomeOverlay').style.display = 'none';
+  welcomeSlideIndex = 0;
+  renderWelcomeSlide();
 }
+
+renderWelcomeSlide();
 
 // ============================================================
 //  HELP MODAL
