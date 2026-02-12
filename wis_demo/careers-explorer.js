@@ -108,6 +108,16 @@ const videoLegend = document.getElementById('videoLegend');
 const comparisonPanel = document.getElementById('comparisonPanel');
 const closeComparisonBtn = document.getElementById('closeComparisonBtn');
 const exploreCenter = document.getElementById('exploreCenter');
+const viewSwitcher = document.getElementById('viewSwitcher');
+
+// View switcher event listener
+if (viewSwitcher) {
+    viewSwitcher.addEventListener('click', () => {
+        if (currentView === 'cards' || currentView === 'stack') {
+            switchView('floating');
+        }
+    });
+}
 
 // Create skill category filter tags
 Object.keys(skillCategories).forEach(category => {
@@ -607,7 +617,19 @@ function renderCareerCardsInternal(careerMatchingLevels = null) {
 
     noResults.style.display = 'none';
 
-    filteredCareers.forEach((career, index) => {
+    // Sort careers by match score if available
+    let sortedCareers = [...filteredCareers];
+    if (careerMatchingLevels && careerMatchingLevels.size > 0) {
+        sortedCareers.sort((a, b) => {
+            const matchA = careerMatchingLevels.get(a.name);
+            const matchB = careerMatchingLevels.get(b.name);
+            const scoreA = matchA ? matchA.matchScore : 0;
+            const scoreB = matchB ? matchB.matchScore : 0;
+            return scoreB - scoreA; // Sort descending (highest match first)
+        });
+    }
+
+    sortedCareers.forEach((career, index) => {
         const matchingLevels = careerMatchingLevels ? careerMatchingLevels.get(career.name) : null;
         const card = createCareerCard(career, matchingLevels);
 

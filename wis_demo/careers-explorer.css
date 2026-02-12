@@ -404,6 +404,41 @@ body {
     opacity: 1;
 }
 
+.card-view.active ~ .games-fab {
+    display: none;
+}
+
+.view-switcher {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a365d;
+}
+
+.view-switcher:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.view-switcher svg {
+    width: 20px;
+    height: 20px;
+}
+
 .header {
     text-align: center;
     padding: 24px 0;
@@ -873,8 +908,8 @@ body {
    =================================== */
 .pause-btn {
     position: fixed;
-    top: 20px;
-    right: 90px;
+    bottom: 20px;
+    left: 140px;
     width: 40px;
     height: 40px;
     background: rgba(255, 255, 255, 0.95);
