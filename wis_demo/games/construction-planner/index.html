@@ -1471,8 +1471,19 @@ max-height: 130px;
     }
   }
 </style>
+<link rel="stylesheet" href="../../nav.css?v=1.0.0">
 </head>
 <body>
+<nav class="nav-drawer" id="navDrawer">
+  <button class="nav-close" id="navClose" aria-label="Close menu">&times;</button>
+  <a href="../../index.html" class="nav-link">Home</a>
+  <a href="../../about.html" class="nav-link">About</a>
+  <a href="../../mini-games.html" class="nav-link">Mini Games</a>
+  <a href="../../contact.html" class="nav-link">Contact</a>
+  <a href="../../credits.html" class="nav-link">Credits</a>
+</nav>
+<div class="nav-scrim" id="navScrim"></div>
+
 <div class="welcome-overlay" id="welcomeOverlay">
   <div class="welcome-card">
     <div class="welcome-title">WELCOME TO<br>CREW PLANNER!</div>
@@ -1487,6 +1498,13 @@ max-height: 130px;
   </div>
 </div>
 <div class="app">
+  <!-- Hamburger menu -->
+  <button class="menu-btn" id="menuBtn" aria-label="Open menu" style="position: fixed; top: 32px; right: 32px; z-index: 100;">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
   <!-- Header -->
   <div class="header">
     <h1>CREW<br>PLANNER</h1>
@@ -2911,5 +2929,6 @@ window.addEventListener('resize', () => {
   }
 });
 </script>
+<script src="../../nav.js?v=1.0.0"></script>
 </body>
 </html>
