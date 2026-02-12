@@ -546,7 +546,7 @@ let hookedCrate = null;
 let score = 0;
 let totalCrates = 3;
 let damage = 0;
-let hitCooldown = 0;
+let activeDrumHitIds = new Set();
 let droppedCrates = [];
 let spotterMsg = '';
 let spotterArrow = null;
@@ -628,7 +628,7 @@ function initGame() {
   score = 0;
   totalCrates = crates.length;
   damage = 0;
-  hitCooldown = 0;
+  activeDrumHitIds = new Set();
   droppedCrates = [];
   spotterMsg = '';
   spotterArrow = null;
@@ -728,6 +728,8 @@ const GRAVITY = 9.81;
 const SWING_DAMPING = 0.988;
 
 function updatePhysics(dt) {
+  const frameDrumHitIds = new Set();
+
   if (inputState.left) trolley.speed -= TROLLEY_ACCEL * dt;
   if (inputState.right) trolley.speed += TROLLEY_ACCEL * dt;
   trolley.speed *= TROLLEY_FRICTION;
@@ -803,8 +805,37 @@ function updatePhysics(dt) {
     const dx = hook.x - trolley.x;
     const maxLen = Math.sqrt(dx * dx + dy * dy);
     if (trolley.ropeLength > maxLen) trolley.ropeLength = maxLen;
-    // Hard block only prevents clipping below the stack; damage is handled
-    // by real obstacle overlap checks further below.
+
+    // Apply damage only when the blocked point is on a real drum top surface.
+    let touchedDrumTop = false;
+    let touchedDrumId = -1;
+    for (let i = 0; i < obstacles.length; i++) {
+      const obs = obstacles[i];
+      if (hookedCrate) {
+        const cLeft = hook.x - hookedCrate.w / 2;
+        const cRight = hook.x + hookedCrate.w / 2;
+        const cBottom = hook.y + 15 + hookedCrate.h;
+        if (cRight > obs.x && cLeft < obs.x + obs.w &&
+            cBottom >= obs.y - margin && cBottom <= obs.y + margin) {
+          touchedDrumTop = true;
+          touchedDrumId = i;
+          frameDrumHitIds.add(i);
+          break;
+        }
+      } else {
+        if (hook.x > obs.x && hook.x < obs.x + obs.w &&
+            hook.y >= obs.y - margin && hook.y <= obs.y + margin) {
+          touchedDrumTop = true;
+          touchedDrumId = i;
+          frameDrumHitIds.add(i);
+          break;
+        }
+      }
+    }
+    if (touchedDrumTop && touchedDrumId !== -1 && !activeDrumHitIds.has(touchedDrumId)) {
+      addDamage(25);
+      setSpotterAlert('⚠️ COLLISION! Avoid the obstacle!');
+    }
   }
 
   const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
@@ -893,9 +924,8 @@ function updatePhysics(dt) {
     if (btn.classList.contains('hooked')) resetHookBtn();
   }
 
-  if (hitCooldown > 0) hitCooldown -= dt;
-
-  for (const obs of obstacles) {
+  for (let i = 0; i < obstacles.length; i++) {
+    const obs = obstacles[i];
     let wasHit = false;
     if (hook.x > obs.x && hook.x < obs.x + obs.w &&
         hook.y > obs.y && hook.y < obs.y + obs.h) {
@@ -914,12 +944,15 @@ function updatePhysics(dt) {
         wasHit = true;
       }
     }
-    if (wasHit && hitCooldown <= 0) {
-      hitCooldown = 1.0;
+    if (wasHit) {
+      frameDrumHitIds.add(i);
+    }
+    if (wasHit && !activeDrumHitIds.has(i)) {
       addDamage(25);
       setSpotterAlert('⚠️ COLLISION! Avoid the obstacle!');
     }
   }
+  activeDrumHitIds = frameDrumHitIds;
 
   if (gameState === 'playing' && !spotterAlertTimer) {
     updateSpotter();
