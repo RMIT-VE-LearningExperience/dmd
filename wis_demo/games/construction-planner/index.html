@@ -1552,12 +1552,8 @@ padding-bottom: 60px;
       <div class="slide" data-slide="1">
         <p><strong>Weather Matters:</strong></p>
         <ul class="weather-list">
-          <li><img class="weather-icon small" src="images/weather_icons/sunny02.svg" alt="Sunny"> Sunny - All workers can work</li>
-          <li><img class="weather-icon small" src="images/weather_icons/partlycloudy02.svg" alt="Partly Cloudy"> Partly Cloudy - All workers can work</li>
-          <li><img class="weather-icon small" src="images/weather_icons/cloudy01.svg" alt="Cloudy"> Cloudy - All workers can work</li>
           <li><img class="weather-icon small" src="images/weather_icons/thunder02.svg" alt="Storms"> Storms - Crane Operator & Concreter cannot work</li>
-          <li><img class="weather-icon small" src="images/weather_icons/wind01.svg" alt="Windy"> Windy - Crane Operator & Concreter cannot work</li>
-          <li><img class="weather-icon small" src="images/weather_icons/moon.svg" alt="Night"> Night - Crane Operator & Concreter cannot work</li>
+          <li><img class="weather-icon small" src="images/weather_icons/wind01.svg" alt="Windy"> Windy - Crane Operator cannot work</li>
         </ul>
       </div>
       <div class="slide" data-slide="2">
@@ -1973,7 +1969,7 @@ function attemptPlacement(role, day, slotNum, cellEl) {
   if (worker.blockedWeather.includes(weather)) {
     showFeedback(role,
       `I can't work in ${weatherNames[weather]}! It's too dangerous. Find me a slot with better weather.`,
-      `Weather blockers: Crane & Concreter can't work in wind, storms, or at night.`
+      `Weather blockers include wind, storms, and nighttime conditions.`
     );
     return false;
   }
@@ -2019,7 +2015,7 @@ function attemptPlacement(role, day, slotNum, cellEl) {
       if (worker.blockedWeather.includes(w)) {
         showFeedback(role,
           `I can't work on ${day} — there's ${weatherNames[w]} in the ${slotNames[s]}! I need good weather all day.`,
-          "Concreter can't work in wind, storms, or at night."
+          "Concreter needs safe weather all day."
         );
         return false;
       }
