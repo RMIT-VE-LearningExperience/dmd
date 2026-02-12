@@ -793,6 +793,7 @@ function updatePhysics(dt) {
   if (blockY !== null && hook.y > blockY) {
     hook.y = blockY;
     wireSegments[WIRE_SEG_COUNT].y = blockY;
+    if (hookedCrate) hookedCrate.broken = true;
     if (trolley.ropeSpeed > 0) trolley.ropeSpeed = 0;
     const anchorYBlock = WORLD.craneTopY + WIRE_ANCHOR_Y_OFFSET;
     const dy = hook.y - anchorYBlock;
@@ -907,6 +908,7 @@ function updatePhysics(dt) {
     if (hookedCrate) {
       if (hookedCrate.x + hookedCrate.w > obs.x && hookedCrate.x < obs.x + obs.w &&
           hookedCrate.y + hookedCrate.h > obs.y && hookedCrate.y < obs.y + obs.h) {
+        hookedCrate.broken = true;
         hook.angleVel *= -0.5;
         if (hookedCrate.x < obs.x) trolley.speed = Math.min(trolley.speed, -60);
         else trolley.speed = Math.max(trolley.speed, 60);
@@ -1627,7 +1629,6 @@ function toggleHook() {
     hookedCrate.vy = 0;
     hookedCrate.landed = false;
     hookedCrate.scored = false;
-    hookedCrate.broken = false;
     hookedCrate.releasedTooHigh = (hookedCrate.y + hookedCrate.h) < DROP_ZONE_TOP_Y();
     droppedCrates.push(hookedCrate);
     hookedCrate = null;
@@ -1636,6 +1637,7 @@ function toggleHook() {
     const crate = findNearestCrate();
     if (crate) {
       hookedCrate = crate;
+      if (typeof hookedCrate.broken !== 'boolean') hookedCrate.broken = false;
       document.getElementById('hookBtn').textContent = 'Release';
       document.getElementById('hookBtn').classList.add('hooked');
     }
