@@ -301,8 +301,15 @@
   @media (max-width: 600px) {
     .ctrl-btn { width: 48px; height: 48px; font-size: 1.2rem; }
     .ctrl-btn.hook-btn { width: 68px; font-size: 0.65rem; }
-    #mobileNavBar { display: block; }
-    #controls { bottom: 12px; }
+    #mobileNavBar { display: block; height: 140px; }
+    #controls { bottom: 24px; }
+  }
+
+  /* Mobile: move HUD to top-left so it doesn't overlap the hamburger menu */
+  @media (max-width: 700px) {
+    #hud { right: 60px; align-items: flex-start; }
+    #hudRow1 { justify-content: flex-start; }
+    #spotterBox { text-align: left; }
   }
 
   /* Landscape: move controls to the left */
