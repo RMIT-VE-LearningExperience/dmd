@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — Construct Your Career</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="nav.css?v=1.0.0">
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+        width: 100%; min-height: 100%;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #0f172a; color: #e2e8f0;
+    }
+    .page-hero {
+        position: relative; width: 100%; padding: 120px 8% 60px;
+        background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+        overflow: hidden;
+    }
+    .page-hero::before {
+        content: ''; position: absolute; inset: -20px;
+        background-image: url('images/constructionsite_background.svg');
+        background-size: cover; background-position: center;
+        filter: blur(8px); opacity: 0.3; z-index: 0;
+    }
+    .page-hero-content { position: relative; z-index: 1; max-width: 800px; }
+    .page-hero h1 {
+        font-size: clamp(32px, 5vw, 56px); font-weight: 800;
+        text-transform: uppercase; letter-spacing: -0.5px;
+        color: #fff; margin-bottom: 16px;
+    }
+    .page-hero h1 span {
+        display: inline-block; background: #1a3a6b;
+        padding: 6px 20px 10px; border-radius: 12px;
+    }
+    .page-hero p {
+        font-size: clamp(14px, 1.6vw, 18px); color: rgba(255,255,255,0.8);
+        line-height: 1.7; max-width: 600px;
+    }
+    .content { max-width: 800px; margin: 0 auto; padding: 48px 8% 80px; }
+    .content h2 {
+        font-size: clamp(20px, 3vw, 28px); font-weight: 700;
+        color: #fff; margin-bottom: 16px;
+    }
+    .content p {
+        font-size: clamp(14px, 1.4vw, 16px); color: #94a3b8;
+        line-height: 1.8; margin-bottom: 24px;
+    }
+    .content ul {
+        list-style: none; padding: 0; margin-bottom: 32px;
+    }
+    .content ul li {
+        padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+        color: #cbd5e1; font-size: 15px; display: flex; gap: 12px; align-items: baseline;
+    }
+    .content ul li::before {
+        content: ''; display: inline-block; width: 8px; height: 8px;
+        background: #e8b830; border-radius: 50%; flex-shrink: 0; margin-top: 6px;
+    }
+    </style>
+</head>
+<body>
+    <nav class="nav-drawer" id="navDrawer">
+        <button class="nav-close" id="navClose" aria-label="Close menu">&times;</button>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="about.html" class="nav-link active">About</a>
+        <a href="mini-games.html" class="nav-link">Mini Games</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="credits.html" class="nav-link">Credits</a>
+    </nav>
+    <div class="nav-scrim" id="navScrim"></div>
+
+    <section class="page-hero">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="page-hero-content">
+            <h1><span>About</span></h1>
+            <p>Learn about the Construct Your Career initiative and how it helps people explore the construction industry.</p>
+        </div>
+    </section>
+
+    <div class="content">
+        <h2>What is Construct Your Career?</h2>
+        <p>Construct Your Career is an interactive platform designed to introduce people to the diverse range of careers available in the construction industry. Through immersive mini games, career exploration tools, and engaging content, we aim to inspire the next generation of builders.</p>
+
+        <h2>Our Mission</h2>
+        <p>We believe that construction offers rewarding, well-paid careers that are often overlooked. Our mission is to break down barriers, challenge stereotypes, and show that there's a place for everyone in the construction industry.</p>
+
+        <h2>What You Can Do Here</h2>
+        <ul>
+            <li>Explore different construction career pathways</li>
+            <li>Play mini games that simulate real construction tasks</li>
+            <li>Learn about career progression from entry-level to senior roles</li>
+            <li>Discover what skills and qualifications you need</li>
+        </ul>
+
+        <h2>Who Is This For?</h2>
+        <p>Whether you're a student considering your options, a career changer looking for something new, or an educator helping others find their path — this platform is built for you.</p>
+    </div>
+
+    <script src="nav.js?v=1.0.0"></script>
+</body>
+</html>

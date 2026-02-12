@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact — Construct Your Career</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="nav.css?v=1.0.0">
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+        width: 100%; min-height: 100%;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #0f172a; color: #e2e8f0;
+    }
+    .page-hero {
+        position: relative; width: 100%; padding: 120px 8% 60px;
+        background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+        overflow: hidden;
+    }
+    .page-hero::before {
+        content: ''; position: absolute; inset: -20px;
+        background-image: url('images/constructionsite_background.svg');
+        background-size: cover; background-position: center;
+        filter: blur(8px); opacity: 0.3; z-index: 0;
+    }
+    .page-hero-content { position: relative; z-index: 1; max-width: 800px; }
+    .page-hero h1 {
+        font-size: clamp(32px, 5vw, 56px); font-weight: 800;
+        text-transform: uppercase; letter-spacing: -0.5px;
+        color: #fff; margin-bottom: 16px;
+    }
+    .page-hero h1 span {
+        display: inline-block; background: #1a3a6b;
+        padding: 6px 20px 10px; border-radius: 12px;
+    }
+    .page-hero p {
+        font-size: clamp(14px, 1.6vw, 18px); color: rgba(255,255,255,0.8);
+        line-height: 1.7; max-width: 600px;
+    }
+    .content { max-width: 800px; margin: 0 auto; padding: 48px 8% 80px; }
+    .content h2 {
+        font-size: clamp(20px, 3vw, 28px); font-weight: 700;
+        color: #fff; margin-bottom: 16px;
+    }
+    .content p {
+        font-size: clamp(14px, 1.4vw, 16px); color: #94a3b8;
+        line-height: 1.8; margin-bottom: 24px;
+    }
+    .contact-cards {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px; margin-bottom: 40px;
+    }
+    .contact-card {
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px; padding: 28px;
+    }
+    .contact-card h3 {
+        font-size: 16px; font-weight: 700; color: #e8b830;
+        margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .contact-card p {
+        font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 0;
+    }
+    .contact-card a {
+        color: #60a5fa; text-decoration: none;
+    }
+    .contact-card a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <nav class="nav-drawer" id="navDrawer">
+        <button class="nav-close" id="navClose" aria-label="Close menu">&times;</button>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="mini-games.html" class="nav-link">Mini Games</a>
+        <a href="contact.html" class="nav-link active">Contact</a>
+        <a href="credits.html" class="nav-link">Credits</a>
+    </nav>
+    <div class="nav-scrim" id="navScrim"></div>
+
+    <section class="page-hero">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="page-hero-content">
+            <h1><span>Contact</span></h1>
+            <p>Get in touch with the Construct Your Career team.</p>
+        </div>
+    </section>
+
+    <div class="content">
+        <h2>Get In Touch</h2>
+        <p>Have questions, feedback, or want to collaborate? We'd love to hear from you.</p>
+
+        <div class="contact-cards">
+            <div class="contact-card">
+                <h3>General Enquiries</h3>
+                <p>For general questions about the platform or construction careers.<br><br>
+                <a href="mailto:info@constructyourcareer.com">info@constructyourcareer.com</a></p>
+            </div>
+            <div class="contact-card">
+                <h3>Partnerships</h3>
+                <p>Interested in partnering with us or integrating our tools into your programs?<br><br>
+                <a href="mailto:partners@constructyourcareer.com">partners@constructyourcareer.com</a></p>
+            </div>
+            <div class="contact-card">
+                <h3>Technical Support</h3>
+                <p>Experiencing issues with the games or platform? Let us know.<br><br>
+                <a href="mailto:support@constructyourcareer.com">support@constructyourcareer.com</a></p>
+            </div>
+        </div>
+
+        <h2>Location</h2>
+        <p>RMIT University<br>Melbourne, Victoria, Australia</p>
+    </div>
+
+    <script src="nav.js?v=1.0.0"></script>
+</body>
+</html>

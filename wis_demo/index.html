@@ -19,6 +19,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="index.css?v=2.1.0">
+    <link rel="stylesheet" href="nav.css?v=1.0.0">
 
     <style>
     /* ===================================
@@ -513,6 +514,16 @@
     </style>
 </head>
 <body>
+    <nav class="nav-drawer" id="navDrawer">
+        <button class="nav-close" id="navClose" aria-label="Close menu">&times;</button>
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="mini-games.html" class="nav-link">Mini Games</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="credits.html" class="nav-link">Credits</a>
+    </nav>
+    <div class="nav-scrim" id="navScrim"></div>
+
     <!-- Full-screen Hero Section -->
     <section class="hero">
         <!-- Background image (blurred) -->
@@ -522,7 +533,7 @@
         <div class="hero-overlay"></div>
 
         <!-- Hamburger menu -->
-        <button class="menu-btn" aria-label="Open menu">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu">
             <span></span>
             <span></span>
             <span></span>
@@ -744,5 +755,6 @@
         }
     })();
     </script>
+    <script src="nav.js?v=1.0.0"></script>
 </body>
 </html>

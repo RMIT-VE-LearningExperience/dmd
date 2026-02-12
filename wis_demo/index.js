@@ -43,14 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gamesBtn.addEventListener('click', navigateToGames);
     }
 
-    // Hamburger menu (placeholder - expand as needed)
-    const menuBtn = document.querySelector('.menu-btn');
-    if (menuBtn) {
-        menuBtn.addEventListener('click', () => {
-            console.log('☰ Menu clicked');
-            // TODO: Open navigation drawer / sidebar
-        });
-    }
+    // Hamburger menu is handled by nav.js
 });
 
 // ===================================

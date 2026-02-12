@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credits — Construct Your Career</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="nav.css?v=1.0.0">
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+        width: 100%; min-height: 100%;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #0f172a; color: #e2e8f0;
+    }
+    .page-hero {
+        position: relative; width: 100%; padding: 120px 8% 60px;
+        background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+        overflow: hidden;
+    }
+    .page-hero::before {
+        content: ''; position: absolute; inset: -20px;
+        background-image: url('images/constructionsite_background.svg');
+        background-size: cover; background-position: center;
+        filter: blur(8px); opacity: 0.3; z-index: 0;
+    }
+    .page-hero-content { position: relative; z-index: 1; max-width: 800px; }
+    .page-hero h1 {
+        font-size: clamp(32px, 5vw, 56px); font-weight: 800;
+        text-transform: uppercase; letter-spacing: -0.5px;
+        color: #fff; margin-bottom: 16px;
+    }
+    .page-hero h1 span {
+        display: inline-block; background: #1a3a6b;
+        padding: 6px 20px 10px; border-radius: 12px;
+    }
+    .page-hero p {
+        font-size: clamp(14px, 1.6vw, 18px); color: rgba(255,255,255,0.8);
+        line-height: 1.7; max-width: 600px;
+    }
+    .content { max-width: 800px; margin: 0 auto; padding: 48px 8% 80px; }
+    .content h2 {
+        font-size: clamp(20px, 3vw, 28px); font-weight: 700;
+        color: #fff; margin-bottom: 16px;
+    }
+    .content h3 {
+        font-size: 16px; font-weight: 700; color: #e8b830;
+        text-transform: uppercase; letter-spacing: 1px;
+        margin-bottom: 8px; margin-top: 32px;
+    }
+    .content p {
+        font-size: clamp(14px, 1.4vw, 16px); color: #94a3b8;
+        line-height: 1.8; margin-bottom: 16px;
+    }
+    .credits-section {
+        background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 16px; padding: 32px; margin-bottom: 24px;
+    }
+    .credits-section h3:first-child { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <nav class="nav-drawer" id="navDrawer">
+        <button class="nav-close" id="navClose" aria-label="Close menu">&times;</button>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="mini-games.html" class="nav-link">Mini Games</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="credits.html" class="nav-link active">Credits</a>
+    </nav>
+    <div class="nav-scrim" id="navScrim"></div>
+
+    <section class="page-hero">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="page-hero-content">
+            <h1><span>Credits</span></h1>
+            <p>Acknowledgements and attributions for the Construct Your Career platform.</p>
+        </div>
+    </section>
+
+    <div class="content">
+        <div class="credits-section">
+            <h3>Developed By</h3>
+            <p>RMIT University — Virtual Environments Lab</p>
+        </div>
+
+        <div class="credits-section">
+            <h3>Technology</h3>
+            <p>Built with HTML5, CSS3, JavaScript, Canvas API, and Three.js for 3D experiences.</p>
+        </div>
+
+        <div class="credits-section">
+            <h3>Assets & Resources</h3>
+            <p>Construction site backgrounds, character illustrations, and icons created for the Construct Your Career project.</p>
+        </div>
+
+        <div class="credits-section">
+            <h3>Special Thanks</h3>
+            <p>To the construction industry professionals who provided insights into career pathways and day-to-day responsibilities that informed our games and career explorer.</p>
+        </div>
+    </div>
+
+    <script src="nav.js?v=1.0.0"></script>
+</body>
+</html>
