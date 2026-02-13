@@ -165,7 +165,7 @@
     height: 100%;
     width: 0%;
     background: linear-gradient(90deg, #3CA63C, #F5C942, #f55);
-    border-radius: 4px;
+    border-radius: 4px 10px 10px 4px;
     transition: width 0.3s ease;
   }
 
@@ -1647,9 +1647,21 @@ function updateHUD() {
   const pct = Math.min(100, Math.max(0, damage));
   document.getElementById('damageFill').style.width = pct + '%';
   const lbl = document.getElementById('damageLabel');
-  if (pct > 75) lbl.style.color = '#f55';
-  else if (pct > 40) lbl.style.color = '#F5C942';
-  else lbl.style.color = '#3CA63C';
+  // Interpolate label colour through green → yellow → red
+  const t = pct / 100;
+  let r, g, b;
+  if (t < 0.5) {
+    const p = t / 0.5;
+    r = Math.round(60 + (245 - 60) * p);
+    g = Math.round(166 + (201 - 166) * p);
+    b = Math.round(60 + (66 - 60) * p);
+  } else {
+    const p = (t - 0.5) / 0.5;
+    r = Math.round(245 + (255 - 245) * p);
+    g = Math.round(201 + (85 - 201) * p);
+    b = Math.round(66 + (85 - 66) * p);
+  }
+  lbl.style.color = `rgb(${r},${g},${b})`;
 }
 
 function showEndScreen(won) {
