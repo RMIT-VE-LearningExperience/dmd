@@ -164,8 +164,8 @@
   #damageFill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #3CA63C, #F5C942, #f55);
-    border-radius: 4px;
+    background: linear-gradient(90deg, #F5C942, #F37329, #E61E2A);
+    border-radius: 4px 10px 10px 4px;
     transition: width 0.3s ease;
   }
 
@@ -331,14 +331,14 @@
 <!-- Start Screen -->
 <div id="startScreen">
   <h1>Crane Operator</h1>
-  <p>Move the crate to the drop zone</p>
+  <p>Move the block to the drop zone</p>
   <button id="startBtn">Start Game</button>
 </div>
 
 <!-- HUD -->
 <div id="hud">
   <div id="hudRow1">
-    <div class="hud-box" id="scoreText">Crates: 0/3</div>
+    <div class="hud-box" id="scoreText">Blocks: 0/3</div>
     <div id="damageWrap">
       <span id="damageLabel">DMG</span>
       <div id="damageTrack"><div id="damageFill"></div></div>
@@ -367,7 +367,7 @@
 <!-- End Screen -->
 <div id="endScreen">
   <h2 id="endTitle">Job Complete!</h2>
-  <p id="endMsg">All crates delivered.</p>
+  <p id="endMsg">All blocks delivered.</p>
   <button id="restartBtn">Play Again</button>
 </div>
 
@@ -445,15 +445,15 @@ let hook = {
   angle: 0, angleVel: 0,
 };
 
-let crates = [];
+let blocks = [];
 let obstacles = [];
 let dropZone = { x: 900, y: WORLD.groundY - 25, width: 120, height: 50 };
-let hookedCrate = null;
+let hookedBlock = null;
 let score = 0;
-let totalCrates = 3;
+let totalBlocks = 3;
 let damage = 0;
 let hitCooldown = 0;
-let droppedCrates = [];
+let droppedBlocks = [];
 let spotterMsg = '';
 let spotterArrow = null;
 const DROP_ZONE_TOP_Y = () => dropZone.y - 80;
@@ -481,9 +481,9 @@ function initGame() {
   hook.vx = 0; hook.vy = 0;
   hook.angle = 0; hook.angleVel = 0;
 
-  crates = [
+  blocks = [
     { x: WORLD.craneBaseX + 100, y: WORLD.groundY - 50, w: 60, h: 40, color: '#F37329', type: 'drum', delivered: false },
-    { x: WORLD.craneBaseX + 250, y: WORLD.groundY - 60, w: 50, h: 50, color: '#F9893D', type: 'crate', delivered: false },
+    { x: WORLD.craneBaseX + 250, y: WORLD.groundY - 60, w: 50, h: 50, color: '#F9893D', type: 'block', delivered: false },
     { x: WORLD.craneBaseX + 400, y: WORLD.groundY - 45, w: 70, h: 35, color: '#9A6C48', type: 'drum', delivered: false },
   ];
 
@@ -493,12 +493,12 @@ function initGame() {
   ];
 
   dropZone.x = WORLD.craneBaseX + WORLD.jibLength - 200;
-  hookedCrate = null;
+  hookedBlock = null;
   score = 0;
-  totalCrates = crates.length;
+  totalBlocks = blocks.length;
   damage = 0;
   hitCooldown = 0;
-  droppedCrates = [];
+  droppedBlocks = [];
   spotterMsg = '';
   spotterArrow = null;
 
@@ -517,14 +517,14 @@ function updateSpotter() {
   const obstacleX = WORLD.craneBaseX + 580;
   const obstacleTopY = WORLD.groundY - 250;
 
-  if (!hookedCrate) {
-    const avail = crates.find(c => !c.delivered && !droppedCrates.includes(c));
+  if (!hookedBlock) {
+    const avail = blocks.find(c => !c.delivered && !droppedBlocks.includes(c));
     if (!avail) {
-      if (score >= totalCrates) {
+      if (score >= totalBlocks) {
         spotterMsg = '';
         spotterArrow = null;
       } else {
-        spotterMsg = 'No crates left!';
+        spotterMsg = 'No blocks left!';
         spotterArrow = null;
       }
       return;
@@ -537,12 +537,12 @@ function updateSpotter() {
       spotterMsg = '\u261d PRESS HOOK to attach';
       spotterArrow = { x: cx, y: cy - 50, dir: 'down' };
     } else if (hook.y < cy - 80) {
-      spotterMsg = '\u2b07 LOWER the hook to the crate';
+      spotterMsg = '\u2b07 LOWER the hook to the block';
       spotterArrow = { x: cx, y: cy - 60, dir: 'down' };
     } else {
       const dx = cx - hook.x;
       if (Math.abs(dx) > 40) {
-        spotterMsg = (dx > 0 ? '\u27a1' : '\u2b05') + ' Move hook over the crate';
+        spotterMsg = (dx > 0 ? '\u27a1' : '\u2b05') + ' Move hook over the block';
         spotterArrow = { x: cx, y: cy - 60, dir: dx > 0 ? 'right' : 'left' };
       } else {
         spotterMsg = '\u2b07 LOWER the hook';
@@ -552,12 +552,12 @@ function updateSpotter() {
     return;
   }
 
-  const crateX = hookedCrate.x + hookedCrate.w / 2;
-  const crateY = hookedCrate.y + hookedCrate.h;
+  const loadX = hookedBlock.x + hookedBlock.w / 2;
+  const loadY = hookedBlock.y + hookedBlock.h;
   const dzCenterX = dropZone.x + dropZone.width / 2;
 
-  if (crateX > dropZone.x && crateX < dropZone.x + dropZone.width) {
-    if (crateY >= DROP_ZONE_TOP_Y()) {
+  if (loadX > dropZone.x && loadX < dropZone.x + dropZone.width) {
+    if (loadY >= DROP_ZONE_TOP_Y()) {
       spotterMsg = '\u2b07 RELEASE now! In the green zone!';
       spotterArrow = { x: dzCenterX, y: dropZone.y - 40, dir: 'down' };
     } else {
@@ -567,14 +567,14 @@ function updateSpotter() {
     return;
   }
 
-  if (crateX > obstacleX + 80) {
+  if (loadX > obstacleX + 80) {
     spotterMsg = '\u27a1 Almost there! Move to drop zone';
     spotterArrow = { x: dzCenterX, y: dropZone.y - 60, dir: 'right' };
     return;
   }
 
-  if (crateX > obstacleX - 100 && crateX < obstacleX + 130) {
-    if (crateY > obstacleTopY - 20) {
+  if (loadX > obstacleX - 100 && loadX < obstacleX + 130) {
+    if (loadY > obstacleTopY - 20) {
       spotterMsg = '\u2b06 RAISE the load! Clear the obstacle!';
       spotterArrow = { x: obstacleX + 25, y: obstacleTopY - 60, dir: 'up' };
     } else {
@@ -585,7 +585,7 @@ function updateSpotter() {
   }
 
   spotterMsg = '\u27a1 Move right towards drop zone';
-  spotterArrow = { x: obstacleX - 30, y: crateY - 60, dir: 'right' };
+  spotterArrow = { x: obstacleX - 30, y: loadY - 60, dir: 'right' };
 }
 
 // ============ PHYSICS ============
@@ -647,14 +647,14 @@ function updatePhysics(dt) {
   const lastSeg = wireSegments[WIRE_SEG_COUNT];
   const currentWireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
 
-  if (hookedCrate) {
-    hookedCrate.x = hook.x - hookedCrate.w / 2;
-    hookedCrate.y = hook.y + 15;
-    hookedCrate.rotation = currentWireAngle;
+  if (hookedBlock) {
+    hookedBlock.x = hook.x - hookedBlock.w / 2;
+    hookedBlock.y = hook.y + 15;
+    hookedBlock.rotation = currentWireAngle;
   }
 
-  for (let i = droppedCrates.length - 1; i >= 0; i--) {
-    const dc = droppedCrates[i];
+  for (let i = droppedBlocks.length - 1; i >= 0; i--) {
+    const dc = droppedBlocks[i];
     dc.vy += 800 * dt;
     dc.x += dc.vx * dt;
     dc.y += dc.vy * dt;
@@ -687,44 +687,44 @@ function updatePhysics(dt) {
       if (dc.releasedTooHigh) {
         dc.broken = true;
         dc.delivered = false;
-        setSpotterAlert('\u26a0 DROPPED TOO HIGH! Crate destroyed!');
+        setSpotterAlert('\u26a0 DROPPED TOO HIGH! Block destroyed!');
         addDamage(30);
         setTimeout(() => {
-          const idx = droppedCrates.indexOf(dc);
-          if (idx !== -1) droppedCrates.splice(idx, 1);
+          const idx = droppedBlocks.indexOf(dc);
+          if (idx !== -1) droppedBlocks.splice(idx, 1);
         }, 1200);
       } else if (inZone) {
         dc.delivered = true;
         dc.x = dropZone.x + (dropZone.width - dc.w) / 2;
         dc.y = dropZone.y - dc.h + 25;
-        const deliveredCount = crates.filter(c => c.delivered).length;
+        const deliveredCount = blocks.filter(c => c.delivered).length;
         dc.y -= (deliveredCount - 1) * 35;
         dc.rotation = 0;
         score++;
         updateHUD();
         setSpotterAlert('\u2705 Delivered! Good work!');
 
-        if (score >= totalCrates) {
+        if (score >= totalBlocks) {
           setTimeout(() => {
             gameState = 'win';
             showEndScreen(true);
           }, 800);
         }
         setTimeout(() => {
-          const idx = droppedCrates.indexOf(dc);
-          if (idx !== -1) droppedCrates.splice(idx, 1);
+          const idx = droppedBlocks.indexOf(dc);
+          if (idx !== -1) droppedBlocks.splice(idx, 1);
         }, 500);
       } else {
-        setSpotterAlert('\u274c Missed the drop zone! Crate lost.');
+        setSpotterAlert('\u274c Missed the drop zone! Block lost.');
         setTimeout(() => {
-          const idx = droppedCrates.indexOf(dc);
-          if (idx !== -1) droppedCrates.splice(idx, 1);
+          const idx = droppedBlocks.indexOf(dc);
+          if (idx !== -1) droppedBlocks.splice(idx, 1);
         }, 1500);
       }
     }
   }
 
-  if (!hookedCrate) {
+  if (!hookedBlock) {
     const btn = document.getElementById('hookBtn');
     if (btn.classList.contains('hooked')) resetHookBtn();
   }
@@ -740,11 +740,11 @@ function updatePhysics(dt) {
       else trolley.speed = Math.max(trolley.speed, 40);
       wasHit = true;
     }
-    if (hookedCrate) {
-      if (hookedCrate.x + hookedCrate.w > obs.x && hookedCrate.x < obs.x + obs.w &&
-          hookedCrate.y + hookedCrate.h > obs.y && hookedCrate.y < obs.y + obs.h) {
+    if (hookedBlock) {
+      if (hookedBlock.x + hookedBlock.w > obs.x && hookedBlock.x < obs.x + obs.w &&
+          hookedBlock.y + hookedBlock.h > obs.y && hookedBlock.y < obs.y + obs.h) {
         hook.angleVel *= -0.5;
-        if (hookedCrate.x < obs.x) trolley.speed = Math.min(trolley.speed, -60);
+        if (hookedBlock.x < obs.x) trolley.speed = Math.min(trolley.speed, -60);
         else trolley.speed = Math.max(trolley.speed, 60);
         wasHit = true;
       }
@@ -836,17 +836,17 @@ function drawWorld() {
   drawDropZone();
   obstacles.forEach(obs => drawObstacle(obs));
 
-  crates.forEach(c => { if (!c.delivered || c === hookedCrate) return; drawCrate(c); });
-  crates.forEach(c => { if (c.delivered || c === hookedCrate || droppedCrates.includes(c)) return; drawCrate(c); });
+  blocks.forEach(c => { if (!c.delivered || c === hookedBlock) return; drawBlock(c); });
+  blocks.forEach(c => { if (c.delivered || c === hookedBlock || droppedBlocks.includes(c)) return; drawBlock(c); });
 
   drawWire();
   drawHook();
 
-  droppedCrates.forEach(dc => drawCrate(dc));
-  if (hookedCrate) drawCrate(hookedCrate);
+  droppedBlocks.forEach(dc => drawBlock(dc));
+  if (hookedBlock) drawBlock(hookedBlock);
 
-  if (!hookedCrate && gameState === 'playing') {
-    const nearby = findNearestCrate();
+  if (!hookedBlock && gameState === 'playing') {
+    const nearby = findNearestBlock();
     if (nearby) {
       ctx.strokeStyle = 'rgba(245,198,66,0.5)';
       ctx.lineWidth = 2;
@@ -1095,7 +1095,7 @@ function drawHook() {
   ctx.fill();
 
   // Hook
-  ctx.strokeStyle = hookedCrate ? '#f55' : '#F5C942';
+  ctx.strokeStyle = hookedBlock ? '#f55' : '#F5C942';
   ctx.lineWidth = 3;
   ctx.lineCap = 'round';
   ctx.beginPath();
@@ -1106,8 +1106,8 @@ function drawHook() {
   ctx.stroke();
   ctx.restore();
 
-  if (!hookedCrate && gameState === 'playing') {
-    const nearby = findNearestCrate();
+  if (!hookedBlock && gameState === 'playing') {
+    const nearby = findNearestBlock();
     if (nearby) {
       ctx.beginPath();
       ctx.arc(hx, hy, 20, 0, Math.PI * 2);
@@ -1117,7 +1117,7 @@ function drawHook() {
   }
 }
 
-function drawCrate(c) {
+function drawBlock(c) {
   ctx.save();
   const cx = c.x + c.w / 2;
   const cy = c.y + c.h / 2;
@@ -1243,11 +1243,11 @@ function drawDropZone() {
 }
 
 // ============ HOOK/UNHOOK ============
-function findNearestCrate() {
+function findNearestBlock() {
   let best = null;
   let bestDist = 60;
-  for (const c of crates) {
-    if (c.delivered || droppedCrates.includes(c)) continue;
+  for (const c of blocks) {
+    if (c.delivered || droppedBlocks.includes(c)) continue;
     const cx = c.x + c.w / 2;
     const cy = c.y + c.h / 2;
     const dist = Math.hypot(hook.x - cx, hook.y - cy);
@@ -1257,20 +1257,20 @@ function findNearestCrate() {
 }
 
 function toggleHook() {
-  if (hookedCrate) {
-    hookedCrate.vx = trolley.speed * 0.3;
-    hookedCrate.vy = 0;
-    hookedCrate.landed = false;
-    hookedCrate.scored = false;
-    hookedCrate.broken = false;
-    hookedCrate.releasedTooHigh = (hookedCrate.y + hookedCrate.h) < DROP_ZONE_TOP_Y();
-    droppedCrates.push(hookedCrate);
-    hookedCrate = null;
+  if (hookedBlock) {
+    hookedBlock.vx = trolley.speed * 0.3;
+    hookedBlock.vy = 0;
+    hookedBlock.landed = false;
+    hookedBlock.scored = false;
+    hookedBlock.broken = false;
+    hookedBlock.releasedTooHigh = (hookedBlock.y + hookedBlock.h) < DROP_ZONE_TOP_Y();
+    droppedBlocks.push(hookedBlock);
+    hookedBlock = null;
     resetHookBtn();
   } else {
-    const crate = findNearestCrate();
-    if (crate) {
-      hookedCrate = crate;
+    const block = findNearestBlock();
+    if (block) {
+      hookedBlock = block;
       document.getElementById('hookBtn').textContent = 'Release';
       document.getElementById('hookBtn').classList.add('hooked');
     }
@@ -1278,7 +1278,7 @@ function toggleHook() {
 }
 
 function updateHUD() {
-  document.getElementById('scoreText').textContent = `Crates: ${score}/${totalCrates}`;
+  document.getElementById('scoreText').textContent = `Blocks: ${score}/${totalBlocks}`;
   const pct = Math.min(100, Math.max(0, damage));
   document.getElementById('damageFill').style.width = pct + '%';
   const lbl = document.getElementById('damageLabel');
@@ -1296,13 +1296,13 @@ function showEndScreen(won) {
   if (won) {
     title.textContent = 'Job Complete!';
     title.className = 'win-title';
-    msg.textContent = `All crates delivered. Damage: ${Math.round(damage)}%`;
+    msg.textContent = `All blocks delivered. Damage: ${Math.round(damage)}%`;
     btn.className = '';
     btn.textContent = 'Play Again';
   } else {
     title.textContent = 'Game Over';
     title.className = 'lose-title';
-    msg.textContent = `Too much damage! Delivered ${score}/${totalCrates} crates.`;
+    msg.textContent = `Too much damage! Delivered ${score}/${totalBlocks} blocks.`;
     btn.className = 'lose-btn';
     btn.textContent = 'Try Again';
   }
@@ -1378,7 +1378,7 @@ function startGame() {
 
   setTimeout(() => {
     gameState = 'playing';
-    document.getElementById('spotterBox').textContent = '\u2b07 Lower the hook to a crate';
+    document.getElementById('spotterBox').textContent = '\u2b07 Lower the hook to a block';
   }, 2000);
 }
 

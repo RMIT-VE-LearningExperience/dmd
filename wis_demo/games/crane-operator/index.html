@@ -7,12 +7,12 @@
 
 <!-- Open Graph / Social Media Meta Tags -->
 <meta property="og:title" content="Crane Operator - Construction Game">
-<meta property="og:description" content="Operate a tower crane to move crates to the drop zone without taking damage.">
+<meta property="og:description" content="Operate a tower crane to move blocks to the drop zone without taking damage.">
 <meta property="og:image" content="../../images/minigames_thumnails/crane.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Crane Operator - Construction Game">
-<meta name="twitter:description" content="Operate a tower crane to move crates to the drop zone without taking damage.">
+<meta name="twitter:description" content="Operate a tower crane to move blocks to the drop zone without taking damage.">
 <meta name="twitter:image" content="../../images/minigames_thumnails/crane.png">
 
 <!-- Hotjar Tracking Code for WIS - Construction game -->
@@ -686,15 +686,16 @@
     <svg id="damageBar" width="170" height="28" viewBox="0 0 170 28" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="170" height="28" rx="10" fill="#284572"/>
       <defs>
+        <linearGradient id="damageGradient" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#F5C942"/>
+          <stop offset="50%" stop-color="#F37329"/>
+          <stop offset="100%" stop-color="#E61E2A"/>
+        </linearGradient>
         <clipPath id="damageClip">
-          <rect x="74" y="0" width="96" height="28"/>
+          <rect id="damageClipRect" x="74" y="0" width="0" height="28" rx="0" ry="0"/>
         </clipPath>
       </defs>
-      <g clip-path="url(#damageClip)">
-        <rect id="damageYellow" x="74" y="0" width="0" height="28" fill="#F5C942"/>
-        <rect id="damageOrange" x="74" y="0" width="0" height="28" fill="#F37329"/>
-        <rect id="damageRed" x="74" y="0" width="0" height="28" fill="#E61E2A"/>
-      </g>
+      <rect x="74" y="0" width="96" height="28" rx="10" fill="url(#damageGradient)" clip-path="url(#damageClip)"/>
       <path d="M12.8523 18H9.75852V9.27273H12.8778C13.7557 9.27273 14.5114 9.44744 15.1449 9.79688C15.7784 10.1435 16.2656 10.642 16.6065 11.2926C16.9503 11.9432 17.1222 12.7216 17.1222 13.6278C17.1222 14.5369 16.9503 15.3182 16.6065 15.9716C16.2656 16.625 15.7756 17.1264 15.1364 17.4759C14.5 17.8253 13.7386 18 12.8523 18ZM11.6037 16.419H12.7756C13.321 16.419 13.7798 16.3224 14.152 16.1293C14.527 15.9332 14.8082 15.6307 14.9957 15.2216C15.1861 14.8097 15.2812 14.2784 15.2812 13.6278C15.2812 12.983 15.1861 12.456 14.9957 12.0469C14.8082 11.6378 14.5284 11.3366 14.1562 11.1435C13.7841 10.9503 13.3253 10.8537 12.7798 10.8537H11.6037V16.419ZM20.3214 18.1236C19.9038 18.1236 19.5316 18.0511 19.2049 17.9062C18.8782 17.7585 18.6197 17.5412 18.4293 17.2543C18.2418 16.9645 18.1481 16.6037 18.1481 16.1719C18.1481 15.8082 18.2148 15.5028 18.3484 15.2557C18.4819 15.0085 18.6637 14.8097 18.8938 14.6591C19.1239 14.5085 19.3853 14.3949 19.6779 14.3182C19.9734 14.2415 20.283 14.1875 20.6069 14.1562C20.9876 14.1165 21.2944 14.0795 21.5273 14.0455C21.7603 14.0085 21.9293 13.9545 22.0344 13.8835C22.1396 13.8125 22.1921 13.7074 22.1921 13.5682V13.5426C22.1921 13.2727 22.1069 13.0639 21.9364 12.9162C21.7688 12.7685 21.5302 12.6946 21.2205 12.6946C20.8938 12.6946 20.6339 12.767 20.4407 12.9119C20.2475 13.054 20.1197 13.233 20.0572 13.4489L18.3782 13.3125C18.4634 12.9148 18.631 12.571 18.881 12.2812C19.131 11.9886 19.4535 11.7642 19.8484 11.608C20.2461 11.4489 20.7063 11.3693 21.229 11.3693C21.5927 11.3693 21.9407 11.4119 22.2731 11.4972C22.6083 11.5824 22.9052 11.7145 23.1637 11.8935C23.4251 12.0724 23.631 12.3026 23.7816 12.5838C23.9322 12.8622 24.0075 13.196 24.0075 13.5852V18H22.2859V17.0923H22.2347C22.1296 17.2969 21.989 17.4773 21.8129 17.6335C21.6367 17.7869 21.4251 17.9077 21.1779 17.9957C20.9308 18.081 20.6452 18.1236 20.3214 18.1236ZM20.8413 16.8707C21.1083 16.8707 21.3441 16.8182 21.5487 16.7131C21.7532 16.6051 21.9137 16.4602 22.0302 16.2784C22.1467 16.0966 22.2049 15.8906 22.2049 15.6605V14.9659C22.1481 15.0028 22.07 15.0369 21.9705 15.0682C21.8739 15.0966 21.7646 15.1236 21.6424 15.1491C21.5202 15.1719 21.3981 15.1932 21.2759 15.2131C21.1538 15.2301 21.043 15.2457 20.9435 15.2599C20.7305 15.2912 20.5444 15.3409 20.3853 15.4091C20.2262 15.4773 20.1026 15.5696 20.0146 15.6861C19.9265 15.7997 19.8825 15.9418 19.8825 16.1122C19.8825 16.3594 19.9719 16.5483 20.1509 16.679C20.3327 16.8068 20.5629 16.8707 20.8413 16.8707ZM25.4158 18V11.4545H27.146V12.6094H27.2227C27.359 12.2259 27.5863 11.9233 27.9045 11.7017C28.2227 11.4801 28.6033 11.3693 29.0465 11.3693C29.4954 11.3693 29.8775 11.4815 30.1928 11.706C30.5082 11.9276 30.7184 12.2287 30.8235 12.6094H30.8917C31.0252 12.2344 31.2667 11.9347 31.6161 11.7102C31.9684 11.483 32.3846 11.3693 32.8647 11.3693C33.4755 11.3693 33.9712 11.5639 34.3519 11.9531C34.7354 12.3395 34.9272 12.8878 34.9272 13.598V18H33.1161V13.956C33.1161 13.5923 33.0195 13.3196 32.8263 13.1378C32.6332 12.956 32.3917 12.8651 32.1019 12.8651C31.7724 12.8651 31.5153 12.9702 31.3306 13.1804C31.146 13.3878 31.0536 13.6619 31.0536 14.0028V18H29.2937V13.9176C29.2937 13.5966 29.2013 13.3409 29.0167 13.1506C28.8349 12.9602 28.5948 12.8651 28.2965 12.8651C28.0948 12.8651 27.913 12.9162 27.7511 13.0185C27.592 13.1179 27.4656 13.2585 27.3718 13.4403C27.2781 13.6193 27.2312 13.8295 27.2312 14.071V18H25.4158ZM38.2276 18.1236C37.81 18.1236 37.4379 18.0511 37.1112 17.9062C36.7844 17.7585 36.5259 17.5412 36.3356 17.2543C36.1481 16.9645 36.0543 16.6037 36.0543 16.1719C36.0543 15.8082 36.1211 15.5028 36.2546 15.2557C36.3881 15.0085 36.57 14.8097 36.8001 14.6591C37.0302 14.5085 37.2915 14.3949 37.5842 14.3182C37.8796 14.2415 38.1893 14.1875 38.5131 14.1562C38.8938 14.1165 39.2006 14.0795 39.4336 14.0455C39.6665 14.0085 39.8356 13.9545 39.9407 13.8835C40.0458 13.8125 40.0984 13.7074 40.0984 13.5682V13.5426C40.0984 13.2727 40.0131 13.0639 39.8427 12.9162C39.6751 12.7685 39.4364 12.6946 39.1268 12.6946C38.8001 12.6946 38.5401 12.767 38.3469 12.9119C38.1538 13.054 38.0259 13.233 37.9634 13.4489L36.2844 13.3125C36.3697 12.9148 36.5373 12.571 36.7873 12.2812C37.0373 11.9886 37.3597 11.7642 37.7546 11.608C38.1523 11.4489 38.6126 11.3693 39.1353 11.3693C39.4989 11.3693 39.8469 11.4119 40.1793 11.4972C40.5146 11.5824 40.8114 11.7145 41.07 11.8935C41.3313 12.0724 41.5373 12.3026 41.6879 12.5838C41.8384 12.8622 41.9137 13.196 41.9137 13.5852V18H40.1921V17.0923H40.141C40.0359 17.2969 39.8952 17.4773 39.7191 17.6335C39.543 17.7869 39.3313 17.9077 39.0842 17.9957C38.837 18.081 38.5515 18.1236 38.2276 18.1236ZM38.7475 16.8707C39.0146 16.8707 39.2504 16.8182 39.4549 16.7131C39.6594 16.6051 39.82 16.4602 39.9364 16.2784C40.0529 16.0966 40.1112 15.8906 40.1112 15.6605V14.9659C40.0543 15.0028 39.9762 15.0369 39.8768 15.0682C39.7802 15.0966 39.6708 15.1236 39.5487 15.1491C39.4265 15.1719 39.3043 15.1932 39.1822 15.2131C39.06 15.2301 38.9492 15.2457 38.8498 15.2599C38.6367 15.2912 38.4506 15.3409 38.2915 15.4091C38.1325 15.4773 38.0089 15.5696 37.9208 15.6861C37.8327 15.7997 37.7887 15.9418 37.7887 16.1122C37.7887 16.3594 37.8782 16.5483 38.0572 16.679C38.239 16.8068 38.4691 16.8707 38.7475 16.8707ZM46.271 20.5909C45.6829 20.5909 45.1786 20.5099 44.7582 20.348C44.3406 20.1889 44.0082 19.9716 43.761 19.696C43.5138 19.4205 43.3533 19.1108 43.2795 18.767L44.9585 18.5412C45.0096 18.6719 45.0906 18.794 45.2013 18.9077C45.3121 19.0213 45.4585 19.1122 45.6403 19.1804C45.8249 19.2514 46.0494 19.2869 46.3136 19.2869C46.7085 19.2869 47.0337 19.1903 47.2894 18.9972C47.5479 18.8068 47.6772 18.4872 47.6772 18.0384V16.8409H47.6005C47.521 17.0227 47.4016 17.1946 47.2425 17.3565C47.0835 17.5185 46.8789 17.6506 46.6289 17.7528C46.3789 17.8551 46.0806 17.9062 45.734 17.9062C45.2425 17.9062 44.7951 17.7926 44.3917 17.5653C43.9911 17.3352 43.6715 16.9844 43.4329 16.5128C43.1971 16.0384 43.0792 15.4389 43.0792 14.7145C43.0792 13.973 43.1999 13.3537 43.4414 12.8565C43.6829 12.3594 44.0039 11.9872 44.4045 11.7401C44.8079 11.4929 45.2496 11.3693 45.7298 11.3693C46.0962 11.3693 46.4031 11.4318 46.6502 11.5568C46.8974 11.679 47.0962 11.8324 47.2468 12.017C47.4002 12.1989 47.5181 12.3778 47.6005 12.554H47.6687V11.4545H49.4712V18.0639C49.4712 18.6207 49.3349 19.0866 49.0621 19.4616C48.7894 19.8366 48.4116 20.1179 47.9286 20.3054C47.4485 20.4957 46.896 20.5909 46.271 20.5909ZM46.3093 16.5426C46.6019 16.5426 46.8491 16.4702 47.0508 16.3253C47.2553 16.1776 47.4116 15.9673 47.5195 15.6946C47.6303 15.419 47.6857 15.0895 47.6857 14.706C47.6857 14.3224 47.6317 13.9901 47.5238 13.7088C47.4158 13.4247 47.2596 13.2045 47.055 13.0483C46.8505 12.892 46.6019 12.8139 46.3093 12.8139C46.011 12.8139 45.7596 12.8949 45.555 13.0568C45.3505 13.2159 45.1957 13.4375 45.0906 13.7216C44.9854 14.0057 44.9329 14.3338 44.9329 14.706C44.9329 15.0838 44.9854 15.4105 45.0906 15.6861C45.1985 15.9588 45.3533 16.1705 45.555 16.321C45.7596 16.4687 46.011 16.5426 46.3093 16.5426ZM53.8988 18.1278C53.2255 18.1278 52.646 17.9915 52.1602 17.7188C51.6772 17.4432 51.305 17.054 51.0437 16.5511C50.7823 16.0455 50.6516 15.4474 50.6516 14.7571C50.6516 14.0838 50.7823 13.4929 51.0437 12.9844C51.305 12.4759 51.6729 12.0795 52.1474 11.7955C52.6246 11.5114 53.1843 11.3693 53.8263 11.3693C54.2582 11.3693 54.6602 11.4389 55.0323 11.5781C55.4073 11.7145 55.734 11.9205 56.0124 12.196C56.2937 12.4716 56.5124 12.8182 56.6687 13.2358C56.8249 13.6506 56.9031 14.1364 56.9031 14.6932V15.1918H51.3761V14.0668H55.1942C55.1942 13.8054 55.1374 13.5739 55.0238 13.3722C54.9102 13.1705 54.7525 13.0128 54.5508 12.8991C54.3519 12.7827 54.1204 12.7244 53.8562 12.7244C53.5806 12.7244 53.3363 12.7884 53.1232 12.9162C52.913 13.0412 52.7482 13.2102 52.6289 13.4233C52.5096 13.6335 52.4485 13.8679 52.4457 14.1264V15.196C52.4457 15.5199 52.5053 15.7997 52.6246 16.0355C52.7468 16.2713 52.9187 16.4531 53.1403 16.581C53.3619 16.7088 53.6246 16.7727 53.9286 16.7727C54.1303 16.7727 54.315 16.7443 54.4826 16.6875C54.6502 16.6307 54.7937 16.5455 54.913 16.4318C55.0323 16.3182 55.1232 16.179 55.1857 16.0142L56.8647 16.125C56.7795 16.5284 56.6048 16.8807 56.3406 17.1818C56.0792 17.4801 55.7411 17.7131 55.3263 17.8807C54.9144 18.0455 54.4386 18.1278 53.8988 18.1278Z" fill="white"/>
     </svg>
 
@@ -744,21 +745,21 @@
         <p><strong>Controls:</strong></p>
         <ul>
           <li><strong>Arrow Keys / Buttons:</strong> Move the crane trolley left/right and raise/lower the hook</li>
-          <li><strong>HOOK Button / Spacebar:</strong> Attach to nearby crates or release them</li>
+          <li><strong>HOOK Button / Spacebar:</strong> Attach to nearby blocks or release them</li>
         </ul>
       </div>
       <div class="slide" data-slide="2">
         <p><strong>Tips:</strong></p>
         <ol>
-          <li>🪝 Lower the hook close to a crate, then press HOOK to attach</li>
+          <li>🪝 Lower the hook close to a block, then press HOOK to attach</li>
           <li>⬆️ Raise the load high enough to clear the orange drum obstacle</li>
-          <li>⬇️ Lower the crate into the green drop zone before releasing</li>
+          <li>⬇️ Lower the block into the green drop zone before releasing</li>
           <li>⚠️ Avoid hitting drums - collisions cause damage!</li>
         </ol>
       </div>
       <div class="slide" data-slide="3">
         <p><strong>Watch Out:</strong></p>
-        <p>If you take too much damage (100%), the job fails. Release crates too high and they'll break on impact.</p>
+        <p>If you take too much damage (100%), the job fails. Release blocks too high and they'll break on impact.</p>
         <p>Follow the spotter's instructions at the bottom of the screen for guidance!</p>
       </div>
     </div>
@@ -774,7 +775,7 @@
 <!-- End Screen -->
 <div id="endScreen">
   <h2 id="endTitle">Job Complete!</h2>
-  <p id="endMsg">All crates delivered.</p>
+  <p id="endMsg">All blocks delivered.</p>
   <button id="restartBtn">Play Again</button>
 </div>
 
@@ -902,15 +903,15 @@ let hook = {
   angle: 0, angleVel: 0,
 };
 
-let crates = [];
+let blocks = [];
 let obstacles = [];
 let dropZone = { x: 1100, y: WORLD.groundY - 25, width: 120, height: 50 };
-let hookedCrate = null;
+let hookedBlock = null;
 let score = 0;
-let totalCrates = 3;
+let totalBlocks = 3;
 let damage = 0;
 let activeDrumHitIds = new Set();
-let droppedCrates = [];
+let droppedBlocks = [];
 let spotterMsg = '';
 let spotterArrow = null;
 const DROP_ZONE_TOP_Y = () => dropZone.y - 80;
@@ -940,7 +941,7 @@ function initGame() {
   hook.angle = 0; hook.angleVel = 0;
 
   // Precast concrete elements to transport (276x161 aspect ratio from SVG)
-  crates = [
+  blocks = [
     { x: WORLD.craneBaseX + 100, y: WORLD.groundY - 45, w: 80, h: 47, color: '#C0C9CE', type: 'precast', delivered: false },
     { x: WORLD.craneBaseX + 250, y: WORLD.groundY - 45, w: 80, h: 47, color: '#C0C9CE', type: 'precast', delivered: false },
     { x: WORLD.craneBaseX + 400, y: WORLD.groundY - 45, w: 80, h: 47, color: '#C0C9CE', type: 'precast', delivered: false },
@@ -987,12 +988,12 @@ function initGame() {
   }
 
   dropZone.x = WORLD.craneBaseX + WORLD.jibLength - 200;
-  hookedCrate = null;
+  hookedBlock = null;
   score = 0;
-  totalCrates = crates.length;
+  totalBlocks = blocks.length;
   damage = 0;
   activeDrumHitIds = new Set();
-  droppedCrates = [];
+  droppedBlocks = [];
   spotterMsg = '';
   spotterArrow = null;
 
@@ -1014,14 +1015,14 @@ function updateSpotter() {
   const obstacleX = OBSTACLE_BASE_X;
   const obstacleTopY = WORLD.groundY - 250;
 
-  if (!hookedCrate) {
-    const avail = crates.find(c => !c.delivered && !droppedCrates.includes(c));
+  if (!hookedBlock) {
+    const avail = blocks.find(c => !c.delivered && !droppedBlocks.includes(c));
     if (!avail) {
-      if (score >= totalCrates) {
+      if (score >= totalBlocks) {
         spotterMsg = '';
         spotterArrow = null;
       } else {
-        spotterMsg = 'No crates left!';
+        spotterMsg = 'No blocks left!';
         spotterArrow = null;
       }
       return;
@@ -1034,12 +1035,12 @@ function updateSpotter() {
       spotterMsg = '🪝 PRESS HOOK to attach';
       spotterArrow = { x: cx, y: cy - 50, dir: 'down' };
     } else if (hook.y < cy - 80) {
-      spotterMsg = '⬇️ LOWER the hook to the crate';
+      spotterMsg = '⬇️ LOWER the hook to the block';
       spotterArrow = { x: cx, y: cy - 60, dir: 'down' };
     } else {
       const dx = cx - hook.x;
       if (Math.abs(dx) > 40) {
-        spotterMsg = (dx > 0 ? '➡️' : '⬅️') + ' Move hook over the crate';
+        spotterMsg = (dx > 0 ? '➡️' : '⬅️') + ' Move hook over the block';
         spotterArrow = { x: cx, y: cy - 60, dir: dx > 0 ? 'right' : 'left' };
       } else {
         spotterMsg = '⬇️ LOWER the hook';
@@ -1049,12 +1050,12 @@ function updateSpotter() {
     return;
   }
 
-  const crateX = hookedCrate.x + hookedCrate.w / 2;
-  const crateY = hookedCrate.y + hookedCrate.h;
+  const loadX = hookedBlock.x + hookedBlock.w / 2;
+  const loadY = hookedBlock.y + hookedBlock.h;
   const dzCenterX = dropZone.x + dropZone.width / 2;
 
-  if (crateX > dropZone.x && crateX < dropZone.x + dropZone.width) {
-    if (crateY >= DROP_ZONE_TOP_Y()) {
+  if (loadX > dropZone.x && loadX < dropZone.x + dropZone.width) {
+    if (loadY >= DROP_ZONE_TOP_Y()) {
       spotterMsg = '👍 RELEASE now! In the green zone!';
       spotterArrow = { x: dzCenterX, y: dropZone.y - 40, dir: 'down' };
     } else {
@@ -1064,14 +1065,14 @@ function updateSpotter() {
     return;
   }
 
-  if (crateX > obstacleX + 80) {
+  if (loadX > obstacleX + 80) {
     spotterMsg = '➡️ Almost there! Move to drop zone';
     spotterArrow = { x: dzCenterX, y: dropZone.y - 60, dir: 'right' };
     return;
   }
 
-  if (crateX > obstacleX - 100 && crateX < obstacleX + 130) {
-    if (crateY > obstacleTopY - 20) {
+  if (loadX > obstacleX - 100 && loadX < obstacleX + 130) {
+    if (loadY > obstacleTopY - 20) {
       spotterMsg = '⬆️ RAISE the load! Clear the obstacle!';
       spotterArrow = { x: obstacleX + 25, y: obstacleTopY - 60, dir: 'up' };
     } else {
@@ -1082,7 +1083,7 @@ function updateSpotter() {
   }
 
   spotterMsg = '➡️ Move right towards drop zone';
-  spotterArrow = { x: obstacleX - 30, y: crateY - 60, dir: 'right' };
+  spotterArrow = { x: obstacleX - 30, y: loadY - 60, dir: 'right' };
 }
 
 // ============ PHYSICS ============
@@ -1142,19 +1143,19 @@ function updatePhysics(dt) {
   hook.x = wireSegments[WIRE_SEG_COUNT].x;
   hook.y = wireSegments[WIRE_SEG_COUNT].y;
 
-  // --- Hard block: prevent hook/crate from going under obstacles ---
+  // --- Hard block: prevent hook/block from going under obstacles ---
   const obsLeft = OBSTACLE_BASE_X - 10;
   const obsRight = OBSTACLE_BASE_X + 4 * 38 + 10;
   const obsTop = WORLD.groundY - 3 * 47;
   const margin = 8;
 
   let blockY = null;
-  if (hookedCrate) {
-    const cLeft = hook.x - hookedCrate.w / 2;
-    const cRight = hook.x + hookedCrate.w / 2;
-    const cBottom = hook.y + 15 + hookedCrate.h;
+  if (hookedBlock) {
+    const cLeft = hook.x - hookedBlock.w / 2;
+    const cRight = hook.x + hookedBlock.w / 2;
+    const cBottom = hook.y + 15 + hookedBlock.h;
     if (cRight > obsLeft && cLeft < obsRight && cBottom > obsTop - margin) {
-      blockY = obsTop - margin - 15 - hookedCrate.h;
+      blockY = obsTop - margin - 15 - hookedBlock.h;
     }
   } else {
     if (hook.x > obsLeft && hook.x < obsRight && hook.y > obsTop - margin) {
@@ -1164,7 +1165,7 @@ function updatePhysics(dt) {
   if (blockY !== null && hook.y > blockY) {
     hook.y = blockY;
     wireSegments[WIRE_SEG_COUNT].y = blockY;
-    if (hookedCrate) hookedCrate.broken = true;
+    if (hookedBlock) hookedBlock.broken = true;
     if (trolley.ropeSpeed > 0) trolley.ropeSpeed = 0;
     const anchorYBlock = WORLD.craneTopY + WIRE_ANCHOR_Y_OFFSET;
     const dy = hook.y - anchorYBlock;
@@ -1177,10 +1178,10 @@ function updatePhysics(dt) {
     let touchedDrumId = -1;
     for (let i = 0; i < obstacles.length; i++) {
       const obs = obstacles[i];
-      if (hookedCrate) {
-        const cLeft = hook.x - hookedCrate.w / 2;
-        const cRight = hook.x + hookedCrate.w / 2;
-        const cBottom = hook.y + 15 + hookedCrate.h;
+      if (hookedBlock) {
+        const cLeft = hook.x - hookedBlock.w / 2;
+        const cRight = hook.x + hookedBlock.w / 2;
+        const cBottom = hook.y + 15 + hookedBlock.h;
         if (cRight > obs.x && cLeft < obs.x + obs.w &&
             cBottom >= obs.y - margin && cBottom <= obs.y + margin) {
           touchedDrumTop = true;
@@ -1208,14 +1209,14 @@ function updatePhysics(dt) {
   const lastSeg = wireSegments[WIRE_SEG_COUNT];
   const currentWireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
 
-  if (hookedCrate) {
-    hookedCrate.x = hook.x - hookedCrate.w / 2;
-    hookedCrate.y = hook.y + 15;
-    hookedCrate.rotation = currentWireAngle;
+  if (hookedBlock) {
+    hookedBlock.x = hook.x - hookedBlock.w / 2;
+    hookedBlock.y = hook.y + 15;
+    hookedBlock.rotation = currentWireAngle;
   }
 
-  for (let i = droppedCrates.length - 1; i >= 0; i--) {
-    const dc = droppedCrates[i];
+  for (let i = droppedBlocks.length - 1; i >= 0; i--) {
+    const dc = droppedBlocks[i];
     dc.vy += 800 * dt;
     dc.x += dc.vx * dt;
     dc.y += dc.vy * dt;
@@ -1248,44 +1249,44 @@ function updatePhysics(dt) {
       if (dc.releasedTooHigh) {
         dc.broken = true;
         dc.delivered = false;
-        setSpotterAlert('⚠️ DROPPED TOO HIGH! Crate destroyed!');
+        setSpotterAlert('⚠️ DROPPED TOO HIGH! Block destroyed!');
         addDamage(30);
         setTimeout(() => {
-          const idx = droppedCrates.indexOf(dc);
-          if (idx !== -1) droppedCrates.splice(idx, 1);
+          const idx = droppedBlocks.indexOf(dc);
+          if (idx !== -1) droppedBlocks.splice(idx, 1);
         }, 1200);
       } else if (inZone) {
         dc.delivered = true;
         dc.x = dropZone.x + (dropZone.width - dc.w) / 2;
         dc.y = dropZone.y - dc.h + 25;
-        const deliveredCount = crates.filter(c => c.delivered).length;
+        const deliveredCount = blocks.filter(c => c.delivered).length;
         dc.y -= (deliveredCount - 1) * 35;
         dc.rotation = 0;
         score++;
         updateHUD();
         setSpotterAlert('✅ Delivered! Good work!');
 
-        if (score >= totalCrates) {
+        if (score >= totalBlocks) {
           setTimeout(() => {
             gameState = 'win';
             showEndScreen(true);
           }, 800);
         }
         setTimeout(() => {
-          const idx = droppedCrates.indexOf(dc);
-          if (idx !== -1) droppedCrates.splice(idx, 1);
+          const idx = droppedBlocks.indexOf(dc);
+          if (idx !== -1) droppedBlocks.splice(idx, 1);
         }, 500);
       } else {
-        setSpotterAlert('❌ Missed the drop zone! Crate lost.');
+        setSpotterAlert('❌ Missed the drop zone! Block lost.');
         setTimeout(() => {
-          const idx = droppedCrates.indexOf(dc);
-          if (idx !== -1) droppedCrates.splice(idx, 1);
+          const idx = droppedBlocks.indexOf(dc);
+          if (idx !== -1) droppedBlocks.splice(idx, 1);
         }, 1500);
       }
     }
   }
 
-  if (!hookedCrate) {
+  if (!hookedBlock) {
     const btn = document.getElementById('hookBtn');
     if (btn.classList.contains('hooked')) resetHookBtn();
   }
@@ -1300,12 +1301,12 @@ function updatePhysics(dt) {
       else trolley.speed = Math.max(trolley.speed, 40);
       wasHit = true;
     }
-    if (hookedCrate) {
-      if (hookedCrate.x + hookedCrate.w > obs.x && hookedCrate.x < obs.x + obs.w &&
-          hookedCrate.y + hookedCrate.h > obs.y && hookedCrate.y < obs.y + obs.h) {
-        hookedCrate.broken = true;
+    if (hookedBlock) {
+      if (hookedBlock.x + hookedBlock.w > obs.x && hookedBlock.x < obs.x + obs.w &&
+          hookedBlock.y + hookedBlock.h > obs.y && hookedBlock.y < obs.y + obs.h) {
+        hookedBlock.broken = true;
         hook.angleVel *= -0.5;
-        if (hookedCrate.x < obs.x) trolley.speed = Math.min(trolley.speed, -60);
+        if (hookedBlock.x < obs.x) trolley.speed = Math.min(trolley.speed, -60);
         else trolley.speed = Math.max(trolley.speed, 60);
         wasHit = true;
       }
@@ -1444,20 +1445,20 @@ function drawWorld() {
   drawDropZone();
   obstacles.forEach(obs => drawObstacle(obs));
 
-  if (!hookedCrate && gameState === 'playing') {
-    const pickupTarget = getPickupTargetCrate();
+  if (!hookedBlock && gameState === 'playing') {
+    const pickupTarget = getPickupTargetBlock();
     if (pickupTarget) drawPickupMarker(pickupTarget);
   }
 
-  crates.forEach(c => { if (!c.delivered || c === hookedCrate) return; drawCrate(c); });
-  crates.forEach(c => { if (c.delivered || c === hookedCrate || droppedCrates.includes(c)) return; drawCrate(c); });
+  blocks.forEach(c => { if (!c.delivered || c === hookedBlock) return; drawBlock(c); });
+  blocks.forEach(c => { if (c.delivered || c === hookedBlock || droppedBlocks.includes(c)) return; drawBlock(c); });
 
   drawWire();
   drawTrolley();
   drawHook();
 
-  droppedCrates.forEach(dc => drawCrate(dc));
-  if (hookedCrate) drawCrate(hookedCrate);
+  droppedBlocks.forEach(dc => drawBlock(dc));
+  if (hookedBlock) drawBlock(hookedBlock);
 
   if (spotterArrow && gameState === 'playing') {
     drawSpotterArrow(spotterArrow);
@@ -1914,8 +1915,8 @@ function drawHook() {
   ctx.restore();
 
   // Proximity indicator - centered at bottom of hook
-  if (!hookedCrate && gameState === 'playing') {
-    const nearby = findNearestCrate();
+  if (!hookedBlock && gameState === 'playing') {
+    const nearby = findNearestBlock();
     if (nearby) {
       ctx.beginPath();
       ctx.arc(hx, hy + hookHeight, 20, 0, Math.PI * 2);
@@ -1925,7 +1926,7 @@ function drawHook() {
   }
 }
 
-function drawCrate(c) {
+function drawBlock(c) {
   ctx.save();
   const cx = c.x + c.w / 2;
   const cy = c.y + c.h / 2;
@@ -1939,7 +1940,7 @@ function drawCrate(c) {
     // Draw broken precast SVG
     ctx.drawImage(svgImages.brokenprecast, -c.w / 2, -c.h / 2, c.w, c.h);
   } else if (c.broken) {
-    // Fallback for broken crates without SVG
+    // Fallback for broken blocks without SVG
     ctx.globalAlpha = 0.4;
     ctx.fillStyle = '#555';
     ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
@@ -2038,9 +2039,9 @@ function drawObstacle(obs) {
 
 function drawDropZone() {
   const dz = dropZone;
-  const refCrate = getPickupTargetCrate() || hookedCrate || crates[0];
-  const refW = refCrate ? refCrate.w : 80;
-  const refH = refCrate ? refCrate.h : 47;
+  const refBlock = getPickupTargetBlock() || hookedBlock || blocks[0];
+  const refW = refBlock ? refBlock.w : 80;
+  const refH = refBlock ? refBlock.h : 47;
   const t = performance.now() / 1000;
   const pulse = 1 + Math.sin(t * 4) * 0.06;
   const alpha = 0.5 + Math.sin(t * 4) * 0.12;
@@ -2083,15 +2084,15 @@ function drawPickupMarker(c) {
 }
 
 // ============ HOOK/UNHOOK ============
-function getPickupTargetCrate() {
-  return crates.find(c => !c.delivered && !droppedCrates.includes(c)) || null;
+function getPickupTargetBlock() {
+  return blocks.find(c => !c.delivered && !droppedBlocks.includes(c)) || null;
 }
 
-function findNearestCrate() {
+function findNearestBlock() {
   let best = null;
   let bestDist = 60;
-  for (const c of crates) {
-    if (c.delivered || droppedCrates.includes(c)) continue;
+  for (const c of blocks) {
+    if (c.delivered || droppedBlocks.includes(c)) continue;
     const cx = c.x + c.w / 2;
     const cy = c.y + c.h / 2;
     const dist = Math.hypot(hook.x - cx, hook.y - cy);
@@ -2101,20 +2102,20 @@ function findNearestCrate() {
 }
 
 function toggleHook() {
-  if (hookedCrate) {
-    hookedCrate.vx = trolley.speed * 0.3;
-    hookedCrate.vy = 0;
-    hookedCrate.landed = false;
-    hookedCrate.scored = false;
-    hookedCrate.releasedTooHigh = (hookedCrate.y + hookedCrate.h) < DROP_ZONE_TOP_Y();
-    droppedCrates.push(hookedCrate);
-    hookedCrate = null;
+  if (hookedBlock) {
+    hookedBlock.vx = trolley.speed * 0.3;
+    hookedBlock.vy = 0;
+    hookedBlock.landed = false;
+    hookedBlock.scored = false;
+    hookedBlock.releasedTooHigh = (hookedBlock.y + hookedBlock.h) < DROP_ZONE_TOP_Y();
+    droppedBlocks.push(hookedBlock);
+    hookedBlock = null;
     resetHookBtn();
   } else {
-    const crate = findNearestCrate();
-    if (crate) {
-      hookedCrate = crate;
-      if (typeof hookedCrate.broken !== 'boolean') hookedCrate.broken = false;
+    const block = findNearestBlock();
+    if (block) {
+      hookedBlock = block;
+      if (typeof hookedBlock.broken !== 'boolean') hookedBlock.broken = false;
       const hookBtn = document.getElementById('hookBtn');
       hookBtn.textContent = 'Release';
       hookBtn.classList.add('hooked');
@@ -2126,22 +2127,22 @@ function toggleHook() {
 
 function updateHUD() {
   // Update block counter
-  document.getElementById('blockNumber').textContent = `${score}/${totalCrates}`;
+  document.getElementById('blockNumber').textContent = `${score}/${totalBlocks}`;
 
-  // Update damage bar (3 segments: yellow 0-33%, orange 33-66%, red 66-100%)
+  // Update damage bar (gradient: yellow -> orange -> red)
   const pct = Math.min(100, Math.max(0, damage));
   const maxWidth = 96; // Total width of damage area
-
-  // Calculate widths for each segment
-  const yellowWidth = Math.min(maxWidth / 3, (pct / 100) * maxWidth);
-  const orangeWidth = pct > 33.33 ? Math.min(maxWidth / 3, ((pct - 33.33) / 100) * maxWidth * 3) : 0;
-  const redWidth = pct > 66.66 ? Math.min(maxWidth / 3, ((pct - 66.66) / 100) * maxWidth * 3) : 0;
-
-  document.getElementById('damageYellow').setAttribute('width', yellowWidth);
-  document.getElementById('damageOrange').setAttribute('x', 74 + yellowWidth);
-  document.getElementById('damageOrange').setAttribute('width', orangeWidth);
-  document.getElementById('damageRed').setAttribute('x', 74 + yellowWidth + orangeWidth);
-  document.getElementById('damageRed').setAttribute('width', redWidth);
+  const fillWidth = (pct / 100) * maxWidth;
+  const clipRect = document.getElementById('damageClipRect');
+  clipRect.setAttribute('width', fillWidth);
+  // Round the right side when there's fill visible
+  if (fillWidth > 10) {
+    clipRect.setAttribute('rx', '10');
+    clipRect.setAttribute('ry', '10');
+  } else {
+    clipRect.setAttribute('rx', '0');
+    clipRect.setAttribute('ry', '0');
+  }
 }
 
 function showEndScreen(won) {
@@ -2153,13 +2154,13 @@ function showEndScreen(won) {
   if (won) {
     title.textContent = 'Job Complete!';
     title.className = 'win-title';
-    msg.textContent = `All crates delivered. Damage: ${Math.round(damage)}%`;
+    msg.textContent = `All blocks delivered. Damage: ${Math.round(damage)}%`;
     btn.className = '';
     btn.textContent = 'Play Again';
   } else {
     title.textContent = 'Game Over';
     title.className = 'lose-title';
-    msg.textContent = `Too much damage! Delivered ${score}/${totalCrates} crates.`;
+    msg.textContent = `Too much damage! Delivered ${score}/${totalBlocks} blocks.`;
     btn.className = 'lose-btn';
     btn.textContent = 'Try Again';
   }
@@ -2273,14 +2274,14 @@ function startGame() {
   if (isDesktopView) {
     introZoomTimer = setTimeout(() => {
       gameState = 'playing';
-      document.getElementById('spotterText').textContent = '⬇️ Lower the hook to a crate';
+      document.getElementById('spotterText').textContent = '⬇️ Lower the hook to a block';
     }, 1000);
   } else {
     introOverviewTimer = setTimeout(() => {
       gameState = 'zooming';
       introZoomTimer = setTimeout(() => {
         gameState = 'playing';
-        document.getElementById('spotterText').textContent = '⬇️ Lower the hook to a crate';
+        document.getElementById('spotterText').textContent = '⬇️ Lower the hook to a block';
       }, 1000);
     }, 2000);
   }
