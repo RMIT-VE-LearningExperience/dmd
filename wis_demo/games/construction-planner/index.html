@@ -2112,12 +2112,12 @@ const weatherData = {
 const workers = {
   crane: {
     name: 'Crane Operator',
-    blockedWeather: ['windy', 'thunder', 'night'],
+    blockedWeather: ['windy', 'thunder'],
     slotsNeeded: 3
   },
   concreter: {
     name: 'Concreter',
-    blockedWeather: ['windy', 'thunder', 'night'],
+    blockedWeather: ['windy', 'thunder'],
     slotsNeeded: 3,
     needsFullDay: true
   },
@@ -2149,7 +2149,7 @@ const weatherDescriptions = {
   'cloudy': 'Cloudy: Good conditions for all roles.',
   'thunder': 'Storms: Crane Operator and Concreter cannot work.',
   'windy': 'High winds: Crane Operator and Concreter cannot work.',
-  'night': 'Nighttime: Crane Operator and Concreter cannot work.'
+  'night': 'Evening conditions: Work can continue if other constraints are met.'
 };
 
 const roleColors = {
@@ -2533,7 +2533,7 @@ function attemptPlacement(role, day, slotNum, cellEl) {
   if (worker.blockedWeather.includes(weather)) {
     showFeedback(role,
       `I can't work in ${weatherNames[weather]}! It's too dangerous. Find me a slot with better weather.`,
-      `Weather blockers include wind, storms, and nighttime conditions.`
+      `Weather blockers include wind and storms.`
     );
     return false;
   }
