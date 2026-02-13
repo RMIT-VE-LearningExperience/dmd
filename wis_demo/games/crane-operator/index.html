@@ -372,14 +372,14 @@
 <!-- Start Screen -->
 <div id="startScreen">
   <h1>Crane Operator</h1>
-  <p>Move the crate to the drop zone</p>
+  <p>Move the block to the drop zone</p>
   <button id="startBtn">Start Game</button>
 </div>
 
 <!-- HUD -->
 <div id="hud">
   <div id="hudRow1">
-    <div class="hud-box" id="scoreText">Crates: 0/3</div>
+    <div class="hud-box" id="scoreText">Blocks: 0/3</div>
     <div id="damageWrap">
       <span id="damageLabel">DMG</span>
       <div id="damageTrack"><div id="damageFill"></div></div>
@@ -410,7 +410,7 @@
 <!-- End Screen -->
 <div id="endScreen">
   <h2 id="endTitle">Job Complete!</h2>
-  <p id="endMsg">All crates delivered.</p>
+  <p id="endMsg">All blocks delivered.</p>
   <button id="restartBtn">Play Again</button>
 </div>
 
@@ -652,7 +652,7 @@ function updateSpotter() {
         spotterMsg = '';
         spotterArrow = null;
       } else {
-        spotterMsg = 'No crates left!';
+        spotterMsg = 'No blocks left!';
         spotterArrow = null;
       }
       return;
@@ -665,12 +665,12 @@ function updateSpotter() {
       spotterMsg = '🪝 PRESS HOOK to attach';
       spotterArrow = { x: cx, y: cy - 50, dir: 'down' };
     } else if (hook.y < cy - 80) {
-      spotterMsg = '⬇️ LOWER the hook to the crate';
+      spotterMsg = '⬇️ LOWER the hook to the block';
       spotterArrow = { x: cx, y: cy - 60, dir: 'down' };
     } else {
       const dx = cx - hook.x;
       if (Math.abs(dx) > 40) {
-        spotterMsg = (dx > 0 ? '➡️' : '⬅️') + ' Move hook over the crate';
+        spotterMsg = (dx > 0 ? '➡️' : '⬅️') + ' Move hook over the block';
         spotterArrow = { x: cx, y: cy - 60, dir: dx > 0 ? 'right' : 'left' };
       } else {
         spotterMsg = '⬇️ LOWER the hook';
@@ -851,7 +851,7 @@ function updatePhysics(dt) {
       if (dc.releasedTooHigh) {
         dc.broken = true;
         dc.delivered = false;
-        setSpotterAlert('⚠️ DROPPED TOO HIGH! Crate destroyed!');
+        setSpotterAlert('⚠️ DROPPED TOO HIGH! Block destroyed!');
         addDamage(30);
         setTimeout(() => {
           const idx = droppedCrates.indexOf(dc);
@@ -879,7 +879,7 @@ function updatePhysics(dt) {
           if (idx !== -1) droppedCrates.splice(idx, 1);
         }, 500);
       } else {
-        setSpotterAlert('❌ Missed the drop zone! Crate lost.');
+        setSpotterAlert('❌ Missed the drop zone! Block lost.');
         setTimeout(() => {
           const idx = droppedCrates.indexOf(dc);
           if (idx !== -1) droppedCrates.splice(idx, 1);
@@ -1643,7 +1643,7 @@ function toggleHook() {
 }
 
 function updateHUD() {
-  document.getElementById('scoreText').textContent = `Crates: ${score}/${totalCrates}`;
+  document.getElementById('scoreText').textContent = `Blocks: ${score}/${totalCrates}`;
   const pct = Math.min(100, Math.max(0, damage));
   document.getElementById('damageFill').style.width = pct + '%';
   const lbl = document.getElementById('damageLabel');
@@ -1661,13 +1661,13 @@ function showEndScreen(won) {
   if (won) {
     title.textContent = 'Job Complete!';
     title.className = 'win-title';
-    msg.textContent = `All crates delivered. Damage: ${Math.round(damage)}%`;
+    msg.textContent = `All blocks delivered. Damage: ${Math.round(damage)}%`;
     btn.className = '';
     btn.textContent = 'Play Again';
   } else {
     title.textContent = 'Game Over';
     title.className = 'lose-title';
-    msg.textContent = `Too much damage! Delivered ${score}/${totalCrates} crates.`;
+    msg.textContent = `Too much damage! Delivered ${score}/${totalCrates} blocks.`;
     btn.className = 'lose-btn';
     btn.textContent = 'Try Again';
   }
@@ -1743,7 +1743,7 @@ function startGame() {
 
   setTimeout(() => {
     gameState = 'playing';
-    document.getElementById('spotterBox').textContent = '⬇️ Lower the hook to a crate';
+    document.getElementById('spotterBox').textContent = '⬇️ Lower the hook to a block';
   }, 2000);
 }
 
