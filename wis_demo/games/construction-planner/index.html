@@ -63,16 +63,19 @@
   }
 
   .help-menu-btn svg {
-    width: 52px;
-    height: 52px;
-    fill: #F5C942;
+    width: 28px;
+    height: 38px;
+  }
+
+  .help-menu-btn .help-mark {
+    fill: #193E75;
   }
 .sidebar-help {
   margin-right: 10px;
 }
   .help-menu-btn {
-    background: #193E75 !important;
-
+    background: #F5C942 !important;
+    border-radius: 50%;
   }
 
   /* Desktop title (hidden on mobile) */
@@ -818,6 +821,102 @@ padding-bottom: 60px;
     pointer-events: none;
   }
 
+  .weather-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(25,62,117,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 170;
+    padding: 20px;
+  }
+
+  .weather-popup-overlay.active { display: flex; }
+
+  .weather-popup {
+    width: min(360px, 92vw);
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.28);
+    position: relative;
+  }
+
+  .weather-popup-close {
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    line-height: 1;
+    color: #1a2744;
+    cursor: pointer;
+  }
+
+  .weather-popup-title {
+    font-size: 16px;
+    font-weight: 900;
+    color: #1a2744;
+    margin-bottom: 10px;
+  }
+
+  .weather-popup-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .weather-popup-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    background: #193E75;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  .weather-popup-icon img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+  }
+
+  .weather-popup-text {
+    font-size: 14px;
+    line-height: 1.35;
+    color: #1a2744;
+    font-weight: 600;
+  }
+
+  .weather-hover-tip {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 180;
+    background: #1a2744;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    padding: 8px 10px;
+    border-radius: 8px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+    max-width: 220px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+  }
+
+  .weather-hover-tip.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
   /* Success overlay */
   .success-overlay {
     position: fixed;
@@ -1311,19 +1410,24 @@ padding-bottom: 60px;
 
   .onboarding-role-highlight {
     position: relative;
-    z-index: 430;
+    z-index: 430 !important;
+  }
+
+  .onboarding-role-highlight .worker-avatar {
+    z-index: 431 !important;
+    position: relative;
   }
 
   .onboarding-drop-highlight {
     position: relative;
-    z-index: 430;
+    z-index: 430 !important;
   }
 
   .onboarding-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 410;
-    background: rgba(7, 17, 37, 0.16);
+    z-index: 49;
+    background: rgba(7, 17, 37, 0.5);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.18s ease;
@@ -1810,8 +1914,9 @@ padding-bottom: 60px;
     <h1>CREW<br>PLANNER</h1>
     <div class="header-actions">
       <button class="menu-btn help-menu-btn header-help" aria-label="Help" onclick="showHelp()">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+        <svg viewBox="0 0 50.9 84.5" xmlns="http://www.w3.org/2000/svg">
+          <path class="help-mark" d="M49.2,15.3c-1.2-3-3-5.7-5.3-8-3.3-3.3-9.2-7.3-18.5-7.3s-6.6.5-9.5,1.6c-2.7,1-5.2,2.5-7.4,4.4C4.9,9.1,2.1,13.4.4,18.3c-1.2,3.4.6,7.1,4,8.3s7.1-.6,8.3-4c.7-2,2-4.7,4.4-6.8,2.3-1.9,5-2.9,8.5-2.9s7,1.2,9.3,3.5c2.2,2.3,3.2,5.2,3.2,7.1,0,3.2-1,5-1.8,6.1-1.2,1.7-3,3.2-5,4.9-2.6,2.1-5.5,4.5-7.6,8-3,4.8-4.6,9.7-4.6,14.5s2.9,6.5,6.5,6.5,6.5-2.9,6.5-6.5.5-4.1,2.6-7.5c1.1-1.7,2.9-3.2,5-4.9,4.8-4,11.3-9.4,11.4-20.8,0-2.7-.6-5.6-1.7-8.4h0Z"/>
+          <path class="help-mark" d="M32.6,77c0,0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2s0-.1,0-.2c0,0,0-.1,0-.2,0-.1,0-.2,0-.3,0-.1,0-.2,0-.3,0-.1,0-.2-.1-.3s0-.2-.1-.3c0-.1,0-.2-.1-.3,0-.1,0-.2-.2-.3,0,0-.1-.2-.2-.3,0,0-.1-.2-.2-.3,0,0,0,0,0-.1,0,0,0,0,0-.1,0,0,0,0-.1-.1s0,0-.1-.1c0,0,0,0-.1-.1s0,0-.1-.1c0,0,0,0-.1-.1,0,0,0,0-.1-.1,0,0,0,0-.1-.1,0,0,0,0-.1-.1s0,0-.1-.1,0,0-.1-.1c0,0,0,0-.1-.1s0,0-.1-.1c0,0,0,0-.1,0s0,0-.2,0c0,0-.2-.1-.3-.2,0,0-.2-.1-.3-.2,0,0-.2-.1-.3-.2-.1,0-.2,0-.3-.1s-.2,0-.3-.1-.2,0-.3-.1-.2,0-.3,0c-.1,0-.2,0-.3,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0s-.1,0-.2,0c0,0-.1,0-.2,0s-.1,0-.2,0h-.7c0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0s-.1,0-.2,0c0,0-.1,0-.2,0-.1,0-.2,0-.3,0s-.2,0-.3,0-.2,0-.3.1-.2,0-.3.1c-.1,0-.2,0-.3.1-.1,0-.2,0-.3.2,0,0-.2.1-.3.2,0,0-.2.1-.3.2,0,0,0,0-.1,0,0,0,0,0-.1,0,0,0,0,0-.1.1s0,0-.1.1,0,0-.1.1c0,0,0,0-.1.1s0,0-.1.1,0,0-.1.1,0,0-.1.1c0,0,0,0-.1.1,0,0,0,0-.1.1,0,0,0,0-.1.1,0,0,0,0-.1.1s0,0-.1.1c0,0,0,0,0,.1s0,0,0,.1c0,0-.1.2-.2.3,0,0-.1.2-.2.3,0,0-.1.2-.2.3,0,.1,0,.2-.1.3s0,.2-.1.3,0,.2-.1.3,0,.2,0,.3c0,.1,0,.2,0,.3,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2s0,.1,0,.2c0,0,0,.1,0,.2,0,0,0,.1,0,.2v.7c0,0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2s0,.1,0,.2c0,0,0,.1,0,.2,0,.1,0,.2,0,.3,0,.1,0,.2,0,.3,0,.1,0,.2.1.3s0,.2.1.3,0,.2.1.3c0,.1,0,.2.2.3s.1.2.2.3c0,0,.1.2.2.3,0,0,0,0,0,.2,0,0,0,0,0,.1,0,0,0,0,.1.1s0,0,.1.1,0,0,.1.1,0,0,.1.1c0,0,0,0,.1.1,0,0,0,0,.1.1s0,0,.1.1c0,0,0,0,.1.1s0,0,.1.1,0,0,.1.1c0,0,0,0,.1.1s0,0,.1.1c0,0,0,0,.1,0s0,0,.1,0c0,0,.2.1.3.2,0,0,.2.1.3.2,0,0,.2.1.3.2.1,0,.2,0,.3.1s.2,0,.3.1.2,0,.3.1.2,0,.3,0c.1,0,.2,0,.3,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0s.1,0,.2,0c0,0,.1,0,.2,0,0,0,.1,0,.2,0h.7c0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0s.1,0,.2,0c0,0,.1,0,.2,0,.1,0,.2,0,.3,0s.2,0,.3,0,.2,0,.3-.1.2,0,.3-.1c.1,0,.2,0,.3-.1.1,0,.2,0,.3-.2,0,0,.2-.1.3-.2,0,0,.2-.1.3-.2,0,0,0,0,.2,0,0,0,0,0,.1,0,0,0,0,0,.1-.1s0,0,.1-.1,0,0,.1-.1c0,0,0,0,.1-.1s0,0,.1-.1,0,0,.1-.1,0,0,.1-.1c0,0,0,0,.1-.1,0,0,0,0,.1-.1,0,0,0,0,.1-.1,0,0,0,0,.1-.1s0,0,.1-.1c0,0,0,0,0-.1s0,0,0-.2c0,0,.1-.2.2-.3,0,0,.1-.2.2-.3,0,0,.1-.2.2-.3,0-.1,0-.2.1-.3,0-.1,0-.2.1-.3s0-.2.1-.3,0-.2,0-.3c0-.1,0-.2,0-.3,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2s0-.1,0-.2c0,0,0-.1,0-.2,0,0,0-.1,0-.2v-.7h0Z"/>
         </svg>
       </button>
       <button class="menu-btn header-menu" id="menuBtnHeader" aria-label="Open menu">
@@ -1838,8 +1943,9 @@ padding-bottom: 60px;
   <div class="sidebar"> <div class="bottom-bar">
     <div class="sidebar-menu">
       <button class="menu-btn help-menu-btn sidebar-help" aria-label="Help" onclick="showHelp()">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+        <svg viewBox="0 0 50.9 84.5" xmlns="http://www.w3.org/2000/svg">
+          <path class="help-mark" d="M49.2,15.3c-1.2-3-3-5.7-5.3-8-3.3-3.3-9.2-7.3-18.5-7.3s-6.6.5-9.5,1.6c-2.7,1-5.2,2.5-7.4,4.4C4.9,9.1,2.1,13.4.4,18.3c-1.2,3.4.6,7.1,4,8.3s7.1-.6,8.3-4c.7-2,2-4.7,4.4-6.8,2.3-1.9,5-2.9,8.5-2.9s7,1.2,9.3,3.5c2.2,2.3,3.2,5.2,3.2,7.1,0,3.2-1,5-1.8,6.1-1.2,1.7-3,3.2-5,4.9-2.6,2.1-5.5,4.5-7.6,8-3,4.8-4.6,9.7-4.6,14.5s2.9,6.5,6.5,6.5,6.5-2.9,6.5-6.5.5-4.1,2.6-7.5c1.1-1.7,2.9-3.2,5-4.9,4.8-4,11.3-9.4,11.4-20.8,0-2.7-.6-5.6-1.7-8.4h0Z"/>
+          <path class="help-mark" d="M32.6,77c0,0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2s0-.1,0-.2c0,0,0-.1,0-.2,0-.1,0-.2,0-.3,0-.1,0-.2,0-.3,0-.1,0-.2-.1-.3s0-.2-.1-.3c0-.1,0-.2-.1-.3,0-.1,0-.2-.2-.3,0,0-.1-.2-.2-.3,0,0-.1-.2-.2-.3,0,0,0,0,0-.1,0,0,0,0,0-.1,0,0,0,0-.1-.1s0,0-.1-.1c0,0,0,0-.1-.1s0,0-.1-.1c0,0,0,0-.1-.1,0,0,0,0-.1-.1,0,0,0,0-.1-.1,0,0,0,0-.1-.1s0,0-.1-.1,0,0-.1-.1c0,0,0,0-.1-.1s0,0-.1-.1c0,0,0,0-.1,0s0,0-.2,0c0,0-.2-.1-.3-.2,0,0-.2-.1-.3-.2,0,0-.2-.1-.3-.2-.1,0-.2,0-.3-.1s-.2,0-.3-.1-.2,0-.3-.1-.2,0-.3,0c-.1,0-.2,0-.3,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0s-.1,0-.2,0c0,0-.1,0-.2,0s-.1,0-.2,0h-.7c0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0s-.1,0-.2,0c0,0-.1,0-.2,0-.1,0-.2,0-.3,0s-.2,0-.3,0-.2,0-.3.1-.2,0-.3.1c-.1,0-.2,0-.3.1-.1,0-.2,0-.3.2,0,0-.2.1-.3.2,0,0-.2.1-.3.2,0,0,0,0-.1,0,0,0,0,0-.1,0,0,0,0,0-.1.1s0,0-.1.1,0,0-.1.1c0,0,0,0-.1.1s0,0-.1.1,0,0-.1.1,0,0-.1.1c0,0,0,0-.1.1,0,0,0,0-.1.1,0,0,0,0-.1.1,0,0,0,0-.1.1s0,0-.1.1c0,0,0,0,0,.1s0,0,0,.1c0,0-.1.2-.2.3,0,0-.1.2-.2.3,0,0-.1.2-.2.3,0,.1,0,.2-.1.3s0,.2-.1.3,0,.2-.1.3,0,.2,0,.3c0,.1,0,.2,0,.3,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2s0,.1,0,.2c0,0,0,.1,0,.2,0,0,0,.1,0,.2v.7c0,0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2s0,.1,0,.2c0,0,0,.1,0,.2,0,.1,0,.2,0,.3,0,.1,0,.2,0,.3,0,.1,0,.2.1.3s0,.2.1.3,0,.2.1.3c0,.1,0,.2.2.3s.1.2.2.3c0,0,.1.2.2.3,0,0,0,0,0,.2,0,0,0,0,0,.1,0,0,0,0,.1.1s0,0,.1.1,0,0,.1.1,0,0,.1.1c0,0,0,0,.1.1,0,0,0,0,.1.1s0,0,.1.1c0,0,0,0,.1.1s0,0,.1.1,0,0,.1.1c0,0,0,0,.1.1s0,0,.1.1c0,0,0,0,.1,0s0,0,.1,0c0,0,.2.1.3.2,0,0,.2.1.3.2,0,0,.2.1.3.2.1,0,.2,0,.3.1s.2,0,.3.1.2,0,.3.1.2,0,.3,0c.1,0,.2,0,.3,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0s.1,0,.2,0c0,0,.1,0,.2,0,0,0,.1,0,.2,0h.7c0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0,0,0,.1,0,.2,0s.1,0,.2,0c0,0,.1,0,.2,0,.1,0,.2,0,.3,0s.2,0,.3,0,.2,0,.3-.1.2,0,.3-.1c.1,0,.2,0,.3-.1.1,0,.2,0,.3-.2,0,0,.2-.1.3-.2,0,0,.2-.1.3-.2,0,0,0,0,.2,0,0,0,0,0,.1,0,0,0,0,0,.1-.1s0,0,.1-.1,0,0,.1-.1c0,0,0,0,.1-.1s0,0,.1-.1,0,0,.1-.1,0,0,.1-.1c0,0,0,0,.1-.1,0,0,0,0,.1-.1,0,0,0,0,.1-.1,0,0,0,0,.1-.1s0,0,.1-.1c0,0,0,0,0-.1s0,0,0-.2c0,0,.1-.2.2-.3,0,0,.1-.2.2-.3,0,0,.1-.2.2-.3,0-.1,0-.2.1-.3,0-.1,0-.2.1-.3s0-.2.1-.3,0-.2,0-.3c0-.1,0-.2,0-.3,0,0,0-.1,0-.2,0,0,0-.1,0-.2,0,0,0-.1,0-.2s0-.1,0-.2c0,0,0-.1,0-.2,0,0,0-.1,0-.2v-.7h0Z"/>
         </svg>
       </button>
       <button class="menu-btn" id="menuBtn" aria-label="Open menu">
@@ -1887,6 +1993,17 @@ padding-bottom: 60px;
     <div class="feedback-avatar" id="feedbackAvatar"></div>
     <div class="feedback-msg" id="feedbackMsg"></div>
     <div class="feedback-hint" id="feedbackHint"></div>
+  </div>
+</div>
+
+<div class="weather-popup-overlay" id="weatherPopupOverlay">
+  <div class="weather-popup" id="weatherPopup">
+    <button class="weather-popup-close" aria-label="Close weather info" onclick="closeWeatherPopup()">×</button>
+    <div class="weather-popup-title" id="weatherPopupTitle">Weather info</div>
+    <div class="weather-popup-body">
+      <div class="weather-popup-icon" id="weatherPopupIcon"></div>
+      <div class="weather-popup-text" id="weatherPopupText"></div>
+    </div>
   </div>
 </div>
 
@@ -2004,6 +2121,24 @@ const weatherNames = {
   'night': 'nighttime'
 };
 
+const weatherMeta = {
+  'sunny': { label: 'Sunny', src: 'images/weather_icons/sunny02.svg' },
+  'partly-cloudy': { label: 'Partly cloudy', src: 'images/weather_icons/partlycloudy02.svg' },
+  'cloudy': { label: 'Cloudy', src: 'images/weather_icons/cloudy01.svg' },
+  'thunder': { label: 'Storms', src: 'images/weather_icons/thunder02.svg' },
+  'windy': { label: 'Windy', src: 'images/weather_icons/wind01.svg' },
+  'night': { label: 'Night', src: 'images/weather_icons/moon.svg' }
+};
+
+const weatherDescriptions = {
+  'sunny': 'Sunny: Good conditions for all roles.',
+  'partly-cloudy': 'Partly cloudy: Good conditions for all roles.',
+  'cloudy': 'Cloudy: Good conditions for all roles.',
+  'thunder': 'Storms: Crane Operator and Concreter cannot work.',
+  'windy': 'High winds: Crane Operator and Concreter cannot work.',
+  'night': 'Nighttime: Crane Operator and Concreter cannot work.'
+};
+
 const roleColors = {
   crane: '#E39F58',
   concreter: '#E46F5B',
@@ -2026,15 +2161,16 @@ const gameState = {
 //  SVG ICONS (same as before)
 // ============================================================
 function weatherSVG(type) {
-  const icons = {
-    'sunny': `<img class="weather-icon" src="images/weather_icons/sunny02.svg" alt="Sunny">`,
-    'partly-cloudy': `<img class="weather-icon" src="images/weather_icons/partlycloudy02.svg" alt="Partly cloudy">`,
-    'cloudy': `<img class="weather-icon" src="images/weather_icons/cloudy01.svg" alt="Cloudy">`,
-    'thunder': `<img class="weather-icon" src="images/weather_icons/thunder02.svg" alt="Storms">`,
-    'windy': `<img class="weather-icon" src="images/weather_icons/wind01.svg" alt="Windy">`,
-    'night': `<img class="weather-icon" src="images/weather_icons/moon.svg" alt="Night">`
-  };
-  return icons[type] || '';
+  const meta = weatherMeta[type];
+  if (!meta) return '';
+  const tip = weatherDescriptions[type] || meta.label;
+  return `<img class="weather-icon" src="${meta.src}" alt="${meta.label}" title="${tip}" data-weather="${type}">`;
+}
+
+function weatherPopupIconSVG(type) {
+  const meta = weatherMeta[type];
+  if (!meta) return '';
+  return `<img src="${meta.src}" alt="${meta.label}">`;
 }
 
 function workerSVG(role) {
@@ -2164,6 +2300,71 @@ function closeFeedback() {
 
 document.getElementById('feedbackOverlay').addEventListener('click', e => {
   if (e.target.id === 'feedbackOverlay') closeFeedback();
+});
+
+function closeWeatherPopup() {
+  document.getElementById('weatherPopupOverlay').classList.remove('active');
+}
+
+function showWeatherPopup(type, day, slot) {
+  const titleEl = document.getElementById('weatherPopupTitle');
+  const iconEl = document.getElementById('weatherPopupIcon');
+  const textEl = document.getElementById('weatherPopupText');
+  const meta = weatherMeta[type];
+  const label = meta ? meta.label : 'Weather';
+  titleEl.textContent = `${day} ${slotLabels[slot]} • ${label}`;
+  iconEl.innerHTML = weatherPopupIconSVG(type);
+  textEl.textContent = weatherDescriptions[type] || `${label} conditions.`;
+  document.getElementById('weatherPopupOverlay').classList.add('active');
+}
+
+function isCoarsePointer() {
+  return window.matchMedia('(hover: none), (pointer: coarse)').matches;
+}
+
+function ensureWeatherHoverTip() {
+  let el = document.getElementById('weatherHoverTip');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'weatherHoverTip';
+    el.className = 'weather-hover-tip';
+    document.body.appendChild(el);
+  }
+  return el;
+}
+
+function hideWeatherHoverTip() {
+  const el = document.getElementById('weatherHoverTip');
+  if (el) el.classList.remove('show');
+}
+
+function showWeatherHoverTip(type, x, y) {
+  if (isCoarsePointer()) return;
+  const text = weatherDescriptions[type];
+  if (!text) return;
+  const tip = ensureWeatherHoverTip();
+  tip.textContent = text;
+  const margin = 10;
+  const maxLeft = window.innerWidth - tip.offsetWidth - margin;
+  const left = Math.max(margin, Math.min(x + 12, maxLeft));
+  let top = y - tip.offsetHeight - 14;
+  if (top < margin) top = y + 16;
+  tip.style.left = `${left}px`;
+  tip.style.top = `${top}px`;
+  tip.classList.add('show');
+}
+
+function weatherTypeFromEventTarget(target) {
+  const cell = target?.closest?.('.cell');
+  if (!cell) return null;
+  const key = `${cell.dataset.day}-${cell.dataset.slot}`;
+  const type = weatherData[key];
+  if (!type) return null;
+  return { cell, type };
+}
+
+document.getElementById('weatherPopupOverlay').addEventListener('click', e => {
+  if (e.target.id === 'weatherPopupOverlay') closeWeatherPopup();
 });
 
 function showToast(msg) {
@@ -2328,15 +2529,6 @@ function attemptPlacement(role, day, slotNum, cellEl) {
   //  CONCRETER SPECIAL RULES
   // ============================
   if (role === 'concreter') {
-    // First concreter placement must start in morning
-    if (gameState.concreteDay === null && slotNum !== 0) {
-      showFeedback(role,
-        "I need to start in the morning! Concrete work takes a full day — I need all 3 slots on the same day.",
-        "Drop me on a morning (7AM-11AM) slot to start the day."
-      );
-      return false;
-    }
-
     // Must stay on the same day once started
     if (gameState.concreteDay !== null && day !== gameState.concreteDay) {
       showFeedback(role,
@@ -2464,6 +2656,7 @@ function attemptPlacement(role, day, slotNum, cellEl) {
 
     updateAllProgress();
     checkCompletion();
+    lastPlacementAt = Date.now();
     return true;
   }
 
@@ -2553,6 +2746,7 @@ function attemptPlacement(role, day, slotNum, cellEl) {
   showToast(`${workers[role].name} assigned to ${day} ${slotLabels[slotNum]}!`);
   maybeFinishOnboarding(role, day, slotNum);
   checkCompletion();
+  lastPlacementAt = Date.now();
   return true;
 }
 
@@ -2701,6 +2895,7 @@ let ghostEl = null;
 let touchDragging = false;
 let touchRole = null;
 let touchSourceCell = null;
+let lastPlacementAt = 0;
 let dragOffset = { x: 0, y: 0 };
 let idleTimer = null;
 let idleActive = false;
@@ -3010,18 +3205,29 @@ function ensureOnboardingBackdrop() {
     el = document.createElement('div');
     el.id = 'onboardingBackdrop';
     el.className = 'onboarding-backdrop';
+    // Add click handler to exit onboarding when clicking the backdrop
+    el.addEventListener('click', function(e) {
+      if (onboarding.step > 0) {
+        finishOnboarding();
+      }
+    });
     document.body.appendChild(el);
   }
   return el;
 }
 
 function showOnboardingBackdrop() {
-  ensureOnboardingBackdrop().classList.add('show');
+  const backdrop = ensureOnboardingBackdrop();
+  backdrop.classList.add('show');
+  backdrop.style.pointerEvents = 'auto';
 }
 
 function hideOnboardingBackdrop() {
   const el = document.getElementById('onboardingBackdrop');
-  if (el) el.classList.remove('show');
+  if (el) {
+    el.classList.remove('show');
+    el.style.pointerEvents = 'none';
+  }
 }
 
 function ensureOnboardingFocusRing() {
@@ -3214,6 +3420,8 @@ function finishOnboarding() {
   hideOnboardingBackdrop();
   hideOnboardingFocusRing();
   stopOnboardingFocusTracking();
+  // Start idle animation after onboarding is complete
+  startIdleTimer();
 }
 
 // --- Prevent ALL native HTML5 drag (eliminates browser ghost) ---
@@ -3368,6 +3576,49 @@ document.addEventListener('touchend', e => {
   touchSourceCell = null;
 });
 
+document.getElementById('scheduleGrid').addEventListener('click', e => {
+  if (!isCoarsePointer()) return;
+  if (Date.now() - lastPlacementAt < 400) return;
+  if (mouseDragging || touchDragging) return;
+  if (e.target.closest('.remove-btn') || e.target.closest('.worker-in-cell')) return;
+
+  const found = weatherTypeFromEventTarget(e.target);
+  if (!found) return;
+  const { cell, type } = found;
+  showWeatherPopup(type, cell.dataset.day, parseInt(cell.dataset.slot, 10));
+});
+
+document.getElementById('scheduleGrid').addEventListener('touchend', e => {
+  if (!isCoarsePointer()) return;
+  if (Date.now() - lastPlacementAt < 400) return;
+  if (mouseDragging || touchDragging) return;
+  if (e.target.closest('.remove-btn') || e.target.closest('.worker-in-cell')) return;
+
+  const found = weatherTypeFromEventTarget(e.target);
+  if (!found) return;
+  const { cell, type } = found;
+  showWeatherPopup(type, cell.dataset.day, parseInt(cell.dataset.slot, 10));
+}, { passive: true });
+
+document.getElementById('scheduleGrid').addEventListener('mouseover', e => {
+  const icon = e.target.closest('.weather-icon');
+  if (!icon) return;
+  const type = icon.dataset.weather;
+  showWeatherHoverTip(type, e.clientX, e.clientY);
+});
+
+document.getElementById('scheduleGrid').addEventListener('mousemove', e => {
+  const icon = e.target.closest('.weather-icon');
+  if (!icon) return;
+  const type = icon.dataset.weather;
+  showWeatherHoverTip(type, e.clientX, e.clientY);
+});
+
+document.getElementById('scheduleGrid').addEventListener('mouseout', e => {
+  if (!e.target.closest('.weather-icon')) return;
+  hideWeatherHoverTip();
+});
+
 // ============================================================
 //  RESET
 // ============================================================
@@ -3491,7 +3742,7 @@ document.getElementById('helpModal').addEventListener('click', (e) => {
 buildGrid();
 setAvatars();
 updateAllProgress();
-startIdleTimer();
+// startIdleTimer(); // Don't start idle animation until onboarding is complete
 
 let lastDesktop = window.matchMedia('(min-width: 1024px)').matches;
 window.addEventListener('resize', () => {
