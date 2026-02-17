@@ -134,6 +134,33 @@
             font-size: 20px;
             font-weight: bold;
             color: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .tamb-input {
+            width: 70px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            padding: 2px 4px;
+            outline: none;
+            -moz-appearance: textfield;
+        }
+
+        .tamb-input::-webkit-outer-spin-button,
+        .tamb-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .tamb-input:focus {
+            border-color: #007bff;
         }
 
         .dropdown {
@@ -496,7 +523,7 @@
                     <div class="slider-container">
                         <label>Ambient Temperature (T<sub>amb</sub>)</label>
                         <input type="range" id="tamb" min="-20" max="70" value="25" step="0.5">
-                        <div class="slider-value"><span id="tamb-value">25.0</span> °C</div>
+                        <div class="slider-value"><input type="number" id="tamb-value" class="tamb-input" value="25.0" min="-20" max="70" step="0.5"> °C</div>
                     </div>
                 </div>
 
@@ -789,10 +816,36 @@
 
     // ── Tamb slider ──────────────────────────────────────────────────
     const tambSlider = document.getElementById("tamb");
-    const tambDisplay = document.getElementById("tamb-value");
+    const tambInput  = document.getElementById("tamb-value");
+
+    // Slider → input
     tambSlider.addEventListener("input", () => {
-        tambDisplay.textContent = parseFloat(tambSlider.value).toFixed(1);
+        tambInput.value = parseFloat(tambSlider.value).toFixed(1);
         update();
+    });
+
+    // Input → slider (on every keystroke / change)
+    tambInput.addEventListener("input", () => {
+        let val = parseFloat(tambInput.value);
+        if (isNaN(val)) return;
+        val = clamp(val, -20, 70);
+        tambSlider.value = val;
+        update();
+    });
+
+    // Clamp on blur so the displayed value stays in range
+    tambInput.addEventListener("blur", () => {
+        let val = parseFloat(tambInput.value);
+        if (isNaN(val)) val = 25;
+        val = clamp(val, -20, 70);
+        tambInput.value = val.toFixed(1);
+        tambSlider.value = val;
+        update();
+    });
+
+    // Enter key applies and blurs
+    tambInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); tambInput.blur(); }
     });
 
     // ── Refrigerant selector ─────────────────────────────────────────
@@ -996,7 +1049,7 @@
             statusEl.className = "status-banner valid";
             statusEl.innerHTML = "✅ Valid Configuration: " + cfg.name;
 
-            const Tamb = parseFloat(tambSlider.value);
+            const Tamb = parseFloat(tambInput.value) || parseFloat(tambSlider.value);
             const ref  = document.getElementById("refrigerant").value;
             const out  = compute(Tamb, ref);
             render(out);
