@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TU-100 Refrigeration Trainer Emulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #1a1a2e;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .rmit-logo {
+            color: #e63946;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 20px;
+            padding: 20px;
+            min-height: 700px;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+        }
+
+        .control-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #495057;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .mode-btn.active.cooling {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .mode-btn.active.heating {
+            background: #e63946;
+            color: white;
+            border-color: #e63946;
+        }
+
+        .slider-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .slider-value {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .dropdown {
+            margin-bottom: 15px;
+        }
+
+        .dropdown label {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .valve-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .valve-toggle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .valve-toggle:hover {
+            border-color: #007bff;
+        }
+
+        .valve-toggle.on {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .valve-toggle.off {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .valve-toggle.ignored {
+            opacity: 0.6;
+        }
+
+        .valve-label {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .valve-desc {
+            font-size: 9px;
+            opacity: 0.85;
+            text-align: center;
+        }
+
+        .valve-state {
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* Schematic Area */
+        .schematic-area {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-banner {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .status-banner.valid {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .status-banner.invalid {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .system-diagram {
+            position: relative;
+            flex: 1;
+            min-height: 550px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 2px solid #dee2e6;
+            overflow: hidden;
+        }
+
+        /* SVG schematic */
+        .system-diagram svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Instrumentation Panel */
+        .instrumentation {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        .inst-section {
+            margin-bottom: 20px;
+        }
+
+        .inst-section h3 {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #495057;
+            text-transform: uppercase;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+
+        .gauge {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .gauge-visual {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 8px;
+            position: relative;
+            border-radius: 50%;
+            border: 5px solid #495057;
+            background: white;
+            overflow: hidden;
+        }
+
+        .gauge-visual.red { border-color: #dc3545; }
+        .gauge-visual.blue { border-color: #007bff; }
+
+        .gauge-needle {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            width: 3px;
+            height: 36px;
+            background: #212529;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(-90deg);
+            transition: transform 0.5s ease;
+        }
+
+        .gauge-center {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #495057;
+            transform: translate(-50%, 50%);
+        }
+
+        .gauge-label {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 3px;
+            color: #495057;
+        }
+
+        .gauge-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #212529;
+        }
+
+        .gauge-unit {
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        .temp-reading {
+            display: flex;
+            align-items: center;
+            padding: 7px 8px;
+            margin-bottom: 6px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid #dee2e6;
+        }
+
+        .temp-icon {
+            width: 28px;
+            height: 28px;
+            background: #17a2b8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .temp-icon.air {
+            background: #6c757d;
+        }
+
+        .temp-info {
+            flex: 1;
+        }
+
+        .temp-label {
+            font-size: 10px;
+            color: #6c757d;
+            margin-bottom: 1px;
+        }
+
+        .temp-value {
+            font-size: 13px;
+            font-weight: bold;
+            color: #212529;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .airflow-reading {
+            display: flex;
+            align-items: center;
+            padding: 7px 8px;
+            margin-bottom: 6px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid #dee2e6;
+        }
+
+        .airflow-icon {
+            width: 28px;
+            height: 28px;
+            background: #6f42c1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .legend {
+            margin-top: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid #dee2e6;
+        }
+
+        .legend-title {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #495057;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            margin-right: 6px;
+        }
+
+        .config-hint {
+            margin-top: 10px;
+            font-size: 11px;
+            color: #6c757d;
+            line-height: 1.4;
+            padding: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .control-panel, .instrumentation {
+                max-width: 600px;
+                margin: 0 auto;
+                max-height: none;
+            }
+
+            .system-diagram {
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>TU-100 Refrigeration Trainer Emulator</h1>
+            <div class="rmit-logo">RMIT</div>
+        </div>
+
+        <div class="main-content">
+            <!-- Left Panel: Controls -->
+            <div class="control-panel">
+                <div class="control-section">
+                    <h3>System Configuration</h3>
+
+                    <div class="dropdown">
+                        <label>Refrigerant</label>
+                        <select id="refrigerant">
+                            <option value="R134a">R134a</option>
+                            <option value="R290">R290 (Propane)</option>
+                            <option value="R32">R32</option>
+                            <option value="R454C">R454C (Blend)</option>
+                        </select>
+                    </div>
+
+                    <div class="dropdown">
+                        <label>Operating Mode</label>
+                        <div class="mode-toggle">
+                            <button class="mode-btn active cooling" data-mode="cooling">COOLING</button>
+                            <button class="mode-btn" data-mode="heating">HEATING</button>
+                        </div>
+                    </div>
+
+                    <div class="slider-container">
+                        <label>Ambient Temperature (T<sub>amb</sub>)</label>
+                        <input type="range" id="tamb" min="-20" max="70" value="25" step="0.5">
+                        <div class="slider-value"><span id="tamb-value">25.0</span> °C</div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Valve Configuration</h3>
+                    <div class="valve-grid" id="valve-grid">
+                        <!-- Valves built by JS -->
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-title">Quick Guide</div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #28a745;"></div>
+                        <span>Valve Open (ON)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #dc3545;"></div>
+                        <span>Valve Closed (OFF)</span>
+                    </div>
+                    <div class="legend-item" style="margin-top: 6px;">
+                        <div class="legend-color" style="background: #dc3545; border: 2px solid #495057;"></div>
+                        <span>High Pressure Gauge</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #007bff; border: 2px solid #495057;"></div>
+                        <span>Low Pressure Gauge</span>
+                    </div>
+                </div>
+
+                <div class="config-hint" id="config-hint">
+                    Set valves to one of the 8 valid configurations to run the emulation. AXV is shown but not emulated.
+                </div>
+            </div>
+
+            <!-- Center: Schematic -->
+            <div class="schematic-area">
+                <div class="status-banner invalid" id="status">
+                    ⚠️ Invalid Configuration – Set valves to match a valid operating mode
+                </div>
+
+                <div class="system-diagram" id="diagram">
+                    <!-- SVG schematic injected by JS -->
+                </div>
+            </div>
+
+            <!-- Right Panel: Instrumentation -->
+            <div class="instrumentation">
+                <div class="inst-section">
+                    <h3>Pressure Gauges</h3>
+
+                    <div class="gauge">
+                        <div class="gauge-visual red">
+                            <div class="gauge-needle" id="needle-pdis"></div>
+                            <div class="gauge-center"></div>
+                        </div>
+                        <div class="gauge-label">Condenser Pressure (P<sub>dis</sub>)</div>
+                        <div class="gauge-value" id="val-pdis">---<span class="gauge-unit"> kPa</span></div>
+                    </div>
+
+                    <div class="gauge">
+                        <div class="gauge-visual red">
+                            <div class="gauge-needle" id="needle-pevap"></div>
+                            <div class="gauge-center"></div>
+                        </div>
+                        <div class="gauge-label">Evaporator Pressure (P<sub>evap</sub>)</div>
+                        <div class="gauge-value" id="val-pevap">---<span class="gauge-unit"> kPa</span></div>
+                    </div>
+
+                    <div class="gauge">
+                        <div class="gauge-visual blue">
+                            <div class="gauge-needle" id="needle-psuc"></div>
+                            <div class="gauge-center"></div>
+                        </div>
+                        <div class="gauge-label">Suction Pressure (P<sub>suc</sub>)</div>
+                        <div class="gauge-value" id="val-psuc">---<span class="gauge-unit"> kPa</span></div>
+                    </div>
+                </div>
+
+                <div class="inst-section">
+                    <h3>Temperature Clamps</h3>
+
+                    <div class="temp-reading">
+                        <div class="temp-icon">T</div>
+                        <div class="temp-info">
+                            <div class="temp-label">Discharge (T<sub>dis</sub>)</div>
+                            <div class="temp-value" id="val-tdis">--- °C</div>
+                        </div>
+                    </div>
+
+                    <div class="temp-reading">
+                        <div class="temp-icon">T</div>
+                        <div class="temp-info">
+                            <div class="temp-label" id="lbl-tco">Condenser Outlet (T<sub>co</sub>)</div>
+                            <div class="temp-value" id="val-tco">--- °C</div>
+                        </div>
+                    </div>
+
+                    <div class="temp-reading">
+                        <div class="temp-icon">T</div>
+                        <div class="temp-info">
+                            <div class="temp-label">Liquid Receiver Outlet (T<sub>lro</sub>)</div>
+                            <div class="temp-value" id="val-tlro">--- °C</div>
+                        </div>
+                    </div>
+
+                    <div class="temp-reading">
+                        <div class="temp-icon">T</div>
+                        <div class="temp-info">
+                            <div class="temp-label" id="lbl-teo">Evaporator Outlet (T<sub>eo</sub>)</div>
+                            <div class="temp-value" id="val-teo">--- °C</div>
+                        </div>
+                    </div>
+
+                    <div class="temp-reading">
+                        <div class="temp-icon">T</div>
+                        <div class="temp-info">
+                            <div class="temp-label">Accumulator Outlet (T<sub>acco</sub>)</div>
+                            <div class="temp-value" id="val-tacco">--- °C</div>
+                        </div>
+                    </div>
+
+                    <div class="temp-reading">
+                        <div class="temp-icon">T</div>
+                        <div class="temp-info">
+                            <div class="temp-label">Suction (T<sub>suc</sub>)</div>
+                            <div class="temp-value" id="val-tsuc">--- °C</div>
+                        </div>
+                    </div>
+
+                    <div class="temp-reading">
+                        <div class="temp-icon">T</div>
+                        <div class="temp-info">
+                            <div class="temp-label">Ambient Air (T<sub>amb</sub>)</div>
+                            <div class="temp-value" id="val-tamb-out">--- °C</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="inst-section">
+                    <h3>Air Temperatures &amp; Flow</h3>
+
+                    <div class="temp-reading">
+                        <div class="temp-icon air">A</div>
+                        <div class="temp-info">
+                            <div class="temp-label" id="lbl-tcondairo">Condenser Air Outlet (T<sub>condairo</sub>)</div>
+                            <div class="temp-value" id="val-tcondairo">--- °C</div>
+                        </div>
+                    </div>
+
+                    <div class="temp-reading">
+                        <div class="temp-icon air">A</div>
+                        <div class="temp-info">
+                            <div class="temp-label" id="lbl-tevapairo">Evaporator Air Outlet (T<sub>evapairo</sub>)</div>
+                            <div class="temp-value" id="val-tevapairo">--- °C</div>
+                        </div>
+                    </div>
+
+                    <div class="airflow-reading">
+                        <div class="airflow-icon">F</div>
+                        <div class="temp-info">
+                            <div class="temp-label" id="lbl-airA">Condenser Airflow</div>
+                            <div class="temp-value" id="val-airA">--- L/min</div>
+                        </div>
+                    </div>
+
+                    <div class="airflow-reading">
+                        <div class="airflow-icon">F</div>
+                        <div class="temp-info">
+                            <div class="temp-label" id="lbl-airB">Evaporator Airflow</div>
+                            <div class="temp-value" id="val-airB">--- L/min</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* ================================================================
+       TU-100 Refrigeration Trainer Emulator
+       Merged: mockup UI layout + full polynomial engine from MTA1 logic
+       ================================================================ */
+
+    // ── Constants (from MTA1 logic doc) ──────────────────────────────
+    const C = {
+        condenserTD:   15,   // K
+        evaporatorTD:  15,   // K
+        evaporatorSH:   5,   // K
+        suctionSH:     15,   // K
+        dischargeSH:   30,   // K
+        condenserSC:    5,   // K
+        condenserSplit: 5,   // K
+        evaporatorSplit:5,   // K
+        psucOffset:     5,   // K  (tentative)
+        tlroDrop:       0.1, // K  (tentative)
+        taccoRise:      1,   // K  (tentative)
+        airflowA:       6,   // L/min (tentative)
+        airflowB:       6    // L/min (tentative)
+    };
+
+    // ── Refrigerant polynomial models (gauge kPa, valid −20 to 70 °C) ─
+    const REFRIGERANTS = {
+        R134a: {
+            pdew: t => 2.087e-06*t**4 + 0.00089072*t**3 + 0.14797*t**2 + 10.616*t + 191.46,
+            tbubbleFromPdew: null   // Tbubble = Tdew for pure refrigerants
+        },
+        R290: {
+            pdew: t => 1.4626e-06*t**4 + 0.00074114*t**3 + 0.16485*t**2 + 14.499*t + 373.11,
+            tbubbleFromPdew: null
+        },
+        R32: {
+            pdew: t => 7.1215e-06*t**4 + 0.0014878*t**3 + 0.31693*t**2 + 26.107*t + 711.64,
+            tbubbleFromPdew: null
+        },
+        R454C: {
+            pdew: t => 6.7169e-06*t**4 + 0.00092632*t**3 + 0.19689*t**2 + 15.337*t + 352.44,
+            tbubbleFromPdew: p => -1.635e-12*p**4 + 1.383e-08*p**3 - 4.571e-05*p**2 + 0.0909*p - 35.07
+        }
+    };
+
+    // ── Valve definitions ────────────────────────────────────────────
+    const VALVE_DEFS = [
+        { key:"HP1", desc:"High pressure valve 1" },
+        { key:"HP2", desc:"High pressure valve 2" },
+        { key:"HP3", desc:"High pressure valve 3" },
+        { key:"HP4", desc:"High pressure valve 4" },
+        { key:"LRI", desc:"Liquid receiver inlet" },
+        { key:"LRK", desc:"Liquid receiver king valve" },
+        { key:"LRB", desc:"Liquid receiver bypass" },
+        { key:"TXV", desc:"Thermostatic expansion valve" },
+        { key:"CTV", desc:"Capillary tube valve" },
+        { key:"ACI", desc:"Accumulator inlet" },
+        { key:"ACO", desc:"Accumulator outlet" },
+        { key:"ACB", desc:"Accumulator bypass" },
+        { key:"AXV", desc:"Auto expansion valve (not emulated)", ignore:true }
+    ];
+
+    // ── 8 valid configurations (truth table from MTA1 doc) ───────────
+    const VALID_CONFIGS = [
+        { name:"Cooling — TXV with LR and AC",        mode:"cooling", valves:{HP1:1,HP2:0,HP3:0,HP4:1,LRI:1,LRK:1,LRB:0,TXV:1,CTV:0,ACI:1,ACO:1,ACB:0} },
+        { name:"Heating — TXV with LR and AC",        mode:"heating", valves:{HP1:0,HP2:1,HP3:1,HP4:0,LRI:1,LRK:1,LRB:0,TXV:1,CTV:0,ACI:1,ACO:1,ACB:0} },
+        { name:"Cooling — CTV with AC (no LR)",       mode:"cooling", valves:{HP1:1,HP2:0,HP3:0,HP4:1,LRI:0,LRK:0,LRB:1,TXV:0,CTV:1,ACI:1,ACO:1,ACB:0} },
+        { name:"Heating — CTV with AC (no LR)",       mode:"heating", valves:{HP1:0,HP2:1,HP3:1,HP4:0,LRI:0,LRK:0,LRB:1,TXV:0,CTV:1,ACI:1,ACO:1,ACB:0} },
+        { name:"Cooling — TXV with LR (no AC)",       mode:"cooling", valves:{HP1:1,HP2:0,HP3:0,HP4:1,LRI:1,LRK:1,LRB:0,TXV:1,CTV:0,ACI:0,ACO:0,ACB:1} },
+        { name:"Heating — TXV with LR (no AC)",       mode:"heating", valves:{HP1:0,HP2:1,HP3:1,HP4:0,LRI:1,LRK:1,LRB:0,TXV:1,CTV:0,ACI:0,ACO:0,ACB:1} },
+        { name:"Cooling — CTV (no LR, no AC)",        mode:"cooling", valves:{HP1:1,HP2:0,HP3:0,HP4:1,LRI:0,LRK:0,LRB:1,TXV:0,CTV:1,ACI:0,ACO:0,ACB:1} },
+        { name:"Heating — CTV (no LR, no AC)",        mode:"heating", valves:{HP1:0,HP2:1,HP3:1,HP4:0,LRI:0,LRK:0,LRB:1,TXV:0,CTV:1,ACI:0,ACO:0,ACB:1} }
+    ];
+
+    // ── State ────────────────────────────────────────────────────────
+    const valveState = {};
+    VALVE_DEFS.forEach(v => valveState[v.key] = 0);
+
+    let currentMode = "cooling";
+
+    // ── Build valve UI ───────────────────────────────────────────────
+    const valveGrid = document.getElementById("valve-grid");
+
+    VALVE_DEFS.forEach(v => {
+        const el = document.createElement("div");
+        el.className = "valve-toggle off" + (v.ignore ? " ignored" : "");
+        el.dataset.valve = v.key;
+        el.innerHTML = `
+            <div class="valve-label">${v.key}</div>
+            <div class="valve-desc">${v.desc}</div>
+            <div class="valve-state">OFF</div>
+        `;
+        el.addEventListener("click", () => {
+            valveState[v.key] = valveState[v.key] ? 0 : 1;
+            el.className = "valve-toggle " + (valveState[v.key] ? "on" : "off") + (v.ignore ? " ignored" : "");
+            el.querySelector(".valve-state").textContent = valveState[v.key] ? "ON" : "OFF";
+            update();
+        });
+        valveGrid.appendChild(el);
+    });
+
+    // ── Mode toggle ──────────────────────────────────────────────────
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".mode-btn").forEach(b => {
+                b.classList.remove("active", "cooling", "heating");
+            });
+            currentMode = btn.dataset.mode;
+            btn.classList.add("active", currentMode);
+            updateModeLabels();
+            update();
+        });
+    });
+
+    // ── Tamb slider ──────────────────────────────────────────────────
+    const tambSlider = document.getElementById("tamb");
+    const tambDisplay = document.getElementById("tamb-value");
+    tambSlider.addEventListener("input", () => {
+        tambDisplay.textContent = parseFloat(tambSlider.value).toFixed(1);
+        update();
+    });
+
+    // ── Refrigerant selector ─────────────────────────────────────────
+    document.getElementById("refrigerant").addEventListener("change", update);
+
+    // ── Helpers ──────────────────────────────────────────────────────
+    function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+    function fmt(x, dp) { return x == null || isNaN(x) ? "---" : x.toFixed(dp ?? 1); }
+
+    // ── Configuration matcher ────────────────────────────────────────
+    function matchConfig() {
+        for (const cfg of VALID_CONFIGS) {
+            if (cfg.mode !== currentMode) continue;
+            let ok = true;
+            for (const [k, req] of Object.entries(cfg.valves)) {
+                if ((valveState[k] ?? 0) !== req) { ok = false; break; }
+            }
+            if (ok) return cfg;
+        }
+        return null;
+    }
+
+    // ── Calculation engine (MTA1 formulae) ───────────────────────────
+    function compute(Tamb, refrigerantKey) {
+        const r = REFRIGERANTS[refrigerantKey];
+        if (!r) return null;
+
+        const T = clamp(Tamb, -20, 70);
+
+        // Saturation temperatures
+        const Tcond = T + C.condenserTD;
+        const Tevap = T - C.evaporatorTD;
+
+        // Pressures via polynomial (clamp inputs to valid range)
+        const Pdis  = r.pdew(clamp(Tcond, -20, 70));
+        const Pevap = r.pdew(clamp(Tevap, -20, 70));
+        const Psuc  = r.pdew(clamp(Tevap - C.psucOffset, -20, 70));
+
+        // Tbubble (matters for R454C glide; equals Tdew for pure refrigerants)
+        let Tbubble = Tcond;
+        if (r.tbubbleFromPdew) {
+            const pdewAtTcond = r.pdew(clamp(Tcond, -20, 70));
+            Tbubble = r.tbubbleFromPdew(pdewAtTcond);
+        }
+
+        // Temperatures
+        const Tdis  = Tcond + C.dischargeSH;
+        const Tco   = Tbubble - C.condenserSC;
+        const Tlro  = Tco - C.tlroDrop;
+        const Teo   = Tevap + C.evaporatorSH;
+        const Tacco = Teo + C.taccoRise;
+        const Tsuc  = (Tevap - C.psucOffset) + C.suctionSH;
+
+        // Air outlet temperatures
+        const Tcondairo = T + C.condenserSplit;
+        const Tevapairo = T - C.evaporatorSplit;
+
+        return { Tamb: T, Pdis, Pevap, Psuc, Tdis, Tco, Tlro, Teo, Tacco, Tsuc, Tcondairo, Tevapairo };
+    }
+
+    // ── Gauge needle (180° sweep, −90 to +90) ────────────────────────
+    function setNeedle(id, kPa, min, max) {
+        const el = document.getElementById(id);
+        if (kPa == null || isNaN(kPa)) {
+            el.style.transform = "translateX(-50%) rotate(-90deg)";
+            return;
+        }
+        const t = (clamp(kPa, min, max) - min) / (max - min);
+        const angle = -90 + t * 180;
+        el.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+    }
+
+    // ── Label swapping for heating mode ──────────────────────────────
+    function updateModeLabels() {
+        const hx1 = document.getElementById("heat-ex-1-label");
+        const hx2 = document.getElementById("heat-ex-2-label");
+
+        if (currentMode === "cooling") {
+            if (hx1) hx1.textContent = "CONDENSER";
+            if (hx2) hx2.textContent = "EVAPORATOR";
+            document.getElementById("lbl-tco").innerHTML = 'Condenser Outlet (T<sub>co</sub>)';
+            document.getElementById("lbl-teo").innerHTML = 'Evaporator Outlet (T<sub>eo</sub>)';
+            document.getElementById("lbl-tcondairo").innerHTML = 'Condenser Air Outlet (T<sub>condairo</sub>)';
+            document.getElementById("lbl-tevapairo").innerHTML = 'Evaporator Air Outlet (T<sub>evapairo</sub>)';
+            document.getElementById("lbl-airA").textContent = "Condenser Airflow";
+            document.getElementById("lbl-airB").textContent = "Evaporator Airflow";
+        } else {
+            if (hx1) hx1.textContent = "EVAPORATOR";
+            if (hx2) hx2.textContent = "CONDENSER";
+            document.getElementById("lbl-tco").innerHTML = 'Evaporator Outlet (T<sub>co</sub>)';
+            document.getElementById("lbl-teo").innerHTML = 'Condenser Outlet (T<sub>eo</sub>)';
+            document.getElementById("lbl-tcondairo").innerHTML = 'Evaporator Air Outlet (T<sub>condairo</sub>)';
+            document.getElementById("lbl-tevapairo").innerHTML = 'Condenser Air Outlet (T<sub>evapairo</sub>)';
+            document.getElementById("lbl-airA").textContent = "Evaporator Airflow";
+            document.getElementById("lbl-airB").textContent = "Condenser Airflow";
+        }
+    }
+
+    // ── Render outputs ───────────────────────────────────────────────
+    function render(out) {
+        const dash = "--- ";
+
+        // Pressures
+        document.getElementById("val-pdis").innerHTML  = (out ? fmt(out.Pdis, 0) : "---") + '<span class="gauge-unit"> kPa</span>';
+        document.getElementById("val-pevap").innerHTML = (out ? fmt(out.Pevap, 0) : "---") + '<span class="gauge-unit"> kPa</span>';
+        document.getElementById("val-psuc").innerHTML  = (out ? fmt(out.Psuc, 0) : "---") + '<span class="gauge-unit"> kPa</span>';
+
+        // Gauge needles
+        setNeedle("needle-pdis",  out?.Pdis,  0, 4000);
+        setNeedle("needle-pevap", out?.Pevap, 0, 3000);
+        setNeedle("needle-psuc",  out?.Psuc,  0, 3000);
+
+        // Temperatures
+        document.getElementById("val-tdis").textContent      = out ? fmt(out.Tdis) + " °C" : "--- °C";
+        document.getElementById("val-tco").textContent       = out ? fmt(out.Tco) + " °C" : "--- °C";
+        document.getElementById("val-tlro").textContent      = out ? fmt(out.Tlro) + " °C" : "--- °C";
+        document.getElementById("val-teo").textContent       = out ? fmt(out.Teo) + " °C" : "--- °C";
+        document.getElementById("val-tacco").textContent     = out ? fmt(out.Tacco) + " °C" : "--- °C";
+        document.getElementById("val-tsuc").textContent      = out ? fmt(out.Tsuc) + " °C" : "--- °C";
+        document.getElementById("val-tamb-out").textContent  = out ? fmt(out.Tamb) + " °C" : "--- °C";
+
+        // Air temps and flows
+        document.getElementById("val-tcondairo").textContent = out ? fmt(out.Tcondairo) + " °C" : "--- °C";
+        document.getElementById("val-tevapairo").textContent = out ? fmt(out.Tevapairo) + " °C" : "--- °C";
+        document.getElementById("val-airA").textContent      = out ? C.airflowA + " L/min" : "--- L/min";
+        document.getElementById("val-airB").textContent      = out ? C.airflowB + " L/min" : "--- L/min";
+    }
+
+    // ── Build SVG schematic ──────────────────────────────────────────
+    function buildSchematic() {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 700 550");
+        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+        svg.innerHTML = `
+            <defs>
+                <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                    <path d="M0,0 L8,3 L0,6 Z" fill="#6c757d" />
+                </marker>
+            </defs>
+
+            <!-- Pipes (drawn first, behind components) -->
+            <!-- Compressor discharge to HX1 -->
+            <polyline points="185,420 185,100 280,100" fill="none" stroke="#dc3545" stroke-width="3" marker-end="url(#arrow)" opacity="0.5" />
+            <!-- HX1 out to Liquid Receiver -->
+            <polyline points="420,100 500,100 500,210" fill="none" stroke="#ff8c00" stroke-width="3" marker-end="url(#arrow)" opacity="0.5" />
+            <!-- Liquid Receiver to Expansion Device -->
+            <polyline points="500,290 500,340 420,340" fill="none" stroke="#ffc107" stroke-width="3" marker-end="url(#arrow)" opacity="0.5" />
+            <!-- Expansion Device to HX2 -->
+            <polyline points="280,340 220,340 220,370" fill="none" stroke="#17a2b8" stroke-width="3" marker-end="url(#arrow)" opacity="0.5" />
+            <!-- HX2 out to Accumulator -->
+            <polyline points="220,450 220,480 350,480" fill="none" stroke="#007bff" stroke-width="3" marker-end="url(#arrow)" opacity="0.5" />
+            <!-- Accumulator to Compressor -->
+            <polyline points="490,480 560,480 560,420 185,420" fill="none" stroke="#6f42c1" stroke-width="3" marker-end="url(#arrow)" opacity="0.5" />
+
+            <!-- HX1 (Condenser / Evaporator in heating) -->
+            <rect x="280" y="60" width="140" height="80" rx="8" fill="#6c757d" stroke="#495057" stroke-width="3" />
+            <text id="heat-ex-1-label" x="350" y="97" text-anchor="middle" fill="white" font-size="13" font-weight="600">CONDENSER</text>
+            <text x="350" y="115" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10">Fin-tube HX</text>
+
+            <!-- Expansion device zone -->
+            <rect x="280" y="310" width="140" height="60" rx="8" fill="#e9ecef" stroke="#ced4da" stroke-width="2" />
+            <text x="350" y="338" text-anchor="middle" fill="#495057" font-size="11" font-weight="600">EXPANSION</text>
+            <text x="350" y="354" text-anchor="middle" fill="#6c757d" font-size="10">TXV / CTV</text>
+
+            <!-- HX2 (Evaporator / Condenser in heating) -->
+            <rect x="140" y="370" width="160" height="80" rx="8" fill="#6c757d" stroke="#495057" stroke-width="3" />
+            <text id="heat-ex-2-label" x="220" y="407" text-anchor="middle" fill="white" font-size="13" font-weight="600">EVAPORATOR</text>
+            <text x="220" y="425" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10">Fin-tube HX</text>
+
+            <!-- Liquid Receiver -->
+            <rect x="440" y="210" width="120" height="80" rx="8" fill="#17a2b8" stroke="#138496" stroke-width="3" />
+            <text x="500" y="247" text-anchor="middle" fill="white" font-size="11" font-weight="600">LIQUID</text>
+            <text x="500" y="263" text-anchor="middle" fill="white" font-size="11" font-weight="600">RECEIVER</text>
+
+            <!-- Accumulator -->
+            <rect x="350" y="455" width="140" height="50" rx="8" fill="#17a2b8" stroke="#138496" stroke-width="3" />
+            <text x="420" y="485" text-anchor="middle" fill="white" font-size="11" font-weight="600">ACCUMULATOR</text>
+
+            <!-- Compressor -->
+            <circle cx="120" cy="420" r="50" fill="#495057" stroke="#343a40" stroke-width="4" />
+            <text x="120" y="416" text-anchor="middle" fill="white" font-size="12" font-weight="600">COMP-</text>
+            <text x="120" y="432" text-anchor="middle" fill="white" font-size="12" font-weight="600">RESSOR</text>
+
+            <!-- Labels for pipe sections -->
+            <text x="170" y="260" fill="#dc3545" font-size="9" font-weight="600" transform="rotate(-90,170,260)">DISCHARGE</text>
+            <text x="460" y="170" fill="#ff8c00" font-size="9" font-weight="600">LIQUID LINE</text>
+            <text x="245" y="330" fill="#17a2b8" font-size="9" font-weight="600">TO EVAP</text>
+            <text x="550" y="465" fill="#6f42c1" font-size="9" font-weight="600">SUCTION</text>
+        `;
+
+        document.getElementById("diagram").appendChild(svg);
+    }
+
+    // ── Main update ──────────────────────────────────────────────────
+    function update() {
+        const statusEl = document.getElementById("status");
+        const cfg = matchConfig();
+
+        if (cfg) {
+            statusEl.className = "status-banner valid";
+            statusEl.innerHTML = "✅ Valid Configuration: " + cfg.name;
+
+            const Tamb = parseFloat(tambSlider.value);
+            const ref  = document.getElementById("refrigerant").value;
+            const out  = compute(Tamb, ref);
+            render(out);
+        } else {
+            statusEl.className = "status-banner invalid";
+            statusEl.innerHTML = "⚠️ Invalid Configuration – Adjust valves to match one of the 8 valid operating modes";
+            render(null);
+        }
+    }
+
+    // ── Init ─────────────────────────────────────────────────────────
+    buildSchematic();
+    updateModeLabels();
+    update();
+    </script>
+</body>
+</html>
