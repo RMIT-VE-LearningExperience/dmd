@@ -85,6 +85,7 @@ let selectedCategories = new Set();
 let comparisonCareers = [];
 let videoFilterActive = false;
 let stackIndex = 0;
+let careerHistory = []; // Navigation history stack for back button
 
 // DOM Elements
 const floatingView = document.getElementById('floatingView');
@@ -438,6 +439,21 @@ function animate() {
 }
 
 // Card View Functions
+// Get category color class for a career
+function getCategoryColorClass(career) {
+    const color = getCareerColor(career.name);
+    return color === 'blue' ? 'cat-blue' : 'cat-green';
+}
+
+// Get primary category for a career
+function getPrimaryCategory(career) {
+    if (career.work_style) return career.work_style;
+    if (career.core_skills && career.core_skills.length > 0) {
+        return categorizeSkill(career.core_skills[0]);
+    }
+    return 'Professional';
+}
+
 function createCareerCard(career, matchingLevels = null) {
     const card = document.createElement('div');
     card.className = 'career-card';
@@ -447,6 +463,10 @@ function createCareerCard(career, matchingLevels = null) {
     if (career.video_url) {
         card.classList.add('has-video');
     }
+
+    // Card body (main content area)
+    const body = document.createElement('div');
+    body.className = 'career-card-body';
 
     const header = document.createElement('div');
     header.className = 'career-card-header';
@@ -463,10 +483,6 @@ function createCareerCard(career, matchingLevels = null) {
     header.appendChild(dot);
     header.appendChild(title);
 
-    const salary = document.createElement('div');
-    salary.className = 'career-card-salary';
-    salary.textContent = career.salary_range;
-
     const overview = document.createElement('div');
     overview.className = 'career-card-overview';
     overview.textContent = career.overview;
@@ -480,14 +496,14 @@ function createCareerCard(career, matchingLevels = null) {
         toggleComparison(career, card, compareBtn);
     };
 
-    card.appendChild(header);
-    card.appendChild(salary);
-    card.appendChild(overview);
+    body.appendChild(header);
+    body.appendChild(overview);
+    card.appendChild(body);
 
     // Quiz match badge (if quiz results exist)
     if (quizResults && quizResults.scores && quizResults.scores[career.name]) {
         const score = quizResults.scores[career.name];
-        const percentage = Math.round(score); // Score is already 0-100%
+        const percentage = Math.round(score);
         const matchBadge = document.createElement('div');
         matchBadge.className = 'quiz-match-badge';
         matchBadge.textContent = `${percentage}% Match`;
@@ -512,6 +528,19 @@ function createCareerCard(career, matchingLevels = null) {
 
         card.appendChild(levelNote);
     }
+
+    // Salary bar
+    const salary = document.createElement('div');
+    salary.className = 'career-card-salary';
+    salary.textContent = career.salary_range;
+    card.appendChild(salary);
+
+    // Category strip at bottom
+    const catStrip = document.createElement('div');
+    const catColor = getCategoryColorClass(career);
+    catStrip.className = `career-card-category ${catColor}`;
+    catStrip.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/></svg> <span>${getPrimaryCategory(career)}</span>`;
+    card.appendChild(catStrip);
 
     card.appendChild(compareBtn);
 
@@ -1011,47 +1040,95 @@ function getYouTubeEmbedUrl(url) {
     return null;
 }
 
-// Function to toggle expandable sections
-function toggleSection(header) {
-    const section = header.closest('.expandable-section');
-    if (!section) return;
+// Function to toggle expandable bar
+function toggleExpandBar(bar) {
+    const content = bar.nextElementSibling;
+    if (!content || !content.classList.contains('expand-content')) return;
 
-    const content = section.querySelector('.section-content');
-    header.classList.toggle('active');
+    bar.classList.toggle('active');
     content.classList.toggle('active');
 }
 
-// Function to setup expandable section listeners
+// Function to setup expandable bar listeners
 function setupExpandableSections() {
-    const headers = document.querySelectorAll('.section-header');
-    headers.forEach(header => {
-        header.addEventListener('click', () => toggleSection(header));
-        header.setAttribute('role', 'button');
-        header.setAttribute('tabindex', '0');
-        header.addEventListener('keydown', (e) => {
+    const bars = document.querySelectorAll('.expand-bar');
+    bars.forEach(bar => {
+        bar.addEventListener('click', () => toggleExpandBar(bar));
+        bar.setAttribute('role', 'button');
+        bar.setAttribute('tabindex', '0');
+        bar.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                toggleSection(header);
+                toggleExpandBar(bar);
             }
         });
     });
+
+    // Setup overlay click to close panel
+    const overlay = document.getElementById('infoPanelOverlay');
+    if (overlay) {
+        overlay.addEventListener('click', () => {
+            infoPanel.classList.remove('visible');
+            overlay.classList.remove('visible');
+        });
+    }
 }
 
-// Show Career Info
-function showCareerInfo(career) {
+// Extract work style from career data
+function getWorkStyle(career) {
+    if (career.work_style) return career.work_style;
+    // Derive from first skill category
+    if (career.core_skills && career.core_skills.length > 0) {
+        const cat = categorizeSkill(career.core_skills[0]);
+        return cat;
+    }
+    return 'Professional';
+}
+
+// Update back button visibility and position based on history
+function updateBackButton() {
+    const backBtn = document.getElementById('backBtn');
+    const panel = document.getElementById('infoPanel');
+    if (!backBtn) return;
+
+    if (careerHistory.length > 0) {
+        backBtn.style.display = 'flex';
+        // Position to the left of the actual modal element
+        const rect = panel.getBoundingClientRect();
+        backBtn.style.left = (rect.left - 56) + 'px';
+    } else {
+        backBtn.style.display = 'none';
+    }
+}
+
+// Go back to previous career in history
+function goBackCareer() {
+    if (careerHistory.length === 0) return;
+    const previousCareer = careerHistory.pop();
+    // Pass false to avoid adding back to history
+    populateCareerPanel(previousCareer);
+    updateBackButton();
+}
+
+// Populate career panel with data (shared by showCareerInfo and goBackCareer)
+function populateCareerPanel(career) {
     document.getElementById('careerTitle').textContent = career.name;
-    document.getElementById('careerSalary').textContent = career.salary_range || 'Salary varies';
 
-    // Set header badge - showing "Role" as the badge
-    document.getElementById('headerBadge').textContent = 'Role';
+    // Set salary badge
+    const salaryText = document.getElementById('salaryText');
+    if (salaryText) {
+        salaryText.textContent = career.salary_range || 'Salary varies';
+    }
 
-    // Load and display SVG icon
+    // Set work style badge
+    const workStyleText = document.getElementById('workStyleText');
+    if (workStyleText) {
+        workStyleText.textContent = getWorkStyle(career);
+    }
+
+    // Load the head icon SVG
     const headerIcon = document.getElementById('headerIcon');
-    headerIcon.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M12 14c-6 0-8 3-8 3v7h16v-7c0 0-2-3-8-3z" fill="currentColor"/></svg>';
-
-    // Try to load the role-specific SVG if available
-    // For now, using a default head icon
-    // This can be customized per role if needed
+    headerIcon.innerHTML = '<img src="images/analytical.svg" alt="Career icon">';
 
     // Video iframe with person info
     const videoContainer = document.getElementById('videoContainer');
@@ -1150,9 +1227,12 @@ function showCareerInfo(career) {
     // Related Roles Section
     const relatedRolesContainer = document.getElementById('relatedRoles');
     relatedRolesContainer.innerHTML = '';
+    const pathwayBar = document.getElementById('pathwayBar');
+    const pathwayContent = document.getElementById('pathwayContent');
+
     if (career.related_roles && career.related_roles.length > 0) {
-        const relatedRolesSection = document.getElementById('relatedRolesSection');
-        relatedRolesSection.style.display = 'block';
+        if (pathwayBar) pathwayBar.style.display = 'flex';
+        if (pathwayContent) pathwayContent.style.display = '';
 
         career.related_roles.forEach(roleName => {
             const tag = document.createElement('div');
@@ -1164,7 +1244,13 @@ function showCareerInfo(career) {
             const activateTag = () => {
                 const relatedCareer = careersData.roles.find(c => c.name === roleName);
                 if (relatedCareer) {
-                    showCareerInfo(relatedCareer);
+                    // Push current career to history before navigating
+                    careerHistory.push(career);
+                    populateCareerPanel(relatedCareer);
+                    updateBackButton();
+                    // Scroll content to top
+                    const panelContent = document.querySelector('.panel-content');
+                    if (panelContent) panelContent.scrollTop = 0;
                 }
             };
             tag.addEventListener('click', activateTag);
@@ -1172,26 +1258,32 @@ function showCareerInfo(career) {
             relatedRolesContainer.appendChild(tag);
         });
     } else {
-        document.getElementById('relatedRolesSection').style.display = 'none';
+        if (pathwayBar) pathwayBar.style.display = 'none';
+        if (pathwayContent) pathwayContent.style.display = 'none';
     }
 
-    // Reset expandable sections - collapse all except the first one
-    const headers = document.querySelectorAll('.section-header');
-    headers.forEach((header, index) => {
-        const section = header.closest('.expandable-section');
-        const content = section.querySelector('.section-content');
-
-        // Expand the Overview and Education sections by default
-        if (index <= 1) {
-            header.classList.add('active');
-            content.classList.add('active');
-        } else {
-            header.classList.remove('active');
+    // Reset all expandable bars - collapse all
+    const bars = document.querySelectorAll('.expand-bar');
+    bars.forEach(bar => {
+        bar.classList.remove('active');
+        const content = bar.nextElementSibling;
+        if (content && content.classList.contains('expand-content')) {
             content.classList.remove('active');
         }
     });
 
+    // Show the panel and overlay
     infoPanel.classList.add('visible');
+    const overlay = document.getElementById('infoPanelOverlay');
+    if (overlay) overlay.classList.add('visible');
+}
+
+// Show Career Info (entry point — clears history since this is a fresh open)
+function showCareerInfo(career) {
+    // Clear history when opening a new career from grid/floating view
+    careerHistory = [];
+    updateBackButton();
+    populateCareerPanel(career);
 }
 
 // Filters - FIXED SALARY LOGIC
@@ -1352,11 +1444,36 @@ clearFiltersBtn.addEventListener('click', () => {
 });
 
 // Event Listeners
-closeBtn.addEventListener('click', () => {
+function closeInfoPanel() {
     infoPanel.classList.remove('visible');
+    const overlay = document.getElementById('infoPanelOverlay');
+    if (overlay) overlay.classList.remove('visible');
     if (selectedCareer) {
         selectedCareer.classList.remove('clicked');
         selectedCareer = null;
+    }
+    // Clear history when closing
+    careerHistory = [];
+    updateBackButton();
+}
+
+closeBtn.addEventListener('click', closeInfoPanel);
+
+// Back button - go to previous career
+const backBtn = document.getElementById('backBtn');
+if (backBtn) {
+    backBtn.addEventListener('click', () => {
+        goBackCareer();
+        // Scroll content to top
+        const panelContent = document.querySelector('.panel-content');
+        if (panelContent) panelContent.scrollTop = 0;
+    });
+}
+
+// Close info panel on Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && infoPanel.classList.contains('visible')) {
+        closeInfoPanel();
     }
 });
 
