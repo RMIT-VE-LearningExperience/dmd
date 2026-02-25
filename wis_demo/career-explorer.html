@@ -131,8 +131,14 @@
     <div class="info-panel" id="infoPanel">
         <div class="panel-header">
             <button class="close-btn" id="closeBtn">×</button>
-            <h2 id="careerTitle"></h2>
-            <div class="salary" id="careerSalary"></div>
+            <div class="header-content">
+                <div class="header-icon" id="headerIcon"></div>
+                <div class="header-info">
+                    <h2 id="careerTitle"></h2>
+                    <div class="header-badge" id="headerBadge"></div>
+                </div>
+                <div class="header-salary" id="careerSalary"></div>
+            </div>
         </div>
         <div class="panel-content">
             <div class="video-container" id="videoContainer" style="display: none;"></div>
@@ -142,24 +148,44 @@
                 <p class="overview-text" id="careerOverview"></p>
             </div>
 
-            <div class="section">
-                <div class="section-title">Core Skills</div>
-                <div class="skills-container" id="coreSkills"></div>
+            <div class="expandable-section">
+                <div class="section-header" id="educationHeader">
+                    <div class="section-title">Education</div>
+                    <span class="expand-icon">+</span>
+                </div>
+                <div class="section-content" id="educationContent" style="display: none;">
+                    <ul class="education-list" id="coreEducation"></ul>
+                </div>
             </div>
 
-            <div class="section">
-                <div class="section-title">Core Education</div>
-                <ul class="education-list" id="coreEducation"></ul>
+            <div class="expandable-section">
+                <div class="section-header" id="skillsHeader">
+                    <div class="section-title">Relevant Skills</div>
+                    <span class="expand-icon">+</span>
+                </div>
+                <div class="section-content" id="skillsContent" style="display: none;">
+                    <div class="skills-container" id="coreSkills"></div>
+                </div>
             </div>
 
-            <div class="section">
-                <div class="section-title">Career Levels</div>
-                <div class="levels-container" id="careerLevels"></div>
+            <div class="expandable-section">
+                <div class="section-header" id="progressionHeader">
+                    <div class="section-title">Career Progression</div>
+                    <span class="expand-icon">+</span>
+                </div>
+                <div class="section-content" id="progressionContent" style="display: none;">
+                    <div class="levels-container" id="careerLevels"></div>
+                </div>
             </div>
 
-            <div class="section" id="relatedRolesSection" style="display: none;">
-                <div class="section-title">Related Career Pathways</div>
-                <div class="related-roles-container" id="relatedRoles"></div>
+            <div class="expandable-section" id="relatedRolesSection" style="display: none;">
+                <div class="section-header" id="pathwayHeader">
+                    <div class="section-title">Career Pathway</div>
+                    <span class="expand-icon">+</span>
+                </div>
+                <div class="section-content" id="pathwayContent" style="display: none;">
+                    <div class="related-roles-container" id="relatedRoles"></div>
+                </div>
             </div>
         </div>
     </div>

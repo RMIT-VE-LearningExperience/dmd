@@ -1007,10 +1007,11 @@ body {
 }
 
 .panel-header {
-    background: rgba(26, 54, 93, 0.95);
+    background: linear-gradient(135deg, rgba(26, 54, 93, 0.95) 0%, rgba(45, 85, 130, 0.95) 100%);
     color: white;
-    padding: 24px;
+    padding: 20px;
     position: relative;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .panel-content {
@@ -1251,26 +1252,148 @@ body {
 
 .close-btn {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 32px;
-    height: 32px;
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
     background: rgba(255, 255, 255, 0.2);
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 24px;
     color: white;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(10px);
+    flex-shrink: 0;
+    z-index: 10;
 }
 
 .close-btn:hover {
     background: rgba(255, 255, 255, 0.3);
     transform: rotate(90deg);
+}
+
+/* ===================================
+   NEW PANEL HEADER LAYOUT
+   =================================== */
+.header-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.header-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 8px;
+}
+
+.header-icon svg {
+    width: 100%;
+    height: 100%;
+    filter: invert(1) brightness(1.1);
+}
+
+.header-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.header-info h2 {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: white;
+}
+
+.header-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.header-salary {
+    font-size: 18px;
+    font-weight: 700;
+    color: #e8b830;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* ===================================
+   EXPANDABLE SECTIONS
+   =================================== */
+.expandable-section {
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 0;
+}
+
+.expandable-section:last-child {
+    border-bottom: none;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.section-header:hover {
+    background: rgba(26, 54, 93, 0.02);
+    padding-left: 8px;
+    padding-right: -8px;
+}
+
+.section-header .section-title {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.expand-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4a5568;
+    font-size: 18px;
+    font-weight: 300;
+    transition: transform 0.3s ease;
+}
+
+.section-header.active .expand-icon {
+    transform: rotate(45deg);
+}
+
+.section-content {
+    padding-bottom: 12px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.section-content.active {
+    max-height: 1000px;
+    padding-bottom: 16px;
 }
 
 .panel-content::-webkit-scrollbar {

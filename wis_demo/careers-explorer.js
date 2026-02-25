@@ -1011,10 +1011,47 @@ function getYouTubeEmbedUrl(url) {
     return null;
 }
 
+// Function to toggle expandable sections
+function toggleSection(header) {
+    const section = header.closest('.expandable-section');
+    if (!section) return;
+
+    const content = section.querySelector('.section-content');
+    header.classList.toggle('active');
+    content.classList.toggle('active');
+}
+
+// Function to setup expandable section listeners
+function setupExpandableSections() {
+    const headers = document.querySelectorAll('.section-header');
+    headers.forEach(header => {
+        header.addEventListener('click', () => toggleSection(header));
+        header.setAttribute('role', 'button');
+        header.setAttribute('tabindex', '0');
+        header.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleSection(header);
+            }
+        });
+    });
+}
+
 // Show Career Info
 function showCareerInfo(career) {
     document.getElementById('careerTitle').textContent = career.name;
     document.getElementById('careerSalary').textContent = career.salary_range || 'Salary varies';
+
+    // Set header badge - showing "Role" as the badge
+    document.getElementById('headerBadge').textContent = 'Role';
+
+    // Load and display SVG icon
+    const headerIcon = document.getElementById('headerIcon');
+    headerIcon.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M12 14c-6 0-8 3-8 3v7h16v-7c0 0-2-3-8-3z" fill="currentColor"/></svg>';
+
+    // Try to load the role-specific SVG if available
+    // For now, using a default head icon
+    // This can be customized per role if needed
 
     // Video iframe with person info
     const videoContainer = document.getElementById('videoContainer');
@@ -1137,6 +1174,22 @@ function showCareerInfo(career) {
     } else {
         document.getElementById('relatedRolesSection').style.display = 'none';
     }
+
+    // Reset expandable sections - collapse all except the first one
+    const headers = document.querySelectorAll('.section-header');
+    headers.forEach((header, index) => {
+        const section = header.closest('.expandable-section');
+        const content = section.querySelector('.section-content');
+
+        // Expand the Overview and Education sections by default
+        if (index <= 1) {
+            header.classList.add('active');
+            content.classList.add('active');
+        } else {
+            header.classList.remove('active');
+            content.classList.remove('active');
+        }
+    });
 
     infoPanel.classList.add('visible');
 }
@@ -1425,6 +1478,10 @@ async function initialize() {
     loadQuizResultsFromURL(); // Now checks URL params first, then localStorage
     filteredCareers = careersData.roles;
     renderCareerCards();
+
+    // Initialize expandable sections
+    setupExpandableSections();
+
     console.log('✅ INITIALIZATION COMPLETE');
 }
 
