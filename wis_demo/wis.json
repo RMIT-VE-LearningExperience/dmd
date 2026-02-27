@@ -119,7 +119,7 @@
         {
           "title": "Contract Administrator",
           "summary": "Manages contract documentation, RFIs, variations and progress claims for specific projects.",
-          "typical_experience": "1ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ3 years in an assistant CA or project admin role.",
+          "typical_experience": "1ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ3 years in an assistant CA or project admin role.",
           "progresses_to": [
             "Senior Contract Administrator"
           ],
@@ -168,6 +168,10 @@
       "name": "Quantity Surveyor",
       "salary_range": "$70,000 - $140,000",
       "overview": "Quantity surveyors are cost experts who plan, manage and report on construction costs from early design through to project completion.",
+      "work_style": "Analytical-Formal",
+      "video_url": "",
+      "person_name": "",
+      "person_bio": "",
       "core_skills": [
         "Cost planning",
         "Analytical thinking",
@@ -182,7 +186,11 @@
         "Bachelor of Construction Management",
         "Graduate Diploma of Construction Management"
       ],
-      "work_style": "Analytical-Formal",
+      "related_roles": [
+        "Building Estimator",
+        "Contract Administrator",
+        "Project Manager"
+      ],
       "levels": [
         {
           "title": "Graduate Quantity Surveyor",
@@ -199,7 +207,7 @@
         {
           "title": "Quantity Surveyor",
           "summary": "Prepares detailed cost plans, bills of quantities and monitors project costs during construction.",
-          "typical_experience": "1ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ3 years in a QS or estimating role.",
+          "typical_experience": "3 years in a QS or estimating role.",
           "progresses_to": [
             "Senior Quantity Surveyor"
           ],
@@ -234,11 +242,6 @@
             "Construction Manager"
           ]
         }
-      ],
-      "related_roles": [
-        "Building Estimator",
-        "Contract Administrator",
-        "Project Manager"
       ]
     },
     {
@@ -276,7 +279,7 @@
         {
           "title": "Project Coordinator",
           "summary": "Coordinates meetings, schedules, documentation and communication for one or more projects.",
-          "typical_experience": "1ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ3 years in project support or coordination roles.",
+          "typical_experience": "1ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ3 years in project support or coordination roles.",
           "progresses_to": [
             "Project Manager"
           ],
@@ -499,14 +502,14 @@
         {
           "title": "Project Engineer",
           "summary": "Manages technical queries, coordinates design changes and quality tests and supports the site team.",
-          "typical_experience": "1ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ3 years in engineering roles with site exposure.",
+          "typical_experience": "1ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ3 years in engineering roles with site exposure.",
           "progresses_to": [
             "Senior Project Engineer"
           ],
           "related_roles": [
             "Project Manager",
             "Site Manager",
-            "Electrician (Senior level ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ commercial projects)"
+            "Electrician (Senior level ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ commercial projects)"
           ]
         },
         {
@@ -573,7 +576,7 @@
         {
           "title": "Health and Safety Officer",
           "summary": "Conducts site inspections, risk assessments and safety training and supports investigations.",
-          "typical_experience": "1ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ3 years in WHS roles or relevant on-site experience.",
+          "typical_experience": "1ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ3 years in WHS roles or relevant on-site experience.",
           "progresses_to": [
             "Senior Safety Officer"
           ],
@@ -848,7 +851,7 @@
       ],
       "core_education": [
         "Certificate III in Electrotechnology (Electrician)",
-        "Electrical Apprenticeship (typically 3ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ4 years)"
+        "Electrical Apprenticeship (typically 3ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ4 years)"
       ],
       "work_style": "HandsOn-Technical",
       "levels": [
