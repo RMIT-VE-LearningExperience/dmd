@@ -1272,6 +1272,16 @@ function populateCareerPanel(career) {
         }
     });
 
+    // Open the first expandable bar (EDUCATION) by default
+    const firstBar = document.getElementById('educationBar');
+    if (firstBar) {
+        firstBar.classList.add('active');
+        const firstContent = firstBar.nextElementSibling;
+        if (firstContent && firstContent.classList.contains('expand-content')) {
+            firstContent.classList.add('active');
+        }
+    }
+
     // Show the panel and overlay
     infoPanel.classList.add('visible');
     const overlay = document.getElementById('infoPanelOverlay');

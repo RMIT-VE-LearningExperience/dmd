@@ -1354,7 +1354,7 @@ body {
 }
 
 .expand-bar.active .expand-bar-icon {
-    transform: rotate(180deg);
+    transform: rotate(90deg);
 }
 
 .expand-content {
