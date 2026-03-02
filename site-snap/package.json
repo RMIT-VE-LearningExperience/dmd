@@ -1,0 +1,31 @@
+{
+  "name": "site-snap",
+  "version": "1.0.0",
+  "description": "Static site copier — downloads a public website and saves it locally as a browsable offline HTML snapshot.",
+  "type": "module",
+  "main": "dist/cli.js",
+  "bin": {
+    "site-snap": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["static-site", "crawler", "offline", "snapshot", "playwright"],
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "p-limit": "^6.1.0",
+    "playwright": "^1.49.0",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/yargs": "^17.0.33",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
