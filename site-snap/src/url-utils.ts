@@ -22,6 +22,21 @@ export function normalizeUrl(raw: string): string {
 }
 
 /**
+ * Normalise an asset URL for consistent map lookups.
+ * Strips hash, sorts query params, and normalises the path.
+ */
+export function normalizeAssetUrl(raw: string): string {
+  try {
+    const u = new URL(raw);
+    u.hash = "";
+    u.searchParams.sort();
+    return u.toString();
+  } catch {
+    return raw;
+  }
+}
+
+/**
  * Returns true if the URL is on the same origin (or allowed subdomain).
  */
 export function isSameOrigin(

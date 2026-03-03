@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio";
 import path from "node:path";
-import { rewriteCssUrls } from "./css-rewriter.js";
+import { rewriteCssUrls, extractCssUrls } from "./css-rewriter.js";
+import { normalizeAssetUrl } from "./url-utils.js";
 
 /**
  * Attributes that may contain asset URLs, grouped by element tag.
@@ -15,10 +16,17 @@ const ASSET_ATTRS: Array<{ selector: string; attr: string }> = [
   { selector: "video[poster]", attr: "poster" },
   { selector: "audio[src]", attr: "src" },
   { selector: "script[src]", attr: "src" },
-  { selector: 'link[rel="stylesheet"][href]', attr: "href" },
-  { selector: 'link[rel="icon"][href]', attr: "href" },
+  // Use ~= (word-match) so "stylesheet" matches even in "stylesheet preload" etc.
+  { selector: 'link[rel~="stylesheet"][href]', attr: "href" },
+  { selector: 'link[rel~="icon"][href]', attr: "href" },
   { selector: 'link[rel="shortcut icon"][href]', attr: "href" },
-  { selector: 'link[rel="apple-touch-icon"][href]', attr: "href" },
+  { selector: 'link[rel~="apple-touch-icon"][href]', attr: "href" },
+  // Preloaded stylesheets and scripts
+  { selector: 'link[rel="preload"][as="style"][href]', attr: "href" },
+  { selector: 'link[rel="preload"][as="script"][href]', attr: "href" },
+  { selector: 'link[rel="preload"][as="font"][href]', attr: "href" },
+  { selector: 'link[rel="preload"][as="image"][href]', attr: "href" },
+  { selector: 'link[rel="modulepreload"][href]', attr: "href" },
   { selector: "object[data]", attr: "data" },
   { selector: "embed[src]", attr: "src" },
 ];
@@ -192,17 +200,19 @@ export function extractAssetUrls(html: string, pageUrl: string): string[] {
     });
   }
 
-  // Also extract url() from inline styles and <style> blocks
-  const cssRegex = /url\(\s*['"]?([^'")\s]+)['"]?\s*\)/g;
-  const fullHtml = $.html();
-  let match: RegExpExecArray | null;
-  while ((match = cssRegex.exec(fullHtml)) !== null) {
-    const raw = match[1];
-    if (raw.startsWith("data:")) continue;
-    try {
-      urls.push(new URL(raw, pageUrl).toString());
-    } catch { /* skip */ }
-  }
+  // Extract url() and @import from <style> blocks and inline style attributes
+  $("style").each((_i, el) => {
+    const cssText = $(el).html();
+    if (cssText) {
+      urls.push(...extractCssUrls(cssText, pageUrl));
+    }
+  });
+  $("[style]").each((_i, el) => {
+    const styleVal = $(el).attr("style");
+    if (styleVal && styleVal.includes("url(")) {
+      urls.push(...extractCssUrls(styleVal, pageUrl));
+    }
+  });
 
   return [...new Set(urls)];
 }
@@ -225,7 +235,8 @@ function rewriteAssetRef(
     return {};
   }
 
-  const localPath = assetMap.get(absoluteUrl);
+  // Try exact URL first, then normalised form
+  const localPath = assetMap.get(absoluteUrl) ?? assetMap.get(normalizeAssetUrl(absoluteUrl));
   if (localPath) {
     return {
       absoluteUrl,
@@ -259,7 +270,8 @@ function rewriteSrcset(
 }
 
 function computeRelativePath(fromDir: string, toPath: string): string {
-  const fromParts = fromDir.split("/").filter(Boolean);
+  // "." means root directory — treat as empty
+  const fromParts = fromDir === "." ? [] : fromDir.split("/").filter(Boolean);
   const toParts = toPath.split("/").filter(Boolean);
 
   let common = 0;

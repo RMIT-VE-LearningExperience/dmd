@@ -12,6 +12,7 @@ import type {
 } from "./types.js";
 import {
   normalizeUrl,
+  normalizeAssetUrl,
   isSameOrigin,
   isSkippableUrl,
   isNonHttpLink,
@@ -20,7 +21,7 @@ import {
 import { RobotsChecker } from "./robots.js";
 import { downloadAsset } from "./asset-downloader.js";
 import { extractAssetUrls, rewriteHtml } from "./html-rewriter.js";
-import { rewriteCssUrls } from "./css-rewriter.js";
+import { rewriteCssUrls, extractCssUrls } from "./css-rewriter.js";
 
 /**
  * Main crawler class.
@@ -271,15 +272,17 @@ export class Crawler {
 
   /**
    * Download an asset if not already downloaded.
+   * Normalizes the URL before checking/storing in the asset map for consistent lookups.
    */
   private async enqueueAssetDownload(assetUrl: string): Promise<void> {
-    if (this.assetMap.has(assetUrl)) return;
-    if (this.assetDownloading.has(assetUrl)) return;
-
     // Skip data URIs
     if (assetUrl.startsWith("data:")) return;
 
-    this.assetDownloading.add(assetUrl);
+    const normUrl = normalizeAssetUrl(assetUrl);
+    if (this.assetMap.has(normUrl)) return;
+    if (this.assetDownloading.has(normUrl)) return;
+
+    this.assetDownloading.add(normUrl);
 
     const result = await downloadAsset(
       assetUrl,
@@ -288,7 +291,11 @@ export class Crawler {
     );
 
     if (result.asset) {
-      this.assetMap.set(assetUrl, result.asset.localPath);
+      // Store under both the normalised URL and the raw URL for reliable lookups
+      this.assetMap.set(normUrl, result.asset.localPath);
+      if (assetUrl !== normUrl) {
+        this.assetMap.set(assetUrl, result.asset.localPath);
+      }
       this.manifest.assets.push(result.asset);
 
       // If it's a CSS file, parse it for further url() references
@@ -302,23 +309,15 @@ export class Crawler {
   }
 
   /**
-   * Parse a downloaded CSS file and download any url() assets it references.
+   * Parse a downloaded CSS file and download any url()/@import assets it references.
    */
   private async processCssAsset(cssUrl: string, localCssPath: string): Promise<void> {
     try {
       const fullPath = path.join(this.opts.out, localCssPath);
       const cssText = await fs.readFile(fullPath, "utf-8");
-
-      // Find all url(...) references
-      const urlRe = /url\(\s*['"]?([^'")\s]+)['"]?\s*\)/g;
-      let match: RegExpExecArray | null;
-      while ((match = urlRe.exec(cssText)) !== null) {
-        const raw = match[1];
-        if (raw.startsWith("data:")) continue;
-        try {
-          const absoluteUrl = new URL(raw, cssUrl).toString();
-          await this.enqueueAssetDownload(absoluteUrl);
-        } catch { /* skip invalid URLs */ }
+      const urls = extractCssUrls(cssText, cssUrl);
+      for (const u of urls) {
+        await this.enqueueAssetDownload(u);
       }
     } catch { /* skip read errors */ }
   }
