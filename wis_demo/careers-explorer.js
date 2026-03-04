@@ -1789,6 +1789,36 @@ function loadQuizResultsFromURL() {
     }
 }
 
+// Open a specific career popup when passed via URL:
+// career-explorer.html?openCareer=Quantity%20Surveyor
+function openCareerFromURLParam() {
+    const params = new URLSearchParams(window.location.search);
+    const openCareerParam = params.get('openCareer');
+    if (!openCareerParam || !careersData || !careersData.roles) return;
+
+    const targetName = openCareerParam.trim().toLowerCase();
+    const career = careersData.roles.find(c => c.name && c.name.toLowerCase() === targetName);
+    if (!career) return;
+
+    // Ensure we are in card view when opening from deep-link.
+    if (currentView !== 'cards') {
+        switchView('cards');
+    }
+
+    showCareerInfo(career);
+
+    // Highlight matching card in grid if visible.
+    const cards = document.querySelectorAll('.career-card');
+    cards.forEach(card => {
+        const title = card.querySelector('.career-card-title');
+        if (title && title.textContent === career.name) {
+            if (selectedCareer) selectedCareer.classList.remove('clicked');
+            selectedCareer = card;
+            selectedCareer.classList.add('clicked');
+        }
+    });
+}
+
 // Load quiz results from localStorage
 function loadQuizResults() {
     try {
@@ -1822,6 +1852,9 @@ async function initialize() {
 
     // Initialize expandable sections
     setupExpandableSections();
+
+    // Deep-link support for opening a role directly in the shared popup.
+    openCareerFromURLParam();
 
     console.log('✅ INITIALIZATION COMPLETE');
 }

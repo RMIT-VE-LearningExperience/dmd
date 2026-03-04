@@ -16,19 +16,6 @@ async function loadCareerData() {
 }
 
 // ===================================
-// COLOR TIER LOGIC
-// ===================================
-// >= 50%  → green
-// 34–49%  → yellow
-// < 34%   → orange
-
-function getMatchTier(percentage) {
-    if (percentage >= 50) return 'green';
-    if (percentage >= 34) return 'yellow';
-    return 'orange';
-}
-
-// ===================================
 // STATE
 // ===================================
 let currentQuestionIndex = 0;
@@ -195,7 +182,6 @@ function showResults() {
             return {
                 name,
                 score: scoreData.score,
-                percentage: scoreData.score,
                 matchCount: scoreData.matchCount,
                 description: careerObj ? careerObj.overview : '',
                 matchingSkills: scoreData.matchingSkills
@@ -227,38 +213,46 @@ function renderResults(topResults, otherResults) {
         return;
     }
 
-    // Top 3 matches with full percentage cards
-    topResults.forEach(career => {
-        const card = createResultCard(career);
+    // Top matches in ranked order (1st, 2nd, 3rd)
+    topResults.forEach((career, index) => {
+        const card = createResultCard(career, index);
         resultsGrid.appendChild(card);
     });
 
     // "Other careers to explore" section removed per user request
 }
 
-// Build a result card matching the screenshot layout:
-//   [ colored % badge | colored border | career name + description ]
-function createResultCard(career) {
-    const tier = getMatchTier(career.percentage);
+function getRankLabel(index) {
+    const rank = index + 1;
+    if (rank === 1) return '1st';
+    if (rank === 2) return '2nd';
+    if (rank === 3) return '3rd';
+    return `${rank}th`;
+}
+
+function getRankTier(index) {
+    if (index === 0) return 'green';
+    if (index === 1) return 'yellow';
+    return 'orange';
+}
+
+// Build a result card matching the ranked layout:
+//   [ colored rank badge | colored border | career name + description ]
+function createResultCard(career, index) {
+    const tier = getRankTier(index);
 
     // Outer card
     const card = document.createElement('div');
     card.className = `result-card tier-${tier}`;
 
-    // Left: percentage badge
+    // Left: rank badge
     const badge = document.createElement('div');
     badge.className = `match-badge tier-${tier}`;
 
-    const percent = document.createElement('div');
-    percent.className = 'match-percent';
-    percent.textContent = `${career.percentage}%`;
-
-    const label = document.createElement('div');
-    label.className = 'match-label';
-    label.textContent = 'Match';
-
-    badge.appendChild(percent);
-    badge.appendChild(label);
+    const rank = document.createElement('div');
+    rank.className = 'match-rank';
+    rank.textContent = getRankLabel(index);
+    badge.appendChild(rank);
 
     // Right: career info wrapper (with colored left border)
     const infoWrapper = document.createElement('div');

@@ -174,9 +174,11 @@ body {
 
 @keyframes explorePulse {
     0%, 100% {
+        transform: translate(-50%, -50%);
         box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.16);
     }
     50% {
+        transform: translate(-50%, -50%);
         box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.04);
     }
 }
@@ -336,7 +338,6 @@ body {
 }
 
 .career-item.quiz-match .career-dot {
-    border: 2px solid white;
 }
 
 .floating-quiz-badge {

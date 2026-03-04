@@ -347,7 +347,7 @@ h2 {
     flex: 1;
 }
 
-/* Result card: percentage badge on left, career info on right */
+/* Result card: rank badge on left, career info on right */
 .result-card {
     display: flex;
     align-items: stretch;
@@ -368,30 +368,25 @@ h2 {
 .result-card:nth-child(2) { animation-delay: 120ms; }
 .result-card:nth-child(3) { animation-delay: 240ms; }
 
-/* Percentage badge (left column) */
+/* Rank badge (left column) */
 .match-badge {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 20px 24px;
     min-width: 100px;
     color: #ffffff;
-    font-weight: 700;
+    font-weight: 900;
+    font-size: 42px;
     text-align: center;
-    line-height: 1.2;
+    line-height: 1;
     flex-shrink: 0;
 }
 
-.match-badge .match-percent {
-    font-size: 28px;
-    font-weight: 900;
-}
-
-.match-badge .match-label {
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: capitalize;
+.match-rank {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: 1;
 }
 
 /* Badge color tiers */
@@ -401,6 +396,7 @@ h2 {
 
 .match-badge.tier-yellow {
     background: #e8b830;
+    color: #1a365d;
 }
 
 .match-badge.tier-orange {
@@ -565,7 +561,7 @@ h2 {
         padding: 16px 16px;
     }
 
-    .match-badge .match-percent {
+    .match-rank {
         font-size: 24px;
     }
 
