@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="nav.css?v=1.1.6">
+    <link rel="stylesheet" href="secondary-pages.css?v=1.0.0">
 
     <!-- Hotjar Tracking Code for WIS - Construction game -->
     <script>
@@ -21,62 +22,8 @@
             a.appendChild(r);
         })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
     </script>
-
-    <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-        width: 100%; min-height: 100%;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: #0f172a; color: #e2e8f0;
-    }
-    .page-hero {
-        position: relative; width: 100%; padding: 120px 8% 60px;
-        background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
-        overflow: hidden;
-    }
-    .page-hero::before {
-        content: ''; position: absolute; inset: -20px;
-        background-image: url('images/constructionsite_background.svg');
-        background-size: cover; background-position: center;
-        filter: blur(8px); opacity: 0.3; z-index: 0;
-    }
-    .page-hero-content { position: relative; z-index: 1; max-width: 800px; }
-    .page-hero h1 {
-        font-size: clamp(32px, 5vw, 56px); font-weight: 800;
-        text-transform: uppercase; letter-spacing: -0.5px;
-        color: #fff; margin-bottom: 16px;
-    }
-    .page-hero h1 span {
-        display: inline-block; background: #1a3a6b;
-        padding: 6px 20px 10px; border-radius: 12px;
-    }
-    .page-hero p {
-        font-size: clamp(14px, 1.6vw, 18px); color: rgba(255,255,255,0.8);
-        line-height: 1.7; max-width: 600px;
-    }
-    .content { max-width: 800px; margin: 0 auto; padding: 48px 8% 80px; }
-    .content h2 {
-        font-size: clamp(20px, 3vw, 28px); font-weight: 700;
-        color: #fff; margin-bottom: 16px;
-    }
-    .content p {
-        font-size: clamp(14px, 1.4vw, 16px); color: #94a3b8;
-        line-height: 1.8; margin-bottom: 24px;
-    }
-    .content ul {
-        list-style: none; padding: 0; margin-bottom: 32px;
-    }
-    .content ul li {
-        padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
-        color: #cbd5e1; font-size: 15px; display: flex; gap: 12px; align-items: baseline;
-    }
-    .content ul li::before {
-        content: ''; display: inline-block; width: 8px; height: 8px;
-        background: #e8b830; border-radius: 50%; flex-shrink: 0; margin-top: 6px;
-    }
-    </style>
 </head>
-<body>
+<body class="page-secondary">
     <nav class="nav-drawer" id="navDrawer">
         <button class="nav-close" id="navClose" aria-label="Close menu">&times;</button>
         <a href="index.html" class="nav-link nav-link-home"><span class="nav-link-label">Home</span><span class="nav-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 11.5L12 4l8 7.5V20a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1v-8.5z" fill="currentColor"/></svg></span></a>
@@ -93,44 +40,87 @@
 
     <div class="nav-scrim" id="navScrim"></div>
 
-    <section class="page-hero">
-        <button class="menu-btn" id="menuBtn" aria-label="Open menu">
-            <span></span><span></span><span></span>
-        </button>
-        <div class="page-hero-content">
-            <h1><span>About</span></h1>
-            <p>Learn about the Construct Your Career initiative and how it helps people explore the construction industry.</p>
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+        <img src="images/menu.svg" alt="Menu icon">
+    </button>
+
+    <main class="page-shell">
+        <div class="page-topbar">
+            <svg class="page-top-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V8h4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M8 13h8M8 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
         </div>
-    </section>
 
-    <div class="content">
-        <h2>What is Construct Your Career?</h2>
-        <p>Construct Your Career is an interactive platform designed to introduce people to the diverse range of careers available in the construction industry. Through immersive mini games, career exploration tools, and engaging content, we aim to inspire the next generation of builders.</p>
+        <section class="page-hero">
+            <h1>About Construct<br>Your Career</h1>
+            <div class="hero-colors" aria-hidden="true">
+                <span style="background:#659bb0"></span>
+                <span style="background:#e46f5b"></span>
+                <span style="background:#7ea67e"></span>
+                <span style="background:#a978b5"></span>
+                <span style="background:#e8c66c"></span>
+                <span style="background:#e39f58"></span>
+            </div>
+            <p>An interactive way to discover construction pathways, skills, and real opportunities.</p>
+            <p class="sub">This experience is built to help students, educators, and career changers understand what construction roles involve and where they can lead.</p>
+        </section>
 
-        <h2>Our Mission</h2>
-        <p>We believe that construction offers rewarding, well-paid careers that are often overlooked. Our mission is to break down barriers, challenge stereotypes, and show that there's a place for everyone in the construction industry.</p>
+        <section class="page-band">
+            <div class="band-chip"><a href="career-explorer.html">Career Explorer</a></div>
+            <div class="band-chip"><a href="explore-stories.html">Explore Stories</a></div>
+            <div class="band-chip"><a href="mini-games.html">Mini Games</a></div>
+        </section>
 
-        <h2>What You Can Do Here</h2>
-        <ul>
-            <li>Explore different construction career pathways</li>
-            <li>Play mini games that simulate real construction tasks</li>
-            <li>Learn about career progression from entry-level to senior roles</li>
-            <li>Discover what skills and qualifications you need</li>
-        </ul>
+        <section class="page-main">
+            <div class="content-grid">
+                <article class="content-card">
+                    <h3>What It Is</h3>
+                    <p>Construct Your Career introduces the many pathways in construction through role cards, career stories, and practical game-based challenges.</p>
+                </article>
 
-        <h2>Who Is This For?</h2>
-        <p>Whether you're a student considering your options, a career changer looking for something new, or an educator helping others find their path — this platform is built for you.</p>
+                <article class="content-card">
+                    <h3>Our Mission</h3>
+                    <p>Open up construction careers to more people by making pathways easier to understand, more visible, and more engaging.</p>
+                </article>
 
-        <h2>Our Partners</h2>
-        <div style="display: flex; gap: 40px; align-items: center; margin-top: 32px; flex-wrap: wrap;">
-            <a href="https://www.rmit.edu.au/" target="_blank" rel="noopener noreferrer" style="display: block;">
-                <img src="images/RMIT_University_Logo.svg" alt="RMIT University" style="height: 60px; width: auto;">
-            </a>
-            <a href="https://bigbuild.vic.gov.au/projects/m80-ring-road" target="_blank" rel="noopener noreferrer" style="display: block;">
-                <img src="images/M80_Ring_Road.svg" alt="Big Build - M80 Ring Road" style="height: 60px; width: auto;">
-            </a>
-        </div>
-    </div>
+                <article class="content-card">
+                    <h3>Who It Is For</h3>
+                    <p>Students exploring options, educators supporting pathway decisions, and anyone considering a future career in construction.</p>
+                </article>
+
+                <article class="content-card">
+                    <h3>What You Can Do</h3>
+                    <ul>
+                        <li>Explore construction roles and salary ranges</li>
+                        <li>Watch short profile stories from professionals</li>
+                        <li>Play mini games linked to real site skills</li>
+                        <li>Understand progression from entry to senior levels</li>
+                    </ul>
+                </article>
+
+                <article class="content-card wide">
+                    <h3>Partners</h3>
+                    <p>This platform is developed through collaboration across education and industry to support practical career awareness.</p>
+                    <div class="partners-row">
+                        <a href="https://www.rmit.edu.au/" target="_blank" rel="noopener noreferrer" class="partner-logo">
+                            <img src="images/RMIT_University_Logo.svg" alt="RMIT University">
+                        </a>
+                        <a href="https://bigbuild.vic.gov.au/" target="_blank" rel="noopener noreferrer" class="partner-logo">
+                            <img src="images/M80_Ring_Road.svg" alt="Big Build - M80 Ring Road">
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <footer class="page-footer">
+            <span>Made possible by</span>
+            <span class="page-footer-divider" aria-hidden="true"></span>
+            <img src="images/M80_Ring_Road.svg" alt="Big Build M80 Ring Road">
+            <img src="images/RMIT_University_Logo.svg" alt="RMIT University Women in STEM">
+        </footer>
+    </main>
 
     <script src="nav.js?v=1.0.0"></script>
 </body>

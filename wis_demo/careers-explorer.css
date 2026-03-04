@@ -1874,14 +1874,6 @@ body.embed-popup-mode .info-panel {
         display: none !important;
     }
 
-    .floating-view {
-        display: none !important;
-    }
-
-    .card-view {
-        display: block !important;
-    }
-
     .info-panel {
         width: 95%;
         height: 90%;
@@ -2433,7 +2425,7 @@ body.embed-popup-mode .info-panel {
     content: '';
     width: 22px;
     height: 22px;
-    background: url('/images/tick.svg') center / contain no-repeat;
+    background: url('images/tick.svg') center / contain no-repeat;
 }
 
 /* Card selected states */
