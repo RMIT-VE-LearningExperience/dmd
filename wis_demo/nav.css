@@ -2,30 +2,58 @@
    SHARED NAVIGATION — Hamburger + Drawer
    =================================== */
 
-/* Hamburger button */
-.menu-btn {
-    position: absolute;
-    top: 32px;
-    right: 32px;
+/* Top Navigation Icons Container */
+.top-nav-icons {
+    position: fixed;
+    top: 20px;
+    right: 20px;
     z-index: 10;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+/* Navigation Icon Button */
+.nav-icon-btn {
+    width: 62px;
+    height: 62px;
     background: rgba(255, 255, 255, 0.95);
     border: none;
     border-radius: 50%;
-    width: 52px;
-    height: 52px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5px;
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 0;
 }
 
-.menu-btn:hover {
+.nav-icon-btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
+}
+
+.nav-icon-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Card button */
+.card-btn {
+    flex-shrink: 0;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Hamburger button */
+.menu-btn {
+    flex-shrink: 0;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .menu-btn:focus-visible,
@@ -35,14 +63,6 @@
     outline-offset: 3px;
 }
 
-.menu-btn span {
-    display: block;
-    width: 22px;
-    height: 3px;
-    background: #1a365d;
-    border-radius: 2px;
-    transition: all 0.3s ease;
-}
 
 /* Nav Drawer */
 .nav-drawer {
@@ -59,12 +79,12 @@
     padding: 80px 32px 32px;
     gap: 4px;
     transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: -8px 0 32px rgba(0, 0, 0, 0);
+    box-shadow: none;
 }
 
 .nav-drawer.open {
     right: 0;
-    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+    box-shadow: none;
 }
 
 /* Close button */
@@ -134,20 +154,28 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-    .menu-btn {
-        top: 20px;
-        right: 20px;
-        width: 46px;
-        height: 46px;
+    .top-nav-icons {
+        top: 16px;
+        right: 16px;
+        gap: 12px;
+    }
+
+    .nav-icon-btn {
+        width: 70px;
+        height: 70px;
     }
 }
 
 @media (max-width: 480px) {
-    .menu-btn {
-        top: 16px;
-        right: 16px;
-        width: 42px;
-        height: 42px;
+    .top-nav-icons {
+        top: 12px;
+        right: 12px;
+        gap: 10px;
+    }
+
+    .nav-icon-btn {
+        width: 60px;
+        height: 60px;
     }
 
     .nav-drawer {

@@ -15,8 +15,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="careers-explorer.css?v=1.0.0">
-    <link rel="stylesheet" href="nav.css?v=1.0.0">
+    <link rel="stylesheet" href="careers-explorer.css?v=1.1.9">
+    <link rel="stylesheet" href="nav.css?v=1.1.5">
 
     <!-- Hotjar Tracking Code for WIS - Construction game -->
     <script>
@@ -46,12 +46,15 @@
     <div class="bg-image" aria-hidden="true"></div>
     <div class="bg-overlay" aria-hidden="true"></div>
 
-    <!-- Hamburger menu -->
-    <button class="menu-btn" id="menuBtn" aria-label="Open menu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
+    <!-- Top Navigation Icons -->
+    <div class="top-nav-icons">
+        <button class="nav-icon-btn card-btn" id="cardBtn" aria-label="Card view">
+            <img src="images/card.svg" alt="Card view icon" />
+        </button>
+        <button class="nav-icon-btn menu-btn" id="menuBtn" aria-label="Open menu">
+            <img src="images/menu.svg" alt="Menu icon" />
+        </button>
+    </div>
 
     <!-- Pause Button (Floating View Only) -->
     <button class="pause-btn" id="pauseBtn"></button>
@@ -72,45 +75,42 @@
 
     <!-- Card View -->
     <div class="card-view" id="cardView">
-        <button class="view-switcher" id="viewSwitcher" aria-label="Switch to floating view">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
-                <circle cx="12" cy="8" r="2" fill="currentColor"/>
-                <circle cx="8" cy="16" r="2" fill="currentColor"/>
-                <circle cx="16" cy="16" r="2" fill="currentColor"/>
-            </svg>
-            <span>Floating View</span>
-        </button>
-        <div class="header">
-            <h1>CAREER <span>EXPLORER</span></h1>
+        <!-- Top search bar -->
+        <div class="card-view-top-bar">
+            <div class="search-container">
+                <input type="text" id="careerSearch" class="search-input" placeholder="Search careers by name..." autocomplete="off" />
+                <img src="images/search.svg" alt="Search" class="search-icon" />
+            </div>
         </div>
 
         <div class="filters-container">
-            <div class="search-container">
-                <input type="text" id="careerSearch" class="search-input" placeholder="Search careers by name..." autocomplete="off" />
-                <span class="search-icon">🔍</span>
-            </div>
-            <div class="filter-row">
-                <div class="filter-group" style="flex: 2;">
-                    <label class="filter-label">Salary Range</label>
-                    <div class="salary-range-display" id="salaryRangeDisplay">$40k - $200k</div>
-                    <div class="range-slider-container">
-                        <input type="range" id="salaryMin" class="range-slider range-min" min="40" max="200" value="40" step="10">
-                        <input type="range" id="salaryMax" class="range-slider range-max" min="40" max="200" value="200" step="10">
-                        <div class="range-track"></div>
-                        <div class="range-fill" id="rangeFill"></div>
-                    </div>
-                </div>
-                <div class="filter-group">
-                    <button class="clear-filters" id="clearFilters">Clear All Filters</button>
-                </div>
-            </div>
+            <!-- Skills Category Filter (moved above salary) -->
             <div class="filter-row">
                 <div class="filter-group" style="flex: none; width: 100%;">
-                    <label class="filter-label">Filter by Skill Category</label>
                     <div class="skills-filter" id="skillsFilterContainer"></div>
                 </div>
             </div>
+
+            <!-- Salary Range Filter -->
+            <div class="filter-row salary-filter-row">
+                <div class="filter-group salary-group">
+                    <div class="range-slider-wrapper">
+                        <img src="images/money.svg" alt="Salary" class="salary-icon" />
+                        <div class="range-slider-container">
+                            <input type="range" id="salaryMin" class="range-slider range-min" min="40" max="200" value="40" step="10">
+                            <input type="range" id="salaryMax" class="range-slider range-max" min="40" max="200" value="200" step="10">
+                            <div class="range-track"></div>
+                            <div class="range-fill" id="rangeFill"></div>
+                            <div class="salary-range-display" id="salaryRangeDisplay">$40k - $200k</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button class="compare-action-btn" id="compareActionBtn">Compare</button>
+            <button class="clear-filters" id="clearFilters">Clear All Filters</button>
         </div>
 
         <div class="stack-view" id="stackView">
@@ -228,9 +228,7 @@
 
     <!-- Mini Games FAB -->
     <button class="games-fab" id="gamesFab" aria-label="Open mini games">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 6H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-10 7H8v3H6v-3H3V11h3V8h2v3h3v2zm4.5 2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
-        </svg>
+        <img src="/images/game.svg" alt="Mini games" />
     </button>
 
     <!-- Dashboard Overlay -->
@@ -335,7 +333,7 @@
         </div>
     </div>
 
-    <script src="careers-explorer.js?v=2.5.0"></script>
+    <script src="careers-explorer.js?v=2.6.0"></script>
     <script>
     (function() {
         const fab = document.getElementById('gamesFab');

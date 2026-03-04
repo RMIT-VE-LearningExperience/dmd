@@ -44,7 +44,7 @@ async function loadCareerData() {
 }
 
 
-// Skill categories mapping
+// Skill categories mapping with icon references
 const skillCategories = {
     "Technical": ["Technical knowledge", "Technical knowledge of construction", "Engineering principles", "Technical problem-solving", "Technical precision", "Computer and digital modelling skills", "IT and digital modelling", "Mathematics", "Numerical analysis", "Cost planning", "Software proficiency", "Trade knowledge", "Tool handling", "Vehicle operation"],
     "Leadership & Management": ["Leadership", "On-site leadership", "Decision-making", "Budget management", "Budgeting", "Planning", "Team coordination"],
@@ -52,6 +52,26 @@ const skillCategories = {
     "Safety & Compliance": ["Safety awareness", "Health & Safety", "Risk assessment", "Risk management", "Compliance management", "Attention to detail"],
     "Physical & Trade": ["Manual dexterity", "Precision", "Physical fitness", "Physical stamina", "Surface preparation", "Design sense", "Creativity"],
     "Professional & Analytical": ["Problem-solving", "Analytical thinking", "Financial management", "Knowledge of contracts and law", "Focus", "Customer service", "Training"]
+};
+
+// Skill icon mapping - map skill categories to SVG files
+const skillIconMap = {
+    "Technical": "images/skills/technical.svg",
+    "Leadership & Management": "images/skills/management.svg",
+    "Communication & Organisation": "images/skills/communication.svg",
+    "Safety & Compliance": "images/skills/safety.svg",
+    "Physical & Trade": "images/skills/physical.svg",
+    "Professional & Analytical": "images/skills/analytical.svg"
+};
+
+// Skill color mapping - map skill categories to colors with 30% opacity
+const skillColorMap = {
+    "Technical": "rgba(126, 166, 126, 0.3)",      // #7EA67E at 30%
+    "Leadership & Management": "rgba(228, 111, 91, 0.3)", // #E46F5B at 30%
+    "Communication & Organisation": "rgba(101, 155, 176, 0.3)", // #659BB0 at 30%
+    "Safety & Compliance": "rgba(232, 198, 108, 0.3)",    // #E8C66C at 30%
+    "Physical & Trade": "rgba(227, 159, 88, 0.3)",       // #E39F58 at 30%
+    "Professional & Analytical": "rgba(169, 120, 181, 0.3)" // #A978B5 at 30%
 };
 
 // Function to categorize a skill
@@ -75,6 +95,20 @@ function getCategoriesForCareer(career) {
     return Array.from(categories);
 }
 
+// Function to get the primary skill icon for a career
+function getPrimarySkillIconForCareer(career) {
+    if (!career.core_skills || career.core_skills.length === 0) {
+        return { icon: skillIconMap["Technical"], category: "Technical", color: skillColorMap["Technical"] };
+    }
+
+    const firstSkill = career.core_skills[0];
+    const category = categorizeSkill(firstSkill);
+    const icon = skillIconMap[category] || skillIconMap["Technical"];
+    const color = skillColorMap[category] || skillColorMap["Technical"];
+
+    return { icon, category, color };
+}
+
 // State
 let currentView = 'floating';
 let isPaused = false;
@@ -83,6 +117,7 @@ let careerElements = [];
 let filteredCareers = []; // Will be populated after data loads
 let selectedCategories = new Set();
 let comparisonCareers = [];
+let compareModeActive = false;
 let videoFilterActive = false;
 let stackIndex = 0;
 let careerHistory = []; // Navigation history stack for back button
@@ -101,15 +136,18 @@ const pauseBtn = document.getElementById('pauseBtn');
 const salaryMinSlider = document.getElementById('salaryMin');
 const salaryMaxSlider = document.getElementById('salaryMax');
 const salaryRangeDisplay = document.getElementById('salaryRangeDisplay');
+const salaryMinDisplay = document.getElementById('salaryMinDisplay');
 const rangeFill = document.getElementById('rangeFill');
 const skillsFilterContainer = document.getElementById('skillsFilterContainer');
 const clearFiltersBtn = document.getElementById('clearFilters');
+const compareActionBtn = document.getElementById('compareActionBtn');
 const noResults = document.getElementById('noResults');
 const videoLegend = document.getElementById('videoLegend');
 const comparisonPanel = document.getElementById('comparisonPanel');
 const closeComparisonBtn = document.getElementById('closeComparisonBtn');
 const exploreCenter = document.getElementById('exploreCenter');
-const viewSwitcher = document.getElementById('viewSwitcher');
+const cardBtn = document.getElementById('cardBtn');
+const menuBtn = document.getElementById('menuBtn');
 
 function bindKeyboardActivate(element, handler) {
     if (!element) return;
@@ -121,12 +159,22 @@ function bindKeyboardActivate(element, handler) {
     });
 }
 
-// View switcher event listener
-if (viewSwitcher) {
-    viewSwitcher.addEventListener('click', () => {
-        if (currentView === 'cards' || currentView === 'stack') {
+// Card button event listener (toggle between floating and card views)
+if (cardBtn) {
+    cardBtn.addEventListener('click', () => {
+        if (currentView === 'floating') {
+            switchView('cards');
+        } else if (currentView === 'cards' || currentView === 'stack') {
             switchView('floating');
         }
+    });
+}
+
+// Menu button event listener
+if (menuBtn) {
+    menuBtn.addEventListener('click', () => {
+        navDrawer.classList.add('open');
+        navScrim.classList.add('open');
     });
 }
 
@@ -145,6 +193,41 @@ Object.keys(skillCategories).forEach(category => {
 });
 
 // Salary Range Slider Logic
+function updateSalaryRangeUI(minValue, maxValue) {
+    if (salaryMinDisplay) {
+        salaryMinDisplay.textContent = `$${minValue}k`;
+    }
+    if (salaryRangeDisplay) {
+        salaryRangeDisplay.textContent = `$${minValue}k - $${maxValue}k`;
+    }
+
+    if (rangeFill) {
+        const minPercent = ((minValue - 40) / (200 - 40)) * 100;
+        const maxPercent = ((maxValue - 40) / (200 - 40)) * 100;
+        rangeFill.style.left = minPercent + '%';
+        rangeFill.style.width = (maxPercent - minPercent) + '%';
+
+        if (salaryRangeDisplay) {
+            const sliderContainer = salaryRangeDisplay.parentElement;
+            if (!sliderContainer) return;
+
+            // Position the bubble at the visual midpoint of the active fill segment,
+            // which corresponds to the midpoint between the two handles.
+            const containerRect = sliderContainer.getBoundingClientRect();
+            const fillRect = rangeFill.getBoundingClientRect();
+            const sliderWidth = sliderContainer.clientWidth;
+            if (!sliderWidth || !fillRect.width) return;
+
+            const midpointPx = ((fillRect.left + fillRect.right) / 2) - containerRect.left;
+            const bubbleWidth = salaryRangeDisplay.offsetWidth;
+            const minLeft = bubbleWidth / 2;
+            const maxLeft = sliderWidth - bubbleWidth / 2;
+            const clampedLeft = Math.min(Math.max(midpointPx, minLeft), maxLeft);
+            salaryRangeDisplay.style.left = `${clampedLeft}px`;
+        }
+    }
+}
+
 function updateRangeSlider() {
     console.log('🎚️ UPDATE RANGE SLIDER called');
     if (!salaryMinSlider || !salaryMaxSlider) {
@@ -162,18 +245,24 @@ function updateRangeSlider() {
         salaryMinSlider.value = minValue;
     }
 
-    // Update display
-    if (salaryRangeDisplay) {
-        salaryRangeDisplay.textContent = `$${minValue}k - $${maxValue}k`;
+    // Ensure minimum range of 40k (difference between min and max)
+    const minRange = 40;
+    if (maxValue - minValue < minRange) {
+        // Adjust based on which slider is closer to its limit
+        if (minValue <= 40) {
+            // Min is at bottom, so adjust max
+            maxValue = minValue + minRange;
+            if (maxValue > 200) maxValue = 200;
+            salaryMaxSlider.value = maxValue;
+        } else {
+            // Adjust min instead
+            minValue = maxValue - minRange;
+            if (minValue < 40) minValue = 40;
+            salaryMinSlider.value = minValue;
+        }
     }
 
-    // Update fill bar
-    if (rangeFill) {
-        const minPercent = ((minValue - 40) / (200 - 40)) * 100;
-        const maxPercent = ((maxValue - 40) / (200 - 40)) * 100;
-        rangeFill.style.left = minPercent + '%';
-        rangeFill.style.width = (maxPercent - minPercent) + '%';
-    }
+    updateSalaryRangeUI(minValue, maxValue);
 
     // Trigger filtering
     filterCareers();
@@ -191,19 +280,17 @@ if (careerSearchInput) {
 if (salaryMinSlider && salaryMaxSlider) {
     salaryMinSlider.addEventListener('input', updateRangeSlider);
     salaryMaxSlider.addEventListener('input', updateRangeSlider);
+    window.addEventListener('resize', () => {
+        updateSalaryRangeUI(
+            parseInt(salaryMinSlider.value),
+            parseInt(salaryMaxSlider.value)
+        );
+    });
 
     // Initialize slider display (just update UI, don't filter yet)
     const minValue = parseInt(salaryMinSlider.value);
     const maxValue = parseInt(salaryMaxSlider.value);
-    if (salaryRangeDisplay) {
-        salaryRangeDisplay.textContent = `$${minValue}k - $${maxValue}k`;
-    }
-    if (rangeFill) {
-        const minPercent = ((minValue - 40) / (200 - 40)) * 100;
-        const maxPercent = ((maxValue - 40) / (200 - 40)) * 100;
-        rangeFill.style.left = minPercent + '%';
-        rangeFill.style.width = (maxPercent - minPercent) + '%';
-    }
+    updateSalaryRangeUI(minValue, maxValue);
 }
 
 // View Toggle
@@ -216,6 +303,15 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
 
 function switchView(view) {
     currentView = view;
+
+    // Update card button icon based on current view
+    if (cardBtn && cardBtn.querySelector('img')) {
+        if (view === 'floating') {
+            cardBtn.querySelector('img').src = 'images/card.svg';
+        } else {
+            cardBtn.querySelector('img').src = 'images/float.svg';
+        }
+    }
 
     if (view === 'floating') {
         // First remove active from card view to trigger fade-out
@@ -344,9 +440,19 @@ function createFloatingCareerItem(career, index, total) {
         item.classList.add('quiz-match');
     }
 
+    // Create skill icon with colored background
+    const skillData = getPrimarySkillIconForCareer(career);
     const dot = document.createElement('div');
-    const color = getCareerColor(career.name);
-    dot.className = `career-dot ${color}`;
+    dot.className = `career-dot`;
+    dot.style.backgroundColor = skillData.color;
+
+    // Load and inline the SVG icon
+    const iconImg = document.createElement('img');
+    iconImg.src = skillData.icon;
+    iconImg.alt = skillData.category;
+    iconImg.style.width = '100%';
+    iconImg.style.height = '100%';
+    dot.appendChild(iconImg);
 
     const name = document.createElement('div');
     name.className = 'career-name';
@@ -355,14 +461,7 @@ function createFloatingCareerItem(career, index, total) {
     item.appendChild(dot);
     item.appendChild(name);
 
-    // Add quiz match badge for floating view
-    if (isQuizMatch) {
-        const matchBadge = document.createElement('div');
-        matchBadge.className = 'floating-quiz-badge';
-        const percentage = Math.round(quizResults.scores[career.name]);
-        matchBadge.textContent = `${percentage}%`;
-        item.appendChild(matchBadge);
-    }
+    // Do NOT add quiz match badge (percentage) - hidden via CSS
 
     // Add play icon if career has video
     if (career.video_url) {
@@ -471,10 +570,18 @@ function createCareerCard(career, matchingLevels = null) {
     const header = document.createElement('div');
     header.className = 'career-card-header';
 
+    // Use skill icon with colored background
+    const skillData = getPrimarySkillIconForCareer(career);
     const dot = document.createElement('div');
-    const color = getCareerColor(career.name);
-    dot.className = `career-card-dot ${color}`;
-    dot.style.background = color === 'blue' ? '#4299e1' : '#48bb78';
+    dot.className = 'career-card-dot';
+    dot.style.backgroundColor = skillData.color;
+
+    const iconImg = document.createElement('img');
+    iconImg.src = skillData.icon;
+    iconImg.alt = skillData.category;
+    iconImg.style.width = '100%';
+    iconImg.style.height = '100%';
+    dot.appendChild(iconImg);
 
     const title = document.createElement('div');
     title.className = 'career-card-title';
@@ -490,7 +597,8 @@ function createCareerCard(career, matchingLevels = null) {
     // Compare button
     const compareBtn = document.createElement('button');
     compareBtn.className = 'compare-btn';
-    compareBtn.innerHTML = '+';
+    compareBtn.type = 'button';
+    compareBtn.setAttribute('aria-label', `Select ${career.name} for comparison`);
     compareBtn.onclick = (e) => {
         e.stopPropagation();
         toggleComparison(career, card, compareBtn);
@@ -500,15 +608,7 @@ function createCareerCard(career, matchingLevels = null) {
     body.appendChild(overview);
     card.appendChild(body);
 
-    // Quiz match badge (if quiz results exist)
-    if (quizResults && quizResults.scores && quizResults.scores[career.name]) {
-        const score = quizResults.scores[career.name];
-        const percentage = Math.round(score);
-        const matchBadge = document.createElement('div');
-        matchBadge.className = 'quiz-match-badge';
-        matchBadge.textContent = `${percentage}% Match`;
-        card.appendChild(matchBadge);
-    }
+    // Quiz match badge removed - percentages no longer shown on cards
 
     // Salary level match note
     if (matchingLevels && matchingLevels.length > 0 && career.levels) {
@@ -545,6 +645,10 @@ function createCareerCard(career, matchingLevels = null) {
     card.appendChild(compareBtn);
 
     const activateCard = () => {
+        if (compareModeActive) {
+            toggleComparison(career, card, compareBtn);
+            return;
+        }
         showCareerInfo(career);
     };
     card.addEventListener('click', activateCard);
@@ -702,11 +806,6 @@ function renderCareerCardsInternal(careerMatchingLevels = null) {
             card.classList.add('selected');
             const btn = card.querySelector('.compare-btn');
             btn.classList.add('selected');
-
-            if (comparisonCareers.length === 1) {
-                card.classList.add('pending');
-                btn.classList.add('pending');
-            }
         }
 
         careersGrid.appendChild(card);
@@ -714,17 +813,28 @@ function renderCareerCardsInternal(careerMatchingLevels = null) {
 }
 
 // Comparison Functions
+function setCompareMode(active) {
+    compareModeActive = active;
+    if (cardView) {
+        cardView.classList.toggle('compare-mode', active);
+    }
+    if (compareActionBtn) {
+        compareActionBtn.classList.toggle('active', active);
+    }
+}
+
 function toggleComparison(career, cardElement, buttonElement) {
+    if (!compareModeActive) {
+        setCompareMode(true);
+    }
+
     const careerIndex = comparisonCareers.findIndex(c => c.name === career.name);
 
     // If already in comparison, remove it
     if (careerIndex !== -1) {
         comparisonCareers.splice(careerIndex, 1);
-        cardElement.classList.remove('selected', 'pending');
-        buttonElement.classList.remove('selected', 'pending');
-        buttonElement.innerHTML = '+';
-
-        // Update other cards' pending state
+        cardElement.classList.remove('selected');
+        buttonElement.classList.remove('selected');
         updateComparisonStates();
         return;
     }
@@ -741,17 +851,15 @@ function toggleComparison(career, cardElement, buttonElement) {
     cardElement.classList.add('selected');
     buttonElement.classList.add('selected');
 
-    // If first selection, add pending state
-    if (comparisonCareers.length === 1) {
-        buttonElement.classList.add('pending');
-        cardElement.classList.add('pending');
-    } else {
-        // Second selection - remove pending from first, trigger comparison
+    // Second selection triggers comparison overlay
+    if (comparisonCareers.length === 2) {
         updateComparisonStates();
         setTimeout(() => {
             showComparison();
         }, 300);
     }
+
+    updateCompareActionButton();
 }
 
 function updateComparisonStates() {
@@ -763,18 +871,16 @@ function updateComparisonStates() {
         const careerName = card.querySelector('.career-card-title').textContent;
         const isSelected = comparisonCareers.find(c => c.name === careerName);
 
-        if (isSelected) {
-            if (comparisonCareers.length === 1) {
-                btn.classList.add('pending');
-                card.classList.add('pending');
-                card.classList.remove('selected');
-            } else {
-                btn.classList.remove('pending');
-                card.classList.remove('pending');
-                card.classList.add('selected');
-            }
-        }
+        card.classList.toggle('selected', !!isSelected);
+        btn.classList.toggle('selected', !!isSelected);
     });
+
+    updateCompareActionButton();
+}
+
+function updateCompareActionButton() {
+    if (!compareActionBtn) return;
+    compareActionBtn.textContent = compareModeActive ? 'Done' : 'Compare';
 }
 
 function showLimitReachedFeedback(cardElement) {
@@ -992,16 +1098,14 @@ function changeCareer(index) {
     document.querySelectorAll('.career-card').forEach(card => {
         const careerName = card.querySelector('.career-card-title').textContent;
         if (careerName === removedCareer.name) {
-            card.classList.remove('selected', 'pending');
+            card.classList.remove('selected');
             const btn = card.querySelector('.compare-btn');
             if (btn) {
-                btn.classList.remove('selected', 'pending');
-                btn.innerHTML = '+';
+                btn.classList.remove('selected');
             }
         }
     });
 
-    // Update remaining career to pending state
     updateComparisonStates();
 }
 
@@ -1009,15 +1113,16 @@ function clearComparison() {
     comparisonCareers = [];
     comparisonPanel.classList.remove('visible');
 
-    // Remove all selected and pending states
+    // Remove all selected states
     document.querySelectorAll('.career-card').forEach(card => {
-        card.classList.remove('selected', 'pending');
+        card.classList.remove('selected');
         const btn = card.querySelector('.compare-btn');
         if (btn) {
-            btn.classList.remove('selected', 'pending');
-            btn.innerHTML = '+';
+            btn.classList.remove('selected');
         }
     });
+
+    updateCompareActionButton();
 }
 
 // Convert YouTube URL to embed format
@@ -1450,8 +1555,30 @@ clearFiltersBtn.addEventListener('click', () => {
     });
     videoFilterActive = false;
     videoLegend.classList.remove('active');
+    clearComparison();
+    setCompareMode(false);
     filterCareers();
 });
+
+if (compareActionBtn) {
+    compareActionBtn.addEventListener('click', () => {
+        if (!compareModeActive) {
+            setCompareMode(true);
+            updateCompareActionButton();
+            return;
+        }
+
+        if (comparisonCareers.length === 2) {
+            showComparison();
+            return;
+        }
+
+        clearComparison();
+        setCompareMode(false);
+        updateCompareActionButton();
+    });
+    updateCompareActionButton();
+}
 
 // Event Listeners
 function closeInfoPanel() {
@@ -1489,6 +1616,7 @@ document.addEventListener('keydown', (e) => {
 
 closeComparisonBtn.addEventListener('click', () => {
     clearComparison();
+    setCompareMode(false);
 });
 
 pauseBtn.addEventListener('click', () => {

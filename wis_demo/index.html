@@ -50,27 +50,27 @@
         background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
         color: white;
         cursor: pointer;
-        box-shadow: 0 6px 24px rgba(99, 39, 217, 0.45), 0 2px 8px rgba(0,0,0,0.15);
+        box-shadow: none;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: transform 0.2s ease;
         animation: fab-pulse 3s ease-in-out infinite;
     }
 
     .games-fab:hover {
         transform: scale(1.08);
-        box-shadow: 0 8px 32px rgba(99, 39, 217, 0.55), 0 4px 12px rgba(0,0,0,0.2);
+        box-shadow: none;
     }
 
     .games-fab:active {
         transform: scale(0.95);
     }
 
-    .games-fab svg {
-        width: 32px;
-        height: 32px;
-        fill: white;
+    .games-fab img {
+        width: 68px;
+        height: 68px;
+        object-fit: contain;
     }
 
     .games-fab-label {
@@ -88,8 +88,8 @@
     }
 
     @keyframes fab-pulse {
-        0%, 100% { box-shadow: 0 6px 24px rgba(99, 39, 217, 0.45), 0 2px 8px rgba(0,0,0,0.15); }
-        50% { box-shadow: 0 6px 32px rgba(99, 39, 217, 0.65), 0 2px 8px rgba(0,0,0,0.15); }
+        0%, 100% { box-shadow: none; }
+        50% { box-shadow: none; }
     }
 
     /* Hide FAB when dashboard is open */
@@ -104,12 +104,12 @@
         .games-fab {
             bottom: 20px;
             right: 20px;
-            width: 58px;
-            height: 58px;
+            width: 68px;
+            height: 68px;
         }
-        .games-fab svg {
-            width: 28px;
-            height: 28px;
+        .games-fab img {
+            width: 68px;
+            height: 68px;
         }
     }
 
@@ -578,9 +578,7 @@
 
     <!-- Mini Games FAB -->
     <button class="games-fab" id="gamesFab" aria-label="Open mini games">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 6H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-10 7H8v3H6v-3H3V11h3V8h2v3h3v2zm4.5 2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
-        </svg>
+        <img src="/images/game.svg" alt="Mini games" />
     </button>
 
     <!-- Dashboard Overlay -->
