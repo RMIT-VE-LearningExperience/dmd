@@ -81,6 +81,10 @@
     transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: none;
     border-radius: 0 0 0 32px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .nav-drawer.open {
@@ -119,6 +123,7 @@
     display: flex;
     align-items: stretch;
     justify-content: space-between;
+    flex: 0 0 auto;
     min-height: 52px;
     color: #1f4888;
     text-decoration: none;

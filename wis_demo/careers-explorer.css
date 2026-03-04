@@ -1305,6 +1305,37 @@ body {
     transform: translate(-50%, -50%) scale(1);
 }
 
+/* Embed mode: render only the career popup for iframe use (Explore Stories) */
+body.embed-popup-mode {
+    background: transparent;
+    overflow: hidden;
+}
+
+body.embed-popup-mode > :not(#infoPanel):not(#infoPanelOverlay):not(#backBtn):not(script) {
+    display: none !important;
+}
+
+body.embed-popup-mode .info-panel-overlay {
+    display: none !important;
+}
+
+body.embed-popup-mode .info-panel {
+    width: min(1370px, calc(100vw - 24px));
+    height: min(700px, calc(100vh - 24px));
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+}
+
+@media (max-width: 768px) {
+    body.embed-popup-mode .info-panel {
+        width: calc(100vw - 12px);
+        height: calc(100vh - 12px);
+        max-width: calc(100vw - 12px);
+        max-height: calc(100vh - 12px);
+        border-radius: 16px;
+    }
+}
+
 /* ===================================
    CLOSE BUTTON
    =================================== */

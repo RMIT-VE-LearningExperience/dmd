@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="nav.css?v=1.1.5">
+    <link rel="stylesheet" href="nav.css?v=1.1.6">
     <style>
         :root {
             --navy: #234a87;
@@ -320,6 +320,59 @@
 
         .stories-footer img { height: 44px; width: auto; }
 
+        .story-popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(12, 22, 44, 0.66);
+            backdrop-filter: blur(2px);
+            z-index: 2500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+
+        .story-popup-overlay.visible {
+            display: flex;
+        }
+
+        .story-popup-shell {
+            position: relative;
+            width: min(1410px, calc(100vw - 36px));
+            height: min(94vh, 960px);
+            border-radius: 22px;
+            overflow: hidden;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .story-popup-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: transparent;
+        }
+
+        .story-popup-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1f4888;
+            font: 800 24px/1 'Inter', sans-serif;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        body.story-popup-open {
+            overflow: hidden;
+        }
+
         @media (max-width: 1024px) {
             body { padding: 22px 14px; }
             .menu-btn { top: 14px; right: 14px; }
@@ -332,6 +385,16 @@
             .story-role { font-size: 22px; min-height: 56px; }
             .story-quote { font-size: 20px; min-height: 120px; }
             .story-read { font-size: 22px; }
+            .story-popup-overlay { padding: 8px; }
+            .story-popup-shell {
+                width: calc(100vw - 12px);
+                height: calc(100vh - 12px);
+                border-radius: 14px;
+            }
+            .story-popup-close {
+                top: 8px;
+                right: 8px;
+            }
         }
     </style>
 </head>
@@ -406,6 +469,13 @@
         </footer>
     </main>
 
+    <div class="story-popup-overlay" id="storyPopupOverlay" hidden>
+        <div class="story-popup-shell" role="dialog" aria-modal="true" aria-label="Career details">
+            <button class="story-popup-close" id="storyPopupClose" aria-label="Close popup">×</button>
+            <iframe class="story-popup-frame" id="storyPopupFrame" title="Career details"></iframe>
+        </div>
+    </div>
+
     <script src="nav.js?v=1.0.0"></script>
     <script>
         const skillCategories = {
@@ -439,7 +509,39 @@
         const storyCategory = document.getElementById('storyCategory');
         const storiesGrid = document.getElementById('storiesGrid');
         const storiesEmpty = document.getElementById('storiesEmpty');
+        const storyPopupOverlay = document.getElementById('storyPopupOverlay');
+        const storyPopupClose = document.getElementById('storyPopupClose');
+        const storyPopupFrame = document.getElementById('storyPopupFrame');
         let videoRoles = [];
+        let lastReadButton = null;
+
+        function openStoryPopup(roleName, triggerBtn) {
+            if (!roleName || !storyPopupOverlay || !storyPopupFrame) return;
+
+            lastReadButton = triggerBtn || null;
+            const params = new URLSearchParams({
+                openCareer: roleName,
+                embedPopup: '1'
+            });
+            storyPopupFrame.src = `career-explorer.html?${params.toString()}`;
+            storyPopupOverlay.hidden = false;
+            storyPopupOverlay.classList.add('visible');
+            document.body.classList.add('story-popup-open');
+            if (storyPopupClose) storyPopupClose.focus();
+        }
+
+        function closeStoryPopup() {
+            if (!storyPopupOverlay || !storyPopupFrame) return;
+            storyPopupOverlay.classList.remove('visible');
+            storyPopupOverlay.hidden = true;
+            document.body.classList.remove('story-popup-open');
+            storyPopupFrame.src = 'about:blank';
+
+            if (lastReadButton && typeof lastReadButton.focus === 'function') {
+                lastReadButton.focus();
+            }
+            lastReadButton = null;
+        }
 
         function categorizeSkill(skill) {
             for (const [category, list] of Object.entries(skillCategories)) {
@@ -515,13 +617,37 @@
                 btn.addEventListener('click', () => {
                     const role = videoRoles.find((item) => item.name === btn.dataset.role);
                     if (!role) return;
-                    window.location.href = `career-explorer.html?openCareer=${encodeURIComponent(role.name)}`;
+                    openStoryPopup(role.name, btn);
                 });
             });
         }
 
         storySearch.addEventListener('input', renderStories);
         storyCategory.addEventListener('change', renderStories);
+
+        if (storyPopupClose) {
+            storyPopupClose.addEventListener('click', closeStoryPopup);
+        }
+
+        if (storyPopupOverlay) {
+            storyPopupOverlay.addEventListener('click', (event) => {
+                if (event.target === storyPopupOverlay) {
+                    closeStoryPopup();
+                }
+            });
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && storyPopupOverlay && !storyPopupOverlay.hidden) {
+                closeStoryPopup();
+            }
+        });
+
+        window.addEventListener('message', (event) => {
+            if (!storyPopupFrame || event.source !== storyPopupFrame.contentWindow) return;
+            if (!event.data || event.data.type !== 'closeCareerPopup') return;
+            closeStoryPopup();
+        });
 
         async function initStories() {
             try {

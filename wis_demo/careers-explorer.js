@@ -98,6 +98,12 @@ function getSkillTintColor(category, strength = 0.3) {
     return `rgb(${rr}, ${gg}, ${bb})`;
 }
 
+const pageURLParams = new URLSearchParams(window.location.search);
+const isEmbedPopup = pageURLParams.get('embedPopup') === '1';
+if (isEmbedPopup) {
+    document.body.classList.add('embed-popup-mode');
+}
+
 // Function to categorize a skill
 function categorizeSkill(skill) {
     for (const [category, skills] of Object.entries(skillCategories)) {
@@ -1211,10 +1217,7 @@ function setupExpandableSections() {
     // Setup overlay click to close panel
     const overlay = document.getElementById('infoPanelOverlay');
     if (overlay) {
-        overlay.addEventListener('click', () => {
-            infoPanel.classList.remove('visible');
-            overlay.classList.remove('visible');
-        });
+        overlay.addEventListener('click', () => closeInfoPanel());
     }
 }
 
@@ -1669,6 +1672,11 @@ if (compareActionBtn) {
 
 // Event Listeners
 function closeInfoPanel() {
+    if (isEmbedPopup && window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'closeCareerPopup' }, '*');
+        return;
+    }
+
     infoPanel.classList.remove('visible');
     const overlay = document.getElementById('infoPanelOverlay');
     if (overlay) overlay.classList.remove('visible');
@@ -1792,8 +1800,7 @@ function loadQuizResultsFromURL() {
 // Open a specific career popup when passed via URL:
 // career-explorer.html?openCareer=Quantity%20Surveyor
 function openCareerFromURLParam() {
-    const params = new URLSearchParams(window.location.search);
-    const openCareerParam = params.get('openCareer');
+    const openCareerParam = pageURLParams.get('openCareer');
     if (!openCareerParam || !careersData || !careersData.roles) return;
 
     const targetName = openCareerParam.trim().toLowerCase();
@@ -1801,7 +1808,7 @@ function openCareerFromURLParam() {
     if (!career) return;
 
     // Ensure we are in card view when opening from deep-link.
-    if (currentView !== 'cards') {
+    if (!isEmbedPopup && currentView !== 'cards') {
         switchView('cards');
     }
 
