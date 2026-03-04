@@ -932,7 +932,13 @@ body {
 
 .card-view.compare-mode .career-card:hover {
     box-shadow: none;
-    transform: translateY(-4px);
+    transform: translateY(-8px);
+}
+
+.card-view.compare-mode .career-card {
+    border-radius: 16px 0 16px 16px;
+    overflow: clip;
+    overflow-clip-margin: 14px;
 }
 
 .career-card-body {
@@ -1001,6 +1007,8 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: white;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
 }
 
 .career-card-category svg {
@@ -2214,10 +2222,10 @@ body {
    =================================== */
 .compare-btn {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 44px;
-    height: 44px;
+    top: -12px;
+    right: -12px;
+    width: 35px;
+    height: 35px;
     background: #ffffff;
     color: transparent;
     border: 4px solid #1f4d8f;
@@ -2254,14 +2262,26 @@ body {
 }
 
 .compare-btn.selected::before {
-    content: '✓';
-    color: #ffffff;
+    content: '';
+    width: 22px;
+    height: 22px;
+    background: url('/images/tick.svg') center / contain no-repeat;
 }
 
 /* Card selected states */
 .career-card.selected {
-    border: 4px solid #1f4d8f;
+    border: none;
     box-shadow: none;
+}
+
+.career-card.selected::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 4px solid #1f4d8f;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 3;
 }
 
 .compare-action-btn.active {
@@ -2607,8 +2627,10 @@ body {
     }
 
     .compare-btn {
-        width: 38px;
-        height: 38px;
+        width: 35px;
+        height: 35px;
+        top: -10px;
+        right: -10px;
     }
 }
 

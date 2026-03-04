@@ -314,6 +314,9 @@ function switchView(view) {
     }
 
     if (view === 'floating') {
+        clearComparison();
+        setCompareMode(false);
+
         // First remove active from card view to trigger fade-out
         cardView.classList.remove('active');
         if (stackView) {
@@ -1616,7 +1619,6 @@ document.addEventListener('keydown', (e) => {
 
 closeComparisonBtn.addEventListener('click', () => {
     clearComparison();
-    setCompareMode(false);
 });
 
 pauseBtn.addEventListener('click', () => {
