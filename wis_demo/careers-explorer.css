@@ -992,7 +992,7 @@ body {
     color: #4a5568;
     line-height: 1.6;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -1006,7 +1006,7 @@ body {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: white;
+    color: #000000;
     border-bottom-left-radius: 16px;
     border-bottom-right-radius: 16px;
 }
@@ -1017,20 +1017,36 @@ body {
     flex-shrink: 0;
 }
 
-.career-card-category.cat-blue {
-    background: #2b5ea7;
+.career-card-category-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
 }
 
-.career-card-category.cat-green {
-    background: #2d8a6e;
+.career-card-category.cat-technical {
+    background: #7EA67E;
 }
 
-.career-card-category.cat-purple {
-    background: #6b52ae;
+.career-card-category.cat-leadership {
+    background: #E46F5B;
 }
 
-.career-card-category.cat-orange {
-    background: #c47f17;
+.career-card-category.cat-communication {
+    background: #659BB0;
+}
+
+.career-card-category.cat-safety {
+    background: #E8C66C;
+}
+
+.career-card-category.cat-physical {
+    background: #E39F58;
+}
+
+.career-card-category.cat-professional {
+    background: #A978B5;
 }
 
 .quiz-match-badge {
@@ -1383,6 +1399,14 @@ body {
     color: white;
 }
 
+.work-style-icon {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    flex-shrink: 0;
+}
+
 /* ===================================
    PANEL CONTENT
    =================================== */
@@ -1413,6 +1437,113 @@ body {
     margin-bottom: 24px;
 }
 
+.video-insight-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: #f3d4cf;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.video-insight-icon {
+    width: 34px;
+    height: 34px;
+    color: #e46f5b;
+    flex-shrink: 0;
+}
+
+.video-insight-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a365d;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.video-feature {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.video-thumb-wrap {
+    position: relative;
+    display: block;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.video-thumb {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+}
+
+.video-thumb-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.18);
+}
+
+.video-thumb-play::before {
+    content: '';
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.video-thumb-play::after {
+    content: '';
+    position: absolute;
+    border-style: solid;
+    border-width: 16px 0 16px 24px;
+    border-color: transparent transparent transparent #ffffff;
+    margin-left: 6px;
+}
+
+.video-quote {
+    margin: 18px 0 0;
+    font-size: 30px;
+    line-height: 0.7;
+    color: #1a365d;
+}
+
+.video-quote-text {
+    margin: 8px 0 0;
+    font-size: 16px;
+    line-height: 1.45;
+    color: #1a365d;
+}
+
+.video-read-more {
+    margin: 18px auto 0;
+    display: inline-block;
+    background: #e8b830;
+    color: #1a365d;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.video-read-more-wrap {
+    text-align: center;
+}
+
+.video-empty {
+    display: none;
+}
+
 .video-container iframe {
     width: 100%;
     height: 280px;
@@ -1421,25 +1552,16 @@ body {
 }
 
 .person-info {
-    margin-top: 16px;
-    padding: 16px;
-    background: rgba(26, 54, 93, 0.05);
-    border-radius: 8px;
-    border-left: 3px solid #e8b830;
+    display: none;
 }
 
 .person-name {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1a365d;
-    margin: 0 0 8px 0;
+    display: none;
 }
 
 .person-bio {
-    font-size: 14px;
-    line-height: 1.6;
-    color: #4a5568;
     margin: 0;
+    display: none;
 }
 
 /* ===================================

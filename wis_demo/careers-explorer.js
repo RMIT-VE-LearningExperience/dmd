@@ -541,19 +541,17 @@ function animate() {
 }
 
 // Card View Functions
-// Get category color class for a career
-function getCategoryColorClass(career) {
-    const color = getCareerColor(career.name);
-    return color === 'blue' ? 'cat-blue' : 'cat-green';
-}
-
-// Get primary category for a career
-function getPrimaryCategory(career) {
-    if (career.work_style) return career.work_style;
-    if (career.core_skills && career.core_skills.length > 0) {
-        return categorizeSkill(career.core_skills[0]);
-    }
-    return 'Professional';
+// Match card skill-strip color to filter category colors
+function getSkillCategoryColorClass(category) {
+    const classMap = {
+        "Technical": "cat-technical",
+        "Leadership & Management": "cat-leadership",
+        "Communication & Organisation": "cat-communication",
+        "Safety & Compliance": "cat-safety",
+        "Physical & Trade": "cat-physical",
+        "Professional & Analytical": "cat-professional"
+    };
+    return classMap[category] || "cat-technical";
 }
 
 function createCareerCard(career, matchingLevels = null) {
@@ -573,24 +571,13 @@ function createCareerCard(career, matchingLevels = null) {
     const header = document.createElement('div');
     header.className = 'career-card-header';
 
-    // Use skill icon with colored background
+    // Use primary skill category data for card labeling and icon
     const skillData = getPrimarySkillIconForCareer(career);
-    const dot = document.createElement('div');
-    dot.className = 'career-card-dot';
-    dot.style.backgroundColor = skillData.color;
-
-    const iconImg = document.createElement('img');
-    iconImg.src = skillData.icon;
-    iconImg.alt = skillData.category;
-    iconImg.style.width = '100%';
-    iconImg.style.height = '100%';
-    dot.appendChild(iconImg);
 
     const title = document.createElement('div');
     title.className = 'career-card-title';
     title.textContent = career.name;
 
-    header.appendChild(dot);
     header.appendChild(title);
 
     const overview = document.createElement('div');
@@ -640,9 +627,19 @@ function createCareerCard(career, matchingLevels = null) {
 
     // Category strip at bottom
     const catStrip = document.createElement('div');
-    const catColor = getCategoryColorClass(career);
+    const catColor = getSkillCategoryColorClass(skillData.category);
     catStrip.className = `career-card-category ${catColor}`;
-    catStrip.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/></svg> <span>${getPrimaryCategory(career)}</span>`;
+
+    const stripIcon = document.createElement('img');
+    stripIcon.className = 'career-card-category-icon';
+    stripIcon.src = skillData.icon;
+    stripIcon.alt = skillData.category;
+
+    const stripLabel = document.createElement('span');
+    stripLabel.textContent = skillData.category;
+
+    catStrip.appendChild(stripIcon);
+    catStrip.appendChild(stripLabel);
     card.appendChild(catStrip);
 
     card.appendChild(compareBtn);
@@ -1148,6 +1145,14 @@ function getYouTubeEmbedUrl(url) {
     return null;
 }
 
+function getYouTubeVideoId(url) {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) return match[2];
+    return null;
+}
+
 // Function to toggle expandable bar
 function toggleExpandBar(bar) {
     const content = bar.nextElementSibling;
@@ -1221,6 +1226,7 @@ function goBackCareer() {
 // Populate career panel with data (shared by showCareerInfo and goBackCareer)
 function populateCareerPanel(career) {
     document.getElementById('careerTitle').textContent = career.name;
+    const skillData = getPrimarySkillIconForCareer(career);
 
     // Set salary badge
     const salaryText = document.getElementById('salaryText');
@@ -1229,41 +1235,58 @@ function populateCareerPanel(career) {
     }
 
     // Set work style badge
-    const workStyleText = document.getElementById('workStyleText');
-    if (workStyleText) {
-        workStyleText.textContent = getWorkStyle(career);
+    const workStyleBadge = document.getElementById('workStyleBadge');
+    if (workStyleBadge) {
+        workStyleBadge.innerHTML = `
+            <img src="${skillData.icon}" alt="${skillData.category}" class="work-style-icon">
+            <span id="workStyleText">${getWorkStyle(career)}</span>
+        `;
     }
 
     // Load the head icon SVG
     const headerIcon = document.getElementById('headerIcon');
-    headerIcon.innerHTML = '<img src="images/analytical.svg" alt="Career icon">';
+    headerIcon.innerHTML = `<img src="${skillData.icon}" alt="${skillData.category} icon">`;
 
-    // Video iframe with person info
+    // Video preview section (only shown if career has video URL)
     const videoContainer = document.getElementById('videoContainer');
     if (career.video_url) {
-        const embedUrl = getYouTubeEmbedUrl(career.video_url);
-        if (embedUrl) {
-            let videoHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+        const videoId = getYouTubeVideoId(career.video_url);
+        const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
+        const sourceUrl = career.video_url;
+        const quoteText = career.person_bio
+            ? `${career.person_bio.slice(0, 160).trim()}...`
+            : 'See the video to learn more about this role and hear real experiences from industry.';
 
-            // Add "Meet [Name]" and bio if available
-            if (career.person_name || career.person_bio) {
-                videoHTML += '<div class="person-info">';
-                if (career.person_name) {
-                    videoHTML += `<h3 class="person-name">Meet ${career.person_name}</h3>`;
-                }
-                if (career.person_bio) {
-                    videoHTML += `<p class="person-bio">${career.person_bio}</p>`;
-                }
-                videoHTML += '</div>';
-            }
+        videoContainer.innerHTML = `
+            <div class="video-insight-banner">
+                <svg class="video-insight-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor" d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6zm6.5 1.5v6L15 10.5 9.5 7.5zM3 19h18v2H3v-2z"/>
+                </svg>
+                <p class="video-insight-text">See the video to learn more about the role and discover what a career in this field involves.</p>
+            </div>
+            <div class="video-feature">
+                <a class="video-thumb-wrap" href="${sourceUrl}" target="_blank" rel="noopener noreferrer">
+                    <img class="video-thumb" src="${thumbUrl}" alt="Video preview for ${career.name}">
+                    <span class="video-thumb-play"></span>
+                </a>
+                <p class="video-quote">“</p>
+                <p class="video-quote-text">${quoteText}</p>
+                <div class="video-read-more-wrap">
+                    <button class="video-read-more" type="button">Read More</button>
+                </div>
+            </div>
+        `;
+        videoContainer.style.display = 'block';
 
-            videoContainer.innerHTML = videoHTML;
-            videoContainer.style.display = 'block';
-        } else {
-            videoContainer.style.display = 'none';
+        const readMoreBtn = videoContainer.querySelector('.video-read-more');
+        if (readMoreBtn) {
+            readMoreBtn.addEventListener('click', () => {
+                window.open(sourceUrl, '_blank', 'noopener,noreferrer');
+            });
         }
     } else {
         videoContainer.style.display = 'none';
+        videoContainer.innerHTML = '';
     }
 
     document.getElementById('careerOverview').textContent = career.overview;
