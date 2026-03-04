@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="careers-explorer.css?v=1.2.6">
+    <link rel="stylesheet" href="careers-explorer.css?v=1.3.8">
     <link rel="stylesheet" href="nav.css?v=1.1.5">
 
     <!-- Hotjar Tracking Code for WIS - Construction game -->
@@ -149,11 +149,13 @@
                 <h2 id="careerTitle"></h2>
                 <div class="panel-badges">
                     <div class="badge badge-salary" id="careerSalary">
-                        <svg viewBox="0 0 24 24" width="14" height="14"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" fill="currentColor"/></svg>
+                        <img src="/images/dollar.svg" alt="Salary" class="badge-leading-icon">
                         <span id="salaryText"></span>
                     </div>
                     <div class="badge badge-style" id="workStyleBadge">
-                        <svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="currentColor"/></svg>
+                        <svg class="badge-leading-icon" viewBox="0 0 24 24" aria-hidden="true" style="color: #a978b5;">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+                        </svg>
                         <span id="workStyleText"></span>
                     </div>
                 </div>
@@ -162,12 +164,12 @@
 
         <!-- Content -->
         <div class="panel-content">
+            <div class="video-container" id="videoContainer" style="display: none;"></div>
+
             <div class="section section-about">
-                <div class="section-title-text">About</div>
+                <div class="section-title-text">About the role</div>
                 <p class="overview-text" id="careerOverview"></p>
             </div>
-
-            <div class="video-container" id="videoContainer" style="display: none;"></div>
 
             <div class="expandable-bars">
                 <div class="expand-bar" id="educationBar">
@@ -333,7 +335,7 @@
         </div>
     </div>
 
-    <script src="careers-explorer.js?v=2.6.6"></script>
+    <script src="careers-explorer.js?v=2.7.6"></script>
     <script>
     (function() {
         const fab = document.getElementById('gamesFab');

@@ -74,6 +74,30 @@ const skillColorMap = {
     "Professional & Analytical": "rgba(169, 120, 181, 0.3)" // #A978B5 at 30%
 };
 
+// Solid base colors for skill categories (used for tints on dark backgrounds)
+const skillHexColorMap = {
+    "Technical": "#7EA67E",
+    "Leadership & Management": "#E46F5B",
+    "Communication & Organisation": "#659BB0",
+    "Safety & Compliance": "#E8C66C",
+    "Physical & Trade": "#E39F58",
+    "Professional & Analytical": "#A978B5"
+};
+
+function getSkillTintColor(category, strength = 0.3) {
+    const hex = skillHexColorMap[category] || "#7EA67E";
+    const clean = hex.replace('#', '');
+    const r = parseInt(clean.slice(0, 2), 16);
+    const g = parseInt(clean.slice(2, 4), 16);
+    const b = parseInt(clean.slice(4, 6), 16);
+
+    // Build an opaque "30% skill on white" tint so underlying header color doesn't bleed through.
+    const rr = Math.round(255 - (255 - r) * strength);
+    const gg = Math.round(255 - (255 - g) * strength);
+    const bb = Math.round(255 - (255 - b) * strength);
+    return `rgb(${rr}, ${gg}, ${bb})`;
+}
+
 // Function to categorize a skill
 function categorizeSkill(skill) {
     for (const [category, skills] of Object.entries(skillCategories)) {
@@ -462,7 +486,6 @@ function createFloatingCareerItem(career, index, total) {
     name.textContent = career.name;
 
     item.appendChild(dot);
-    item.appendChild(name);
 
     // Do NOT add quiz match badge (percentage) - hidden via CSS
 
@@ -470,7 +493,10 @@ function createFloatingCareerItem(career, index, total) {
     if (career.video_url) {
         const playIcon = document.createElement('div');
         playIcon.className = 'video-play-icon';
+        item.appendChild(name);
         item.appendChild(playIcon);
+    } else {
+        item.appendChild(name);
     }
 
     const pos = getRandomPosition(index, total);
@@ -1158,6 +1184,11 @@ function toggleExpandBar(bar) {
     const content = bar.nextElementSibling;
     if (!content || !content.classList.contains('expand-content')) return;
 
+    const alwaysOpenBars = new Set(['pathwayBar']);
+    if (alwaysOpenBars.has(bar.id) && bar.classList.contains('active')) {
+        return;
+    }
+
     bar.classList.toggle('active');
     content.classList.toggle('active');
 }
@@ -1237,15 +1268,21 @@ function populateCareerPanel(career) {
     // Set work style badge
     const workStyleBadge = document.getElementById('workStyleBadge');
     if (workStyleBadge) {
+        const skillColor = skillHexColorMap[skillData.category] || '#A978B5';
         workStyleBadge.innerHTML = `
-            <img src="${skillData.icon}" alt="${skillData.category}" class="work-style-icon">
-            <span id="workStyleText">${getWorkStyle(career)}</span>
+            <svg class="badge-leading-icon" viewBox="0 0 24 24" aria-hidden="true" style="color: ${skillColor};">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+            </svg>
+            <span id="workStyleText">${skillData.category}</span>
         `;
+        workStyleBadge.style.background = skillColor;
+        workStyleBadge.style.color = '#000000';
     }
 
     // Load the head icon SVG
     const headerIcon = document.getElementById('headerIcon');
     headerIcon.innerHTML = `<img src="${skillData.icon}" alt="${skillData.category} icon">`;
+    headerIcon.style.background = getSkillTintColor(skillData.category, 0.3);
 
     // Video preview section (only shown if career has video URL)
     const videoContainer = document.getElementById('videoContainer');
@@ -1253,36 +1290,53 @@ function populateCareerPanel(career) {
         const videoId = getYouTubeVideoId(career.video_url);
         const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
         const sourceUrl = career.video_url;
-        const quoteText = career.person_bio
-            ? `${career.person_bio.slice(0, 160).trim()}...`
+        const personName = (career.person_name && career.person_name.trim())
+            ? career.person_name.trim()
+            : career.name;
+        const fullBioText = (career.person_bio && career.person_bio.trim())
+            ? career.person_bio.trim()
             : 'See the video to learn more about this role and hear real experiences from industry.';
+        const hasExpandableBio = fullBioText.length > 180;
+        const shortBioText = hasExpandableBio
+            ? `${fullBioText.slice(0, 180).trim()}...`
+            : fullBioText;
 
         videoContainer.innerHTML = `
-            <div class="video-insight-banner">
-                <svg class="video-insight-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fill="currentColor" d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6zm6.5 1.5v6L15 10.5 9.5 7.5zM3 19h18v2H3v-2z"/>
-                </svg>
-                <p class="video-insight-text">See the video to learn more about the role and discover what a career in this field involves.</p>
+            <div class="video-intro">
+                <h3 class="video-meet-title">Meet ${personName}!</h3>
+                <p class="video-bio-text"></p>
+                <div class="video-read-more-wrap">
+                    <button class="video-read-more" type="button">Read More</button>
+                </div>
             </div>
             <div class="video-feature">
                 <a class="video-thumb-wrap" href="${sourceUrl}" target="_blank" rel="noopener noreferrer">
                     <img class="video-thumb" src="${thumbUrl}" alt="Video preview for ${career.name}">
                     <span class="video-thumb-play"></span>
                 </a>
-                <p class="video-quote">“</p>
-                <p class="video-quote-text">${quoteText}</p>
-                <div class="video-read-more-wrap">
-                    <button class="video-read-more" type="button">Read More</button>
-                </div>
             </div>
         `;
         videoContainer.style.display = 'block';
 
+        const bioTextElement = videoContainer.querySelector('.video-bio-text');
+        if (bioTextElement) {
+            bioTextElement.textContent = shortBioText;
+        }
+
         const readMoreBtn = videoContainer.querySelector('.video-read-more');
         if (readMoreBtn) {
-            readMoreBtn.addEventListener('click', () => {
-                window.open(sourceUrl, '_blank', 'noopener,noreferrer');
-            });
+            if (!hasExpandableBio) {
+                readMoreBtn.hidden = true;
+            } else {
+                let expanded = false;
+                readMoreBtn.addEventListener('click', () => {
+                    expanded = !expanded;
+                    if (bioTextElement) {
+                        bioTextElement.textContent = expanded ? fullBioText : shortBioText;
+                    }
+                    readMoreBtn.textContent = expanded ? 'Show Less' : 'Read More';
+                });
+            }
         }
     } else {
         videoContainer.style.display = 'none';
@@ -1403,13 +1457,20 @@ function populateCareerPanel(career) {
         }
     });
 
-    // Open the first expandable bar (EDUCATION) by default
-    const firstBar = document.getElementById('educationBar');
-    if (firstBar) {
-        firstBar.classList.add('active');
-        const firstContent = firstBar.nextElementSibling;
-        if (firstContent && firstContent.classList.contains('expand-content')) {
-            firstContent.classList.add('active');
+    // Always-open sections
+    const educationBar = document.getElementById('educationBar');
+    if (educationBar) {
+        educationBar.classList.add('active');
+        const educationContent = educationBar.nextElementSibling;
+        if (educationContent && educationContent.classList.contains('expand-content')) {
+            educationContent.classList.add('active');
+        }
+    }
+
+    if (pathwayBar && pathwayBar.style.display !== 'none') {
+        pathwayBar.classList.add('active');
+        if (pathwayContent && pathwayContent.classList.contains('expand-content')) {
+            pathwayContent.classList.add('active');
         }
     }
 

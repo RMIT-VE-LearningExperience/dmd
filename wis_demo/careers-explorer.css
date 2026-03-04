@@ -155,6 +155,8 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    animation: explorePulse 2.6s ease-in-out infinite;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.18);
 }
 
 .explore-center:hover {
@@ -168,6 +170,15 @@ body {
 
 .explore-center:active {
     transform: translate(-50%, -50%) scale(0.98);
+}
+
+@keyframes explorePulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.16);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.04);
+    }
 }
 
 .explore-center:focus-visible,
@@ -287,9 +298,7 @@ body {
 }
 
 .video-play-icon {
-    position: absolute;
-    bottom: 4px;
-    left: 4px;
+    position: static;
     background: #ff4757;
     color: white;
     width: 20px;
@@ -300,6 +309,8 @@ body {
     justify-content: center;
     font-size: 10px;
     box-shadow: none;
+    margin-left: 2px;
+    flex-shrink: 0;
 }
 
 .video-play-icon::before {
@@ -1063,19 +1074,20 @@ body {
     background: #ff4757;
     border-radius: 50%;
     box-shadow: none;
+    z-index: 1;
 }
 
 .career-card.has-video .career-card-body::before {
     content: '';
     position: absolute;
-    top: 23px;
-    right: 7px;
+    top: 28px;
+    right: 25px;
     width: 0;
     height: 0;
-    border-left: 8px solid white;
+    border-left: 7px solid #ffffff;
     border-top: 5px solid transparent;
     border-bottom: 5px solid transparent;
-    z-index: 1;
+    z-index: 2;
 }
 
 .career-card-body {
@@ -1127,11 +1139,11 @@ body {
     position: fixed;
     bottom: 20px;
     left: 140px;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     background: rgba(255, 255, 255, 0.95);
     border: none;
-    border-radius: 8px;
+    border-radius: 20px;
     box-shadow: none;
     cursor: pointer;
     display: none;
@@ -1325,7 +1337,7 @@ body {
 .panel-header {
     background: #1a365d;
     color: white;
-    padding: 28px 32px;
+    padding: 0px;
     position: relative;
     display: flex;
     align-items: center;
@@ -1334,27 +1346,28 @@ body {
 }
 
 .panel-header-icon {
-    width: 80px;
-    height: 80px;
-    background: rgba(160, 140, 200, 0.35);
-    border-radius: 50%;
+       width: 120px;
+    height: 140px;
+    background: #d8e6d8;
+    border-radius: 0%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    padding: 14px;
+    padding: 20px;
 }
 
 .panel-header-icon img,
 .panel-header-icon svg {
     width: 100%;
     height: 100%;
-    filter: brightness(0) invert(1);
+    filter: none;
 }
 
 .panel-header-text {
     flex: 1;
     min-width: 0;
+    padding: 30px 20px; 
 }
 
 .panel-header-text h2 {
@@ -1375,23 +1388,26 @@ body {
 
 .panel-badges {
     display: flex;
-    gap: 10px;
+    gap: 60px;
     flex-wrap: wrap;
+    padding-left: 30px;
 }
 
 .badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 14px;
-    border-radius: 20px;
+    padding: 10px 24px;
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
+    position: relative;
+    color: #000000;
 }
 
 .badge-salary {
     background: #e8b830;
-    color: #1a365d;
+    color: #000000;
 }
 
 .badge-style {
@@ -1399,12 +1415,15 @@ body {
     color: white;
 }
 
-.work-style-icon {
-    width: 14px;
-    height: 14px;
+.badge-leading-icon {
+    position: absolute;
+    left: -35px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
     object-fit: contain;
-    filter: brightness(0) invert(1);
-    flex-shrink: 0;
+    pointer-events: none;
 }
 
 /* ===================================
@@ -1437,29 +1456,23 @@ body {
     margin-bottom: 24px;
 }
 
-.video-insight-banner {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 18px;
-    background: #f3d4cf;
-    border-radius: 10px;
-    margin-bottom: 16px;
+.video-intro {
+    margin-bottom: 14px;
 }
 
-.video-insight-icon {
-    width: 34px;
-    height: 34px;
-    color: #e46f5b;
-    flex-shrink: 0;
-}
-
-.video-insight-text {
-    font-size: 16px;
-    font-weight: 500;
+.video-meet-title {
+    margin: 0 0 8px;
+    font-size: 24px;
+    line-height: 1.2;
+    font-weight: 800;
     color: #1a365d;
-    line-height: 1.4;
+}
+
+.video-bio-text {
     margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #1a365d;
 }
 
 .video-feature {
@@ -1506,20 +1519,6 @@ body {
     border-width: 16px 0 16px 24px;
     border-color: transparent transparent transparent #ffffff;
     margin-left: 6px;
-}
-
-.video-quote {
-    margin: 18px 0 0;
-    font-size: 30px;
-    line-height: 0.7;
-    color: #1a365d;
-}
-
-.video-quote-text {
-    margin: 8px 0 0;
-    font-size: 16px;
-    line-height: 1.45;
-    color: #1a365d;
 }
 
 .video-read-more {
@@ -1618,16 +1617,31 @@ body {
     transform: rotate(90deg);
 }
 
+#pathwayBar .expand-bar-icon {
+    display: none;
+}
+
 .expand-content {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.35s ease;
     padding: 0 8px;
+    border: 0 solid transparent;
+    border-radius: 14px;
+    background: transparent;
 }
 
 .expand-content.active {
     max-height: 600px;
-    padding: 14px 8px;
+    padding: 18px 16px;
+    border: 3px solid #a978b5;
+    background: #ffffff;
+}
+
+#progressionContent.expand-content.active {
+    border: none;
+    background: transparent;
+    padding: 8px 0;
 }
 
 /* ===================================
@@ -1733,9 +1747,9 @@ body {
 }
 
 .level-card {
-    background: #f7fafc;
-    border-left: 4px solid #7864b4;
-    border-radius: 8px;
+    background: #ffffff;
+    border: 3px solid #a978b5;
+    border-radius: 14px;
     overflow: hidden;
     transition: all 0.2s ease;
 }
@@ -1750,7 +1764,7 @@ body {
 }
 
 .level-header:hover {
-    background: #edf2f7;
+    background: rgba(169, 120, 181, 0.08);
 }
 
 .level-title {
