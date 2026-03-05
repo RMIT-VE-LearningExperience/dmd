@@ -77,11 +77,13 @@
             padding: 0 24px;
             background: linear-gradient(to right,
                 var(--salmon-soft) 0,
-                var(--salmon-soft) calc(100% - 172px),
-                #ecb2a8 calc(100% - 172px),
-                #e39a8b calc(100% - 114px),
+                var(--salmon-soft) calc(100% - 168px),
+                #ecb2a8 calc(100% - 168px),
+                #ecb2a8 calc(100% - 112px),
+                #e39a8b calc(100% - 112px),
+                #e39a8b calc(100% - 56px),
                 #de8b7a calc(100% - 56px),
-                #da8778 100%);
+                #de8b7a 100%);
         }
 
         .video-top-icon {
@@ -109,13 +111,17 @@
         .hero-colors {
             margin: 26px auto 30px;
             display: flex;
-            width: fit-content;
-            gap: 6px;
+            width: min(100%, 420px);
+            gap: clamp(4px, 1vw, 6px);
+            justify-content: center;
         }
 
         .hero-colors span {
-            width: 54px;
-            height: 54px;
+            flex: 1 1 0;
+            max-width: 54px;
+            min-width: 0;
+            aspect-ratio: 1 / 1;
+            height: auto;
             border-radius: 6px;
         }
 
