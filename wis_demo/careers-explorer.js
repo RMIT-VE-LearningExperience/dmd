@@ -151,6 +151,7 @@ let compareModeActive = false;
 let videoFilterActive = false;
 let stackIndex = 0;
 let careerHistory = []; // Navigation history stack for back button
+let hoveredFloatingItem = null;
 
 // DOM Elements
 const floatingView = document.getElementById('floatingView');
@@ -178,6 +179,9 @@ const closeComparisonBtn = document.getElementById('closeComparisonBtn');
 const exploreCenter = document.getElementById('exploreCenter');
 const cardBtn = document.getElementById('cardBtn');
 const menuBtn = document.getElementById('menuBtn');
+const navSearchShell = document.getElementById('navSearchShell');
+const searchToggleBtn = document.getElementById('searchToggleBtn');
+const careerSearchInput = document.getElementById('careerSearch');
 
 function bindKeyboardActivate(element, handler) {
     if (!element) return;
@@ -186,6 +190,59 @@ function bindKeyboardActivate(element, handler) {
             e.preventDefault();
             handler();
         }
+    });
+}
+
+function setSearchExpanded(expanded, { focus = false } = {}) {
+    if (!navSearchShell) return;
+    navSearchShell.classList.toggle('expanded', expanded);
+
+    if (searchToggleBtn) {
+        searchToggleBtn.setAttribute('aria-label', expanded ? 'Search careers' : 'Open search');
+    }
+
+    if (expanded && focus && careerSearchInput) {
+        requestAnimationFrame(() => {
+            careerSearchInput.focus();
+            const valueLength = careerSearchInput.value.length;
+            careerSearchInput.setSelectionRange(valueLength, valueLength);
+        });
+    }
+
+    if (!expanded && careerSearchInput) {
+        careerSearchInput.blur();
+    }
+}
+
+if (searchToggleBtn && navSearchShell) {
+    searchToggleBtn.addEventListener('click', () => {
+        const isExpanded = navSearchShell.classList.contains('expanded');
+        if (!isExpanded) {
+            setSearchExpanded(true, { focus: true });
+            return;
+        }
+
+        if (careerSearchInput) {
+            careerSearchInput.focus();
+        }
+    });
+}
+
+if (careerSearchInput && navSearchShell) {
+    careerSearchInput.addEventListener('focus', () => {
+        setSearchExpanded(true);
+    });
+
+    careerSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            setSearchExpanded(false);
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!navSearchShell.classList.contains('visible')) return;
+        if (navSearchShell.contains(e.target)) return;
+        setSearchExpanded(false);
     });
 }
 
@@ -299,7 +356,6 @@ function updateRangeSlider() {
 }
 
 // Search input event listener
-const careerSearchInput = document.getElementById('careerSearch');
 if (careerSearchInput) {
     careerSearchInput.addEventListener('input', () => {
         console.log('🔍 Search input changed:', careerSearchInput.value);
@@ -333,6 +389,10 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
 
 function switchView(view) {
     currentView = view;
+
+    if (navSearchShell) {
+        navSearchShell.classList.add('visible');
+    }
 
     // Update card button icon based on current view
     if (cardBtn && cardBtn.querySelector('img')) {
@@ -522,7 +582,11 @@ function createFloatingCareerItem(career, index, total) {
     item.setAttribute('role', 'button');
     item.setAttribute('tabindex', '0');
     item.setAttribute('aria-label', `Open details for ${career.name}`);
-    const activateItem = () => {
+    const activateItem = (event) => {
+        const suppressUntil = parseInt(item.dataset.dragSuppressUntil || '0', 10);
+        if (event && event.type === 'click' && Date.now() < suppressUntil) {
+            return;
+        }
         if (selectedCareer) {
             selectedCareer.classList.remove('clicked');
         }
@@ -533,6 +597,91 @@ function createFloatingCareerItem(career, index, total) {
     item.addEventListener('click', activateItem);
     bindKeyboardActivate(item, activateItem);
 
+    item.addEventListener('mouseenter', () => {
+        hoveredFloatingItem = item;
+    });
+    item.addEventListener('mouseleave', () => {
+        if (hoveredFloatingItem === item) {
+            hoveredFloatingItem = null;
+        }
+    });
+    item.addEventListener('focus', () => {
+        hoveredFloatingItem = item;
+    });
+    item.addEventListener('blur', () => {
+        if (hoveredFloatingItem === item) {
+            hoveredFloatingItem = null;
+        }
+    });
+
+    // Drag to reposition while keeping orbit animation.
+    let pointerId = null;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+    let didDrag = false;
+    let isDragging = false;
+    const dragThreshold = 6;
+
+    const onPointerMove = (e) => {
+        if (!isDragging || e.pointerId !== pointerId) return;
+
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
+
+        if (!didDrag && Math.hypot(dx, dy) > dragThreshold) {
+            didDrag = true;
+            item.classList.add('dragging');
+        }
+
+        if (!didDrag) return;
+
+        item.style.left = `${startLeft + dx}px`;
+        item.style.top = `${startTop + dy}px`;
+    };
+
+    const endDrag = (e) => {
+        if (e.pointerId !== pointerId) return;
+
+        item.releasePointerCapture(pointerId);
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', endDrag);
+        window.removeEventListener('pointercancel', endDrag);
+        isDragging = false;
+
+        if (didDrag) {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const finalLeft = parseFloat(item.style.left || '0');
+            const finalTop = parseFloat(item.style.top || '0');
+            const dx = finalLeft - centerX;
+            const dy = finalTop - centerY;
+
+            item.dataset.radius = String(Math.max(120, Math.hypot(dx, dy)));
+            item.dataset.angle = String(Math.atan2(dy, dx));
+            item.dataset.dragSuppressUntil = String(Date.now() + 250);
+        }
+
+        item.classList.remove('dragging');
+        pointerId = null;
+    };
+
+    item.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        pointerId = e.pointerId;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        startLeft = parseFloat(item.style.left || '0');
+        startTop = parseFloat(item.style.top || '0');
+        didDrag = false;
+        isDragging = true;
+        item.setPointerCapture(pointerId);
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', endDrag);
+        window.addEventListener('pointercancel', endDrag);
+    });
+
     floatingContainer.appendChild(item);
     return item;
 }
@@ -540,6 +689,7 @@ function createFloatingCareerItem(career, index, total) {
 function initFloatingView() {
     floatingContainer.innerHTML = '';
     careerElements = [];
+    hoveredFloatingItem = null;
 
     filteredCareers.forEach((career, index) => {
         careerElements.push(createFloatingCareerItem(career, index, filteredCareers.length));
@@ -552,6 +702,11 @@ function animate() {
     if (!isPaused && currentView === 'floating') {
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
+        const repelRadius = 190;
+        const repelStrength = 42;
+        const easeFactor = 0.18;
+        const positions = new Map();
+        let hoveredPosition = null;
 
         careerElements.forEach(item => {
             let angle = parseFloat(item.dataset.angle);
@@ -564,8 +719,43 @@ function animate() {
             const x = centerX + Math.cos(angle) * radius;
             const y = centerY + Math.sin(angle) * radius;
 
-            item.style.left = `${x}px`;
-            item.style.top = `${y}px`;
+            positions.set(item, { x, y });
+
+            if (item === hoveredFloatingItem) {
+                hoveredPosition = { x, y };
+            }
+        });
+
+        careerElements.forEach(item => {
+            const base = positions.get(item);
+            if (!base) return;
+
+            const currentOffsetX = parseFloat(item.dataset.repelX || '0');
+            const currentOffsetY = parseFloat(item.dataset.repelY || '0');
+            let targetOffsetX = 0;
+            let targetOffsetY = 0;
+
+            if (hoveredPosition && item !== hoveredFloatingItem) {
+                const dx = base.x - hoveredPosition.x;
+                const dy = base.y - hoveredPosition.y;
+                const distance = Math.hypot(dx, dy);
+
+                if (distance > 0 && distance < repelRadius) {
+                    const influence = 1 - (distance / repelRadius);
+                    const force = repelStrength * influence * influence;
+                    targetOffsetX = (dx / distance) * force;
+                    targetOffsetY = (dy / distance) * force;
+                }
+            }
+
+            const nextOffsetX = currentOffsetX + (targetOffsetX - currentOffsetX) * easeFactor;
+            const nextOffsetY = currentOffsetY + (targetOffsetY - currentOffsetY) * easeFactor;
+
+            item.dataset.repelX = String(nextOffsetX);
+            item.dataset.repelY = String(nextOffsetY);
+
+            item.style.left = `${base.x + nextOffsetX}px`;
+            item.style.top = `${base.y + nextOffsetY}px`;
         });
     }
 

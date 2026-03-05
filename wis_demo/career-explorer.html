@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="careers-explorer.css?v=1.4.3">
+    <link rel="stylesheet" href="careers-explorer.css?v=1.4.12">
     <link rel="stylesheet" href="nav.css?v=1.1.6">
 
     <!-- Hotjar Tracking Code for WIS - Construction game -->
@@ -51,8 +51,18 @@
     <div class="bg-image" aria-hidden="true"></div>
     <div class="bg-overlay" aria-hidden="true"></div>
 
+    <a href="index.html" aria-label="Go to homepage">
+        <img class="page-corner-logo" src="images/logo.svg" alt="Construct Your Career logo">
+    </a>
+
     <!-- Top Navigation Icons -->
     <div class="top-nav-icons">
+        <div class="nav-search-shell" id="navSearchShell">
+            <input type="text" id="careerSearch" class="nav-search-input" placeholder="Search careers by name ..." autocomplete="off" />
+            <button class="nav-search-btn" id="searchToggleBtn" aria-label="Open search">
+                <img src="images/search.svg" alt="Search icon" />
+            </button>
+        </div>
         <button class="nav-icon-btn card-btn" id="cardBtn" aria-label="Card view">
             <img src="images/card.svg" alt="Card view icon" />
         </button>
@@ -80,14 +90,6 @@
 
     <!-- Card View -->
     <div class="card-view" id="cardView">
-        <!-- Top search bar -->
-        <div class="card-view-top-bar">
-            <div class="search-container">
-                <input type="text" id="careerSearch" class="search-input" placeholder="Search careers by name..." autocomplete="off" />
-                <img src="images/search.svg" alt="Search" class="search-icon" />
-            </div>
-        </div>
-
         <div class="filters-container">
             <!-- Skills Category Filter (moved above salary) -->
             <div class="filter-row">
@@ -340,7 +342,7 @@
         </div>
     </div>
 
-    <script src="careers-explorer.js?v=2.7.7"></script>
+    <script src="careers-explorer.js?v=2.7.10"></script>
     <script>
     (function() {
         const fab = document.getElementById('gamesFab');

@@ -251,7 +251,13 @@ function createResultCard(career, index) {
 
     const rank = document.createElement('div');
     rank.className = 'match-rank';
-    rank.textContent = getRankLabel(index);
+    const rankLabel = getRankLabel(index);
+    const rankMatch = rankLabel.match(/^(\d+)([a-z]+)$/i);
+    if (rankMatch) {
+        rank.innerHTML = `${rankMatch[1]}<sup>${rankMatch[2]}</sup>`;
+    } else {
+        rank.textContent = rankLabel;
+    }
     badge.appendChild(rank);
 
     // Right: career info wrapper (with colored left border)

@@ -16,6 +16,35 @@ html, body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+.home-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 6;
+    padding: 14px 20px;
+    background: #1f4888;
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    align-items: center;
+    color: #ffffff;
+    flex-wrap: wrap;
+    font-weight: 600;
+}
+
+.home-footer-divider {
+    width: 2px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.6);
+    flex: 0 0 auto;
+}
+
+.home-footer img {
+    height: 36px;
+    width: auto;
+}
+
 /* ===================================
    HERO SECTION - Full Viewport
    =================================== */
@@ -60,19 +89,19 @@ html, body {
    =================================== */
 .menu-btn {
     position: absolute;
-    top: 32px;
-    right: 32px;
+    top: 26px;
+    right: 26px;
     z-index: 10;
     background: rgba(255, 255, 255, 0.95);
     border: none;
     border-radius: 50%;
-    width: 52px;
-    height: 52px;
+    width: 68px;
+    height: 68px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 6px;
     cursor: pointer;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -85,8 +114,8 @@ html, body {
 
 .menu-btn span {
     display: block;
-    width: 22px;
-    height: 3px;
+    width: 28px;
+    height: 4px;
     background: #1a365d;
     border-radius: 2px;
     transition: all 0.3s ease;
@@ -272,10 +301,10 @@ html, body {
     }
 
     .menu-btn {
-        top: 20px;
-        right: 20px;
-        width: 46px;
-        height: 46px;
+        top: 14px;
+        right: 14px;
+        width: 68px;
+        height: 68px;
     }
 
     .hero-subtitle br {
@@ -318,14 +347,23 @@ html, body {
     }
 
     .menu-btn {
-        top: 16px;
-        right: 16px;
-        width: 42px;
-        height: 42px;
+        top: 12px;
+        right: 12px;
+        width: 68px;
+        height: 68px;
     }
 
     .hero-subtitle br {
         display: none;
+    }
+
+    .home-footer {
+        gap: 12px;
+        padding: 12px 14px;
+    }
+
+    .home-footer img {
+        height: 30px;
     }
 }
 

@@ -389,6 +389,13 @@ h2 {
     line-height: 1;
 }
 
+.match-rank sup {
+    font-size: 0.45em;
+    line-height: 0;
+    vertical-align: super;
+    margin-left: 1px;
+}
+
 /* Badge color tiers */
 .match-badge.tier-green {
     background: #48bb78;
