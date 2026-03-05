@@ -278,6 +278,16 @@ h2 {
     text-align: left;
     line-height: 1.5;
     font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.answer-icon {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    object-fit: contain;
 }
 
 .answer-btn:hover {

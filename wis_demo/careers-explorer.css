@@ -16,7 +16,7 @@ body {
 }
 
 .page-corner-logo {
-    position: fixed;
+    position: absolute;
     top: 20px;
     left: 20px;
     z-index: 1100;
@@ -265,6 +265,67 @@ body {
     overflow: hidden;
 }
 
+.career-item.quiz-top-match {
+    gap: 0;
+    padding: 0;
+    min-width: 290px;
+    border-radius: 20px;
+    border: 4px solid transparent;
+    background: #ffffff;
+}
+
+.career-item.quiz-top-match .quiz-rank-badge {
+    min-width: 82px;
+    height: 100%;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1;
+    color: #000000;
+}
+
+.career-item.quiz-top-match .quiz-rank-badge sup {
+    font-size: 0.45em;
+    line-height: 0;
+    vertical-align: super;
+    margin-left: 1px;
+}
+
+.career-item.quiz-top-match .career-name.top-ranked-name {
+    flex: 1;
+    padding: 12px 18px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1f4888;
+}
+
+.career-item.quiz-top-match.quiz-rank-1 {
+    border-color: #3CA63C;
+}
+
+.career-item.quiz-top-match.quiz-rank-2 {
+    border-color: #F5C942;
+}
+
+.career-item.quiz-top-match.quiz-rank-3 {
+    border-color: #F8782D;
+}
+
+.career-item.quiz-top-match.quiz-rank-1 .quiz-rank-badge {
+    background: #3CA63C;
+}
+
+.career-item.quiz-top-match.quiz-rank-2 .quiz-rank-badge {
+    background: #F5C942;
+}
+
+.career-item.quiz-top-match.quiz-rank-3 .quiz-rank-badge {
+    background: #F8782D;
+}
+
 .career-item.dragging {
     cursor: grabbing;
     z-index: 80;
@@ -313,6 +374,10 @@ body {
 
 .career-item.clicked .career-name {
     color: white;
+}
+
+.career-item.quiz-top-match.clicked .career-name.top-ranked-name {
+    color: #1f4888;
 }
 
 .video-play-icon {

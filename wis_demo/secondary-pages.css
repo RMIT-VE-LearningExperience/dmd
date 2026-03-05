@@ -52,7 +52,7 @@ body.page-secondary {
 }
 
 .page-corner-logo {
-    position: fixed;
+    position: absolute;
     top: 26px;
     left: 26px;
     z-index: 11;
@@ -537,7 +537,7 @@ body.page-secondary {
 
 .page-footer {
     padding: 32px 24px;
-    background: var(--navy-strong);
+    background: #193E75;
     display: flex;
     justify-content: center;
     gap: 22px;

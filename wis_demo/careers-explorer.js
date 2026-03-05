@@ -527,42 +527,60 @@ function createFloatingCareerItem(career, index, total) {
     const item = document.createElement('div');
     item.className = 'career-item';
 
-    // Highlight if this career is a quiz match
+    const topMatches = (quizResults && Array.isArray(quizResults.topMatches)) ? quizResults.topMatches : [];
+    const topRank = topMatches.indexOf(career.name) + 1;
+    const isTopRankedMatch = topRank >= 1 && topRank <= 3;
+
+    // Keep legacy quiz-match marker for non-top-ranked quiz matches
     const isQuizMatch = quizResults && quizResults.scores && quizResults.scores[career.name];
-    if (isQuizMatch) {
+    if (isQuizMatch && !isTopRankedMatch) {
         item.classList.add('quiz-match');
     }
 
-    // Create skill icon with colored background
-    const skillData = getPrimarySkillIconForCareer(career);
-    const dot = document.createElement('div');
-    dot.className = `career-dot`;
-    dot.style.backgroundColor = skillData.color;
+    if (isTopRankedMatch) {
+        item.classList.add('quiz-top-match', `quiz-rank-${topRank}`);
 
-    // Load and inline the SVG icon
-    const iconImg = document.createElement('img');
-    iconImg.src = skillData.icon;
-    iconImg.alt = skillData.category;
-    iconImg.style.width = '100%';
-    iconImg.style.height = '100%';
-    dot.appendChild(iconImg);
+        const rankBadge = document.createElement('div');
+        rankBadge.className = 'quiz-rank-badge';
+        const rankLabel = topRank === 1 ? '1st' : topRank === 2 ? '2nd' : '3rd';
+        const rankMatch = rankLabel.match(/^(\d+)([a-z]+)$/i);
+        rankBadge.innerHTML = rankMatch ? `${rankMatch[1]}<sup>${rankMatch[2]}</sup>` : rankLabel;
+        item.appendChild(rankBadge);
 
-    const name = document.createElement('div');
-    name.className = 'career-name';
-    name.textContent = career.name;
-
-    item.appendChild(dot);
-
-    // Do NOT add quiz match badge (percentage) - hidden via CSS
-
-    // Add play icon if career has video
-    if (career.video_url) {
-        const playIcon = document.createElement('div');
-        playIcon.className = 'video-play-icon';
-        item.appendChild(name);
-        item.appendChild(playIcon);
+        const topName = document.createElement('div');
+        topName.className = 'career-name top-ranked-name';
+        topName.textContent = career.name;
+        item.appendChild(topName);
     } else {
-        item.appendChild(name);
+        // Create skill icon with colored background
+        const skillData = getPrimarySkillIconForCareer(career);
+        const dot = document.createElement('div');
+        dot.className = `career-dot`;
+        dot.style.backgroundColor = skillData.color;
+
+        // Load and inline the SVG icon
+        const iconImg = document.createElement('img');
+        iconImg.src = skillData.icon;
+        iconImg.alt = skillData.category;
+        iconImg.style.width = '100%';
+        iconImg.style.height = '100%';
+        dot.appendChild(iconImg);
+
+        const name = document.createElement('div');
+        name.className = 'career-name';
+        name.textContent = career.name;
+
+        item.appendChild(dot);
+
+        // Add play icon if career has video
+        if (career.video_url) {
+            const playIcon = document.createElement('div');
+            playIcon.className = 'video-play-icon';
+            item.appendChild(name);
+            item.appendChild(playIcon);
+        } else {
+            item.appendChild(name);
+        }
     }
 
     const pos = getRandomPosition(index, total);
