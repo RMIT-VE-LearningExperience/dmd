@@ -3,6 +3,57 @@
 // ===================================
 
 (function () {
+    function applyAriaTooltips(root) {
+        var scope = root && root.querySelectorAll ? root : document;
+        var nodes = scope.querySelectorAll('button[aria-label], a[aria-label], [role="button"][aria-label]');
+        Array.prototype.forEach.call(nodes, function (el) {
+            if (el.hasAttribute('data-tooltip-ignore')) return;
+            var label = el.getAttribute('aria-label');
+            if (label) el.setAttribute('title', label);
+        });
+    }
+
+    function watchAriaTooltipChanges() {
+        if (typeof MutationObserver === 'undefined') return;
+        var root = document.body || document.documentElement;
+        if (!root) return;
+
+        var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'aria-label') {
+                    var el = mutation.target;
+                    if (!el || !el.setAttribute || el.hasAttribute('data-tooltip-ignore')) return;
+                    var label = el.getAttribute('aria-label');
+                    if (label) el.setAttribute('title', label);
+                    return;
+                }
+
+                if (mutation.type === 'childList') {
+                    Array.prototype.forEach.call(mutation.addedNodes || [], function (node) {
+                        if (!node || node.nodeType !== 1) return;
+                        if (node.matches && node.matches('button[aria-label], a[aria-label], [role="button"][aria-label]')) {
+                            var directLabel = node.getAttribute('aria-label');
+                            if (directLabel && !node.hasAttribute('data-tooltip-ignore')) {
+                                node.setAttribute('title', directLabel);
+                            }
+                        }
+                        applyAriaTooltips(node);
+                    });
+                }
+            });
+        });
+
+        observer.observe(root, {
+            subtree: true,
+            childList: true,
+            attributes: true,
+            attributeFilter: ['aria-label']
+        });
+    }
+
+    applyAriaTooltips(document);
+    watchAriaTooltipChanges();
+
     var menuBtn = document.getElementById('menuBtn');
     var drawer = document.getElementById('navDrawer');
     var closeBtn = document.getElementById('navClose');

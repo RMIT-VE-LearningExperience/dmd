@@ -265,6 +265,15 @@ body {
     overflow: hidden;
 }
 
+.career-item.stagger-enter {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.career-item.stagger-enter.is-visible {
+    opacity: 1;
+}
+
 .career-item.quiz-top-match {
     gap: 0;
     padding: 0;
@@ -501,7 +510,7 @@ body {
 .card-view {
     display: none;
     min-height: 100vh;
-    padding: 96px 16px 100px;
+    padding: 24px 16px 100px;
     padding-bottom: 100px;
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -631,13 +640,17 @@ body {
 
 /* Hide view switcher on mobile */
 @media (max-width: 768px) {
+    body .top-nav-icons #cardBtn {
+        display: none !important;
+    }
+
     .page-corner-logo {
         top: 16px;
         left: 16px;
     }
 
     .card-view {
-        padding-top: 106px;
+        padding-top: 20px;
     }
 
     .nav-search-shell {
@@ -676,7 +689,7 @@ body {
     }
 
     .card-view {
-        padding-top: 96px;
+        padding-top: 16px;
     }
 
     .nav-search-shell {

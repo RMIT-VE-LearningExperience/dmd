@@ -38,9 +38,8 @@
         }
 
         .menu-btn {
-            position: fixed;
-            top: 26px;
-            right: 26px;
+            position: relative;
+            margin: 26px 26px 0 auto;
             z-index: 11;
             width: 68px;
             height: 68px;
@@ -381,7 +380,7 @@
 
         @media (max-width: 1024px) {
             body { padding: 22px 14px; }
-            .menu-btn { top: 14px; right: 14px; }
+            .menu-btn { margin: 14px 14px 0 auto; }
             .hero p { font-size: clamp(16px, 2.7vw, 28px); }
             .hero p.sub { font-size: clamp(14px, 2.2vw, 23px); }
             .filters { grid-template-columns: 1fr; }
@@ -401,6 +400,10 @@
                 top: 8px;
                 right: 8px;
             }
+        }
+
+        @media (max-width: 768px) {
+            .stories-footer-divider { display: none; }
         }
     </style>
 </head>
@@ -470,8 +473,8 @@
         <footer class="stories-footer">
             <span>Made possible by</span>
             <span class="stories-footer-divider" aria-hidden="true"></span>
-            <img src="images/M80_Ring_Road.svg" alt="Big Build M80 Ring Road">
             <img src="images/RMIT_University_Logo.svg" alt="RMIT University Women in STEM">
+            <img src="images/M80_Ring_Road.svg" alt="Big Build M80 Ring Road">
         </footer>
     </main>
 

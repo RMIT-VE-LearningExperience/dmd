@@ -29,9 +29,8 @@ body.page-secondary {
 }
 
 .menu-btn {
-    position: fixed;
-    top: 26px;
-    right: 26px;
+    position: relative;
+    margin: 26px 26px 0 auto;
     z-index: 11;
     width: 68px;
     height: 68px;
@@ -49,6 +48,16 @@ body.page-secondary {
     width: 68px;
     height: 68px;
     display: block;
+}
+
+/* About page keeps menu pinned in the top-right corner */
+body.page-secondary.about-page .menu-btn {
+    position: fixed;
+    top: 26px;
+    right: 26px;
+    margin: 0;
+    width: 68px;
+    height: 68px;
 }
 
 .page-corner-logo {
@@ -565,8 +574,13 @@ body.page-secondary {
     }
 
     .menu-btn {
+        margin: 14px 14px 0 auto;
+    }
+
+    body.page-secondary.about-page .menu-btn {
         top: 14px;
         right: 14px;
+        margin: 0;
     }
 
     .page-corner-logo {
@@ -657,9 +671,23 @@ body.page-secondary {
     }
 }
 
+@media (max-width: 480px) {
+    body.page-secondary.about-page .menu-btn {
+        top: 12px;
+        right: 12px;
+        margin: 0;
+        width: 68px;
+        height: 68px;
+    }
+}
+
 @media (max-width: 768px) {
     .content-card.wide {
         grid-column: span 1;
+    }
+
+    .page-footer-divider {
+        display: none;
     }
 
     .about-quote p {

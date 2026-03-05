@@ -4,9 +4,9 @@
 
 /* Top Navigation Icons Container */
 .top-nav-icons {
-    position: fixed;
-    top: 20px;
-    right: 20px;
+    position: relative;
+    margin: 20px 20px 0 auto;
+    width: max-content;
     z-index: 10;
     display: flex;
     gap: 16px;
@@ -273,7 +273,7 @@
 @media (max-width: 768px) {
     .top-nav-icons {
         top: 16px;
-        right: 16px;
+        margin: 16px 16px 0 auto;
         gap: 12px;
     }
 
@@ -286,7 +286,7 @@
 @media (max-width: 480px) {
     .top-nav-icons {
         top: 12px;
-        right: 12px;
+        margin: 12px 12px 0 auto;
         gap: 10px;
     }
 

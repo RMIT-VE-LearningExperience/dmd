@@ -362,8 +362,13 @@ html, body {
         padding: 12px 14px;
     }
 
+    .home-footer-divider {
+        display: none;
+    }
+
     .home-footer img {
         height: 30px;
+        transform: translateY(-4px);
     }
 }
 

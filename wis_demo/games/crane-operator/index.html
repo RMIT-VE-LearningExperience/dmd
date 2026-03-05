@@ -203,31 +203,46 @@
   }
 
   #spotterBox {
-    background: rgba(25,62,117,0.9);
-    border: 1px solid rgba(136,204,255,0.4);
-    border-radius: 6px;
-    padding: 5px 12px;
-    color: #88ccff;
-    font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+    position: fixed;
+    left: 384px;
+    right: 20px;
+    bottom: 20px;
+    min-height: 56px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(25, 62, 117, 0.14);
+    border-radius: 14px;
+    padding: 10px 16px;
+    color: #193E75;
+    font-size: clamp(0.9rem, 1.6vw, 1.05rem);
     font-weight: 700;
-    letter-spacing: 0.03em;
-    backdrop-filter: blur(8px);
-    text-align: center;
+    letter-spacing: 0.01em;
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+    max-width: none;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
   }
 
   /* Controls */
   #controls {
     position: fixed;
     bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 20px;
+    transform: none;
     display: none;
-    z-index: 50;
-    gap: 12px;
-    align-items: end;
+    z-index: 55;
+    width: 350px;
+    gap: 10px;
+    align-items: flex-end;
+    padding: 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(245,198,66,0.35);
+    background: rgba(25,62,117,0.82);
+    backdrop-filter: blur(8px);
   }
 
   #mobileNavBar {
@@ -253,7 +268,14 @@
 
   .ctrl-row {
     display: flex;
-    gap: 6px;
+    gap: 8px;
+  }
+
+  .ctrl-spacer {
+    width: 56px;
+    height: 56px;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .ctrl-btn {
@@ -281,7 +303,8 @@
   }
 
   .ctrl-btn.hook-btn {
-    width: 80px;
+    width: 132px;
+    height: 56px;
     font-size: 0.75rem;
     font-family: 'Inter', sans-serif;
     font-weight: 700;
@@ -300,17 +323,42 @@
   }
 
   /* Spotter character for mobile */
-  .spotter-character {
-    display: none;
-    width: 75px;
-    height: auto;
+  .spotter-avatar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
     flex-shrink: 0;
-    margin-left: -8px;
-    margin-right: 4px;
+    margin-top: -54px;
+    min-width: 94px;
+  }
+
+  .spotter-character {
+    display: block;
+    width: 104px;
+    height: auto;
+    margin: 0;
+  }
+
+  .spotter-label {
+    margin-top: -6px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    color: #ffffff;
+    text-transform: uppercase;
+    background: #193E75;
+    padding: 6px 10px;
+    border-radius: 8px;
   }
 
   #spotterText {
     flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* Help Button */
@@ -613,6 +661,13 @@
       box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
       overflow: visible;
     }
+    .spotter-avatar {
+      margin-top: 0;
+      min-width: 0;
+    }
+    .spotter-label {
+      display: none;
+    }
     .spotter-character {
       display: block;
       width: 90px;
@@ -621,8 +676,14 @@
     }
     #controls {
       bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
       flex-direction: row;
       gap: 8px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      backdrop-filter: none;
     }
     .ctrl-group {
       flex-direction: row;
@@ -632,7 +693,7 @@
       gap: 8px;
     }
     /* Hide spacers on mobile portrait */
-    .ctrl-row > div[style*="width"] {
+    .ctrl-spacer {
       display: none;
     }
   }
@@ -643,7 +704,7 @@
   }
 
   /* Landscape: move controls to the left */
-  @media (orientation: landscape) and (max-height: 500px) {
+  @media (orientation: landscape) and (max-height: 500px) and (max-width: 900px) {
     #controls {
       left: 16px;
       bottom: 50%;
@@ -655,7 +716,7 @@
     .ctrl-btn.hook-btn { width: 64px; height: 44px; font-size: 0.6rem; }
   }
 
-  @media (orientation: landscape) and (min-height: 501px) {
+  @media (orientation: landscape) and (min-height: 501px) and (max-width: 900px) {
     #controls {
       left: 16px;
       bottom: 50%;
@@ -754,7 +815,10 @@
     </svg>
   </div>
   <div id="spotterBox" role="status" aria-live="polite">
-    <img src="img/craneoperator.svg" alt="Crane Operator" class="spotter-character">
+    <div class="spotter-avatar">
+      <img src="img/craneoperator.svg" alt="Crane Operator" class="spotter-character">
+      <span class="spotter-label">Spotter</span>
+    </div>
     <span id="spotterText">Ready</span>
   </div>
 </div>
@@ -765,9 +829,9 @@
 <div id="controls">
   <div class="ctrl-group">
     <div class="ctrl-row">
-      <div style="width:56px"></div>
+      <div class="ctrl-spacer" aria-hidden="true"></div>
       <button class="ctrl-btn" data-dir="up" aria-label="Move hook up">&#9650;</button>
-      <div style="width:56px"></div>
+      <div class="ctrl-spacer" aria-hidden="true"></div>
     </div>
     <div class="ctrl-row">
       <button class="ctrl-btn" data-dir="left" aria-label="Move hook left">&#9664;</button>
@@ -775,7 +839,7 @@
       <button class="ctrl-btn" data-dir="right" aria-label="Move hook right">&#9654;</button>
     </div>
   </div>
-  <button class="ctrl-btn hook-btn" id="hookBtn" aria-label="Hook" aria-pressed="false">Hook</button>
+  <button class="ctrl-btn hook-btn" id="hookBtn" aria-label="Hook" aria-pressed="false">HOOK (spacebar)</button>
 </div>
 
 <!-- Help Modal -->
@@ -909,6 +973,7 @@ function resize() {
   canvas.width = window.innerWidth * devicePixelRatio;
   canvas.height = window.innerHeight * devicePixelRatio;
   ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  updateHookIdleButtonLabel();
 }
 resize();
 window.addEventListener('resize', resize);
@@ -958,6 +1023,9 @@ let totalCrates = 3;
 let damage = 0;
 let activeDrumHitIds = new Set();
 let droppedCrates = [];
+let activeDropDisplayCrate = null;
+let debrisParticles = [];
+let drumsCollapseTriggered = false;
 let spotterMsg = '';
 let spotterArrow = null;
 const DROP_ZONE_TOP_Y = () => dropZone.y - 80;
@@ -1033,6 +1101,16 @@ function initGame() {
     });
   }
 
+  obstacles.forEach((obs, index) => {
+    obs.id = index;
+    obs.rotation = 0;
+    obs.vx = 0;
+    obs.vy = 0;
+    obs.spin = 0;
+    obs.isFalling = false;
+    obs.collidable = true;
+  });
+
   dropZone.x = WORLD.craneBaseX + WORLD.jibLength - 200;
   hookedCrate = null;
   score = 0;
@@ -1040,6 +1118,9 @@ function initGame() {
   damage = 0;
   activeDrumHitIds = new Set();
   droppedCrates = [];
+  activeDropDisplayCrate = null;
+  debrisParticles = [];
+  drumsCollapseTriggered = false;
   spotterMsg = '';
   spotterArrow = null;
 
@@ -1048,11 +1129,26 @@ function initGame() {
   updateHUD();
 }
 
+function getHookIdleLabel() {
+  return window.matchMedia('(min-width: 701px)').matches ? 'HOOK (spacebar)' : 'HOOK';
+}
+
+function updateHookIdleButtonLabel() {
+  const hookBtn = document.getElementById('hookBtn');
+  if (!hookBtn || hookBtn.classList.contains('hooked')) return;
+  const label = getHookIdleLabel();
+  hookBtn.textContent = label;
+  hookBtn.setAttribute('aria-label', label);
+  hookBtn.setAttribute('title', label);
+}
+
 function resetHookBtn() {
   const hookBtn = document.getElementById('hookBtn');
-  hookBtn.textContent = 'Hook';
+  const label = getHookIdleLabel();
+  hookBtn.textContent = label;
   hookBtn.classList.remove('hooked');
-  hookBtn.setAttribute('aria-label', 'Hook');
+  hookBtn.setAttribute('aria-label', label);
+  hookBtn.setAttribute('title', label);
   hookBtn.setAttribute('aria-pressed', 'false');
 }
 
@@ -1139,6 +1235,107 @@ const ROPE_ACCEL = 220;
 const ROPE_FRICTION = 0.92;
 const GRAVITY = 9.81;
 const SWING_DAMPING = 0.988;
+const HOOK_TOP_OFFSET = 18;
+const HOOK_WIDTH = 24;
+const HOOK_HEIGHT = (79 / 37) * HOOK_WIDTH;
+const HOOK_ATTACH_LOCAL_Y = HOOK_HEIGHT * 0.82;
+const CRATE_ATTACH_INSET = 5;
+
+function getHookAttachmentPoint(wireAngle) {
+  const hookTopY = hook.y - HOOK_TOP_OFFSET;
+  return {
+    x: hook.x - Math.sin(wireAngle) * HOOK_ATTACH_LOCAL_Y,
+    y: hookTopY + Math.cos(wireAngle) * HOOK_ATTACH_LOCAL_Y
+  };
+}
+
+function getHookedCratePose(crate, wireAngle) {
+  const attach = getHookAttachmentPoint(wireAngle);
+  const attachToCenter = Math.max(4, crate.h / 2 - CRATE_ATTACH_INSET);
+  const centerX = attach.x - Math.sin(wireAngle) * attachToCenter;
+  const centerY = attach.y + Math.cos(wireAngle) * attachToCenter;
+  return {
+    x: centerX - crate.w / 2,
+    y: centerY - crate.h / 2,
+    attachX: attach.x,
+    attachY: attach.y
+  };
+}
+
+function triggerDrumCollapse(impactX, impactY) {
+  if (drumsCollapseTriggered) return;
+  drumsCollapseTriggered = true;
+
+  const hitX = Number.isFinite(impactX) ? impactX : (OBSTACLE_BASE_X + 70);
+  const hitY = Number.isFinite(impactY) ? impactY : (WORLD.groundY - 120);
+
+  for (const obs of obstacles) {
+    if (obs.type !== 'drum') continue;
+
+    const cx = obs.x + obs.w / 2;
+    const cy = obs.y + obs.h / 2;
+    const dx = cx - hitX;
+    const dy = cy - hitY;
+    const dist = Math.max(26, Math.hypot(dx, dy));
+    const dirX = dx / dist;
+    const lateralBoost = 180 + Math.random() * 160;
+    const upwardBoost = 160 + Math.random() * 170;
+
+    obs.collidable = false;
+    obs.isFalling = true;
+    obs.vx = dirX * lateralBoost + (Math.random() - 0.5) * 90;
+    obs.vy = -(upwardBoost + Math.max(0, 90 - Math.abs(dy) * 0.55));
+    obs.spin = (Math.random() - 0.5) * 9;
+  }
+
+  spawnCollisionDebris(hitX, hitY, 2.2);
+  setSpotterAlert('💥 Final hit! Drums are collapsing!');
+}
+
+function updateFallingDrums(dt) {
+  if (!drumsCollapseTriggered) return;
+
+  const gravity = 920;
+  for (const obs of obstacles) {
+    if (obs.type !== 'drum' || !obs.isFalling) continue;
+
+    obs.vy += gravity * dt;
+    obs.x += obs.vx * dt;
+    obs.y += obs.vy * dt;
+    obs.rotation += obs.spin * dt;
+
+    obs.vx *= 0.988;
+    obs.spin *= 0.992;
+
+    const floorY = WORLD.groundY - obs.h;
+    if (obs.y >= floorY) {
+      obs.y = floorY;
+      if (Math.abs(obs.vy) > 40) {
+        obs.vy *= -0.24;
+      } else {
+        obs.vy = 0;
+      }
+      obs.vx *= 0.84;
+      obs.spin *= 0.8;
+
+      if (Math.abs(obs.vx) < 8 && Math.abs(obs.vy) < 12 && Math.abs(obs.spin) < 0.35) {
+        obs.vx = 0;
+        obs.vy = 0;
+        obs.spin = 0;
+        obs.isFalling = false;
+      }
+    }
+  }
+}
+
+function applyDrumCollisionDamage(impactX, impactY, amount = 25) {
+  const prevDamage = damage;
+  addDamage(amount);
+  setSpotterAlert('⚠️ COLLISION! Avoid the obstacle!');
+  if (prevDamage < 100 && damage >= 100) {
+    triggerDrumCollapse(impactX, impactY);
+  }
+}
 
 function updatePhysics(dt) {
   const frameDrumHitIds = new Set();
@@ -1188,24 +1385,46 @@ function updatePhysics(dt) {
 
   hook.x = wireSegments[WIRE_SEG_COUNT].x;
   hook.y = wireSegments[WIRE_SEG_COUNT].y;
+  let currentWireAngle = -Math.atan2(
+    wireSegments[WIRE_SEG_COUNT].x - wireSegments[WIRE_SEG_COUNT - 1].x,
+    wireSegments[WIRE_SEG_COUNT].y - wireSegments[WIRE_SEG_COUNT - 1].y
+  );
 
-  // --- Hard block: prevent hook/crate from going under obstacles ---
-  const obsLeft = OBSTACLE_BASE_X - 10;
-  const obsRight = OBSTACLE_BASE_X + 4 * 38 + 10;
-  const obsTop = WORLD.groundY - 3 * 47;
+  updateFallingDrums(dt);
+
+  // --- Hard block: prevent hook/crate from passing through drum tops ---
+  // Use per-drum rectangles so the collision map matches the drum stack shape.
   const margin = 8;
-
   let blockY = null;
   if (hookedCrate) {
-    const cLeft = hook.x - hookedCrate.w / 2;
-    const cRight = hook.x + hookedCrate.w / 2;
-    const cBottom = hook.y + 15 + hookedCrate.h;
-    if (cRight > obsLeft && cLeft < obsRight && cBottom > obsTop - margin) {
-      blockY = obsTop - margin - 15 - hookedCrate.h;
+    const previewPose = getHookedCratePose(hookedCrate, currentWireAngle);
+    const cLeft = previewPose.x;
+    const cRight = previewPose.x + hookedCrate.w;
+    const cBottom = previewPose.y + hookedCrate.h;
+    const hookToCrateBottom = cBottom - hook.y;
+    for (const obs of obstacles) {
+      if (obs.collidable === false) continue;
+      const overlapsX = cRight > obs.x && cLeft < obs.x + obs.w;
+      if (!overlapsX) continue;
+      const topY = obs.y - margin;
+      if (cBottom > topY) {
+        const candidate = topY - hookToCrateBottom;
+        if (blockY === null || candidate < blockY) {
+          blockY = candidate;
+        }
+      }
     }
   } else {
-    if (hook.x > obsLeft && hook.x < obsRight && hook.y > obsTop - margin) {
-      blockY = obsTop - margin;
+    for (const obs of obstacles) {
+      if (obs.collidable === false) continue;
+      const withinX = hook.x > obs.x && hook.x < obs.x + obs.w;
+      if (!withinX) continue;
+      const topY = obs.y - margin;
+      if (hook.y > topY) {
+        if (blockY === null || topY < blockY) {
+          blockY = topY;
+        }
+      }
     }
   }
   if (blockY !== null && hook.y > blockY) {
@@ -1219,46 +1438,75 @@ function updatePhysics(dt) {
     const maxLen = Math.sqrt(dx * dx + dy * dy);
     if (trolley.ropeLength > maxLen) trolley.ropeLength = maxLen;
 
-    // Apply damage only when the blocked point is on a real drum top surface.
-    let touchedDrumTop = false;
-    let touchedDrumId = -1;
+    // Apply damage only when the blocked point is on one or more drum top surfaces.
+    const touchedDrumIds = [];
     for (let i = 0; i < obstacles.length; i++) {
       const obs = obstacles[i];
+      if (obs.collidable === false) continue;
       if (hookedCrate) {
-        const cLeft = hook.x - hookedCrate.w / 2;
-        const cRight = hook.x + hookedCrate.w / 2;
-        const cBottom = hook.y + 15 + hookedCrate.h;
+        const previewPose = getHookedCratePose(hookedCrate, currentWireAngle);
+        const cLeft = previewPose.x;
+        const cRight = previewPose.x + hookedCrate.w;
+        const cBottom = previewPose.y + hookedCrate.h;
         if (cRight > obs.x && cLeft < obs.x + obs.w &&
             cBottom >= obs.y - margin && cBottom <= obs.y + margin) {
-          touchedDrumTop = true;
-          touchedDrumId = i;
-          frameDrumHitIds.add(i);
-          break;
+          touchedDrumIds.push(i);
         }
       } else {
         if (hook.x > obs.x && hook.x < obs.x + obs.w &&
             hook.y >= obs.y - margin && hook.y <= obs.y + margin) {
-          touchedDrumTop = true;
-          touchedDrumId = i;
-          frameDrumHitIds.add(i);
-          break;
+          touchedDrumIds.push(i);
         }
       }
     }
-    if (touchedDrumTop && touchedDrumId !== -1 && !activeDrumHitIds.has(touchedDrumId)) {
-      addDamage(25);
-      setSpotterAlert('⚠️ COLLISION! Avoid the obstacle!');
+    touchedDrumIds.forEach((id) => frameDrumHitIds.add(id));
+    const newlyTouchedId = touchedDrumIds.find((id) => !activeDrumHitIds.has(id));
+    if (newlyTouchedId !== undefined) {
+      const obs = obstacles[newlyTouchedId];
+      const impactX = obs
+        ? Math.max(obs.x + 4, Math.min(obs.x + obs.w - 4, hook.x))
+        : hook.x;
+      const impactY = obs ? obs.y + 2 : hook.y;
+      applyDrumCollisionDamage(impactX, impactY, 25);
+      if (hookedCrate) {
+        if (obs) {
+          const spawnX = impactX;
+          const spawnY = impactY;
+          spawnCollisionDebris(spawnX, spawnY, 1);
+        }
+      }
     }
+  }
+
+  // Hard ground limit so the hook/load cannot go below the visible ground.
+  const hookGroundOffset = hookedCrate
+    ? (getHookedCratePose(hookedCrate, currentWireAngle).y + hookedCrate.h - hook.y + 2)
+    : 34;
+  const maxHookYAtGround = WORLD.groundY - hookGroundOffset;
+  if (hook.y > maxHookYAtGround) {
+    hook.y = maxHookYAtGround;
+    wireSegments[WIRE_SEG_COUNT].y = hook.y;
+    if (trolley.ropeSpeed > 0) trolley.ropeSpeed = 0;
+
+    // Keep rope length consistent with the clamped hook point.
+    const anchorYGround = WORLD.craneTopY + WIRE_ANCHOR_Y_OFFSET;
+    const dyGround = hook.y - anchorYGround;
+    const dxGround = hook.x - trolley.x;
+    const maxLenGround = Math.sqrt(dxGround * dxGround + dyGround * dyGround);
+    if (trolley.ropeLength > maxLenGround) trolley.ropeLength = maxLenGround;
   }
 
   const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
   const lastSeg = wireSegments[WIRE_SEG_COUNT];
-  const currentWireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
+  currentWireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
 
   if (hookedCrate) {
-    hookedCrate.x = hook.x - hookedCrate.w / 2;
-    hookedCrate.y = hook.y + 15;
+    const pose = getHookedCratePose(hookedCrate, currentWireAngle);
+    hookedCrate.x = pose.x;
+    hookedCrate.y = pose.y;
     hookedCrate.rotation = currentWireAngle;
+    hookedCrate.attachX = pose.attachX;
+    hookedCrate.attachY = pose.attachY;
   }
 
   for (let i = droppedCrates.length - 1; i >= 0; i--) {
@@ -1276,6 +1524,7 @@ function updatePhysics(dt) {
     }
 
     for (const obs of obstacles) {
+      if (obs.collidable === false) continue;
       if (dc.x + dc.w > obs.x && dc.x < obs.x + obs.w &&
           dc.y + dc.h > obs.y && dc.y < obs.y + obs.h) {
         if (dc.y + dc.h - obs.y < obs.y + obs.h - dc.y) {
@@ -1305,6 +1554,7 @@ function updatePhysics(dt) {
         dc.delivered = true;
         dc.x = dropZone.x + (dropZone.width - dc.w) / 2;
         dc.y = dropZone.y - dc.h + 25;
+        activeDropDisplayCrate = dc;
         const deliveredCount = crates.filter(c => c.delivered).length;
         dc.y -= (deliveredCount - 1) * 35;
         dc.rotation = 0;
@@ -1339,7 +1589,9 @@ function updatePhysics(dt) {
 
   for (let i = 0; i < obstacles.length; i++) {
     const obs = obstacles[i];
+    if (obs.collidable === false) continue;
     let wasHit = false;
+    let crateCollisionPoint = null;
     if (hook.x > obs.x && hook.x < obs.x + obs.w &&
         hook.y > obs.y && hook.y < obs.y + obs.h) {
       hook.angleVel *= -0.5;
@@ -1354,6 +1606,14 @@ function updatePhysics(dt) {
         hook.angleVel *= -0.5;
         if (hookedCrate.x < obs.x) trolley.speed = Math.min(trolley.speed, -60);
         else trolley.speed = Math.max(trolley.speed, 60);
+        const overlapLeft = Math.max(hookedCrate.x, obs.x);
+        const overlapRight = Math.min(hookedCrate.x + hookedCrate.w, obs.x + obs.w);
+        const overlapTop = Math.max(hookedCrate.y, obs.y);
+        const overlapBottom = Math.min(hookedCrate.y + hookedCrate.h, obs.y + obs.h);
+        crateCollisionPoint = {
+          x: (overlapLeft + overlapRight) / 2,
+          y: (overlapTop + overlapBottom) / 2
+        };
         wasHit = true;
       }
     }
@@ -1361,11 +1621,16 @@ function updatePhysics(dt) {
       frameDrumHitIds.add(i);
     }
     if (wasHit && !activeDrumHitIds.has(i)) {
-      addDamage(25);
-      setSpotterAlert('⚠️ COLLISION! Avoid the obstacle!');
+      const impactX = crateCollisionPoint ? crateCollisionPoint.x : hook.x;
+      const impactY = crateCollisionPoint ? crateCollisionPoint.y : hook.y;
+      applyDrumCollisionDamage(impactX, impactY, 25);
+      if (crateCollisionPoint) {
+        spawnCollisionDebris(crateCollisionPoint.x, crateCollisionPoint.y, 1.1);
+      }
     }
   }
   activeDrumHitIds = frameDrumHitIds;
+  updateCollisionDebris(dt);
 
   if (gameState === 'playing' && !spotterAlertTimer) {
     updateSpotter();
@@ -1388,6 +1653,67 @@ function addDamage(amount) {
       gameState = 'gameover';
       showEndScreen(false);
     }, 600);
+  }
+}
+
+function spawnCollisionDebris(x, y, intensity = 1) {
+  const count = Math.round(8 + Math.random() * 8 * intensity);
+  const palette = ['#C0C9CE', '#B4BEC4', '#9EA7AE', '#F9893D', '#D97634'];
+
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = (80 + Math.random() * 170) * intensity;
+    const life = 0.35 + Math.random() * 0.35;
+    debrisParticles.push({
+      x: x + (Math.random() - 0.5) * 10,
+      y: y + (Math.random() - 0.5) * 10,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - (30 + Math.random() * 80),
+      size: 2 + Math.random() * 4,
+      life,
+      maxLife: life,
+      rotation: Math.random() * Math.PI * 2,
+      spin: (Math.random() - 0.5) * 12,
+      color: palette[Math.floor(Math.random() * palette.length)]
+    });
+  }
+
+  if (debrisParticles.length > 220) {
+    debrisParticles.splice(0, debrisParticles.length - 220);
+  }
+}
+
+function updateCollisionDebris(dt) {
+  const gravity = 680;
+  for (let i = debrisParticles.length - 1; i >= 0; i--) {
+    const p = debrisParticles[i];
+    p.life -= dt;
+    if (p.life <= 0) {
+      debrisParticles.splice(i, 1);
+      continue;
+    }
+    p.vy += gravity * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vx *= 0.98;
+    p.vy *= 0.995;
+    p.rotation += p.spin * dt;
+  }
+}
+
+function drawCollisionDebris() {
+  for (const p of debrisParticles) {
+    const alpha = Math.max(0, Math.min(1, p.life / p.maxLife));
+    const width = p.size;
+    const height = Math.max(1.5, p.size * 0.58);
+
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rotation);
+    ctx.globalAlpha = alpha * 0.85;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-width / 2, -height / 2, width, height);
+    ctx.restore();
   }
 }
 
@@ -1496,7 +1822,9 @@ function drawWorld() {
     if (pickupTarget) drawPickupMarker(pickupTarget);
   }
 
-  crates.forEach(c => { if (!c.delivered || c === hookedCrate) return; drawCrate(c); });
+  if (activeDropDisplayCrate && activeDropDisplayCrate !== hookedCrate) {
+    drawCrate(activeDropDisplayCrate);
+  }
   crates.forEach(c => { if (c.delivered || c === hookedCrate || droppedCrates.includes(c)) return; drawCrate(c); });
 
   drawWire();
@@ -1504,7 +1832,9 @@ function drawWorld() {
   drawHook();
 
   droppedCrates.forEach(dc => drawCrate(dc));
+  if (hookedCrate) drawHookToLoadLink(hookedCrate);
   if (hookedCrate) drawCrate(hookedCrate);
+  drawCollisionDebris();
 
   if (spotterArrow && gameState === 'playing') {
     drawSpotterArrow(spotterArrow);
@@ -1551,7 +1881,7 @@ function drawSpotterArrow(arrow) {
           maxY = Math.min(maxY, r.top - edgePadPx);
         }
         // Landscape mobile: controls sit on the left, so keep arrow out of that strip.
-        if (window.matchMedia('(orientation: landscape)').matches && r.left < W() * 0.35) {
+        if (window.matchMedia('(orientation: landscape) and (max-width: 900px)').matches && r.left < W() * 0.35) {
           minX = Math.max(minX, r.right + edgePadPx);
         }
       }
@@ -1940,14 +2270,10 @@ function drawWire() {
 
 function drawHook() {
   const hx = hook.x;
-  const hy = hook.y - 18;
+  const hy = hook.y - HOOK_TOP_OFFSET;
   const prevSeg = wireSegments[WIRE_SEG_COUNT - 1];
   const lastSeg = wireSegments[WIRE_SEG_COUNT];
   const wireAngle = -Math.atan2(lastSeg.x - prevSeg.x, lastSeg.y - prevSeg.y);
-
-  // Hook dimensions (20% smaller: 30px -> 24px)
-  const hookWidth = 24;
-  const hookHeight = (79 / 37) * hookWidth;
 
   ctx.save();
   ctx.translate(hx, hy);
@@ -1955,7 +2281,7 @@ function drawHook() {
 
   // Draw hook SVG without color overlay
   if (svgImages.hook) {
-    ctx.drawImage(svgImages.hook, -hookWidth / 2, 0, hookWidth, hookHeight);
+    ctx.drawImage(svgImages.hook, -HOOK_WIDTH / 2, 0, HOOK_WIDTH, HOOK_HEIGHT);
   }
 
   ctx.restore();
@@ -1965,11 +2291,42 @@ function drawHook() {
     const nearby = findNearestCrate();
     if (nearby) {
       ctx.beginPath();
-      ctx.arc(hx, hy + hookHeight, 20, 0, Math.PI * 2);
+      ctx.arc(hx, hy + HOOK_HEIGHT, 20, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(245,198,66,0.15)';
       ctx.fill();
     }
   }
+}
+
+function drawHookToLoadLink(crate) {
+  const rot = crate.rotation || 0;
+  const cx = crate.x + crate.w / 2;
+  const cy = crate.y + crate.h / 2;
+  const attachToCenter = Math.max(4, crate.h / 2 - CRATE_ATTACH_INSET);
+  const crateAttachX = cx + Math.sin(rot) * attachToCenter;
+  const crateAttachY = cy - Math.cos(rot) * attachToCenter;
+
+  const hookAttachX = typeof crate.attachX === 'number'
+    ? crate.attachX
+    : getHookAttachmentPoint(rot).x;
+  const hookAttachY = typeof crate.attachY === 'number'
+    ? crate.attachY
+    : getHookAttachmentPoint(rot).y;
+
+  ctx.save();
+  ctx.strokeStyle = '#193E75';
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(hookAttachX, hookAttachY);
+  ctx.lineTo(crateAttachX, crateAttachY);
+  ctx.stroke();
+
+  ctx.fillStyle = '#193E75';
+  ctx.beginPath();
+  ctx.arc(crateAttachX, crateAttachY, 2.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
 
 function drawCrate(c) {
@@ -2035,29 +2392,34 @@ function drawCrate(c) {
 
 function drawObstacle(obs) {
   ctx.save();
+  const cx = obs.x + obs.w / 2;
+  const cy = obs.y + obs.h / 2;
+  const rotation = obs.rotation || 0;
+  ctx.translate(cx, cy);
+  ctx.rotate(rotation);
 
   // Draw SVG if available (drums), otherwise fallback
   if (obs.type === 'drum' && svgImages.drum) {
-    ctx.drawImage(svgImages.drum, obs.x, obs.y, obs.w, obs.h);
+    ctx.drawImage(svgImages.drum, -obs.w / 2, -obs.h / 2, obs.w, obs.h);
   } else if (obs.type === 'block' && svgImages.block) {
-    ctx.drawImage(svgImages.block, obs.x, obs.y, obs.w, obs.h);
+    ctx.drawImage(svgImages.block, -obs.w / 2, -obs.h / 2, obs.w, obs.h);
   } else {
     // Fallback: colored rectangle with stripes
     ctx.fillStyle = obs.color;
-    ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+    ctx.fillRect(-obs.w / 2, -obs.h / 2, obs.w, obs.h);
 
     // Diagonal stripes
     ctx.save();
     ctx.beginPath();
-    ctx.rect(obs.x, obs.y, obs.w, obs.h);
+    ctx.rect(-obs.w / 2, -obs.h / 2, obs.w, obs.h);
     ctx.clip();
     ctx.strokeStyle = 'rgba(255,198,66,0.3)';
     ctx.lineWidth = 4;
     const stripeGap = 16;
     for (let i = -obs.h; i < obs.w + obs.h; i += stripeGap) {
       ctx.beginPath();
-      ctx.moveTo(obs.x + i, obs.y);
-      ctx.lineTo(obs.x + i - obs.h, obs.y + obs.h);
+      ctx.moveTo(-obs.w / 2 + i, -obs.h / 2);
+      ctx.lineTo(-obs.w / 2 + i - obs.h, obs.h / 2);
       ctx.stroke();
     }
     ctx.restore();
@@ -2065,17 +2427,17 @@ function drawObstacle(obs) {
     // Border
     ctx.strokeStyle = 'rgba(128,143,150,0.6)';
     ctx.lineWidth = 2;
-    ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+    ctx.strokeRect(-obs.w / 2, -obs.h / 2, obs.w, obs.h);
 
     // Highlight
     ctx.fillStyle = 'rgba(255,255,255,0.1)';
-    ctx.fillRect(obs.x, obs.y, obs.w, obs.h * 0.15);
+    ctx.fillRect(-obs.w / 2, -obs.h / 2, obs.w, obs.h * 0.15);
 
     if (obs.w >= 60) {
       ctx.fillStyle = '#F5C942';
       ctx.font = 'bold 14px "Chakra Petch", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('\u26a0 DANGER', obs.x + obs.w / 2, obs.y + obs.h / 2 + 5);
+      ctx.fillText('\u26a0 DANGER', 0, 5);
       ctx.textAlign = 'left';
     }
   }
@@ -2085,18 +2447,35 @@ function drawObstacle(obs) {
 
 function drawDropZone() {
   const dz = dropZone;
-  const refCrate = getPickupTargetCrate() || hookedCrate || crates[0];
+  const refCrate = hookedCrate || getPickupTargetCrate() || activeDropDisplayCrate || crates[0];
   const refW = refCrate ? refCrate.w : 80;
   const refH = refCrate ? refCrate.h : 47;
   const t = performance.now() / 1000;
   const pulse = 1 + Math.sin(t * 4) * 0.06;
   const alpha = 0.5 + Math.sin(t * 4) * 0.12;
+  const ghostAlpha = 0.2 + Math.sin(t * 3.2) * 0.08;
   const cx = dz.x + dz.width / 2;
   const cy = dz.y + 30;
   const rx = Math.max(24, refW * 0.9) * pulse;
   const ry = Math.max(8, refH * 0.28) * pulse;
+  const ghostY = dz.y - refH + 25;
 
   ctx.save();
+  // Ghost block in target position so players know exact drop location.
+  ctx.globalAlpha = Math.max(0.12, Math.min(0.32, ghostAlpha));
+  if (refCrate && refCrate.type === 'precast' && svgImages.precast) {
+    ctx.drawImage(svgImages.precast, cx - refW / 2, ghostY, refW, refH);
+  } else {
+    ctx.fillStyle = 'rgba(60,166,60,0.38)';
+    ctx.strokeStyle = 'rgba(60,166,60,0.9)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 4]);
+    ctx.fillRect(cx - refW / 2, ghostY, refW, refH);
+    ctx.strokeRect(cx - refW / 2, ghostY, refW, refH);
+    ctx.setLineDash([]);
+  }
+  ctx.globalAlpha = 1;
+
   ctx.fillStyle = `rgba(60,166,60,${alpha.toFixed(3)})`;
   ctx.beginPath();
   ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
@@ -2160,12 +2539,16 @@ function toggleHook() {
   } else {
     const crate = findNearestCrate();
     if (crate) {
+      // Picking a new block clears previous delivered block display.
+      activeDropDisplayCrate = null;
+      droppedCrates = droppedCrates.filter(dc => !dc.delivered);
       hookedCrate = crate;
       if (typeof hookedCrate.broken !== 'boolean') hookedCrate.broken = false;
       const hookBtn = document.getElementById('hookBtn');
       hookBtn.textContent = 'Release';
       hookBtn.classList.add('hooked');
       hookBtn.setAttribute('aria-label', 'Release');
+      hookBtn.setAttribute('title', 'Release');
       hookBtn.setAttribute('aria-pressed', 'true');
     }
   }

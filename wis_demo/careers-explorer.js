@@ -152,6 +152,7 @@ let videoFilterActive = false;
 let stackIndex = 0;
 let careerHistory = []; // Navigation history stack for back button
 let hoveredFloatingItem = null;
+let hasPlayedFloatingEntrance = false;
 
 // DOM Elements
 const floatingView = document.getElementById('floatingView');
@@ -198,7 +199,9 @@ function setSearchExpanded(expanded, { focus = false } = {}) {
     navSearchShell.classList.toggle('expanded', expanded);
 
     if (searchToggleBtn) {
-        searchToggleBtn.setAttribute('aria-label', expanded ? 'Search careers' : 'Open search');
+        const label = expanded ? 'Search careers' : 'Open search';
+        searchToggleBtn.setAttribute('aria-label', label);
+        searchToggleBtn.setAttribute('title', label);
     }
 
     if (expanded && focus && careerSearchInput) {
@@ -398,8 +401,12 @@ function switchView(view) {
     if (cardBtn && cardBtn.querySelector('img')) {
         if (view === 'floating') {
             cardBtn.querySelector('img').src = 'images/card.svg';
+            cardBtn.setAttribute('aria-label', 'Switch to card view');
+            cardBtn.setAttribute('title', 'Switch to card view');
         } else {
             cardBtn.querySelector('img').src = 'images/float.svg';
+            cardBtn.setAttribute('aria-label', 'Switch to floating view');
+            cardBtn.setAttribute('title', 'Switch to floating view');
         }
     }
 
@@ -523,7 +530,8 @@ function getRandomPosition(index, total) {
     return { x, y, angle, radius: finalRadius };
 }
 
-function createFloatingCareerItem(career, index, total) {
+function createFloatingCareerItem(career, index, total, options = {}) {
+    const { stagger = false, staggerIndex = index } = options;
     const item = document.createElement('div');
     item.className = 'career-item';
 
@@ -596,6 +604,17 @@ function createFloatingCareerItem(career, index, total) {
     item.dataset.radius = pos.radius;
     item.dataset.speed = 0.0002 + Math.random() * 0.0003;
     item.dataset.career = JSON.stringify(career);
+
+    if (stagger) {
+        const delay = Math.min(staggerIndex * 34, 380);
+        item.classList.add('stagger-enter');
+        window.setTimeout(() => {
+            item.classList.add('is-visible');
+        }, delay);
+        window.setTimeout(() => {
+            item.classList.remove('stagger-enter', 'is-visible');
+        }, delay + 260);
+    }
 
     item.setAttribute('role', 'button');
     item.setAttribute('tabindex', '0');
@@ -704,14 +723,23 @@ function createFloatingCareerItem(career, index, total) {
     return item;
 }
 
-function initFloatingView() {
+function initFloatingView({ stagger = (!hasPlayedFloatingEntrance && currentView === 'floating') } = {}) {
     floatingContainer.innerHTML = '';
     careerElements = [];
     hoveredFloatingItem = null;
 
+    const shouldStagger = stagger && filteredCareers.length > 0;
+
     filteredCareers.forEach((career, index) => {
-        careerElements.push(createFloatingCareerItem(career, index, filteredCareers.length));
+        careerElements.push(createFloatingCareerItem(career, index, filteredCareers.length, {
+            stagger: shouldStagger,
+            staggerIndex: index
+        }));
     });
+
+    if (shouldStagger) {
+        hasPlayedFloatingEntrance = true;
+    }
 
     animate();
 }
