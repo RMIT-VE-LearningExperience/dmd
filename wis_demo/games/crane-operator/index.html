@@ -745,7 +745,7 @@
     border-radius: 50%;
     background: #F0C638;
     color: #193E75;
-    font-size: 2.35rem;
+    font-size: 2rem;
     line-height: 1.02;
     letter-spacing: 0;
     box-shadow: none;
@@ -1259,6 +1259,7 @@ let camera = { x: 0, y: 0, zoom: 0.55 };
 let targetCamera = { x: 0, y: 0, zoom: 0.55 };
 let introOverviewTimer = null;
 let introZoomTimer = null;
+let autoLowerUntil = 0;
 
 let trolley = {
   x: WORLD.craneBaseX + 200,
@@ -1388,6 +1389,7 @@ function initGame() {
   drumsCollapseTriggered = false;
   spotterMsg = '';
   spotterArrow = null;
+  autoLowerUntil = 0;
 
   resetHookBtn();
   initWireSegments();
@@ -1605,6 +1607,7 @@ function applyDrumCollisionDamage(impactX, impactY, amount = 25) {
 
 function updatePhysics(dt) {
   const frameDrumHitIds = new Set();
+  const autoLowerActive = gameState === 'playing' && performance.now() < autoLowerUntil;
 
   if (inputState.left) trolley.speed -= TROLLEY_ACCEL * dt;
   if (inputState.right) trolley.speed += TROLLEY_ACCEL * dt;
@@ -1612,7 +1615,7 @@ function updatePhysics(dt) {
   trolley.x += trolley.speed * dt;
   trolley.x = Math.max(TROLLEY_MIN_X, Math.min(TROLLEY_MAX_X, trolley.x));
 
-  if (inputState.down) trolley.ropeSpeed += ROPE_ACCEL * dt;
+  if (inputState.down || autoLowerActive) trolley.ropeSpeed += ROPE_ACCEL * dt;
   if (inputState.up) trolley.ropeSpeed -= ROPE_ACCEL * dt;
   trolley.ropeSpeed *= ROPE_FRICTION;
   trolley.ropeLength += trolley.ropeSpeed * dt;
@@ -2973,6 +2976,7 @@ function startGame() {
   if (isDesktopView) {
     introZoomTimer = setTimeout(() => {
       gameState = 'playing';
+      autoLowerUntil = performance.now() + 2000;
       document.getElementById('spotterText').textContent = '⬇️ Lower the hook to a crate';
     }, 1000);
   } else {
@@ -2980,6 +2984,7 @@ function startGame() {
       gameState = 'zooming';
       introZoomTimer = setTimeout(() => {
         gameState = 'playing';
+        autoLowerUntil = performance.now() + 2000;
         document.getElementById('spotterText').textContent = '⬇️ Lower the hook to a crate';
       }, 1000);
     }, 2000);
