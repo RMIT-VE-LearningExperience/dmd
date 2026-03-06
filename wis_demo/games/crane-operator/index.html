@@ -266,11 +266,11 @@
     left: 384px;
     right: 20px;
     bottom: 20px;
-    min-height: 56px;
+    min-height: 46px;
     background: rgba(255, 255, 255, 0.95);
     border: 2px solid rgba(25, 62, 117, 0.14);
     border-radius: 14px;
-    padding: 10px 16px;
+    padding: 6px 14px;
     color: #193E75;
     font-size: clamp(0.9rem, 1.6vw, 1.05rem);
     font-weight: 700;
@@ -419,6 +419,35 @@
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
+  }
+
+  @media (min-width: 701px) {
+    #spotterBox {
+      min-height: 40px;
+      padding: 4px 14px 4px 150px;
+      border-radius: 12px;
+      align-items: center;
+    }
+
+    .spotter-avatar {
+      position: absolute;
+      left: 10px;
+      bottom: -2px;
+      margin-top: 0;
+      min-width: 0;
+      width: 120px;
+      z-index: 2;
+    }
+
+    .spotter-character {
+      width: 92px;
+    }
+
+    .spotter-label {
+      margin-top: -8px;
+      font-size: 11px;
+      padding: 4px 9px;
+    }
   }
 
   /* Help Button */
@@ -651,6 +680,122 @@
     background: #193E75;
     width: 24px;
     border-radius: 4px;
+  }
+
+  /* Guided onboarding (Crew Planner style) */
+  .onboarding-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(12, 24, 48, 0.34);
+    display: none;
+    z-index: 430;
+    pointer-events: none;
+  }
+
+  .onboarding-backdrop.active {
+    display: block;
+  }
+
+  .onboarding-focus-ring {
+    position: fixed;
+    display: none;
+    border: 3px solid #F5C942;
+    border-radius: 14px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.08), 0 0 0 8px rgba(245, 201, 66, 0.2);
+    z-index: 431;
+    pointer-events: none;
+    animation: onboardingPulse 1.1s ease-in-out infinite;
+  }
+
+  .onboarding-focus-ring.active {
+    display: block;
+  }
+
+  @keyframes onboardingPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+
+  .onboarding-hint {
+    position: fixed;
+    display: none;
+    width: min(340px, calc(100vw - 24px));
+    background: #ffffff;
+    color: #1a2744;
+    border-radius: 12px;
+    border: 2px solid #dfe5ee;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+    z-index: 432;
+    padding: 12px 12px 10px;
+    pointer-events: auto;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .onboarding-hint.active {
+    display: block;
+  }
+
+  .onboarding-title {
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #193E75;
+    margin-bottom: 6px;
+  }
+
+  .onboarding-copy {
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  .onboarding-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .onboarding-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 11px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+  }
+
+  .onboarding-btn.skip {
+    background: #e8edf5;
+    color: #193E75;
+  }
+
+  .onboarding-btn.next {
+    background: #F5C942;
+    color: #193E75;
+  }
+
+  .onboarding-hint.auto .onboarding-btn.next {
+    display: none;
+  }
+
+  @media (max-width: 700px) {
+    .onboarding-focus-ring {
+      border-radius: 12px;
+    }
+
+    .onboarding-hint {
+      width: calc(100vw - 16px);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .onboarding-copy {
+      font-size: 13px;
+    }
   }
 
   /* End Screen (win & game over) */
@@ -1139,6 +1284,9 @@
       <div class="slide-dots" id="slideDots"></div>
       <button class="modal-btn modal-btn-primary" id="nextSlide">Next →</button>
     </div>
+    <div class="modal-nav" style="justify-content:flex-end; margin-top:10px;">
+      <button class="modal-btn" id="replayTutorialBtn">Replay tutorial</button>
+    </div>
     <button class="modal-close" onclick="closeHelp()">×</button>
   </div>
 </div>
@@ -1150,6 +1298,18 @@
     <p id="endLead"></p>
     <p id="endMsg">All crates delivered.</p>
     <button id="restartBtn">Play Again</button>
+  </div>
+</div>
+
+<!-- Onboarding overlay -->
+<div id="onboardingBackdrop" class="onboarding-backdrop" aria-hidden="true"></div>
+<div id="onboardingFocusRing" class="onboarding-focus-ring" aria-hidden="true"></div>
+<div id="onboardingHint" class="onboarding-hint" role="dialog" aria-live="polite" aria-label="Tutorial step">
+  <div id="onboardingTitle" class="onboarding-title"></div>
+  <div id="onboardingCopy" class="onboarding-copy"></div>
+  <div class="onboarding-actions">
+    <button id="onboardingSkipBtn" class="onboarding-btn skip" type="button">Skip</button>
+    <button id="onboardingNextBtn" class="onboarding-btn next" type="button">Next</button>
   </div>
 </div>
 
@@ -1260,6 +1420,15 @@ let targetCamera = { x: 0, y: 0, zoom: 0.55 };
 let introOverviewTimer = null;
 let introZoomTimer = null;
 let autoLowerUntil = 0;
+const AUTO_LOWER_ACCEL_MULT = 0.55;
+
+const ONBOARDING_STORAGE_KEY = 'craneOperatorOnboardingCompleteV1';
+const onboarding = {
+  active: false,
+  step: 0,
+  force: false,
+  renderedStep: -1
+};
 
 let trolley = {
   x: WORLD.craneBaseX + 200,
@@ -1390,6 +1559,7 @@ function initGame() {
   spotterMsg = '';
   spotterArrow = null;
   autoLowerUntil = 0;
+  stopOnboarding({ markComplete: false, keepForce: false });
 
   resetHookBtn();
   initWireSegments();
@@ -1397,8 +1567,9 @@ function initGame() {
 }
 
 function getHookIdleLabel() {
+  const isPortraitMobile = window.matchMedia('(max-width: 700px) and (orientation: portrait)').matches;
   const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-  return isTouchDevice ? 'Hook' : 'HOOK (spacebar)';
+  return (isPortraitMobile || isTouchDevice) ? 'Hook' : 'HOOK (spacebar)';
 }
 
 function updateHookIdleButtonLabel() {
@@ -1615,7 +1786,11 @@ function updatePhysics(dt) {
   trolley.x += trolley.speed * dt;
   trolley.x = Math.max(TROLLEY_MIN_X, Math.min(TROLLEY_MAX_X, trolley.x));
 
-  if (inputState.down || autoLowerActive) trolley.ropeSpeed += ROPE_ACCEL * dt;
+  if (inputState.down) {
+    trolley.ropeSpeed += ROPE_ACCEL * dt;
+  } else if (autoLowerActive) {
+    trolley.ropeSpeed += (ROPE_ACCEL * AUTO_LOWER_ACCEL_MULT) * dt;
+  }
   if (inputState.up) trolley.ropeSpeed -= ROPE_ACCEL * dt;
   trolley.ropeSpeed *= ROPE_FRICTION;
   trolley.ropeLength += trolley.ropeSpeed * dt;
@@ -2866,6 +3041,9 @@ function showEndScreen(won) {
     msg.innerHTML = 'Improper load control can cause structural failure, falling debris, and serious injury on a real job site. A crane operator\'s duty is precision and safety.<br><br>Check your load balance, and try again.';
     btn.innerHTML = '<span class="retry-lines">TRY<br>AGAIN</span>';
   }
+  if (onboarding.active) {
+    stopOnboarding({ markComplete: true, keepForce: false });
+  }
 }
 
 // ============ INPUT ============
@@ -2959,6 +3137,7 @@ function startGame() {
   introZoomTimer = null;
 
   initGame();
+  const shouldOnboard = shouldStartOnboarding();
   const isDesktopView = window.matchMedia('(min-width: 701px)').matches;
   gameState = isDesktopView ? 'zooming' : 'overview';
 
@@ -2976,7 +3155,11 @@ function startGame() {
   if (isDesktopView) {
     introZoomTimer = setTimeout(() => {
       gameState = 'playing';
-      autoLowerUntil = performance.now() + 2000;
+      if (shouldOnboard) {
+        startOnboarding({ force: false });
+      } else {
+        autoLowerUntil = performance.now() + 2000;
+      }
       document.getElementById('spotterText').textContent = '⬇️ Lower the hook to a crate';
     }, 1000);
   } else {
@@ -2984,7 +3167,11 @@ function startGame() {
       gameState = 'zooming';
       introZoomTimer = setTimeout(() => {
         gameState = 'playing';
-        autoLowerUntil = performance.now() + 2000;
+        if (shouldOnboard) {
+          startOnboarding({ force: false });
+        } else {
+          autoLowerUntil = performance.now() + 2000;
+        }
         document.getElementById('spotterText').textContent = '⬇️ Lower the hook to a crate';
       }, 1000);
     }, 2000);
@@ -3009,6 +3196,11 @@ function gameLoop(time) {
 
   if (gameState !== 'start') drawWorld();
 
+  if (onboarding.active) {
+    updateOnboardingState();
+    renderOnboardingUI();
+  }
+
   const vGrad = ctx.createRadialGradient(W() / 2, H() / 2, W() * 0.3, W() / 2, H() / 2, W() * 0.8);
   vGrad.addColorStop(0, 'rgba(0,0,0,0)');
   vGrad.addColorStop(1, 'rgba(0,0,0,0.4)');
@@ -3016,6 +3208,187 @@ function gameLoop(time) {
   ctx.fillRect(0, 0, W(), H());
 
   requestAnimationFrame(gameLoop);
+}
+
+function hasCompletedOnboarding() {
+  try {
+    return localStorage.getItem(ONBOARDING_STORAGE_KEY) === '1';
+  } catch (error) {
+    return false;
+  }
+}
+
+function setOnboardingCompleted(value) {
+  try {
+    if (value) {
+      localStorage.setItem(ONBOARDING_STORAGE_KEY, '1');
+    } else {
+      localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+    }
+  } catch (error) {
+    // no-op
+  }
+}
+
+function shouldStartOnboarding() {
+  return onboarding.force || !hasCompletedOnboarding();
+}
+
+function getOnboardingStepConfig(step) {
+  switch (step) {
+    case 0:
+      return {
+        title: 'Controls',
+        text: 'Use left/right to move the trolley and up/down to raise or lower the hook.',
+        target: 'controls',
+        auto: false
+      };
+    case 1:
+      return {
+        title: 'Hook Button',
+        text: 'Press Hook to attach when close to a block, then press Hook again to release.',
+        target: 'hook',
+        auto: false
+      };
+    default:
+      return null;
+  }
+}
+
+function getWorldToScreenRect(wx, wy, ww, wh) {
+  const sx = (wx - camera.x) * camera.zoom + W() / 2;
+  const sy = (wy - camera.y) * camera.zoom + H() / 2;
+  return {
+    left: sx,
+    top: sy,
+    width: Math.max(22, ww * camera.zoom),
+    height: Math.max(22, wh * camera.zoom)
+  };
+}
+
+function getOnboardingTargetRect(targetType) {
+  if (targetType === 'controls') {
+    const el = document.getElementById('controls');
+    return el ? el.getBoundingClientRect() : null;
+  }
+  if (targetType === 'hook') {
+    const el = document.getElementById('hookBtn');
+    return el ? el.getBoundingClientRect() : null;
+  }
+  if (targetType === 'crate') {
+    const c = getPickupTargetCrate();
+    if (!c) return null;
+    return getWorldToScreenRect(c.x, c.y, c.w, c.h);
+  }
+  if (targetType === 'dropzone') {
+    return getWorldToScreenRect(dropZone.x, dropZone.y - 45, dropZone.width, 90);
+  }
+  return null;
+}
+
+function positionOnboardingHint(rect) {
+  const hint = document.getElementById('onboardingHint');
+  if (!hint) return;
+  const pad = 10;
+  const hintRect = hint.getBoundingClientRect();
+
+  let left = rect ? rect.left + (rect.width / 2) - (hintRect.width / 2) : (W() - hintRect.width) / 2;
+  left = Math.max(pad, Math.min(W() - hintRect.width - pad, left));
+
+  let top = rect ? rect.bottom + 12 : (H() * 0.7);
+  if (rect && top + hintRect.height > H() - pad) {
+    top = rect.top - hintRect.height - 12;
+  }
+  top = Math.max(pad, Math.min(H() - hintRect.height - pad, top));
+
+  hint.style.left = `${left}px`;
+  hint.style.top = `${top}px`;
+}
+
+function renderOnboardingUI() {
+  if (!onboarding.active) return;
+
+  const cfg = getOnboardingStepConfig(onboarding.step);
+  if (!cfg) {
+    stopOnboarding({ markComplete: true, keepForce: false });
+    return;
+  }
+
+  const backdrop = document.getElementById('onboardingBackdrop');
+  const ring = document.getElementById('onboardingFocusRing');
+  const hint = document.getElementById('onboardingHint');
+  const title = document.getElementById('onboardingTitle');
+  const copy = document.getElementById('onboardingCopy');
+  const nextBtn = document.getElementById('onboardingNextBtn');
+
+  backdrop.classList.add('active');
+  ring.classList.add('active');
+  hint.classList.add('active');
+  hint.classList.toggle('auto', !!cfg.auto);
+
+  if (onboarding.renderedStep !== onboarding.step) {
+    title.textContent = cfg.title;
+    copy.textContent = cfg.text;
+    onboarding.renderedStep = onboarding.step;
+  }
+
+  if (nextBtn) {
+    nextBtn.textContent = onboarding.step >= 1 ? 'Got it' : 'Next';
+  }
+
+  const rect = getOnboardingTargetRect(cfg.target);
+  if (rect) {
+    ring.style.left = `${rect.left - 6}px`;
+    ring.style.top = `${rect.top - 6}px`;
+    ring.style.width = `${rect.width + 12}px`;
+    ring.style.height = `${rect.height + 12}px`;
+    positionOnboardingHint(rect);
+  } else {
+    ring.style.left = `${W() / 2 - 60}px`;
+    ring.style.top = `${H() / 2 - 40}px`;
+    ring.style.width = '120px';
+    ring.style.height = '80px';
+    positionOnboardingHint(null);
+  }
+}
+
+function hideOnboardingUI() {
+  const backdrop = document.getElementById('onboardingBackdrop');
+  const ring = document.getElementById('onboardingFocusRing');
+  const hint = document.getElementById('onboardingHint');
+  if (backdrop) backdrop.classList.remove('active');
+  if (ring) ring.classList.remove('active');
+  if (hint) hint.classList.remove('active');
+}
+
+function startOnboarding({ force = false } = {}) {
+  onboarding.force = force;
+  onboarding.active = true;
+  onboarding.step = 0;
+  onboarding.renderedStep = -1;
+  renderOnboardingUI();
+}
+
+function stopOnboarding({ markComplete = true, keepForce = false } = {}) {
+  onboarding.active = false;
+  onboarding.step = 0;
+  onboarding.renderedStep = -1;
+  if (!keepForce) onboarding.force = false;
+  hideOnboardingUI();
+  if (markComplete) setOnboardingCompleted(true);
+}
+
+function nextOnboardingStep() {
+  if (!onboarding.active) return;
+  onboarding.step += 1;
+  onboarding.renderedStep = -1;
+  if (!getOnboardingStepConfig(onboarding.step)) {
+    stopOnboarding({ markComplete: true, keepForce: false });
+  }
+}
+
+function updateOnboardingState() {
+  if (!onboarding.active || gameState !== 'playing') return;
 }
 
 // ============ HELP MODAL ============
@@ -3071,6 +3444,41 @@ document.getElementById('helpModal').addEventListener('click', (e) => {
 });
 
 document.getElementById('helpBtn').addEventListener('click', showHelp);
+
+const onboardingNextBtn = document.getElementById('onboardingNextBtn');
+const onboardingSkipBtn = document.getElementById('onboardingSkipBtn');
+const replayTutorialBtn = document.getElementById('replayTutorialBtn');
+
+if (onboardingNextBtn) {
+  onboardingNextBtn.addEventListener('click', () => {
+    nextOnboardingStep();
+  });
+}
+
+if (onboardingSkipBtn) {
+  onboardingSkipBtn.addEventListener('click', () => {
+    stopOnboarding({ markComplete: true, keepForce: false });
+  });
+}
+
+if (replayTutorialBtn) {
+  replayTutorialBtn.addEventListener('click', () => {
+    closeHelp();
+    onboarding.force = true;
+    if (gameState === 'playing') {
+      startOnboarding({ force: true });
+    } else {
+      startGame();
+    }
+  });
+}
+
+window.addEventListener('resize', () => {
+  if (onboarding.active) {
+    onboarding.renderedStep = -1;
+    renderOnboardingUI();
+  }
+});
 
 // ============ INITIALIZATION ============
 loadSVGAssets().then(() => {
