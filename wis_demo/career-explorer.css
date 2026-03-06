@@ -1499,8 +1499,9 @@ body {
     gap: 8px;
     background: #1e1b4b;
     color: white;
-    padding: 6px 16px;
-    border-radius: 20px;
+    padding: 0;
+    border-radius: 10px;
+    overflow: hidden;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -1508,9 +1509,9 @@ body {
 }
 
 .dashboard-badge-dot {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
+    min-width: 20px;
+    padding: 7px 8px;
+    border-radius: 10px 0 0 10px;
     background: #22c55e;
     display: flex;
     align-items: center;
@@ -1518,6 +1519,12 @@ body {
     font-size: 10px;
     font-weight: 800;
     color: white;
+}
+
+.dashboard-badge-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 15px 7px 0;
 }
 
 .game-carousel {

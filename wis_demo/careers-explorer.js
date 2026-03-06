@@ -172,6 +172,7 @@ const salaryMinDisplay = document.getElementById('salaryMinDisplay');
 const rangeFill = document.getElementById('rangeFill');
 const skillsFilterContainer = document.getElementById('skillsFilterContainer');
 const clearFiltersBtn = document.getElementById('clearFilters');
+const videoStoriesFilterBtn = document.getElementById('videoStoriesFilterBtn');
 const compareActionBtn = document.getElementById('compareActionBtn');
 const noResults = document.getElementById('noResults');
 const videoLegend = document.getElementById('videoLegend');
@@ -184,6 +185,15 @@ const navSearchShell = document.getElementById('navSearchShell');
 const searchToggleBtn = document.getElementById('searchToggleBtn');
 const careerSearchInput = document.getElementById('careerSearch');
 const topNavIcons = document.querySelector('.top-nav-icons');
+
+function syncVideoFilterUI() {
+    if (videoLegend) {
+        videoLegend.classList.toggle('active', videoFilterActive);
+    }
+    if (videoStoriesFilterBtn) {
+        videoStoriesFilterBtn.classList.toggle('active', videoFilterActive);
+    }
+}
 
 function bindKeyboardActivate(element, handler) {
     if (!element) return;
@@ -1426,6 +1436,29 @@ function getYouTubeVideoId(url) {
 }
 
 // Function to toggle expandable bar
+function setExpandContentState(content, shouldOpen) {
+    if (!content || !content.classList.contains('expand-content')) return;
+    const isAutoHeightSection = content.id === 'progressionContent';
+
+    if (shouldOpen) {
+        content.classList.add('active');
+        content.style.maxHeight = isAutoHeightSection ? 'none' : `${content.scrollHeight}px`;
+    } else {
+        content.style.maxHeight = '0px';
+        content.classList.remove('active');
+    }
+}
+
+function refreshActiveExpandContentHeights() {
+    document.querySelectorAll('.expand-content.active').forEach(content => {
+        if (content.id === 'progressionContent') {
+            content.style.maxHeight = 'none';
+            return;
+        }
+        content.style.maxHeight = `${content.scrollHeight}px`;
+    });
+}
+
 function toggleExpandBar(bar) {
     const content = bar.nextElementSibling;
     if (!content || !content.classList.contains('expand-content')) return;
@@ -1435,8 +1468,9 @@ function toggleExpandBar(bar) {
         return;
     }
 
-    bar.classList.toggle('active');
-    content.classList.toggle('active');
+    const isOpening = !bar.classList.contains('active');
+    bar.classList.toggle('active', isOpening);
+    setExpandContentState(content, isOpening);
 }
 
 // Function to setup expandable bar listeners
@@ -1644,6 +1678,7 @@ function populateCareerPanel(career) {
             const toggleLevel = () => {
                 card.classList.toggle('active');
                 header.setAttribute('aria-expanded', card.classList.contains('active') ? 'true' : 'false');
+                requestAnimationFrame(refreshActiveExpandContentHeights);
             };
             header.addEventListener('click', toggleLevel);
             bindKeyboardActivate(header, toggleLevel);
@@ -1696,7 +1731,7 @@ function populateCareerPanel(career) {
         bar.classList.remove('active');
         const content = bar.nextElementSibling;
         if (content && content.classList.contains('expand-content')) {
-            content.classList.remove('active');
+            setExpandContentState(content, false);
         }
     });
 
@@ -1706,16 +1741,18 @@ function populateCareerPanel(career) {
         educationBar.classList.add('active');
         const educationContent = educationBar.nextElementSibling;
         if (educationContent && educationContent.classList.contains('expand-content')) {
-            educationContent.classList.add('active');
+            setExpandContentState(educationContent, true);
         }
     }
 
     if (pathwayBar && pathwayBar.style.display !== 'none') {
         pathwayBar.classList.add('active');
         if (pathwayContent && pathwayContent.classList.contains('expand-content')) {
-            pathwayContent.classList.add('active');
+            setExpandContentState(pathwayContent, true);
         }
     }
+
+    requestAnimationFrame(refreshActiveExpandContentHeights);
 
     // Show the panel and overlay
     infoPanel.classList.add('visible');
@@ -1884,11 +1921,19 @@ clearFiltersBtn.addEventListener('click', () => {
         tag.classList.remove('active');
     });
     videoFilterActive = false;
-    videoLegend.classList.remove('active');
+    syncVideoFilterUI();
     clearComparison();
     setCompareMode(false);
     filterCareers();
 });
+
+if (videoStoriesFilterBtn) {
+    videoStoriesFilterBtn.addEventListener('click', () => {
+        videoFilterActive = !videoFilterActive;
+        syncVideoFilterUI();
+        filterCareers();
+    });
+}
 
 if (compareActionBtn) {
     compareActionBtn.addEventListener('click', () => {
@@ -1931,17 +1976,6 @@ function closeInfoPanel() {
 
 closeBtn.addEventListener('click', closeInfoPanel);
 
-// Back button - go to previous career
-const backBtn = document.getElementById('backBtn');
-if (backBtn) {
-    backBtn.addEventListener('click', () => {
-        goBackCareer();
-        // Scroll content to top
-        const panelContent = document.querySelector('.panel-content');
-        if (panelContent) panelContent.scrollTop = 0;
-    });
-}
-
 // Close info panel on Escape key
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && infoPanel.classList.contains('visible')) {
@@ -1963,7 +1997,7 @@ videoLegend.setAttribute('role', 'button');
 videoLegend.setAttribute('tabindex', '0');
 const toggleVideoFilter = () => {
     videoFilterActive = !videoFilterActive;
-    videoLegend.classList.toggle('active');
+    syncVideoFilterUI();
 
     // In floating view, filter the careers
     if (currentView === 'floating') {

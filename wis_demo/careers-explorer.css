@@ -950,7 +950,7 @@ body {
 
 .filter-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     gap: 12px;
     margin-bottom: 24px;
@@ -959,6 +959,7 @@ body {
 }
 
 .compare-action-btn,
+.video-stories-filter,
 .clear-filters {
     padding: 10px 20px;
     border: none;
@@ -998,6 +999,22 @@ body {
     background: #193E75;
     color: #FFFFFF;
     opacity: 1;
+}
+
+.video-stories-filter {
+    margin-left: auto;
+    background: #193E75;
+    color: #FFFFFF;
+}
+
+.video-stories-filter:hover {
+    background: #163562;
+    transform: scale(1.02);
+}
+
+.video-stories-filter.active {
+    background: #e46f5b;
+    color: #ffffff;
 }
 
 /* ===================================
@@ -1892,7 +1909,7 @@ body.embed-popup-mode .info-panel {
 }
 
 .expand-content.active {
-    max-height: 600px;
+    max-height: 2000px;
     padding: 18px 16px;
     border: 3px solid #a978b5;
     background: #ffffff;
@@ -1902,6 +1919,8 @@ body.embed-popup-mode .info-panel {
     border: none;
     background: transparent;
     padding: 8px 0;
+    max-height: none;
+    overflow: visible;
 }
 
 /* ===================================
@@ -2428,8 +2447,9 @@ body.embed-popup-mode .info-panel {
     gap: 8px;
     background: #1e1b4b;
     color: white;
-    padding: 6px 16px;
-    border-radius: 20px;
+    padding: 0;
+    border-radius: 10px;
+    overflow: hidden;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -2437,9 +2457,9 @@ body.embed-popup-mode .info-panel {
 }
 
 .dashboard-badge-dot {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
+    min-width: 20px;
+    padding: 7px 8px;
+    border-radius: 10px 0 0 10px;
     background: #22c55e;
     display: flex;
     align-items: center;
@@ -2447,6 +2467,12 @@ body.embed-popup-mode .info-panel {
     font-size: 10px;
     font-weight: 800;
     color: white;
+}
+
+.dashboard-badge-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 15px 7px 0;
 }
 
 .game-carousel {

@@ -149,7 +149,7 @@ body.nav-open .page-corner-logo {
     content: "";
     position: absolute;
     inset: 0;
-    background: #1f4888;
+    background: #193E75;
     transform: scaleX(0);
     transform-origin: right center;
     transition: transform 0.3s ease;

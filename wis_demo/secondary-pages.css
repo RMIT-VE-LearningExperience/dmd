@@ -538,6 +538,7 @@ body.page-secondary.mini-games-page .page-main {
     color: #3b4f73;
     min-height: 0;
     flex: 1 1 auto;
+    padding-bottom: 20px;
 }
 
 .game-status {
