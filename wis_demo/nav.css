@@ -63,6 +63,12 @@
     outline-offset: 3px;
 }
 
+/* Hide the top-left page logo while drawer is open so it never overlaps menu content */
+body.nav-open .page-corner-logo {
+    opacity: 0;
+    pointer-events: none;
+}
+
 
 /* Nav Drawer */
 .nav-drawer {
@@ -123,6 +129,8 @@
     display: flex;
     align-items: stretch;
     justify-content: space-between;
+    position: relative;
+    isolation: isolate;
     flex: 0 0 auto;
     min-height: 52px;
     color: #1f4888;
@@ -134,7 +142,18 @@
     border-radius: 16px;
     background: #d7dde6;
     overflow: hidden;
-    transition: background 0.2s, color 0.2s;
+    transition: color 0.25s ease;
+}
+
+.nav-link::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #1f4888;
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 0.3s ease;
+    z-index: 0;
 }
 
 .nav-link-label {
@@ -142,6 +161,9 @@
     align-items: center;
     padding: 0 0 0 22px;
     text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+    transition: color 0.25s ease;
 }
 
 .nav-link-icon {
@@ -152,6 +174,9 @@
     justify-content: center;
     background: #b9cedd;
     color: #5e95b2;
+    position: relative;
+    z-index: 1;
+    transition: background 0.25s ease, color 0.25s ease, filter 0.25s ease;
 }
 
 .nav-link-icon svg,
@@ -245,8 +270,24 @@
 }
 
 .nav-link:hover {
-    background: #e3e8ef;
-    color: #1f4888;
+    color: #ffffff;
+}
+
+.nav-link:hover::before {
+    transform: scaleX(1);
+}
+
+.nav-link:hover .nav-link-label {
+    color: #ffffff;
+}
+
+.nav-link:hover .nav-link-icon {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+
+.nav-link:hover .nav-link-icon img {
+    filter: brightness(0) invert(1);
 }
 
 .nav-link.active {
@@ -273,7 +314,7 @@
 @media (max-width: 768px) {
     .top-nav-icons {
         top: 16px;
-        margin: 16px 16px 0 auto;
+        margin: 0px 16px 0 auto;
         gap: 12px;
     }
 

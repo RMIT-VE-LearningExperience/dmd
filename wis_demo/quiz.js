@@ -86,6 +86,11 @@ function startQuiz() {
 
 function skipQuiz() {
     console.log('⏭️ Skipping quiz...');
+    try {
+        localStorage.removeItem('quizResults');
+    } catch (error) {
+        console.warn('⚠️ Unable to clear quiz results while skipping:', error);
+    }
     window.location.href = 'career-explorer.html';
 }
 

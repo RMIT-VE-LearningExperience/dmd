@@ -183,6 +183,7 @@ const menuBtn = document.getElementById('menuBtn');
 const navSearchShell = document.getElementById('navSearchShell');
 const searchToggleBtn = document.getElementById('searchToggleBtn');
 const careerSearchInput = document.getElementById('careerSearch');
+const topNavIcons = document.querySelector('.top-nav-icons');
 
 function bindKeyboardActivate(element, handler) {
     if (!element) return;
@@ -197,6 +198,9 @@ function bindKeyboardActivate(element, handler) {
 function setSearchExpanded(expanded, { focus = false } = {}) {
     if (!navSearchShell) return;
     navSearchShell.classList.toggle('expanded', expanded);
+    if (topNavIcons) {
+        topNavIcons.classList.toggle('search-open', expanded);
+    }
 
     if (searchToggleBtn) {
         const label = expanded ? 'Search careers' : 'Open search';

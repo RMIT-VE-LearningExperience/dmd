@@ -337,7 +337,7 @@ html, body {
     .hero-buttons {
         flex-direction: column-reverse;
         gap: 12px;
-        margin-bottom: 8px;
+        margin-bottom: 92px;
     }
 
     .btn {

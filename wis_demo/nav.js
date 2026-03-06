@@ -72,6 +72,7 @@
     function setDrawerKeyboardState(isOpen) {
         if (isOpen) {
             drawer.classList.add('open');
+            document.body.classList.add('nav-open');
             drawer.removeAttribute('inert');
             drawer.setAttribute('aria-hidden', 'false');
             menuBtn.setAttribute('aria-expanded', 'true');
@@ -86,6 +87,7 @@
             });
         } else {
             drawer.classList.remove('open');
+            document.body.classList.remove('nav-open');
             drawer.setAttribute('inert', '');
             drawer.setAttribute('aria-hidden', 'true');
             menuBtn.setAttribute('aria-expanded', 'false');

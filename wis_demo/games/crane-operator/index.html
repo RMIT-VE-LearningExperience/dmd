@@ -359,6 +359,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
   }
 
   /* Help Button */
@@ -1006,7 +1007,8 @@ let trolley = {
 const TROLLEY_MIN_X = WORLD.craneBaseX + 30;
 const TROLLEY_MAX_X = WORLD.craneBaseX + WORLD.jibLength - 30;
 const OBSTACLE_BASE_X = WORLD.craneBaseX + 510;
-const ROPE_MIN = 60;
+// Prevent the hook from retracting too close to the trolley/top beam.
+const ROPE_MIN = 110;
 const ROPE_MAX = 680;
 
 let hook = {

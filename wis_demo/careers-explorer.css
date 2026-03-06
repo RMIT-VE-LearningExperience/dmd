@@ -644,6 +644,10 @@ body {
         display: none !important;
     }
 
+    body .top-nav-icons.search-open {
+        z-index: 1150;
+    }
+
     .page-corner-logo {
         top: 16px;
         left: 16px;
@@ -670,6 +674,8 @@ body {
     .nav-search-btn {
         width: 70px;
         height: 70px;
+        top: auto;
+        right: -5px;
     }
 
     .nav-search-btn img {
