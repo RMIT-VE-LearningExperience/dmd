@@ -290,11 +290,72 @@ Object.keys(skillCategories).forEach(category => {
     tag.dataset.category = category;
     tag.setAttribute('role', 'button');
     tag.setAttribute('tabindex', '0');
-    const activateTag = () => toggleCategoryFilter(category, tag);
+    const activateTag = () => {
+        const suppressUntil = parseInt(tag.dataset.dragSuppressUntil || '0', 10);
+        if (Date.now() < suppressUntil) return;
+        toggleCategoryFilter(category, tag);
+    };
     tag.addEventListener('click', activateTag);
     bindKeyboardActivate(tag, activateTag);
     skillsFilterContainer.appendChild(tag);
 });
+
+function setupSkillsFilterCarouselDrag() {
+    if (!skillsFilterContainer || skillsFilterContainer.dataset.dragReady === '1') return;
+    skillsFilterContainer.dataset.dragReady = '1';
+
+    let isDragging = false;
+    let didDrag = false;
+    let startX = 0;
+    let startScrollLeft = 0;
+
+    const dragThreshold = 6;
+
+    const onPointerMove = (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+
+        if (!didDrag && Math.abs(dx) > dragThreshold) {
+            didDrag = true;
+            skillsFilterContainer.classList.add('is-dragging');
+        }
+
+        if (!didDrag) return;
+        skillsFilterContainer.scrollLeft = startScrollLeft - dx;
+    };
+
+    const stopDrag = () => {
+        if (!isDragging) return;
+
+        if (didDrag) {
+            const suppressUntil = String(Date.now() + 220);
+            skillsFilterContainer.querySelectorAll('.skill-filter-tag').forEach((tag) => {
+                tag.dataset.dragSuppressUntil = suppressUntil;
+            });
+        }
+
+        skillsFilterContainer.classList.remove('is-dragging');
+        isDragging = false;
+        didDrag = false;
+    };
+
+    skillsFilterContainer.addEventListener('pointerdown', (e) => {
+        if (window.innerWidth > 768) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+        isDragging = true;
+        didDrag = false;
+        startX = e.clientX;
+        startScrollLeft = skillsFilterContainer.scrollLeft;
+
+        skillsFilterContainer.setPointerCapture(e.pointerId);
+    });
+
+    skillsFilterContainer.addEventListener('pointermove', onPointerMove);
+    skillsFilterContainer.addEventListener('pointerup', stopDrag);
+    skillsFilterContainer.addEventListener('pointercancel', stopDrag);
+    skillsFilterContainer.addEventListener('lostpointercapture', stopDrag);
+}
 
 // Salary Range Slider Logic
 function updateSalaryRangeUI(minValue, maxValue) {
@@ -2152,6 +2213,7 @@ async function initialize() {
 
     // Initialize expandable sections
     setupExpandableSections();
+    setupSkillsFilterCarouselDrag();
 
     // Deep-link support for opening a role directly in the shared popup.
     openCareerFromURLParam();

@@ -327,7 +327,7 @@ body.nav-open .page-corner-logo {
 @media (max-width: 480px) {
     .top-nav-icons {
         top: 12px;
-        margin: 12px 12px 0 auto;
+        margin: 0px 12px 0 auto;
         gap: 10px;
     }
 

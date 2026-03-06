@@ -162,6 +162,65 @@
     }
   }
 
+  /* Landscape mobile: keep welcome content readable and avoid overlaps */
+  @media (orientation: landscape) and (max-height: 740px) and (max-width: 980px) {
+    #startScreen {
+      padding: 12px;
+      align-items: center;
+    }
+
+    .welcome-card {
+      width: min(940px, 96vw);
+      max-width: none;
+      height: auto;
+      max-height: 92vh;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+      border-radius: 14px;
+    }
+
+    .welcome-intro-body {
+      position: relative;
+      inset: auto;
+      padding: 16px 170px 0 18px;
+    }
+
+    .welcome-intro-title {
+      font-size: clamp(28px, 5.4vw, 40px);
+      line-height: 0.9;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    .welcome-intro-text {
+      font-size: 13px;
+      line-height: 1.28;
+      margin-bottom: 8px;
+    }
+
+    .welcome-intro-character {
+      position: absolute;
+      right: 6px;
+      bottom: 0;
+      width: min(22vw, 150px);
+      max-width: 150px;
+      z-index: 2;
+    }
+
+    #startBtn {
+      position: static;
+      align-self: flex-start;
+      margin: 8px 0 14px 18px;
+      width: 64px;
+      height: 64px;
+      font-size: 16px;
+      line-height: 1;
+      z-index: 3;
+    }
+  }
+
   button:focus-visible,
   a:focus-visible {
     outline: 3px solid #fff;
@@ -387,16 +446,16 @@
 
   #helpBtn {
     position: fixed;
-    top: 32px;
-    right: 106px;
+    top: 26px;
+    right: 100px;
     z-index: 450;
   }
 
   /* Main nav hamburger button */
   #menuBtn {
     position: fixed;
-    top: 32px;
-    right: 32px;
+    top: 26px;
+    right: 26px;
     z-index: 450;
     width: 62px;
     height: 62px;
@@ -418,6 +477,18 @@
     height: 3px;
     border-radius: 999px;
     background: #1f4888;
+  }
+
+  @media (max-width: 700px) {
+    #helpBtn {
+      top: 12px;
+      right: 84px;
+    }
+
+    #menuBtn {
+      top: 12px;
+      right: 12px;
+    }
   }
 
   /* Help Modal */
@@ -593,47 +664,122 @@
     justify-content: center;
     text-align: center;
     z-index: 200;
+    padding: 40px;
   }
 
-  #endScreen h2 {
-    font-family: 'Oswald', sans-serif;
-    font-size: 3rem;
+  #endScreen .end-card {
+    width: min(1020px, calc(100vw - 120px));
+    background: #efefef;
+    border-radius: 30px;
+    padding: 46px 60px 46px;
+    color: #111;
+    position: relative;
+    text-align: left;
+  }
+
+  #endTitle {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(40px, 4.4vw, 58px);
+    font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.5em;
+    letter-spacing: 0.02em;
+    margin-bottom: 24px;
+    text-align: center;
   }
 
-  #endScreen h2.win-title {
+  #endTitle.win-title {
     color: #3CA63C;
-    text-shadow: 0 0 40px rgba(60,166,60,0.5);
+    text-shadow: none;
   }
 
-  #endScreen h2.lose-title {
-    color: #f55;
-    text-shadow: 0 0 40px rgba(255,80,80,0.5);
+  #endTitle.lose-title {
+    color: #E61E2A;
+    text-shadow: none;
   }
 
-  #endScreen p { color: #aaa; margin-bottom: 1.5em; }
+  #endLead {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(24px, 2.1vw, 38px);
+    line-height: 1.3;
+    font-weight: 800;
+    margin: 0 0 20px;
+  }
+
+  #endMsg {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(18px, 1.8vw, 30px);
+    line-height: 1.32;
+    font-weight: 500;
+    margin: 0;
+    max-width: calc(100% - 240px);
+  }
 
   #restartBtn {
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.2rem;
-    padding: 0.7em 2.5em;
+    margin-top: 28px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.1rem;
+    padding: 0.85em 2.2em;
     background: linear-gradient(180deg, #3CA63C, #2a8a2a);
     color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 12px;
     cursor: pointer;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    font-weight: 700;
-    box-shadow: 0 4px 0 #1a6a1a, 0 6px 20px rgba(60,166,60,0.3);
+    letter-spacing: 0.08em;
+    font-weight: 800;
+    box-shadow: none;
   }
 
-  #restartBtn.lose-btn {
-    background: #F37329;
+  #endScreen.lose-mode {
+    background: rgba(230, 30, 42, 0.82);
+  }
+
+  #endScreen.lose-mode #restartBtn {
+    position: absolute;
+    right: 48px;
+    bottom: 36px;
+    width: 136px;
+    height: 136px;
+    margin-top: 0;
+    padding: 0;
+    border-radius: 50%;
+    background: #F0C638;
     color: #193E75;
-    box-shadow: 0 4px 0 #193E75, 0 6px 20px rgba(245,198,66,0.3);
+    font-size: 2.35rem;
+    line-height: 1.02;
+    letter-spacing: 0;
+    box-shadow: none;
+  }
+
+  #endScreen.lose-mode #restartBtn .retry-lines {
+    display: block;
+    text-align: center;
+    font-weight: 900;
+  }
+
+  @media (max-width: 900px) {
+    #endScreen {
+      padding: 18px;
+    }
+
+    #endScreen .end-card {
+      width: 100%;
+      border-radius: 20px;
+      padding: 30px 22px 24px;
+    }
+
+    #endMsg {
+      max-width: 100%;
+    }
+
+    #endScreen.lose-mode #restartBtn {
+      position: static;
+      width: 110px;
+      height: 110px;
+      margin: 24px auto 0;
+      font-size: 1.95rem;
+      display: block;
+    }
   }
 
   @media (max-width: 600px) {
@@ -699,31 +845,128 @@
     }
   }
 
+  @media (max-width: 600px) and (orientation: portrait) {
+    #spotterBox {
+      height: 56px;
+      min-height: 56px;
+      padding: 0 12px 0 96px;
+      gap: 0;
+      align-items: center;
+      justify-content: flex-start;
+      flex-direction: row;
+      overflow: visible;
+    }
+
+    .spotter-avatar {
+      position: absolute;
+      left: 8px;
+      bottom: 0;
+      width: 78px;
+      min-width: 78px;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .spotter-character {
+      width: 74px;
+      margin: 0;
+    }
+
+    #spotterText {
+      display: block;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      line-height: 1.15;
+      text-align: left;
+    }
+  }
+
   /* Mobile: ensure HUD doesn't overlap the hamburger menu */
   @media (max-width: 700px) {
     #hud { max-width: calc(100% - 70px); }
   }
 
-  /* Landscape: move controls to the left */
-  @media (orientation: landscape) and (max-height: 500px) and (max-width: 900px) {
-    #controls {
-      left: 16px;
-      bottom: 50%;
-      transform: translateY(50%);
-      flex-direction: column;
-      gap: 8px;
+  /* Landscape mobile: compact HUD/controls on the left to free gameplay space */
+  @media (orientation: landscape) and (max-height: 600px) and (hover: none) and (pointer: coarse) {
+    #mobileNavBar {
+      display: none;
     }
-    .ctrl-btn { width: 44px; height: 44px; font-size: 1.1rem; }
-    .ctrl-btn.hook-btn { width: 64px; height: 44px; font-size: 0.6rem; }
-  }
 
-  @media (orientation: landscape) and (min-height: 501px) and (max-width: 900px) {
     #controls {
-      left: 16px;
-      bottom: 50%;
-      transform: translateY(50%);
+      left: 12px;
+      bottom: 12px;
+      transform: none;
       flex-direction: column;
-      gap: 10px;
+      align-items: flex-start;
+      width: 180px;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 12px;
+    }
+
+    .ctrl-btn {
+      width: 42px;
+      height: 42px;
+      font-size: 1rem;
+    }
+
+    .ctrl-btn.hook-btn {
+      width: 100%;
+      height: 42px;
+      font-size: 0.54rem;
+      letter-spacing: 0.04em;
+    }
+
+    #spotterBox {
+      right: 20px !important;
+      transform: none;
+      top: auto;
+      bottom: 10px;
+      width: auto;
+      min-height: 0;
+      padding: 8px 12px;
+      border-radius: 12px;
+      gap: 0;
+      white-space: nowrap;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .spotter-avatar {
+      position: fixed;
+      right: 0;
+      bottom: 2px;
+      margin-top: 0;
+      min-width: 0;
+      z-index: 56;
+      align-items: center;
+    }
+
+    .spotter-character {
+      width: 108px;
+    }
+
+    .spotter-label {
+      margin-top: -8px;
+      font-size: 9px;
+      padding: 3px 7px;
+    }
+
+    #spotterText {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.15;
+      text-align: center;
+      max-height: none;
+      max-width: 100%;
+      font-size: 14px;
+      margin: 0;
     }
   }
 
@@ -840,7 +1083,7 @@
       <button class="ctrl-btn" data-dir="right" aria-label="Move hook right">&#9654;</button>
     </div>
   </div>
-  <button class="ctrl-btn hook-btn" id="hookBtn" aria-label="Hook" aria-pressed="false">HOOK (spacebar)</button>
+  <button class="ctrl-btn hook-btn" id="hookBtn" aria-label="Hook" aria-pressed="false">Hook</button>
 </div>
 
 <!-- Help Modal -->
@@ -885,9 +1128,12 @@
 
 <!-- End Screen -->
 <div id="endScreen">
-  <h2 id="endTitle">Job Complete!</h2>
-  <p id="endMsg">All crates delivered.</p>
-  <button id="restartBtn">Play Again</button>
+  <div class="end-card">
+    <h2 id="endTitle">Job Complete!</h2>
+    <p id="endLead"></p>
+    <p id="endMsg">All crates delivered.</p>
+    <button id="restartBtn">Play Again</button>
+  </div>
 </div>
 
 <script>
@@ -1132,7 +1378,8 @@ function initGame() {
 }
 
 function getHookIdleLabel() {
-  return window.matchMedia('(min-width: 701px)').matches ? 'HOOK (spacebar)' : 'HOOK';
+  const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  return isTouchDevice ? 'Hook' : 'HOOK (spacebar)';
 }
 
 function updateHookIdleButtonLabel() {
@@ -2579,21 +2826,25 @@ function updateHUD() {
 function showEndScreen(won) {
   const el = document.getElementById('endScreen');
   const title = document.getElementById('endTitle');
+  const lead = document.getElementById('endLead');
   const msg = document.getElementById('endMsg');
   const btn = document.getElementById('restartBtn');
   el.style.display = 'flex';
+  el.classList.toggle('win-mode', won);
+  el.classList.toggle('lose-mode', !won);
   if (won) {
     title.textContent = 'Job Complete!';
     title.className = 'win-title';
-    msg.textContent = `All crates delivered. Damage: ${Math.round(damage)}%`;
-    btn.className = '';
+    lead.textContent = 'All crates delivered safely.';
+    msg.textContent = `Total damage: ${Math.round(damage)}%.`;
+    btn.innerHTML = 'Play Again';
     btn.textContent = 'Play Again';
   } else {
-    title.textContent = 'Game Over';
+    title.textContent = 'Load Failure';
     title.className = 'lose-title';
-    msg.textContent = `Too much damage! Delivered ${score}/${totalCrates} crates.`;
-    btn.className = 'lose-btn';
-    btn.textContent = 'Try Again';
+    lead.textContent = 'You have damaged the blocks you were responsible for.';
+    msg.innerHTML = 'Improper load control can cause structural failure, falling debris, and serious injury on a real job site. A crane operator\'s duty is precision and safety.<br><br>Check your load balance, and try again.';
+    btn.innerHTML = '<span class="retry-lines">TRY<br>AGAIN</span>';
   }
 }
 
