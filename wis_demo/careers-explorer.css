@@ -1003,17 +1003,30 @@ body {
 
 .video-stories-filter {
     margin-left: auto;
-    background: #193E75;
+    background: #ff4757;
     color: #FFFFFF;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.video-stories-filter::before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 9px solid #FFFFFF;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    display: inline-block;
 }
 
 .video-stories-filter:hover {
-    background: #163562;
+    background: #d75f4d;
     transform: scale(1.02);
 }
 
 .video-stories-filter.active {
-    background: #e46f5b;
+    background: #c95443;
     color: #ffffff;
 }
 
@@ -1232,6 +1245,19 @@ body {
     line-height: 1.4;
 }
 
+.career-card-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.career-card-role-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a365d;
+    line-height: 1.35;
+}
+
 .career-card-salary {
     display: block;
     padding: 8px 16px;
@@ -1382,7 +1408,7 @@ body {
 .pause-btn {
     position: fixed;
     bottom: 20px;
-    left: 140px;
+    left: 180px;
     width: 36px;
     height: 36px;
     background: rgba(255, 255, 255, 0.95);

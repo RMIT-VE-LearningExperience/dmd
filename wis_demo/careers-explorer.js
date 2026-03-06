@@ -839,6 +839,7 @@ function getSkillCategoryColorClass(category) {
 function createCareerCard(career, matchingLevels = null) {
     const card = document.createElement('div');
     card.className = 'career-card';
+    card.dataset.careerName = career.name;
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
     card.setAttribute('aria-label', `Open details for ${career.name}`);
@@ -856,11 +857,30 @@ function createCareerCard(career, matchingLevels = null) {
     // Use primary skill category data for card labeling and icon
     const skillData = getPrimarySkillIconForCareer(career);
 
-    const title = document.createElement('div');
-    title.className = 'career-card-title';
-    title.textContent = career.name;
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'career-card-title-wrap';
+    const hasProfile = Boolean(career.person_name && career.person_name.trim());
+    if (hasProfile) {
+        const firstName = career.person_name.trim().split(/\s+/)[0];
 
-    header.appendChild(title);
+        const introTitle = document.createElement('div');
+        introTitle.className = 'career-card-title';
+        introTitle.textContent = `Meet ${firstName}!`;
+
+        const roleTitle = document.createElement('div');
+        roleTitle.className = 'career-card-role-title';
+        roleTitle.textContent = career.name;
+
+        titleWrap.appendChild(introTitle);
+        titleWrap.appendChild(roleTitle);
+    } else {
+        const title = document.createElement('div');
+        title.className = 'career-card-title';
+        title.textContent = career.name;
+        titleWrap.appendChild(title);
+    }
+
+    header.appendChild(titleWrap);
 
     const overview = document.createElement('div');
     overview.className = 'career-card-overview';
@@ -1150,7 +1170,7 @@ function updateComparisonStates() {
         const btn = card.querySelector('.compare-btn');
         if (!btn) return;
 
-        const careerName = card.querySelector('.career-card-title').textContent;
+        const careerName = card.dataset.careerName;
         const isSelected = comparisonCareers.find(c => c.name === careerName);
 
         card.classList.toggle('selected', !!isSelected);
@@ -1378,7 +1398,7 @@ function changeCareer(index) {
 
     // Update visual states
     document.querySelectorAll('.career-card').forEach(card => {
-        const careerName = card.querySelector('.career-card-title').textContent;
+        const careerName = card.dataset.careerName;
         if (careerName === removedCareer.name) {
             card.classList.remove('selected');
             const btn = card.querySelector('.compare-btn');
@@ -2091,8 +2111,7 @@ function openCareerFromURLParam() {
     // Highlight matching card in grid if visible.
     const cards = document.querySelectorAll('.career-card');
     cards.forEach(card => {
-        const title = card.querySelector('.career-card-title');
-        if (title && title.textContent === career.name) {
+        if (card.dataset.careerName === career.name) {
             if (selectedCareer) selectedCareer.classList.remove('clicked');
             selectedCareer = card;
             selectedCareer.classList.add('clicked');
