@@ -907,6 +907,9 @@ function createCareerCard(career, matchingLevels = null) {
     if (career.video_url) {
         card.classList.add('has-video');
     }
+    const topMatches = (quizResults && Array.isArray(quizResults.topMatches)) ? quizResults.topMatches : [];
+    const topRank = topMatches.indexOf(career.name) + 1;
+    const isTopRankedMatch = topRank >= 1 && topRank <= 3;
 
     // Card body (main content area)
     const body = document.createElement('div');
@@ -1004,6 +1007,18 @@ function createCareerCard(career, matchingLevels = null) {
     catStrip.appendChild(stripIcon);
     catStrip.appendChild(stripLabel);
     card.appendChild(catStrip);
+
+    if (isTopRankedMatch) {
+        const rankBadge = document.createElement('div');
+        rankBadge.className = `card-rank-badge rank-${topRank}`;
+        rankBadge.setAttribute('aria-label', `${topRank}${topRank === 1 ? 'st' : topRank === 2 ? 'nd' : 'rd'} match`);
+        rankBadge.innerHTML = topRank === 1
+            ? '1<sup>st</sup>'
+            : topRank === 2
+                ? '2<sup>nd</sup>'
+                : '3<sup>rd</sup>';
+        card.appendChild(rankBadge);
+    }
 
     card.appendChild(compareBtn);
 
@@ -1137,17 +1152,36 @@ function renderCareerCardsInternal(careerMatchingLevels = null) {
 
     noResults.style.display = 'none';
 
-    // Sort careers by match score if available
+    const getQuizTopRank = (careerName) => {
+        if (!quizResults || !Array.isArray(quizResults.topMatches)) return 0;
+        const idx = quizResults.topMatches.indexOf(careerName);
+        return (idx >= 0 && idx < 3) ? idx + 1 : 0;
+    };
+
+    // Sort order for card view:
+    // 1) Quiz top 3 first (1st, 2nd, 3rd) when quiz results exist
+    // 2) Then keep salary match ordering if provided
     let sortedCareers = [...filteredCareers];
-    if (careerMatchingLevels && careerMatchingLevels.size > 0) {
-        sortedCareers.sort((a, b) => {
+    sortedCareers.sort((a, b) => {
+        const rankA = getQuizTopRank(a.name);
+        const rankB = getQuizTopRank(b.name);
+
+        if (rankA || rankB) {
+            if (!rankA) return 1;
+            if (!rankB) return -1;
+            if (rankA !== rankB) return rankA - rankB;
+        }
+
+        if (careerMatchingLevels && careerMatchingLevels.size > 0) {
             const matchA = careerMatchingLevels.get(a.name);
             const matchB = careerMatchingLevels.get(b.name);
             const scoreA = matchA ? matchA.matchScore : 0;
             const scoreB = matchB ? matchB.matchScore : 0;
-            return scoreB - scoreA; // Sort descending (highest match first)
-        });
-    }
+            if (scoreA !== scoreB) return scoreB - scoreA;
+        }
+
+        return 0;
+    });
 
     sortedCareers.forEach((career, index) => {
         const matchingLevels = careerMatchingLevels ? careerMatchingLevels.get(career.name) : null;

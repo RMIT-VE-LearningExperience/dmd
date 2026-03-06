@@ -332,7 +332,7 @@
 
   .ctrl-spacer {
     width: 56px;
-    height: 56px;
+    height: 46px;
     visibility: hidden;
     pointer-events: none;
   }
@@ -865,13 +865,30 @@
       min-width: 78px;
       margin: 0;
       display: flex;
+      flex-direction: column;
       justify-content: center;
-      align-items: flex-end;
+      align-items: center;
     }
 
     .spotter-character {
       width: 74px;
       margin: 0;
+    }
+
+    .spotter-label {
+      display: inline-flex;
+      align-self: center;
+      margin: 0;
+      padding: 2px 8px;
+      border-radius: 8px;
+      background: #1f4888;
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      transform: translateY(2px);
     }
 
     #spotterText {
