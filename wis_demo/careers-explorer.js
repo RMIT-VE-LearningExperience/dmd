@@ -1678,6 +1678,8 @@ function populateCareerPanel(career) {
 
     // Video preview section (only shown if career has video URL)
     const videoContainer = document.getElementById('videoContainer');
+    const panelTopRight = document.getElementById('panelTopRight');
+    const panelTopSection = document.getElementById('panelTopSection');
     if (career.video_url) {
         const videoId = getYouTubeVideoId(career.video_url);
         const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
@@ -1693,6 +1695,7 @@ function populateCareerPanel(career) {
             ? `${fullBioText.slice(0, 180).trim()}...`
             : fullBioText;
 
+        // Left column: intro text (Meet name + bio + read more)
         videoContainer.innerHTML = `
             <div class="video-intro">
                 <h3 class="video-meet-title">Meet ${personName}!</h3>
@@ -1701,6 +1704,11 @@ function populateCareerPanel(career) {
                     <button class="video-read-more" type="button">Read More</button>
                 </div>
             </div>
+        `;
+        videoContainer.style.display = 'block';
+
+        // Right column: video thumbnail
+        panelTopRight.innerHTML = `
             <div class="video-feature">
                 <a class="video-thumb-wrap" href="${sourceUrl}" target="_blank" rel="noopener noreferrer">
                     <img class="video-thumb" src="${thumbUrl}" alt="Video preview for ${career.name}">
@@ -1708,7 +1716,7 @@ function populateCareerPanel(career) {
                 </a>
             </div>
         `;
-        videoContainer.style.display = 'block';
+        panelTopSection.classList.add('has-video');
 
         const bioTextElement = videoContainer.querySelector('.video-bio-text');
         if (bioTextElement) {
@@ -1733,6 +1741,8 @@ function populateCareerPanel(career) {
     } else {
         videoContainer.style.display = 'none';
         videoContainer.innerHTML = '';
+        panelTopRight.innerHTML = '';
+        panelTopSection.classList.remove('has-video');
     }
 
     document.getElementById('careerOverview').textContent = career.overview;

@@ -1753,6 +1753,48 @@ body.embed-popup-mode .info-panel {
     line-height: 1.7;
 }
 
+/* ===================================
+   PANEL TOP 2-COLUMN GRID
+   =================================== */
+.panel-top-section.has-video {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+    margin-bottom: 24px;
+}
+
+.panel-top-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-top-right {
+    position: sticky;
+    top: 0;
+}
+
+/* Remove bottom margin from section-about when inside the grid */
+.panel-top-section.has-video .section-about {
+    margin-bottom: 0;
+}
+
+/* Remove bottom margin from video-container when inside the grid (about is below) */
+.panel-top-section.has-video .video-container {
+    margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+    .panel-top-section.has-video {
+        display: block;
+    }
+
+    .panel-top-right {
+        position: static;
+        margin-top: 16px;
+    }
+}
+
 .video-container {
     margin-bottom: 24px;
 }
