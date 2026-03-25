@@ -1690,19 +1690,11 @@ function populateCareerPanel(career) {
         const fullBioText = (career.person_bio && career.person_bio.trim())
             ? career.person_bio.trim()
             : 'See the video to learn more about this role and hear real experiences from industry.';
-        const hasExpandableBio = fullBioText.length > 180;
-        const shortBioText = hasExpandableBio
-            ? `${fullBioText.slice(0, 180).trim()}...`
-            : fullBioText;
-
-        // Left column: intro text (Meet name + bio + read more)
+        // Left column: intro text (Meet name + full bio)
         videoContainer.innerHTML = `
             <div class="video-intro">
                 <h3 class="video-meet-title">Meet ${personName}!</h3>
                 <p class="video-bio-text"></p>
-                <div class="video-read-more-wrap">
-                    <button class="video-read-more" type="button">Read More</button>
-                </div>
             </div>
         `;
         videoContainer.style.display = 'block';
@@ -1720,23 +1712,7 @@ function populateCareerPanel(career) {
 
         const bioTextElement = videoContainer.querySelector('.video-bio-text');
         if (bioTextElement) {
-            bioTextElement.textContent = shortBioText;
-        }
-
-        const readMoreBtn = videoContainer.querySelector('.video-read-more');
-        if (readMoreBtn) {
-            if (!hasExpandableBio) {
-                readMoreBtn.hidden = true;
-            } else {
-                let expanded = false;
-                readMoreBtn.addEventListener('click', () => {
-                    expanded = !expanded;
-                    if (bioTextElement) {
-                        bioTextElement.textContent = expanded ? fullBioText : shortBioText;
-                    }
-                    readMoreBtn.textContent = expanded ? 'Show Less' : 'Read More';
-                });
-            }
+            bioTextElement.textContent = fullBioText;
         }
     } else {
         videoContainer.style.display = 'none';
