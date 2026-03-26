@@ -11,3 +11,9 @@ Original prompt: Build and iterate a playable web game in this workspace, valida
 - Supplemental Playwright checks confirmed keyboard movement, keyboard inspect for the first hazard, pause/resume, win flow, and restart reset.
 - Timeout fail state was confirmed by advancing virtual time to 91 seconds and observing `mode: lost`.
 - Fullscreen toggle key was exercised in headless Chromium, but `document.fullscreenElement` stayed false there, so fullscreen should be rechecked in a headed browser if that behavior matters.
+- Reference-driven redesign pass:
+- Ingested the screenshot set and shifted the game away from the generic top-down site to an annotated, pale isometric safety tableau modeled on the `2.31.26 PM` reference.
+- Rebuilt the scene around scaffold, framed building, roof plane, ladders, barriers, skylight area, and blue label pills.
+- Reworked gameplay to hotspot review rather than walking, which better matches the reference while preserving deterministic automation.
+- New validation artifact: `output/web-game/hazard-hunt-reference1/shot-0.png` with `state-0.json` showing a successful 6/6 review pass.
+- Site menu update: locked the `Hazard Hunt` card so it is no longer publicly accessible from `mini-games.html`, and added a new locked `Plumbing` card as another upcoming game.
