@@ -271,6 +271,14 @@
             background: #d0ced1;
         }
 
+        .avatar-photo {
+            width: 160px;
+            height: 160px;
+            border-radius: 12px;
+            object-fit: cover;
+            display: block;
+        }
+
         .story-meta {
             padding: 20px 18px 14px;
             min-height: 190px;
@@ -602,12 +610,15 @@
             const icon = skillIconMap[category] || skillIconMap.Technical;
             const person = role.person_name || role.name;
             const quote = excerpt(role.person_bio || role.overview || '');
+            const thumbHtml = role.person_thumbnail
+                ? `<img class="avatar-photo" src="${role.person_thumbnail}" alt="${person}">`
+                : `<div class="avatar" aria-hidden="true"></div>`;
 
             return `
                 <article class="story-card" style="--card-color:${cardColor};" data-role="${role.name}" role="button" tabindex="0" aria-label="Open ${role.name} profile">
                     <div class="story-card-top">
                         <div class="story-head" style="background:${cardColor};">
-                            <div class="avatar" aria-hidden="true"></div>
+                            ${thumbHtml}
                         </div>
                         <div class="story-meta">
                             <h3 class="story-name">${person}</h3>
