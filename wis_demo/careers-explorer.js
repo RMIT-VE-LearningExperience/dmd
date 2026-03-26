@@ -1682,7 +1682,6 @@ function populateCareerPanel(career) {
     const panelTopSection = document.getElementById('panelTopSection');
     if (career.video_url) {
         const videoId = getYouTubeVideoId(career.video_url);
-        const thumbUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
         const sourceUrl = career.video_url;
         const personName = (career.person_name && career.person_name.trim())
             ? career.person_name.trim()
@@ -1699,13 +1698,17 @@ function populateCareerPanel(career) {
         `;
         videoContainer.style.display = 'block';
 
-        // Right column: video thumbnail
+        // Right column: embedded video
+        const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?rel=0` : sourceUrl;
         panelTopRight.innerHTML = `
             <div class="video-feature">
-                <a class="video-thumb-wrap" href="${sourceUrl}" target="_blank" rel="noopener noreferrer">
-                    <img class="video-thumb" src="${thumbUrl}" alt="Video preview for ${career.name}">
-                    <span class="video-thumb-play"></span>
-                </a>
+                <iframe
+                    src="${embedUrl}"
+                    title="Video for ${career.name}"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    style="width:100%;aspect-ratio:16/9;border-radius:10px;border:none;display:block;">
+                </iframe>
             </div>
         `;
         panelTopSection.classList.add('has-video');
