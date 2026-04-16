@@ -1,0 +1,11 @@
+{
+  "mc_history": [
+    {
+      "winner": "string — name of the person picked as next MC",
+      "lastMC": "string — name of the person who was MC last week",
+      "date": "YYYY-MM-DD — date the pick was made",
+      "ts": "number — Unix timestamp in milliseconds"
+    }
+  ],
+  "_notes": "This file documents the schema. Live history is stored in localStorage under the key 'mc_picker_history'. Use the Export JSON button in the picker to download a snapshot."
+}
