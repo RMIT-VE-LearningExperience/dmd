@@ -269,6 +269,19 @@
     .action-btn:hover { background: var(--surface-raised); color: var(--text-primary); }
     .action-btn.danger:hover { border-color: rgba(255,80,80,0.4); color: #ff8080; }
 
+    /* ── Save status ── */
+    .save-status {
+      font-size: 12px;
+      text-align: center;
+      margin-top: 12px;
+      min-height: 18px;
+      color: var(--text-tertiary);
+      transition: color 0.2s;
+    }
+    .save-status.saving { color: var(--text-tertiary); }
+    .save-status.saved  { color: #10b981; }
+    .save-status.error  { color: #ef4444; }
+
     /* ── Animations ── */
     @keyframes pop {
       0%   { transform: scale(0.82); opacity: 0; }
@@ -310,56 +323,76 @@
   <!-- History -->
   <p class="section-label">Recent history</p>
   <div class="history-list" id="historyList"></div>
-  <div class="history-actions">
-    <button class="action-btn" id="exportBtn">Export JSON</button>
-    <button class="action-btn danger" id="clearBtn">Clear history</button>
-  </div>
+  <div id="saveStatus" class="save-status"></div>
 
 </div>
 
 <script>
-// ── Config ──────────────────────────────────────────────────────────────────
+// ── GitHub config ─────────────────────────────────────────────────────────────
+// Paste your fine-grained PAT here (Contents: Read & Write on dmd repo)
+const GITHUB_TOKEN = "YOUR_GITHUB_TOKEN_HERE";
+const GITHUB_REPO  = "RMIT-VE-LearningExperience/dmd";
+const GITHUB_PATH  = "mc_picker/mc_history.json";
+const API_BASE     = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+
+// ── People ────────────────────────────────────────────────────────────────────
 const people = [
-  { name: "Lawrence", initials: "LW", color: "#9b8fff", bg: "rgba(155,143,255,0.15)", text: "#c8c0ff" },
-  { name: "Homie",    initials: "HM", color: "#34d399", bg: "rgba(52,211,153,0.12)",  text: "#6ee7b7" },
-  { name: "Neda",     initials: "ND", color: "#f472b6", bg: "rgba(244,114,182,0.13)", text: "#fbcfe8" },
-  { name: "Arielle",  initials: "AR", color: "#60a5fa", bg: "rgba(96,165,250,0.13)",  text: "#bfdbfe" },
+  { name: "Lawrence", initials: "LW", color: "#9b8fff", bg: "rgba(155,143,255,0.15)", text: "#5b4fcf" },
+  { name: "Homie",    initials: "HM", color: "#34d399", bg: "rgba(52,211,153,0.12)",  text: "#059669" },
+  { name: "Neda",     initials: "ND", color: "#f472b6", bg: "rgba(244,114,182,0.13)", text: "#be185d" },
+  { name: "Arielle",  initials: "AR", color: "#60a5fa", bg: "rgba(96,165,250,0.13)",  text: "#1d4ed8" },
 ];
 
-const STORAGE_KEY = "mc_picker_history";
+// ── State ─────────────────────────────────────────────────────────────────────
+let lastWeekMC  = null;
+let isSpinning  = false;
+let currentSha  = null;   // SHA of the file on GitHub (required to update it)
+let ghHistory   = [];     // in-memory copy of mc_history
 
-// ── State ────────────────────────────────────────────────────────────────────
-let lastWeekMC = null;
-let isSpinning = false;
-
-// ── Elements ─────────────────────────────────────────────────────────────────
+// ── Elements ──────────────────────────────────────────────────────────────────
 const peopleGrid  = document.getElementById("peopleGrid");
 const spinBtn     = document.getElementById("spinBtn");
 const resultArea  = document.getElementById("resultArea");
 const historyList = document.getElementById("historyList");
-const exportBtn   = document.getElementById("exportBtn");
-const clearBtn    = document.getElementById("clearBtn");
+const saveStatus  = document.getElementById("saveStatus");
 
-// ── History helpers ──────────────────────────────────────────────────────────
-function loadHistory() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-  catch { return []; }
+// ── GitHub helpers ────────────────────────────────────────────────────────────
+function ghHeaders() {
+  return {
+    "Authorization": `Bearer ${GITHUB_TOKEN}`,
+    "Accept": "application/vnd.github+json",
+    "Content-Type": "application/json",
+  };
 }
 
-function saveHistory(h) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(h));
+async function fetchFromGitHub() {
+  const res = await fetch(API_BASE, { headers: ghHeaders() });
+  if (!res.ok) throw new Error(`GitHub fetch failed: ${res.status}`);
+  const data = await res.json();
+  currentSha = data.sha;
+  const decoded = JSON.parse(atob(data.content));
+  ghHistory = decoded.mc_history || [];
 }
 
-function addHistoryEntry(winner, lastMC) {
-  const h = loadHistory();
-  h.unshift({
-    winner,
-    lastMC,
-    date: new Date().toISOString().slice(0, 10),
-    ts: Date.now(),
+async function saveToGitHub(newEntry) {
+  ghHistory.unshift(newEntry);
+
+  const body = JSON.stringify({
+    message: `MC pick: ${newEntry.winner} on ${newEntry.date}`,
+    content: btoa(JSON.stringify({ mc_history: ghHistory }, null, 2)),
+    sha: currentSha,
   });
-  saveHistory(h.slice(0, 20)); // keep last 20
-  renderHistory();
+
+  const res = await fetch(API_BASE, { method: "PUT", headers: ghHeaders(), body });
+  if (!res.ok) throw new Error(`GitHub save failed: ${res.status}`);
+  const data = await res.json();
+  currentSha = data.content.sha; // update SHA for next write
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function setStatus(state, msg) {
+  saveStatus.className = `save-status ${state}`;
+  saveStatus.textContent = msg;
 }
 
 function formatDate(iso) {
@@ -368,15 +401,14 @@ function formatDate(iso) {
 }
 
 function renderHistory() {
-  const h = loadHistory();
-  if (!h.length) {
+  if (!ghHistory.length) {
     historyList.innerHTML = `<p class="history-empty">No picks yet</p>`;
     return;
   }
-  historyList.innerHTML = h.slice(0, 6).map(entry => {
+  historyList.innerHTML = ghHistory.slice(0, 6).map(entry => {
     const p = people.find(x => x.name === entry.winner);
     const avatarStyle = p ? `background:${p.bg};color:${p.text}` : "";
-    const initials = p ? p.initials : entry.winner.slice(0,2).toUpperCase();
+    const initials = p ? p.initials : entry.winner.slice(0, 2).toUpperCase();
     return `
       <div class="history-item">
         <div class="history-avatar" style="${avatarStyle}">${initials}</div>
@@ -386,18 +418,16 @@ function renderHistory() {
   }).join("");
 }
 
-// ── People grid ──────────────────────────────────────────────────────────────
+// ── People grid ───────────────────────────────────────────────────────────────
 people.forEach(p => {
   const btn = document.createElement("button");
   btn.className = "person-btn";
   btn.dataset.name = p.name;
-  btn.style.setProperty("--accent-border", p.color + "60");
+  btn.style.setProperty("--accent-border", p.color + "80");
   btn.style.setProperty("--accent-bg", p.bg);
   btn.innerHTML = `
     <div class="avatar" style="background:${p.bg};color:${p.text}">${p.initials}</div>
-    <div class="person-info">
-      <span class="person-name">${p.name}</span>
-    </div>`;
+    <div class="person-info"><span class="person-name">${p.name}</span></div>`;
   btn.addEventListener("click", () => {
     if (isSpinning) return;
     document.querySelectorAll(".person-btn").forEach(b => b.classList.remove("selected"));
@@ -411,7 +441,7 @@ people.forEach(p => {
   peopleGrid.appendChild(btn);
 });
 
-// ── Spin ─────────────────────────────────────────────────────────────────────
+// ── Spin ──────────────────────────────────────────────────────────────────────
 spinBtn.addEventListener("click", () => {
   if (!lastWeekMC || isSpinning) return;
   const pool = people.filter(p => p.name !== lastWeekMC);
@@ -427,7 +457,6 @@ spinBtn.addEventListener("click", () => {
   const cycleText = document.getElementById("cycleText");
 
   function getDelay(i) {
-    // accelerate then decelerate
     if (i < 8)  return 60;
     if (i < 16) return 100;
     return 160;
@@ -438,7 +467,6 @@ spinBtn.addEventListener("click", () => {
     idx++;
     count++;
     if (count >= STEPS) {
-      // Pick winner after animation ends
       const winner = pool[Math.floor(Math.random() * pool.length)];
       setTimeout(() => showWinner(winner), getDelay(count));
       return;
@@ -448,14 +476,32 @@ spinBtn.addEventListener("click", () => {
   setTimeout(tick, 60);
 });
 
-function showWinner(p) {
-  addHistoryEntry(p.name, lastWeekMC);
+async function showWinner(p) {
   resultArea.innerHTML = `
     <div class="result-card pop">
       <div class="result-avatar" style="background:${p.bg};color:${p.text}">${p.initials}</div>
       <p class="result-name" style="color:${p.text}">${p.name}</p>
       <p class="result-label">Next week's MC 🎙️</p>
     </div>`;
+
+  const entry = {
+    winner: p.name,
+    lastMC: lastWeekMC,
+    date: new Date().toISOString().slice(0, 10),
+    ts: Date.now(),
+  };
+
+  setStatus("saving", "Saving to GitHub…");
+  try {
+    await saveToGitHub(entry);
+    renderHistory();
+    setStatus("saved", "Saved to GitHub ✓");
+    setTimeout(() => setStatus("", ""), 3000);
+  } catch (err) {
+    console.error(err);
+    setStatus("error", "Could not save — check token or network");
+  }
+
   setTimeout(() => {
     isSpinning = false;
     spinBtn.disabled = false;
@@ -464,27 +510,18 @@ function showWinner(p) {
   }, 600);
 }
 
-// ── Export ───────────────────────────────────────────────────────────────────
-exportBtn.addEventListener("click", () => {
-  const h = loadHistory();
-  const blob = new Blob([JSON.stringify({ mc_history: h }, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "mc_history.json";
-  a.click();
-  URL.revokeObjectURL(url);
-});
-
-clearBtn.addEventListener("click", () => {
-  if (confirm("Clear all MC history?")) {
-    localStorage.removeItem(STORAGE_KEY);
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  setStatus("saving", "Loading history…");
+  try {
+    await fetchFromGitHub();
     renderHistory();
+    setStatus("", "");
+  } catch (err) {
+    console.error(err);
+    setStatus("error", "Could not load history — check token");
   }
-});
-
-// ── Init ─────────────────────────────────────────────────────────────────────
-renderHistory();
+})();
 </script>
 </body>
 </html>
