@@ -328,12 +328,8 @@
 </div>
 
 <script>
-// ── GitHub config ─────────────────────────────────────────────────────────────
-// Paste your fine-grained PAT here (Contents: Read & Write on dmd repo)
-const GITHUB_TOKEN = "YOUR_GITHUB_TOKEN_HERE";
-const GITHUB_REPO  = "RMIT-VE-LearningExperience/dmd";
-const GITHUB_PATH  = "mc_picker/mc_history.json";
-const API_BASE     = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+// ── Config ────────────────────────────────────────────────────────────────────
+const WORKER_URL = "https://mc-picker-proxy.lawrence-165.workers.dev/history";
 
 // ── People ────────────────────────────────────────────────────────────────────
 const people = [
@@ -346,7 +342,6 @@ const people = [
 // ── State ─────────────────────────────────────────────────────────────────────
 let lastWeekMC  = null;
 let isSpinning  = false;
-let currentSha  = null;   // SHA of the file on GitHub (required to update it)
 let ghHistory   = [];     // in-memory copy of mc_history
 
 // ── Elements ──────────────────────────────────────────────────────────────────
@@ -356,37 +351,22 @@ const resultArea  = document.getElementById("resultArea");
 const historyList = document.getElementById("historyList");
 const saveStatus  = document.getElementById("saveStatus");
 
-// ── GitHub helpers ────────────────────────────────────────────────────────────
-function ghHeaders() {
-  return {
-    "Authorization": `Bearer ${GITHUB_TOKEN}`,
-    "Accept": "application/vnd.github+json",
-    "Content-Type": "application/json",
-  };
-}
-
+// ── Worker helpers ────────────────────────────────────────────────────────────
 async function fetchFromGitHub() {
-  const res = await fetch(API_BASE, { headers: ghHeaders() });
-  if (!res.ok) throw new Error(`GitHub fetch failed: ${res.status}`);
+  const res = await fetch(WORKER_URL);
+  if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
   const data = await res.json();
-  currentSha = data.sha;
-  const decoded = JSON.parse(atob(data.content));
-  ghHistory = decoded.mc_history || [];
+  ghHistory = data.mc_history || [];
 }
 
 async function saveToGitHub(newEntry) {
-  ghHistory.unshift(newEntry);
-
-  const body = JSON.stringify({
-    message: `MC pick: ${newEntry.winner} on ${newEntry.date}`,
-    content: btoa(JSON.stringify({ mc_history: ghHistory }, null, 2)),
-    sha: currentSha,
+  const res = await fetch(WORKER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newEntry),
   });
-
-  const res = await fetch(API_BASE, { method: "PUT", headers: ghHeaders(), body });
-  if (!res.ok) throw new Error(`GitHub save failed: ${res.status}`);
-  const data = await res.json();
-  currentSha = data.content.sha; // update SHA for next write
+  if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+  ghHistory.unshift(newEntry);
 }
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
