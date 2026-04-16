@@ -360,14 +360,15 @@ const bottleSvg   = document.getElementById("bottleSvg");
 const wheelCtx    = wheelCanvas.getContext("2d");
 
 // ── Pool helpers ──────────────────────────────────────────────────────────────
-// Exclude the last 3 UNIQUE winners from history
+// Exclude people already picked in the current round.
+// A round resets when all 4 people have had a turn.
 function getExcludedNames() {
   const seen = [];
   for (const e of ghHistory) {
     if (!seen.includes(e.winner)) seen.push(e.winner);
-    if (seen.length >= 3) break;
+    if (seen.length >= people.length) return []; // full round complete — everyone eligible
   }
-  return seen;
+  return seen; // people picked so far this round
 }
 
 function getPool() {
@@ -382,8 +383,8 @@ function renderPoolInfo() {
   const pool = getPool();
   const pickStr = pool.map(p => `<strong>${p.name}</strong>`).join(", ");
   const exclStr = excl.length
-    ? ` &nbsp;·&nbsp; <span class="pool-excl">Skipping: ${excl.join(", ")}</span>`
-    : "";
+    ? ` &nbsp;·&nbsp; <span class="pool-excl">Had a turn: ${excl.join(", ")}</span>`
+    : ` &nbsp;·&nbsp; <span style="color:#10b981;font-weight:500">New round — everyone eligible!</span>`;
   poolInfoEl.innerHTML = `Picking from ${pickStr}${exclStr}`;
 }
 
