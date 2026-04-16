@@ -83,20 +83,33 @@
     .people-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .person-card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-md); padding: 12px 14px;
+      border-radius: var(--radius-md); padding: 10px 12px;
       display: flex; align-items: center; gap: 10px;
       transition: opacity 0.25s, border-color 0.2s;
     }
     .person-card.eligible { border-color: var(--card-border, var(--border)); }
     .person-card.excluded { opacity: 0.32; }
+    .person-card.skipped { opacity: 0.38; background: var(--surface-raised); }
     .avatar {
       width: 34px; height: 34px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 11px; font-weight: 700; flex-shrink: 0;
     }
-    .card-info { display: flex; flex-direction: column; gap: 2px; }
+    .card-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
     .card-name { font-size: 14px; font-weight: 500; }
     .card-badge { font-size: 10px; color: var(--text-tertiary); }
+    .skip-btn {
+      font-size: 10px; font-weight: 500; padding: 3px 8px;
+      border-radius: 5px; border: 1px solid var(--border-accent);
+      background: transparent; color: var(--text-tertiary);
+      cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .skip-btn:hover { background: var(--surface-raised); color: var(--text-secondary); }
+    .skip-btn.active {
+      background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3);
+      color: #dc2626;
+    }
 
     /* Cards: cycling highlight */
     .person-card.lit {
@@ -346,6 +359,7 @@ let isSpinning   = false;
 let currentView  = "cards";
 let wheelRotDeg  = 0;   // cumulative, always growing
 let bottleRotDeg = 0;   // cumulative, always growing
+let skippedNames = new Set(); // manually skipped for this spin
 
 // ── Elements ──────────────────────────────────────────────────────────────────
 const spinBtn     = document.getElementById("spinBtn");
@@ -373,19 +387,22 @@ function getExcludedNames() {
 
 function getPool() {
   const excl = getExcludedNames();
-  const pool  = people.filter(p => !excl.includes(p.name));
-  return pool.length > 0 ? pool : [...people]; // safety fallback
+  const pool  = people.filter(p => !excl.includes(p.name) && !skippedNames.has(p.name));
+  return pool.length > 0 ? pool : people.filter(p => !skippedNames.has(p.name)); // safety fallback
 }
 
 // ── Pool info bar ─────────────────────────────────────────────────────────────
 function renderPoolInfo() {
   const excl = getExcludedNames();
   const pool = getPool();
-  const pickStr = pool.map(p => `<strong>${p.name}</strong>`).join(", ");
-  const exclStr = excl.length
+  const pickStr  = pool.map(p => `<strong>${p.name}</strong>`).join(", ") || "<em>Nobody eligible!</em>";
+  const exclStr  = excl.length
     ? ` &nbsp;·&nbsp; <span class="pool-excl">Had a turn: ${excl.join(", ")}</span>`
-    : ` &nbsp;·&nbsp; <span style="color:#10b981;font-weight:500">New round — everyone eligible!</span>`;
-  poolInfoEl.innerHTML = `Picking from ${pickStr}${exclStr}`;
+    : ` &nbsp;·&nbsp; <span style="color:#10b981;font-weight:500">New round!</span>`;
+  const skipStr  = skippedNames.size
+    ? ` &nbsp;·&nbsp; <span style="color:#dc2626">Skipped: ${[...skippedNames].join(", ")}</span>`
+    : "";
+  poolInfoEl.innerHTML = `Picking from ${pickStr}${exclStr}${skipStr}`;
 }
 
 // ── Cards view ────────────────────────────────────────────────────────────────
@@ -393,17 +410,31 @@ function renderCards() {
   const excl = getExcludedNames();
   peopleGrid.innerHTML = "";
   people.forEach(p => {
-    const isExcl = excl.includes(p.name);
+    const isExcl    = excl.includes(p.name);
+    const isSkipped = skippedNames.has(p.name);
     const div = document.createElement("div");
-    div.className = `person-card ${isExcl ? "excluded" : "eligible"}`;
+    div.className = `person-card ${isSkipped ? "skipped" : isExcl ? "excluded" : "eligible"}`;
     div.style.setProperty("--card-border", p.color + "70");
     div.style.setProperty("--card-bg", p.bg);
     div.innerHTML = `
       <div class="avatar" style="background:${p.bg};color:${p.text}">${p.initials}</div>
       <div class="card-info">
         <span class="card-name">${p.name}</span>
-        ${isExcl ? `<span class="card-badge">recent MC</span>` : ""}
-      </div>`;
+        ${isExcl && !isSkipped ? `<span class="card-badge">recent MC</span>` : ""}
+        ${isSkipped ? `<span class="card-badge" style="color:#dc2626">not present</span>` : ""}
+      </div>
+      <button class="skip-btn${isSkipped ? " active" : ""}" data-name="${p.name}">
+        ${isSkipped ? "Skipped" : "Skip"}
+      </button>`;
+    div.querySelector(".skip-btn").addEventListener("click", () => {
+      if (isSpinning) return;
+      if (skippedNames.has(p.name)) skippedNames.delete(p.name);
+      else skippedNames.add(p.name);
+      renderCards();
+      renderPoolInfo();
+      if (currentView === "wheel")  drawWheel(getPool(), wheelRotDeg);
+      if (currentView === "bottle") renderBottle();
+    });
     peopleGrid.appendChild(div);
   });
 }
@@ -610,6 +641,7 @@ async function onSpinComplete(winner) {
     renderCards();
     if (currentView === "wheel") drawWheel(getPool(), wheelRotDeg);
     if (currentView === "bottle") renderBottle(winner.name);
+    skippedNames.clear(); // reset skips after each pick
     setStatus("saved", "Saved ✓");
     setTimeout(() => setStatus("", ""), 3000);
   } catch (err) {
