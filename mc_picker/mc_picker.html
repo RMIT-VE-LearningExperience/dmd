@@ -202,6 +202,18 @@
     .divider { height: 1px; background: var(--border); margin: 0 0 28px; }
 
     /* ── History ── */
+    .history-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+    }
+    .reset-btn {
+      font-size: 11px; font-weight: 500; padding: 4px 10px;
+      border-radius: 6px; border: 1px solid rgba(239,68,68,0.25);
+      background: rgba(239,68,68,0.06); color: #dc2626;
+      cursor: pointer; transition: background 0.15s, border-color 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .reset-btn:hover { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.4); }
+    .reset-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .history-list { display: flex; flex-direction: column; gap: 6px; }
     .history-item {
       display: flex; align-items: center; gap: 10px; padding: 10px 12px;
@@ -297,7 +309,10 @@
 
   <div class="divider"></div>
 
-  <p class="section-label">Recent history</p>
+  <div class="history-header">
+    <p class="section-label" style="margin-bottom:0">Recent history</p>
+    <button class="reset-btn" id="resetBtn">Reset</button>
+  </div>
   <div class="history-list" id="historyList"></div>
   <div id="saveStatus" class="save-status"></div>
 
@@ -658,6 +673,30 @@ async function saveToGitHub(entry) {
   });
   if (!res.ok) throw new Error(`Save failed: ${res.status}`);
 }
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+const resetBtn = document.getElementById("resetBtn");
+resetBtn.addEventListener("click", async () => {
+  if (!confirm("Clear all MC history? This cannot be undone.")) return;
+  resetBtn.disabled = true;
+  setStatus("saving", "Resetting…");
+  try {
+    const res = await fetch(WORKER_URL, { method: "DELETE" });
+    if (!res.ok) throw new Error(`Reset failed: ${res.status}`);
+    ghHistory = [];
+    renderHistory();
+    renderPoolInfo();
+    renderCards();
+    if (currentView === "wheel")  drawWheel(getPool(), wheelRotDeg);
+    if (currentView === "bottle") renderBottle();
+    setStatus("saved", "History cleared ✓");
+    setTimeout(() => setStatus("", ""), 3000);
+  } catch (err) {
+    console.error(err);
+    setStatus("error", "Reset failed — check network");
+  }
+  resetBtn.disabled = false;
+});
 
 function setStatus(state, msg) {
   saveStatus.className = `save-status ${state}`;
