@@ -118,6 +118,52 @@
       background: rgba(47,47,47,.8); color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 12px;
       display: none; z-index: 1000;
     }
+
+    /* AR mobile controls, shown only after stage is placed in AR */
+    #arControls {
+      display: none;
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: rgba(247, 244, 234, 0.88);
+      border: 1px solid rgba(184, 124, 76, 0.35);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-radius: 16px;
+      padding: 10px 14px;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 340px;
+    }
+    #arControls.visible { display: flex; }
+    #arControls .ar-label {
+      width: 100%;
+      text-align: center;
+      font-size: 11px;
+      color: #B87C4C;
+      letter-spacing: .3px;
+      margin-bottom: 2px;
+    }
+    .ar-ctrl-btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      color: #F7F4EA;
+      background: #B87C4C;
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+      transition: transform .08s ease, opacity .15s ease;
+      min-width: 48px;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ar-ctrl-btn:active { transform: scale(0.93); opacity: .85; }
+    .ar-ctrl-btn.secondary { background: #A8BBA3; }
   </style>
 </head>
 <body>
@@ -139,6 +185,7 @@
     <strong>Desktop, move bricks:</strong> left click and drag to move a brick<br>
     <strong>Mobile build mode:</strong> one finger moves bricks<br>
     <strong>Mobile look mode:</strong> tap Look, one finger rotates, two fingers pan or zoom<br>
+    <strong>AR:</strong> tap floor to place wall, then use AR Controls to re-place, rotate (↺ ↻) or scale (− +)<br>
     <strong>Tip:</strong> the floor circle shows where the grabbed brick sits on the ground
   </div>
 
@@ -153,6 +200,16 @@
   <div id="status"></div>
   <div id="vrInfo"></div>
   <div id="arHint">Point at the floor to place the wall</div>
+
+  <!-- AR mobile controls panel, shown after stage placement -->
+  <div id="arControls">
+    <div class="ar-label">AR Controls</div>
+    <button class="ar-ctrl-btn secondary" id="arReplace">Re-place</button>
+    <button class="ar-ctrl-btn" id="arRotLeft">↺</button>
+    <button class="ar-ctrl-btn" id="arRotRight">↻</button>
+    <button class="ar-ctrl-btn" id="arScaleDown">−</button>
+    <button class="ar-ctrl-btn" id="arScaleUp">+</button>
+  </div>
 
   <script>
     /* =========================
@@ -369,6 +426,7 @@
           renderer.setClearAlpha(1.0);
           renderer.domElement.style.background = '';
           if (floorMesh) floorMesh.visible = true;
+          document.getElementById('arControls').classList.remove('visible');
           showToast('XR session ended');
         });
       }
@@ -1404,6 +1462,29 @@
         } catch (e) { console.warn(e); showToast('Could not start AR session'); }
       });
 
+      // AR mobile controls
+      document.getElementById('arReplace').addEventListener('click', () => {
+        if (!isAR) return;
+        stagePlaced = false;
+        if (arReticle) arReticle.visible = false;
+        document.getElementById('arControls').classList.remove('visible');
+        showToast('Point at the floor to re-place the wall');
+      });
+      document.getElementById('arRotLeft').addEventListener('click', () => {
+        stageGroup.rotation.y += Math.PI / 12;
+      });
+      document.getElementById('arRotRight').addEventListener('click', () => {
+        stageGroup.rotation.y -= Math.PI / 12;
+      });
+      document.getElementById('arScaleDown').addEventListener('click', () => {
+        const s = Math.max(0.3, stageGroup.scale.x - 0.15);
+        stageGroup.scale.set(s, s, s);
+      });
+      document.getElementById('arScaleUp').addEventListener('click', () => {
+        const s = Math.min(2.5, stageGroup.scale.x + 0.15);
+        stageGroup.scale.set(s, s, s);
+      });
+
       // Reset and Help
       document.getElementById('resetButton').addEventListener('click', resetGame);
       document.getElementById('helpButton').addEventListener('click', () => {
@@ -1444,6 +1525,7 @@
 
       stagePlaced = true;
       arReticle.visible = false;
+      document.getElementById('arControls').classList.add('visible');
       showToast('Placed, start building');
     }
 
