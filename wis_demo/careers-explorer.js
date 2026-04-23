@@ -205,6 +205,132 @@ function bindKeyboardActivate(element, handler) {
     });
 }
 
+// Keep keyboard navigation inside the active popup/dialog.
+let activePopup = null;
+let activePopupClose = null;
+let lastFocusedBeforePopup = null;
+const popupManagedElements = new Set();
+
+function getFocusableElements(container) {
+    if (!container) return [];
+    const selector = [
+        'a[href]',
+        'button:not([disabled])',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])'
+    ].join(',');
+    return [...container.querySelectorAll(selector)]
+        .filter(el => !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length));
+}
+
+function setManagedInert(el, inert) {
+    if (!el) return;
+    if (inert) {
+        popupManagedElements.add(el);
+        el.inert = true;
+        if (!el.hasAttribute('data-popup-aria-hidden')) {
+            el.setAttribute('data-popup-aria-hidden', el.getAttribute('aria-hidden') || '');
+        }
+        el.setAttribute('aria-hidden', 'true');
+        return;
+    }
+
+    el.inert = false;
+    if (el.hasAttribute('data-popup-aria-hidden')) {
+        const previous = el.getAttribute('data-popup-aria-hidden');
+        if (previous) el.setAttribute('aria-hidden', previous);
+        else el.removeAttribute('aria-hidden');
+        el.removeAttribute('data-popup-aria-hidden');
+    }
+    popupManagedElements.delete(el);
+}
+
+function setBackgroundInertForPopup(popup, exceptions = []) {
+    const allowed = new Set([popup, ...exceptions].filter(Boolean));
+    [...document.body.children].forEach(child => {
+        if (allowed.has(child)) {
+            setManagedInert(child, false);
+        } else {
+            setManagedInert(child, true);
+        }
+    });
+}
+
+function clearPopupInert() {
+    [...popupManagedElements].forEach(el => setManagedInert(el, false));
+}
+
+function focusPopup(popup) {
+    if (!popup || popup.contains(document.activeElement)) return;
+    const preferred = popup.querySelector('[data-initial-focus]');
+    const focusables = getFocusableElements(popup);
+    const target = preferred || focusables[0] || popup;
+    if (target === popup && !target.hasAttribute('tabindex')) {
+        target.setAttribute('tabindex', '-1');
+    }
+    target.focus({ preventScroll: true });
+}
+
+function openPopupFocusTrap(popup, closeFn, options = {}) {
+    if (!popup) return;
+    if (!activePopup) {
+        lastFocusedBeforePopup = options.restoreFocus || document.activeElement;
+    }
+    activePopup = popup;
+    activePopupClose = closeFn;
+    popup.setAttribute('aria-hidden', 'false');
+    setBackgroundInertForPopup(popup, options.exceptions || []);
+    window.setTimeout(() => focusPopup(popup), 0);
+}
+
+function closePopupFocusTrap(popup) {
+    if (popup) popup.setAttribute('aria-hidden', 'true');
+    if (popup && activePopup && popup !== activePopup) return;
+
+    activePopup = null;
+    activePopupClose = null;
+    clearPopupInert();
+
+    if (lastFocusedBeforePopup && document.contains(lastFocusedBeforePopup) && typeof lastFocusedBeforePopup.focus === 'function') {
+        lastFocusedBeforePopup.focus({ preventScroll: true });
+    }
+    lastFocusedBeforePopup = null;
+}
+
+document.addEventListener('keydown', (e) => {
+    if (!activePopup) return;
+
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        if (typeof activePopupClose === 'function') activePopupClose();
+        return;
+    }
+
+    if (e.key !== 'Tab') return;
+
+    const focusables = getFocusableElements(activePopup);
+    if (!focusables.length) {
+        e.preventDefault();
+        activePopup.focus({ preventScroll: true });
+        return;
+    }
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+    }
+});
+
+window.openPopupFocusTrap = openPopupFocusTrap;
+window.closePopupFocusTrap = closePopupFocusTrap;
+
 function setSearchExpanded(expanded, { focus = false } = {}) {
     if (!navSearchShell) return;
     navSearchShell.classList.toggle('expanded', expanded);
@@ -1480,6 +1606,8 @@ function showComparison() {
     }
 
     comparisonPanel.classList.add('visible');
+    comparisonPanel.setAttribute('aria-hidden', 'false');
+    openPopupFocusTrap(comparisonPanel, clearComparison, { restoreFocus: compareActionBtn });
 }
 
 // Global function to change a career in comparison
@@ -1490,6 +1618,7 @@ function changeCareer(index) {
 
     // Close comparison panel
     comparisonPanel.classList.remove('visible');
+    closePopupFocusTrap(comparisonPanel);
 
     // Update visual states
     document.querySelectorAll('.career-card').forEach(card => {
@@ -1509,6 +1638,7 @@ function changeCareer(index) {
 function clearComparison() {
     comparisonCareers = [];
     comparisonPanel.classList.remove('visible');
+    closePopupFocusTrap(comparisonPanel);
 
     // Remove all selected states
     document.querySelectorAll('.career-card').forEach(card => {
@@ -1860,8 +1990,13 @@ function populateCareerPanel(career) {
 
     // Show the panel and overlay
     infoPanel.classList.add('visible');
+    infoPanel.setAttribute('aria-hidden', 'false');
     const overlay = document.getElementById('infoPanelOverlay');
-    if (overlay) overlay.classList.add('visible');
+    if (overlay) {
+        overlay.classList.add('visible');
+        overlay.setAttribute('aria-hidden', 'true');
+    }
+    openPopupFocusTrap(infoPanel, closeInfoPanel, { exceptions: [overlay], restoreFocus: selectedCareer });
 }
 
 // Show Career Info (entry point — clears history since this is a fresh open)
@@ -2067,8 +2202,11 @@ function closeInfoPanel() {
     }
 
     infoPanel.classList.remove('visible');
+    infoPanel.setAttribute('aria-hidden', 'true');
     const overlay = document.getElementById('infoPanelOverlay');
     if (overlay) overlay.classList.remove('visible');
+    closePopupFocusTrap(infoPanel);
+    infoPanel.querySelectorAll('iframe').forEach(f => { f.src = ''; });
     if (selectedCareer) {
         selectedCareer.classList.remove('clicked');
         selectedCareer = null;
