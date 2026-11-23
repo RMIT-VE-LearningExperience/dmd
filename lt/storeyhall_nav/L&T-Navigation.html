@@ -78,12 +78,6 @@
             animation: hotspotBounce 4s infinite 1.5s;
         }
 
-        .hotspot:hover {
-            filter: drop-shadow(0 5px 10px rgba(23, 14, 81, 0.5));
-            transform: scale(1.01);
-            animation-play-state: paused;
-        }
-
         @keyframes hotspotBounce {
             0%, 85%, 100% {
                 transform: scale(1);
@@ -94,46 +88,6 @@
             95% {
                 transform: scale(1);
             }
-        }
-
-        .hotspot:hover {
-            filter: drop-shadow(0 5px 10px rgba(23, 14, 81, 0.5));
-            transform: scale(1.01);
-        }
-
-        .hotspot-tooltip {
-            position: absolute;
-            background: white;
-            border-radius: 8px;
-            padding: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            pointer-events: none;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
-            z-index: 20;
-            max-width: 200px;
-            border: 2px solid #000054;
-        }
-
-        .hotspot-tooltip.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .tooltip-image {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-bottom: 8px;
-        }
-
-        .tooltip-text {
-            font-weight: 600;
-            color: #000054;
-            text-align: center;
-            font-size: 14px;
         }
 
         .floor-indicator {
@@ -487,12 +441,6 @@
                            data-tooltip="Green Brain Lab 008"/>
                 </svg>
             </div>
-
-            <!-- Tooltip -->
-            <div class="hotspot-tooltip" id="tooltip">
-                <img alt="Hotspot" class="tooltip-image" id="tooltipImage">
-                <div class="tooltip-text" id="tooltipText">Location Details</div>
-            </div>
         </div>
 
         <div class="navigation-section">
@@ -532,20 +480,7 @@
     <script>
         let currentLevel = 2;
         let isTransitioning = false;
-        const tooltip = document.getElementById('tooltip');
-        const tooltipImage = document.getElementById('tooltipImage');
-        const tooltipText = document.getElementById('tooltipText');
         const backButton = document.getElementById('backButton');
-
-        // Tooltip images for each hotspot
-        const tooltipImages = {
-            'Storey Hall Entrance': 'assets/photos/RMIT-CampusBuildings_062.jpg',
-            'Storey Hall Foyer': 'https://armarchitecture.com.au/wp-content/uploads/2015/08/ST-HALL_Staircase-with-reflective-wall-1680x833.jpg',
-            'Auditorium': 'https://armarchitecture.com.au/wp-content/uploads/2015/08/ST-HALL_audit-dark-JG-1680x835.jpg',
-            'Auditorium Foyer': 'https://armarchitecture.com.au/wp-content/uploads/2015/08/P8272429-1680x1260.jpg',
-            'Green Brain Lab 007': 'assets/photos/0U1A0012.jpg',
-            'Green Brain Lab 008': 'https://armarchitecture.com.au/wp-content/uploads/2015/08/RMIT-22_100626_3D_D3R0718-john-gollings-1680x1100.jpg'
-        };
 
         function setButtonsEnabled(enabled) {
             const buttons = document.querySelectorAll('.nav-button');
@@ -588,9 +523,6 @@
             
             // Update current level
             currentLevel = level;
-            
-            // Re-initialize hotspot listeners
-            initializeHotspots();
             updateBackButtonVisibility();
         }
 
@@ -614,10 +546,7 @@
                 
                 // Update current level
                 currentLevel = level;
-                
-                // Re-initialize hotspot listeners
-                initializeHotspots();
-                
+
                 // Execute callback if provided
                 if (callback) {
                     callback();
@@ -625,58 +554,9 @@
             }, 250);
         }
 
-        function initializeHotspots() {
-            const hotspots = document.querySelectorAll('.hotspot');
-            
-            hotspots.forEach(hotspot => {
-                hotspot.addEventListener('mouseenter', (e) => showTooltip(e));
-                hotspot.addEventListener('mouseleave', hideTooltip);
-                hotspot.addEventListener('mousemove', (e) => updateTooltipPosition(e));
-            });
-        }
-
-        function showTooltip(e) {
-            const tooltipKey = e.target.dataset.tooltip;
-            tooltipText.textContent = tooltipKey;
-            tooltipImage.src = tooltipImages[tooltipKey];
-            
-            tooltip.classList.add('show');
-            updateTooltipPosition(e);
-        }
-
-        function hideTooltip() {
-            tooltip.classList.remove('show');
-        }
-
-        function updateTooltipPosition(e) {
-            const rect = e.target.getBoundingClientRect();
-            const container = document.querySelector('.floor-plan-section').getBoundingClientRect();
-            
-            let x = e.clientX - container.left + 15;
-            let y = e.clientY - container.top - 10;
-            
-            // Keep tooltip within bounds
-            const tooltipRect = tooltip.getBoundingClientRect();
-            if (x + tooltipRect.width > container.width) {
-                x = e.clientX - container.left - tooltipRect.width - 15;
-            }
-            if (y < 0) {
-                y = e.clientY - container.top + 25;
-            }
-            
-            tooltip.style.left = `${x}px`;
-            tooltip.style.top = `${y}px`;
-        }
-
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
-            initializeHotspots();
             updateBackButtonVisibility();
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            hideTooltip();
         });
     </script>
 </body>
